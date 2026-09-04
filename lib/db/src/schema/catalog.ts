@@ -268,7 +268,7 @@ export const ordersTable = pgTable("orders", {
 export const orderItemsTable = pgTable("order_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   productId: uuid("product_id").notNull(),
-  orderId: uuid("order_id"),
+  orderId: varchar("order_id", { length: 50 }),
   price: numeric("price", { precision: 12, scale: 2 }).notNull(),
   quantity: integer("quantity").notNull().default(1),
   shippingId: integer("shipping_id"),

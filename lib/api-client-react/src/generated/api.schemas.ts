@@ -5,6 +5,156 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface StoreShippingOption {
+  id: number;
+  name: string;
+  charge: number;
+  free: boolean;
+  /** @nullable */
+  estimatedDays: number | null;
+}
+
+/**
+ * @nullable
+ */
+export type StoreProductCategory = {
+  id: string;
+  name: string;
+} | null;
+
+export interface StoreProduct {
+  id: string;
+  productName: string;
+  sku: string;
+  regularPrice: number;
+  /** @nullable */
+  discountPrice: number | null;
+  quantity: number;
+  /** @nullable */
+  shortDescription: string | null;
+  /** @nullable */
+  productDescription: string | null;
+  /** @nullable */
+  productNote: string | null;
+  /** @nullable */
+  category: StoreProductCategory;
+  images: string[];
+  shippingOptions: StoreShippingOption[];
+}
+
+export interface StoreCatalog {
+  products: StoreProduct[];
+  shippingOptions: StoreShippingOption[];
+}
+
+export interface StoreOrderItemInput {
+  productId: string;
+  /**
+     * @minimum 1
+     * @maximum 99
+     */
+  quantity: number;
+}
+
+export interface StoreOrderCustomer {
+  /**
+     * @minLength 2
+     * @maxLength 100
+     */
+  firstName: string;
+  /**
+     * @minLength 2
+     * @maxLength 100
+     */
+  lastName: string;
+  /** @maxLength 255 */
+  email: string;
+  /**
+     * @minLength 5
+     * @maxLength 40
+     */
+  phoneNumber: string;
+}
+
+export interface StoreOrderAddress {
+  /**
+     * @minLength 3
+     * @maxLength 500
+     */
+  addressLine1: string;
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  addressLine2: string | null;
+  /**
+     * @maxLength 50
+     * @nullable
+     */
+  postalCode: string | null;
+  /**
+     * @minLength 2
+     * @maxLength 100
+     */
+  country: string;
+  /**
+     * @minLength 2
+     * @maxLength 100
+     */
+  city: string;
+  /**
+     * @maxLength 40
+     * @nullable
+     */
+  phoneNumber: string | null;
+}
+
+export interface StoreOrderInput {
+  customer: StoreOrderCustomer;
+  address: StoreOrderAddress;
+  /**
+     * @minItems 1
+     * @maxItems 50
+     */
+  items: StoreOrderItemInput[];
+  /** @minimum 1 */
+  shippingId: number;
+  /**
+     * @maxLength 255
+     * @nullable
+     */
+  couponCode: string | null;
+}
+
+export type StoreOrderItemsItem = {
+  productId: string;
+  productName: string;
+  quantity: number;
+  price: number;
+};
+
+export interface StoreOrder {
+  id: string;
+  status: string;
+  subtotal: number;
+  shippingCost: number;
+  discount: number;
+  total: number;
+  createdAt: string;
+  items: StoreOrderItemsItem[];
+}
+
+export interface StoreOrderSummary {
+  id: string;
+  status: string;
+  total: number;
+  createdAt: string;
+}
+
+export interface StoreOrders {
+  orders: StoreOrderSummary[];
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -178,6 +328,23 @@ export interface AdminSeedResult {
   inserted: number;
   tables: AdminSeedResultTables;
 }
+
+export type ListStoreOrdersParams = {
+email: string;
+/**
+ * @minLength 5
+ * @maxLength 40
+ */
+phone: string;
+};
+
+export type GetStoreOrderParams = {
+/**
+ * @minLength 5
+ * @maxLength 40
+ */
+phone: string;
+};
 
 export type ListAdminRowsParams = {
 search?: string;

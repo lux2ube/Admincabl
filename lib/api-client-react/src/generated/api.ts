@@ -27,12 +27,18 @@ import type {
   AdminRows,
   AdminSeedResult,
   ErrorResponse,
+  GetStoreOrderParams,
   HealthStatus,
   ListAdminRowsParams,
+  ListStoreOrdersParams,
   NewsletterSubscription,
   NewsletterSubscriptionInput,
   QuoteRequest,
-  QuoteRequestInput
+  QuoteRequestInput,
+  StoreCatalog,
+  StoreOrder,
+  StoreOrderInput,
+  StoreOrders
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -281,6 +287,327 @@ export const useSubscribeNewsletter = <TError = ErrorType<ErrorResponse>,
       > => {
       return useMutation(getSubscribeNewsletterMutationOptions(options));
     }
+
+export const getGetStoreCatalogUrl = () => {
+
+
+
+
+  return `/api/store/catalog`
+}
+
+/**
+ * @summary Get the published CABL catalog
+ */
+export const getStoreCatalog = async ( options?: Parameters<typeof customFetch>[1]): Promise<StoreCatalog> => {
+
+  return customFetch<StoreCatalog>(getGetStoreCatalogUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStoreCatalogQueryKey = () => {
+    return [
+    `/api/store/catalog`
+    ] as const;
+    }
+
+
+export const getGetStoreCatalogQueryOptions = <TData = Awaited<ReturnType<typeof getStoreCatalog>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreCatalog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStoreCatalogQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStoreCatalog>>> = ({ signal }) => getStoreCatalog({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStoreCatalog>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStoreCatalogQueryResult = NonNullable<Awaited<ReturnType<typeof getStoreCatalog>>>
+export type GetStoreCatalogQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get the published CABL catalog
+ */
+
+export function useGetStoreCatalog<TData = Awaited<ReturnType<typeof getStoreCatalog>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreCatalog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStoreCatalogQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListStoreOrdersUrl = (params: ListStoreOrdersParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/store/orders?${stringifiedParams}` : `/api/store/orders`
+}
+
+/**
+ * @summary List a customer's orders using verified contact details
+ */
+export const listStoreOrders = async (params: ListStoreOrdersParams, options?: Parameters<typeof customFetch>[1]): Promise<StoreOrders> => {
+
+  return customFetch<StoreOrders>(getListStoreOrdersUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListStoreOrdersQueryKey = (params?: ListStoreOrdersParams,) => {
+    return [
+    `/api/store/orders`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListStoreOrdersQueryOptions = <TData = Awaited<ReturnType<typeof listStoreOrders>>, TError = ErrorType<ErrorResponse>>(params: ListStoreOrdersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStoreOrders>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListStoreOrdersQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listStoreOrders>>> = ({ signal }) => listStoreOrders(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listStoreOrders>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListStoreOrdersQueryResult = NonNullable<Awaited<ReturnType<typeof listStoreOrders>>>
+export type ListStoreOrdersQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List a customer's orders using verified contact details
+ */
+
+export function useListStoreOrders<TData = Awaited<ReturnType<typeof listStoreOrders>>, TError = ErrorType<ErrorResponse>>(
+ params: ListStoreOrdersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStoreOrders>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListStoreOrdersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateStoreOrderUrl = () => {
+
+
+
+
+  return `/api/store/orders`
+}
+
+/**
+ * @summary Create a customer order and its line items
+ */
+export const createStoreOrder = async (storeOrderInput: StoreOrderInput, options?: Parameters<typeof customFetch>[1]): Promise<StoreOrder> => {
+
+  return customFetch<StoreOrder>(getCreateStoreOrderUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(storeOrderInput)
+  }
+);}
+
+
+
+
+
+export const getCreateStoreOrderMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStoreOrder>>, TError,{data: BodyType<StoreOrderInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createStoreOrder>>, TError,{data: BodyType<StoreOrderInput>}, TContext> => {
+
+const mutationKey = ['createStoreOrder'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createStoreOrder>>, {data: BodyType<StoreOrderInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createStoreOrder(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateStoreOrderMutationResult = NonNullable<Awaited<ReturnType<typeof createStoreOrder>>>
+    export type CreateStoreOrderMutationBody = BodyType<StoreOrderInput>
+    export type CreateStoreOrderMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Create a customer order and its line items
+ */
+export const useCreateStoreOrder = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStoreOrder>>, TError,{data: BodyType<StoreOrderInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createStoreOrder>>,
+        TError,
+        {data: BodyType<StoreOrderInput>},
+        TContext
+      > => {
+      return useMutation(getCreateStoreOrderMutationOptions(options));
+    }
+
+export const getGetStoreOrderUrl = (id: string,
+    params: GetStoreOrderParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/store/orders/${id}?${stringifiedParams}` : `/api/store/orders/${id}`
+}
+
+/**
+ * @summary Get one order using the customer's phone number
+ */
+export const getStoreOrder = async (id: string,
+    params: GetStoreOrderParams, options?: Parameters<typeof customFetch>[1]): Promise<StoreOrder> => {
+
+  return customFetch<StoreOrder>(getGetStoreOrderUrl(id,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStoreOrderQueryKey = (id: string,
+    params?: GetStoreOrderParams,) => {
+    return [
+    `/api/store/orders/${id}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetStoreOrderQueryOptions = <TData = Awaited<ReturnType<typeof getStoreOrder>>, TError = ErrorType<ErrorResponse>>(id: string,
+    params: GetStoreOrderParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreOrder>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStoreOrderQueryKey(id,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStoreOrder>>> = ({ signal }) => getStoreOrder(id,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStoreOrder>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStoreOrderQueryResult = NonNullable<Awaited<ReturnType<typeof getStoreOrder>>>
+export type GetStoreOrderQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get one order using the customer's phone number
+ */
+
+export function useGetStoreOrder<TData = Awaited<ReturnType<typeof getStoreOrder>>, TError = ErrorType<ErrorResponse>>(
+ id: string,
+    params: GetStoreOrderParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreOrder>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStoreOrderQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetAdminMetadataUrl = () => {
 

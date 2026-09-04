@@ -77,6 +77,177 @@ export const SubscribeNewsletterResponse = zod.object({
 
 
 /**
+ * @summary Get the published CABL catalog
+ */
+export const GetStoreCatalogResponse = zod.object({
+  "products": zod.array(zod.object({
+  "id": zod.string(),
+  "productName": zod.string(),
+  "sku": zod.string(),
+  "regularPrice": zod.number(),
+  "discountPrice": zod.number().nullable(),
+  "quantity": zod.number(),
+  "shortDescription": zod.string().nullable(),
+  "productDescription": zod.string().nullable(),
+  "productNote": zod.string().nullable(),
+  "category": zod.object({
+  "id": zod.string(),
+  "name": zod.string()
+}).nullable(),
+  "images": zod.array(zod.string()),
+  "shippingOptions": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "charge": zod.number(),
+  "free": zod.boolean(),
+  "estimatedDays": zod.number().nullable()
+}))
+})),
+  "shippingOptions": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "charge": zod.number(),
+  "free": zod.boolean(),
+  "estimatedDays": zod.number().nullable()
+}))
+})
+
+
+/**
+ * @summary List a customer's orders using verified contact details
+ */
+export const listStoreOrdersQueryPhoneMin = 5;
+export const listStoreOrdersQueryPhoneMax = 40;
+
+
+
+export const ListStoreOrdersQueryParams = zod.object({
+  "email": zod.email(),
+  "phone": zod.coerce.string().min(listStoreOrdersQueryPhoneMin).max(listStoreOrdersQueryPhoneMax)
+})
+
+export const ListStoreOrdersResponse = zod.object({
+  "orders": zod.array(zod.object({
+  "id": zod.string(),
+  "status": zod.string(),
+  "total": zod.number(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Create a customer order and its line items
+ */
+export const createStoreOrderBodyCustomerFirstNameMin = 2;
+export const createStoreOrderBodyCustomerFirstNameMax = 100;
+
+export const createStoreOrderBodyCustomerLastNameMin = 2;
+export const createStoreOrderBodyCustomerLastNameMax = 100;
+
+export const createStoreOrderBodyCustomerEmailMax = 255;
+
+export const createStoreOrderBodyCustomerPhoneNumberMin = 5;
+export const createStoreOrderBodyCustomerPhoneNumberMax = 40;
+
+export const createStoreOrderBodyAddressAddressLine1Min = 3;
+export const createStoreOrderBodyAddressAddressLine1Max = 500;
+
+export const createStoreOrderBodyAddressAddressLine2Max = 500;
+
+export const createStoreOrderBodyAddressPostalCodeMax = 50;
+
+export const createStoreOrderBodyAddressCountryMin = 2;
+export const createStoreOrderBodyAddressCountryMax = 100;
+
+export const createStoreOrderBodyAddressCityMin = 2;
+export const createStoreOrderBodyAddressCityMax = 100;
+
+export const createStoreOrderBodyAddressPhoneNumberMax = 40;
+
+export const createStoreOrderBodyItemsItemQuantityMax = 99;
+
+export const createStoreOrderBodyItemsMax = 50;
+
+
+export const createStoreOrderBodyCouponCodeMax = 255;
+
+
+
+export const CreateStoreOrderBody = zod.object({
+  "customer": zod.object({
+  "firstName": zod.string().min(createStoreOrderBodyCustomerFirstNameMin).max(createStoreOrderBodyCustomerFirstNameMax),
+  "lastName": zod.string().min(createStoreOrderBodyCustomerLastNameMin).max(createStoreOrderBodyCustomerLastNameMax),
+  "email": zod.email().max(createStoreOrderBodyCustomerEmailMax),
+  "phoneNumber": zod.string().min(createStoreOrderBodyCustomerPhoneNumberMin).max(createStoreOrderBodyCustomerPhoneNumberMax)
+}),
+  "address": zod.object({
+  "addressLine1": zod.string().min(createStoreOrderBodyAddressAddressLine1Min).max(createStoreOrderBodyAddressAddressLine1Max),
+  "addressLine2": zod.string().max(createStoreOrderBodyAddressAddressLine2Max).nullable(),
+  "postalCode": zod.string().max(createStoreOrderBodyAddressPostalCodeMax).nullable(),
+  "country": zod.string().min(createStoreOrderBodyAddressCountryMin).max(createStoreOrderBodyAddressCountryMax),
+  "city": zod.string().min(createStoreOrderBodyAddressCityMin).max(createStoreOrderBodyAddressCityMax),
+  "phoneNumber": zod.string().max(createStoreOrderBodyAddressPhoneNumberMax).nullable()
+}),
+  "items": zod.array(zod.object({
+  "productId": zod.string(),
+  "quantity": zod.number().min(1).max(createStoreOrderBodyItemsItemQuantityMax)
+})).min(1).max(createStoreOrderBodyItemsMax),
+  "shippingId": zod.number().min(1),
+  "couponCode": zod.string().max(createStoreOrderBodyCouponCodeMax).nullable()
+})
+
+export const CreateStoreOrderResponse = zod.object({
+  "id": zod.string(),
+  "status": zod.string(),
+  "subtotal": zod.number(),
+  "shippingCost": zod.number(),
+  "discount": zod.number(),
+  "total": zod.number(),
+  "createdAt": zod.coerce.date(),
+  "items": zod.array(zod.object({
+  "productId": zod.string(),
+  "productName": zod.string(),
+  "quantity": zod.number(),
+  "price": zod.number()
+}))
+})
+
+
+/**
+ * @summary Get one order using the customer's phone number
+ */
+export const GetStoreOrderParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const getStoreOrderQueryPhoneMin = 5;
+export const getStoreOrderQueryPhoneMax = 40;
+
+
+
+export const GetStoreOrderQueryParams = zod.object({
+  "phone": zod.coerce.string().min(getStoreOrderQueryPhoneMin).max(getStoreOrderQueryPhoneMax)
+})
+
+export const GetStoreOrderResponse = zod.object({
+  "id": zod.string(),
+  "status": zod.string(),
+  "subtotal": zod.number(),
+  "shippingCost": zod.number(),
+  "discount": zod.number(),
+  "total": zod.number(),
+  "createdAt": zod.coerce.date(),
+  "items": zod.array(zod.object({
+  "productId": zod.string(),
+  "productName": zod.string(),
+  "quantity": zod.number(),
+  "price": zod.number()
+}))
+})
+
+
+/**
  * @summary Get admin tables and relationships
  */
 export const GetAdminMetadataResponse = zod.object({
