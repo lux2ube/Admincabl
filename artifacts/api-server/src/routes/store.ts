@@ -1,0 +1,424 @@
+import { Router, type IRouter } from "express";
+import {
+  CreateStoreOrderBody,
+  CreateStoreOrderResponse,
+  GetStoreCatalogResponse,
+  GetStoreOrderParams,
+  GetStoreOrderQueryParams,
+  GetStoreOrderResponse,
+  ListStoreOrdersQueryParams,
+  ListStoreOrdersResponse,
+} from "@workspace/api-zod";
+import { pool } from "@workspace/db";
+
+const router: IRouter = Router();
+
+type ProductRow = {
+  id: string;
+  product_name: string;
+  SKU: string;
+  regular_price: string | number;
+  discount_price: string | number | null;
+  quantity: number;
+  short_description: string | null;
+  product_description: string | null;
+  product_note: string | null;
+  category_id: string | null;
+  category_name: string | null;
+  image_path: string | null;
+  shipping_id: number | null;
+  shipping_name: string | null;
+  ship_charge: string | number | null;
+  shipping_free: boolean | null;
+  estimated_days: string | number | null;
+};
+
+const asNumber = (value: unknown) => {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const roundMoney = (value: number) => Math.round(value * 100) / 100;
+
+const asIso = (value: unknown) => {
+  if (value instanceof Date) return value.toISOString();
+  return new Date(String(value)).toISOString();
+};
+
+const orderId = () => {
+  const stamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `CABL-${stamp}-${random}`;
+};
+
+router.get("/store/catalog", async (req, res): Promise<void> => {
+  try {
+    const result = await pool.query<ProductRow>(`
+      SELECT
+        p."id",
+        p."product_name",
+        p."SKU",
+        p."regular_price",
+        p."discount_price",
+        p."quantity",
+        p."short_description",
+        p."product_description",
+        p."product_note",
+        c."id" AS "category_id",
+        c."category_name" AS "category_name",
+        g."image_path",
+        s."id" AS "shipping_id",
+        s."name" AS "shipping_name",
+        ps."ship_charge",
+        ps."free" AS "shipping_free",
+        ps."estimated_days"
+      FROM "products" p
+      LEFT JOIN "product_categories" pc ON pc."product_id" = p."id"
+      LEFT JOIN "categories" c ON c."id" = pc."category_id" AND c."active" = TRUE
+      LEFT JOIN "galleries" g ON g."product_id" = p."id"
+      LEFT JOIN "product_shippings" ps ON ps."product_id" = p."id"
+      LEFT JOIN "shippings" s ON s."id" = ps."shipping_id" AND s."active" = TRUE
+      WHERE p."published" = TRUE
+      ORDER BY p."created_at" DESC NULLS LAST, p."product_name" ASC, g."display_order" ASC
+    `);
+
+    const productMap = new Map<string, {
+      id: string;
+      productName: string;
+      sku: string;
+      regularPrice: number;
+      discountPrice: number | null;
+      quantity: number;
+      shortDescription: string | null;
+      productDescription: string | null;
+      productNote: string | null;
+      category: { id: string; name: string } | null;
+      images: string[];
+      shippingOptions: Array<{ id: number; name: string; charge: number; free: boolean; estimatedDays: number | null }>;
+    }>();
+
+    for (const row of result.rows) {
+      const existing = productMap.get(row.id) ?? {
+        id: row.id,
+        productName: row.product_name,
+        sku: row.SKU,
+        regularPrice: asNumber(row.regular_price),
+        discountPrice: row.discount_price === null ? null : asNumber(row.discount_price),
+        quantity: row.quantity,
+        shortDescription: row.short_description,
+        productDescription: row.product_description,
+        productNote: row.product_note,
+        category: row.category_id && row.category_name ? { id: row.category_id, name: row.category_name } : null,
+        images: [],
+        shippingOptions: [],
+      };
+      if (row.image_path && !existing.images.includes(row.image_path)) existing.images.push(row.image_path);
+      if (row.shipping_id && row.shipping_name && !existing.shippingOptions.some((option) => option.id === row.shipping_id)) {
+        existing.shippingOptions.push({
+          id: row.shipping_id,
+          name: row.shipping_name,
+          charge: asNumber(row.ship_charge),
+          free: Boolean(row.shipping_free),
+          estimatedDays: row.estimated_days === null ? null : asNumber(row.estimated_days),
+        });
+      }
+      productMap.set(row.id, existing);
+    }
+
+    const shippingResult = await pool.query<{
+      id: number;
+      name: string;
+      charge: string | number;
+      free: boolean;
+      estimated_days: string | number | null;
+    }>(`SELECT s."id", s."name",
+          COALESCE(MAX(ps."ship_charge"), 0) AS "charge",
+          COALESCE(BOOL_AND(COALESCE(ps."free", TRUE)), TRUE) AS "free",
+          MIN(ps."estimated_days") AS "estimated_days"
+       FROM "shippings" s
+       LEFT JOIN "product_shippings" ps ON ps."shipping_id" = s."id"
+       WHERE s."active" = TRUE
+       GROUP BY s."id", s."name"
+       ORDER BY s."id" ASC`);
+    const shippingOptions = shippingResult.rows.map((shipping) => ({
+      id: shipping.id,
+      name: shipping.name,
+      charge: asNumber(shipping.charge),
+      free: shipping.free,
+      estimatedDays: shipping.estimated_days === null ? null : asNumber(shipping.estimated_days),
+    }));
+
+    const response = GetStoreCatalogResponse.parse({
+      products: [...productMap.values()],
+      shippingOptions,
+    });
+    res.json(response);
+  } catch (error) {
+    req.log.error({ err: error }, "Failed to load store catalog");
+    res.status(500).json({ error: "تعذر تحميل كتالوج المتجر" });
+  }
+});
+
+router.get("/store/orders", async (req, res): Promise<void> => {
+  const parsed = ListStoreOrdersQueryParams.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ error: "يرجى إدخال البريد الإلكتروني ورقم الهاتف بشكل صحيح" });
+    return;
+  }
+  try {
+    const result = await pool.query<{
+      id: string;
+      status: string;
+      total: string | number;
+      created_at: Date;
+    }>(
+      `SELECT o."id", COALESCE(os."status_name", 'جديد') AS "status",
+        COALESCE(SUM(oi."price" * oi."quantity"), 0) +
+          COALESCE(SUM(CASE WHEN oi."shipping_id" IS NOT NULL THEN COALESCE(ps."ship_charge", 0) * oi."quantity" ELSE 0 END), 0) AS "total",
+        o."created_at"
+       FROM "orders" o
+       JOIN "customers" c ON c."id" = o."customer_id"
+       LEFT JOIN "order_statuses" os ON os."id" = o."order_status_id"
+       LEFT JOIN "order_items" oi ON oi."order_id" = o."id"
+       LEFT JOIN "product_shippings" ps ON ps."product_id" = oi."product_id" AND ps."shipping_id" = oi."shipping_id"
+       WHERE LOWER(c."email") = LOWER($1) AND c."phone_number" = $2
+       GROUP BY o."id", os."status_name", o."created_at"
+       ORDER BY o."created_at" DESC NULLS LAST`,
+      [parsed.data.email.trim(), parsed.data.phone.trim()],
+    );
+    res.json(ListStoreOrdersResponse.parse({
+      orders: result.rows.map((row) => ({
+        id: row.id,
+        status: row.status,
+        total: roundMoney(asNumber(row.total)),
+        createdAt: asIso(row.created_at),
+      })),
+    }));
+  } catch (error) {
+    req.log.error({ err: error }, "Failed to list customer orders");
+    res.status(500).json({ error: "تعذر تحميل طلبات العميل" });
+  }
+});
+
+router.post("/store/orders", async (req, res): Promise<void> => {
+  const parsed = CreateStoreOrderBody.safeParse(req.body);
+  if (!parsed.success) {
+    req.log.warn({ errors: parsed.error.message }, "Invalid store order");
+    res.status(400).json({ error: "بيانات الطلب غير مكتملة أو غير صالحة" });
+    return;
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const input = parsed.data;
+    const email = input.customer.email.trim().toLowerCase();
+    const phoneNumber = input.customer.phoneNumber.trim();
+    const productIds = [...new Set(input.items.map((item) => item.productId))];
+
+    const shippingResult = await client.query<{
+      id: number;
+      name: string;
+    }>(`SELECT "id", "name" FROM "shippings" WHERE "id" = $1 AND "active" = TRUE`, [input.shippingId]);
+    if (!shippingResult.rows[0]) throw new Error("طريقة الشحن المحددة غير متاحة");
+
+    const productsResult = await client.query<{
+      id: string;
+      product_name: string;
+      regular_price: string | number;
+      discount_price: string | number | null;
+      quantity: number;
+    }>(
+      `SELECT "id", "product_name", "regular_price", "discount_price", "quantity"
+       FROM "products"
+       WHERE "id" = ANY($1::uuid[]) AND "published" = TRUE
+       FOR UPDATE`,
+      [productIds],
+    );
+    const products = new Map(productsResult.rows.map((product) => [product.id, product]));
+    if (products.size !== productIds.length) throw new Error("أحد المنتجات لم يعد متاحًا");
+
+    const shippingRulesResult = await client.query<{
+      product_id: string;
+      ship_charge: string | number;
+      free: boolean;
+    }>(
+      `SELECT "product_id", "ship_charge", "free"
+       FROM "product_shippings"
+       WHERE "shipping_id" = $1 AND "product_id" = ANY($2::uuid[])`,
+      [input.shippingId, productIds],
+    );
+    const shippingRules = new Map(shippingRulesResult.rows.map((rule) => [rule.product_id, rule]));
+    let subtotal = 0;
+    let shippingCost = 0;
+    const items = input.items.map((item) => {
+      const product = products.get(item.productId)!;
+      if (product.quantity < item.quantity) throw new Error(`الكمية المطلوبة من ${product.product_name} غير متوفرة`);
+      const price = asNumber(product.discount_price ?? product.regular_price);
+      const shippingRule = shippingRules.get(item.productId);
+      subtotal += price * item.quantity;
+      if (shippingRule && !shippingRule.free) shippingCost += asNumber(shippingRule.ship_charge) * item.quantity;
+      return { productId: item.productId, productName: product.product_name, quantity: item.quantity, price };
+    });
+
+    let discount = 0;
+    let couponId: number | null = null;
+    if (input.couponCode?.trim()) {
+      const couponResult = await client.query<{
+        id: number;
+        discount_value: string | number | null;
+      }>(
+        `SELECT "id", "discount_value"
+         FROM "coupons"
+         WHERE UPPER("code") = UPPER($1)
+           AND ("coupon_start_date" IS NULL OR "coupon_start_date" <= NOW())
+           AND ("coupon_end_date" IS NULL OR "coupon_end_date" >= NOW())
+           AND ("max_usage" IS NULL OR "times_used" < "max_usage")
+         LIMIT 1`,
+        [input.couponCode.trim()],
+      );
+      const coupon = couponResult.rows[0];
+      if (!coupon) throw new Error("القسيمة غير صالحة أو منتهية");
+      couponId = coupon.id;
+      discount = Math.min(subtotal, Math.max(0, asNumber(coupon.discount_value)));
+    }
+
+    const customerResult = await client.query<{ id: string }>(
+      `INSERT INTO "customers" ("first_name", "last_name", "phone_number", "email", "active", "registered_at", "created_at")
+       VALUES ($1, $2, $3, $4, TRUE, NOW(), NOW())
+       ON CONFLICT ("email") DO UPDATE SET
+         "first_name" = EXCLUDED."first_name",
+         "last_name" = EXCLUDED."last_name",
+         "phone_number" = EXCLUDED."phone_number",
+         "active" = TRUE
+       RETURNING "id"`,
+      [input.customer.firstName.trim(), input.customer.lastName.trim(), phoneNumber, email],
+    );
+    const customerId = customerResult.rows[0].id;
+    await client.query(
+      `INSERT INTO "customer_addresses" ("customer_id", "address_line1", "address_line2", "postal_code", "country", "city", "phone_number")
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        customerId,
+        input.address.addressLine1.trim(),
+        input.address.addressLine2?.trim() || null,
+        input.address.postalCode?.trim() || null,
+        input.address.country.trim(),
+        input.address.city.trim(),
+        input.address.phoneNumber?.trim() || phoneNumber,
+      ],
+    );
+
+    const statusResult = await client.query<{ id: number; status_name: string }>(
+      `SELECT "id", "status_name" FROM "order_statuses" ORDER BY "id" ASC LIMIT 1`,
+    );
+    const statusId = statusResult.rows[0]?.id ?? null;
+    const statusName = statusResult.rows[0]?.status_name ?? "جديد";
+    const id = orderId();
+    const total = roundMoney(subtotal + shippingCost - discount);
+    await client.query(
+      `INSERT INTO "orders" ("id", "coupon_id", "customer_id", "order_status_id", "created_at")
+       VALUES ($1, $2, $3, $4, NOW())`,
+      [id, couponId, customerId, statusId],
+    );
+    for (const item of items) {
+      await client.query(
+        `INSERT INTO "order_items" ("product_id", "order_id", "price", "quantity", "shipping_id")
+         VALUES ($1, $2, $3, $4, $5)`,
+        [item.productId, id, item.price, item.quantity, input.shippingId],
+      );
+      await client.query(
+        `UPDATE "products" SET "quantity" = "quantity" - $1, "updated_at" = NOW() WHERE "id" = $2`,
+        [item.quantity, item.productId],
+      );
+    }
+    if (couponId !== null) await client.query(`UPDATE "coupons" SET "times_used" = "times_used" + 1, "updated_at" = NOW() WHERE "id" = $1`, [couponId]);
+    await client.query("COMMIT");
+
+    res.status(201).json(CreateStoreOrderResponse.parse({
+      id,
+      status: statusName,
+      subtotal: roundMoney(subtotal),
+      shippingCost: roundMoney(shippingCost),
+      discount: roundMoney(discount),
+      total,
+      createdAt: new Date().toISOString(),
+      items,
+    }));
+  } catch (error) {
+    await client.query("ROLLBACK");
+    req.log.error({ err: error }, "Failed to create store order");
+    res.status(400).json({ error: error instanceof Error ? error.message : "تعذر إنشاء الطلب" });
+  } finally {
+    client.release();
+  }
+});
+
+router.get("/store/orders/:id", async (req, res): Promise<void> => {
+  const parsedParams = GetStoreOrderParams.safeParse(req.params);
+  const parsedQuery = GetStoreOrderQueryParams.safeParse(req.query);
+  if (!parsedParams.success || !parsedQuery.success) {
+    res.status(400).json({ error: "يرجى إدخال رقم الطلب ورقم الهاتف بشكل صحيح" });
+    return;
+  }
+  try {
+    const orderResult = await pool.query<{
+      id: string;
+      status: string;
+      created_at: Date;
+      subtotal: string | number;
+      shipping_cost: string | number;
+      items: unknown;
+    }>(
+      `SELECT o."id", COALESCE(os."status_name", 'جديد') AS "status", o."created_at",
+        COALESCE(SUM(oi."price" * oi."quantity"), 0) AS "subtotal",
+        COALESCE(SUM(CASE WHEN oi."shipping_id" IS NOT NULL THEN COALESCE(ps."ship_charge", 0) * oi."quantity" ELSE 0 END), 0) AS "shipping_cost"
+       FROM "orders" o
+       JOIN "customers" c ON c."id" = o."customer_id"
+       LEFT JOIN "order_statuses" os ON os."id" = o."order_status_id"
+       LEFT JOIN "order_items" oi ON oi."order_id" = o."id"
+       LEFT JOIN "product_shippings" ps ON ps."product_id" = oi."product_id" AND ps."shipping_id" = oi."shipping_id"
+       WHERE o."id" = $1 AND c."phone_number" = $2
+       GROUP BY o."id", os."status_name", o."created_at"`,
+      [parsedParams.data.id, parsedQuery.data.phone.trim()],
+    );
+    const order = orderResult.rows[0];
+    if (!order) {
+      res.status(404).json({ error: "لم يتم العثور على الطلب" });
+      return;
+    }
+    const itemsResult = await pool.query<{
+      product_id: string;
+      product_name: string;
+      quantity: number;
+      price: string | number;
+    }>(
+      `SELECT oi."product_id", p."product_name", oi."quantity", oi."price"
+       FROM "order_items" oi JOIN "products" p ON p."id" = oi."product_id"
+       WHERE oi."order_id" = $1 ORDER BY oi."id" ASC`,
+      [order.id],
+    );
+    const subtotal = roundMoney(asNumber(order.subtotal));
+    const shippingCost = roundMoney(asNumber(order.shipping_cost));
+    res.json(GetStoreOrderResponse.parse({
+      id: order.id,
+      status: order.status,
+      subtotal,
+      shippingCost,
+      discount: 0,
+      total: roundMoney(subtotal + shippingCost),
+      createdAt: asIso(order.created_at),
+      items: itemsResult.rows.map((item) => ({
+        productId: item.product_id,
+        productName: item.product_name,
+        quantity: item.quantity,
+        price: asNumber(item.price),
+      })),
+    }));
+  } catch (error) {
+    req.log.error({ err: error }, "Failed to load store order");
+    res.status(500).json({ error: "تعذر تحميل تفاصيل الطلب" });
+  }
+});
+
+export default router;

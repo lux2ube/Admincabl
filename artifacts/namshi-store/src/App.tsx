@@ -13,22 +13,29 @@ import {
   X,
 } from 'lucide-react';
 import {
-  createQuoteRequest,
+  createStoreOrder,
+  getStoreOrder,
+  listStoreOrders,
   subscribeNewsletter,
-  type QuoteRequestInput,
+  type StoreOrder,
+  type StoreProduct,
+  type StoreShippingOption,
+  useGetStoreCatalog,
 } from '@workspace/api-client-react';
 
 type Product = {
-  id: number;
+  id: string;
   brand: string;
   name: string;
-  price: string;
+  price: number;
   color: string;
   category: 'POWER_BANKS' | 'CHARGERS' | 'CABLES' | 'TRAVEL';
   image: string;
-  sku?: string;
+  sku: string;
   warranty?: string;
   tag?: string;
+  quantity: number;
+  shippingOptions: StoreShippingOption[];
 };
 
 type HeroSlide = {
@@ -40,19 +47,6 @@ type HeroSlide = {
 };
 
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
-
-const products: Product[] = [
-  { id: 1, brand: 'Vention', name: 'باور بنك 20,000mAh / 22.5W', price: '$28.09', color: 'USB-C + USB-A + كابل مدمج', category: 'POWER_BANKS', image: asset('vention-powerbank-20k.jpg'), sku: 'XGYP0-40-TY', warranty: 'ضمان 12 شهرًا' },
-  { id: 2, brand: 'Vention', name: 'باور بنك 10,000mAh / 22.5W', price: '$24.18 SGD', color: 'كابل شحن مدمج', category: 'POWER_BANKS', image: asset('vention-powerbank-10k.jpg') },
-  { id: 3, brand: 'Vention', name: 'باور بنك 10,000mAh / USB-C + Lightning', price: '$24.82 SGD', color: 'USB-C + Lightning مدمجان', category: 'POWER_BANKS', image: asset('vention-powerbank-10k-lightning.jpg') },
-  { id: 4, brand: 'Vention', name: 'شاحن GaN بمنفذين 30W', price: '$11.69', color: 'USB-C + USB-A · قابس أوروبي', category: 'CHARGERS', image: asset('vention-charger-30w.jpg') },
-  { id: 5, brand: 'Vention', name: 'طقم شحن GaN بقدرة 30W', price: '$15.90', color: 'شاحن + كابل USB-C إلى USB-C', category: 'CHARGERS', image: asset('vention-charger-30w-kit.jpg'), tag: 'باقة جاهزة' },
-  { id: 6, brand: 'Vention', name: 'شاحن GaN بثلاثة منافذ 65W', price: '$37.59', color: 'C+C+A · 65W / 65W / 60W', category: 'CHARGERS', image: asset('vention-charger-65w.jpg') },
-  { id: 7, brand: 'Vention', name: 'شاحن GaN بثلاثة منافذ 70W', price: '$39.90', color: 'C+C+A · 70W / 70W / 22.5W', category: 'CHARGERS', image: asset('vention-charger-70w.jpg') },
-  { id: 8, brand: 'Vention', name: 'شاحن GaN بثلاثة منافذ 100W', price: '$79.39', color: 'C+C+A · 100W / 100W / 30W', category: 'CHARGERS', image: asset('vention-charger-100w.jpg') },
-  { id: 9, brand: 'Vention', name: 'كابل USB-C إلى USB-C بقدرة 100W', price: '$11.27 SGD', color: 'شحن سريع 5A · USB 2.0', category: 'CABLES', image: asset('vention-cable-100w.jpg') },
-  { id: 10, brand: 'Vention', name: 'محول سفر عالمي GaN بقدرة 65W', price: '$95.88 SGD', color: 'شحن عالمي للسفر', category: 'TRAVEL', image: asset('vention-adapter-65w.jpg') },
-];
 
 const heroes: HeroSlide[] = [
   {
@@ -78,11 +72,11 @@ const heroes: HeroSlide[] = [
   },
 ];
 
-const categories = [
-  { name: 'باور بانك', count: '3 منتجات', image: asset('vention-powerbank-10k.jpg'), filter: 'POWER_BANKS' },
-  { name: 'شواحن GaN', count: '5 منتجات', image: asset('vention-charger-65w.jpg'), filter: 'CHARGERS' },
-  { name: 'كابلات', count: 'منتج واحد', image: asset('vention-cable-100w.jpg'), filter: 'CABLES' },
-  { name: 'السفر والسيارة', count: 'منتج واحد', image: asset('vention-adapter-65w.jpg'), filter: 'TRAVEL' },
+const categoryMeta = [
+  { name: 'باور بانك', image: asset('vention-powerbank-10k.jpg'), filter: 'POWER_BANKS' as const },
+  { name: 'شواحن GaN', image: asset('vention-charger-65w.jpg'), filter: 'CHARGERS' as const },
+  { name: 'كابلات', image: asset('vention-cable-100w.jpg'), filter: 'CABLES' as const },
+  { name: 'السفر والسيارة', image: asset('vention-adapter-65w.jpg'), filter: 'TRAVEL' as const },
 ];
 
 const filterOptions = [
@@ -126,7 +120,7 @@ function ProductPreview({
   isFavorite: boolean;
   onBack: () => void;
   onAddToCart: (product: Product) => void;
-  onToggleFavorite: (id: number) => void;
+  onToggleFavorite: (id: string) => void;
 }) {
   return (
     <section className="product-preview section" aria-label={`تفاصيل ${product.name}`} data-testid="page-product-preview">
@@ -140,7 +134,7 @@ function ProductPreview({
         <div className="product-preview-copy">
           <span className="eyebrow">{product.brand} · {categoryNames[product.category]}</span>
           <h1>{product.name}</h1>
-          <div className="product-preview-price">{product.price}</div>
+           <div className="product-preview-price">${product.price.toFixed(2)}</div>
           <p className="product-preview-description">{product.color}. حل عملي للشحن اليومي، المكتب، والسفر.</p>
           <div className="product-spec-list">
             <div><span>العلامة</span><strong>Vention</strong></div>
@@ -166,36 +160,49 @@ function ProductPreview({
 }
 
 function App() {
+  const catalogQuery = useGetStoreCatalog();
   const [slide, setSlide] = useState(0);
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(() => {
-    const match = window.location.hash.match(/^#product-(\d+)$/);
-    return match ? Number(match[1]) : null;
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(() => {
+    const match = window.location.hash.match(/^#product-([a-zA-Z0-9-]+)$/);
+    return match ? match[1] : null;
   });
-  const [favorites, setFavorites] = useState<number[]>(() => {
+  const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       const saved = window.localStorage.getItem('cabl-favorites');
       const parsed = saved ? JSON.parse(saved) : [];
-      return Array.isArray(parsed) ? parsed.filter((id): id is number => Number.isInteger(id)) : [];
+      return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
     } catch {
       return [];
     }
   });
   const [cart, setCart] = useState<Product[]>([]);
+  const [cartQuantities, setCartQuantities] = useState<Record<string, number>>({});
   const [cartOpen, setCartOpen] = useState(false);
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [quoteSubmitted, setQuoteSubmitted] = useState(false);
   const [quoteSubmitting, setQuoteSubmitting] = useState(false);
   const [quoteError, setQuoteError] = useState('');
+  const [lastOrder, setLastOrder] = useState<StoreOrder | null>(null);
+  const [shippingId, setShippingId] = useState<number | null>(null);
   const [quoteForm, setQuoteForm] = useState({
-    customerName: '',
-    phone: '',
-    businessName: '',
-    notes: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    addressLine1: '',
+    city: '',
+    country: 'اليمن',
   });
+  const [trackingOpen, setTrackingOpen] = useState(false);
+  const [trackingForm, setTrackingForm] = useState({ email: '', phone: '' });
+  const [trackingOrders, setTrackingOrders] = useState<Array<{ id: string; status: string; total: number; createdAt: string }>>([]);
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [trackingError, setTrackingError] = useState('');
+  const [trackingDetail, setTrackingDetail] = useState<StoreOrder | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toast, setToast] = useState('');
   const [email, setEmail] = useState('');
@@ -220,8 +227,8 @@ function App() {
 
   useEffect(() => {
     const syncProductFromUrl = () => {
-      const match = window.location.hash.match(/^#product-(\d+)$/);
-      setSelectedProductId(match ? Number(match[1]) : null);
+      const match = window.location.hash.match(/^#product-([a-zA-Z0-9-]+)$/);
+      setSelectedProductId(match ? match[1] : null);
     };
     window.addEventListener('popstate', syncProductFromUrl);
     window.addEventListener('hashchange', syncProductFromUrl);
@@ -231,6 +238,22 @@ function App() {
     };
   }, []);
 
+  const products = useMemo<Product[]>(() => (catalogQuery.data?.products ?? []).map((product: StoreProduct) => ({
+    id: product.id,
+    brand: 'Vention',
+    name: product.productName,
+    price: product.discountPrice ?? product.regularPrice,
+    color: product.shortDescription ?? product.productDescription ?? 'منتج أصلي من Vention',
+    category: product.category?.name.includes('باور') ? 'POWER_BANKS' : product.category?.name.includes('شاحن') ? 'CHARGERS' : product.category?.name.includes('كابل') ? 'CABLES' : 'TRAVEL',
+    image: product.images[0]?.startsWith('http') ? product.images[0] : `${import.meta.env.BASE_URL}${product.images[0] ?? 'images/vention-powerbank-20k.jpg'}`,
+    sku: product.sku,
+    quantity: product.quantity,
+    shippingOptions: product.shippingOptions,
+  })), [catalogQuery.data]);
+
+  const shippingOptions = catalogQuery.data?.shippingOptions ?? [];
+  const selectedShippingId = shippingId ?? shippingOptions[0]?.id ?? null;
+
   const visibleProducts = useMemo(() => {
     const cleanQuery = query.trim().toLowerCase();
     return products.filter((product) => {
@@ -239,6 +262,11 @@ function App() {
       return matchesFilter && matchesQuery;
     });
   }, [activeFilter, query]);
+
+  const categories = useMemo(() => categoryMeta.map((category) => ({
+    ...category,
+    count: `${products.filter((product) => product.category === category.filter).length} منتجات`,
+  })), [products]);
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -259,15 +287,27 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const toggleFavorite = (id: number) => {
+  const toggleFavorite = (id: string) => {
     setFavorites((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
     announce(favorites.includes(id) ? 'تمت إزالة المنتج من المفضلة' : 'تمت إضافة المنتج إلى المفضلة');
   };
 
   const addToCart = (product: Product) => {
     setCart((current) => current.some((item) => item.id === product.id) ? current : [...current, product]);
+    setCartQuantities((current) => ({ ...current, [product.id]: Math.min((current[product.id] ?? 0) + 1, 99) }));
     setCartOpen(true);
     announce(`تمت إضافة ${product.name} إلى القائمة`);
+  };
+
+  const removeFromCart = (productId: string) => {
+    setCartQuantities((current) => {
+      const quantity = current[productId] ?? 1;
+      if (quantity > 1) return { ...current, [productId]: quantity - 1 };
+      const next = { ...current };
+      delete next[productId];
+      return next;
+    });
+    setCart((current) => current.filter((product) => product.id !== productId || (cartQuantities[productId] ?? 1) > 1));
   };
 
   const chooseCategory = (filter: string) => {
@@ -280,6 +320,8 @@ function App() {
     setWishlistOpen(false);
     setQuoteSubmitted(false);
     setQuoteError('');
+    setLastOrder(null);
+    setShippingId((current) => current ?? shippingOptions[0]?.id ?? null);
     setQuoteOpen(true);
   };
 
@@ -288,23 +330,37 @@ function App() {
     setQuoteSubmitting(true);
     setQuoteError('');
 
-    const payload: QuoteRequestInput = {
-      customerName: quoteForm.customerName.trim(),
-      phone: quoteForm.phone.trim(),
-      businessName: quoteForm.businessName.trim() || null,
-      notes: quoteForm.notes.trim() || null,
-      items: cart.map((product) => ({
-        productId: product.id,
-        productName: product.name,
-        sku: product.sku ?? null,
-        quantity: 1,
-      })),
-    };
+    if (!selectedShippingId) {
+      setQuoteError('لا توجد طريقة شحن متاحة حاليًا.');
+      setQuoteSubmitting(false);
+      return;
+    }
 
     try {
-      await createQuoteRequest(payload);
+      const order = await createStoreOrder({
+        customer: {
+          firstName: quoteForm.firstName.trim(),
+          lastName: quoteForm.lastName.trim(),
+          email: quoteForm.email.trim(),
+          phoneNumber: quoteForm.phoneNumber.trim(),
+        },
+        address: {
+          addressLine1: quoteForm.addressLine1.trim(),
+          addressLine2: null,
+          postalCode: null,
+          country: quoteForm.country.trim(),
+          city: quoteForm.city.trim(),
+          phoneNumber: quoteForm.phoneNumber.trim(),
+        },
+        items: cart.map((product) => ({ productId: product.id, quantity: cartQuantities[product.id] ?? 1 })),
+        shippingId: selectedShippingId,
+        couponCode: null,
+      });
+      setLastOrder(order);
       setQuoteSubmitted(true);
       setCart([]);
+      setCartQuantities({});
+      catalogQuery.refetch();
       announce('تم استلام طلب عرض السعر بنجاح');
     } catch (error) {
       setQuoteError(getApiErrorMessage(error));
@@ -343,6 +399,41 @@ function App() {
 
   const updateQuoteField = (field: keyof typeof quoteForm, value: string) => {
     setQuoteForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const openTracking = () => {
+    setTrackingError('');
+    setTrackingOrders([]);
+    setTrackingDetail(null);
+    setTrackingOpen(true);
+  };
+
+  const submitTracking = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setTrackingLoading(true);
+    setTrackingError('');
+    try {
+      const response = await listStoreOrders({ email: trackingForm.email.trim(), phone: trackingForm.phone.trim() });
+      setTrackingOrders(response.orders);
+      if (response.orders.length === 0) setTrackingError('لم نجد طلبات بهذه البيانات.');
+    } catch (error) {
+      setTrackingError(getApiErrorMessage(error));
+    } finally {
+      setTrackingLoading(false);
+    }
+  };
+
+  const loadTrackingDetail = async (id: string) => {
+    setTrackingLoading(true);
+    setTrackingError('');
+    try {
+      const detail = await getStoreOrder(id, { phone: trackingForm.phone.trim() });
+      setTrackingDetail(detail);
+    } catch (error) {
+      setTrackingError(getApiErrorMessage(error));
+    } finally {
+      setTrackingLoading(false);
+    }
   };
 
   const getApiErrorMessage = (error: unknown) => {
@@ -434,7 +525,7 @@ function App() {
         {selectedProduct ? (
           <ProductPreview
             product={products.find((product) => product.id === selectedProductId) ?? products[0]}
-            isFavorite={favorites.includes(selectedProductId ?? -1)}
+            isFavorite={selectedProductId !== null && favorites.includes(selectedProductId)}
             onBack={closeProductPreview}
             onAddToCart={addToCart}
             onToggleFavorite={toggleFavorite}
@@ -552,7 +643,7 @@ function App() {
                 <div className="product-details">
                   <div className="product-brand">{product.brand}</div>
                   <div className="product-name">{product.name}</div>
-                  <div className="product-price">{product.price}</div>
+                  <div className="product-price">${product.price.toFixed(2)}</div>
                   <div className="product-color">{product.color}</div>
                   {product.sku && <div className="product-color">SKU: {product.sku}</div>}
                   {product.warranty && <div className="product-color">{product.warranty}</div>}
@@ -602,7 +693,7 @@ function App() {
             </div>
             <div className="footer-col"><h4>تصفح</h4><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="footer-power-banks">باور بانك</button><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="footer-chargers">الشواحن</button><button type="button" onClick={() => chooseCategory('CABLES')} data-testid="footer-cables">الكابلات</button><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="footer-travel">السفر والسيارة</button></div>
             <div className="footer-col"><h4>المتجر</h4><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-shortlist">كل المنتجات</button><button type="button" onClick={() => setCartOpen(true)} data-testid="footer-moq">السلة</button><button type="button" onClick={() => setWishlistOpen(true)} data-testid="footer-pricing">المفضلة</button></div>
-            <div className="footer-col"><h4>خدمة العملاء</h4><button type="button" onClick={() => scrollTo('about')} data-testid="footer-about">عن CABL</button><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">الشحن والتوصيل</button><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-help">مواصفات المنتجات</button><button type="button" onClick={openQuoteForm} data-testid="footer-contact">تواصل معنا</button></div>
+            <div className="footer-col"><h4>خدمة العملاء</h4><button type="button" onClick={() => scrollTo('about')} data-testid="footer-about">عن CABL</button><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">الشحن والتوصيل</button><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-help">مواصفات المنتجات</button><button type="button" onClick={openTracking} data-testid="footer-track-order">تتبع طلبك</button><button type="button" onClick={openQuoteForm} data-testid="footer-contact">إتمام الطلب</button></div>
             <div className="footer-col"><h4>تابعنا</h4><button type="button" onClick={() => announce('تم نسخ رابط Instagram')} data-testid="footer-instagram">Instagram</button><button type="button" onClick={() => announce('تم نسخ رابط TikTok')} data-testid="footer-tiktok">TikTok</button><button type="button" onClick={() => announce('تم نسخ رابط WhatsApp')} data-testid="footer-whatsapp">WhatsApp</button></div>
           </div>
           <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لشركة Vention في اليمن.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
@@ -620,7 +711,7 @@ function App() {
                 {favoriteProducts.map((product) => (
                   <div className="cart-item" key={product.id}>
                     <img src={product.image} alt={product.name} />
-                    <div className="cart-item-info"><button className="remove-item" type="button" onClick={() => toggleFavorite(product.id)} data-testid={`button-remove-wishlist-${product.id}`}>إزالة</button><strong>{product.brand}</strong><span>{product.name}</span><br /><span>{product.price}</span></div>
+                    <div className="cart-item-info"><button className="remove-item" type="button" onClick={() => toggleFavorite(product.id)} data-testid={`button-remove-wishlist-${product.id}`}>إزالة</button><strong>{product.brand}</strong><span>{product.name}</span><br /><span>${product.price.toFixed(2)}</span></div>
                   </div>
                 ))}
                 <button className="button-dark checkout-button" type="button" onClick={openQuoteForm} data-testid="button-quote-wishlist">إتمام الطلب</button>
@@ -638,9 +729,9 @@ function App() {
             ) : (
               <>
                 <div>
-                  {cart.map((product) => <div className="cart-item" key={product.id}><img src={product.image} alt={product.name} /><div className="cart-item-info"><button className="remove-item" type="button" onClick={() => setCart((current) => current.filter((item) => item.id !== product.id))} data-testid={`button-remove-cart-${product.id}`}>حذف</button><strong>{product.brand}</strong><span>{product.name}</span><br /><span>{product.price}</span></div></div>)}
+                  {cart.map((product) => <div className="cart-item" key={product.id}><img src={product.image} alt={product.name} /><div className="cart-item-info"><button className="remove-item" type="button" onClick={() => removeFromCart(product.id)} data-testid={`button-remove-cart-${product.id}`}>حذف</button><strong>{product.brand}</strong><span>{product.name}</span><br /><span>${product.price.toFixed(2)} · الكمية {cartQuantities[product.id] ?? 1}</span><div className="product-card-actions"><button className="preview-link" type="button" onClick={() => addToCart(product)}>+ إضافة</button><button className="preview-link" type="button" onClick={() => removeFromCart(product.id)}>- إزالة</button></div></div></div>)}
                 </div>
-                  <div className="drawer-total"><span>المنتجات المختارة</span><span data-testid="text-cart-total">{cart.length}</span></div>
+                  <div className="drawer-total"><span>المنتجات المختارة</span><span data-testid="text-cart-total">{cart.reduce((sum, product) => sum + (cartQuantities[product.id] ?? 1), 0)}</span></div>
                   <button className="button-dark checkout-button" type="button" onClick={openQuoteForm} data-testid="button-checkout">إتمام الطلب</button>
               </>
             )}
@@ -652,18 +743,36 @@ function App() {
           <section className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title" onClick={(event) => event.stopPropagation()} data-testid="modal-quote">
             <div className="drawer-header"><h2 id="quote-title">إتمام الطلب</h2><button className="close-button" type="button" onClick={closeQuoteForm} aria-label="إغلاق النموذج" data-testid="button-close-quote"><X size={16} /></button></div>
             {quoteSubmitted ? (
-              <div className="quote-success" data-testid="status-quote-submitted"><strong>تم استلام طلبك.</strong><p>سنراجع المنتجات المختارة ونتواصل معك على رقم الهاتف المرسل لتأكيد الطلب والتوصيل.</p><button className="button-dark" type="button" onClick={closeQuoteForm} data-testid="button-finish-quote">حسنًا</button></div>
+              <div className="quote-success" data-testid="status-quote-submitted"><strong>تم حفظ طلبك بنجاح.</strong><p>رقم الطلب: <strong>{lastOrder?.id}</strong></p><p>الحالة الحالية: {lastOrder?.status}. يمكنك متابعة الشحن من زر تتبع الطلب.</p><div className="product-card-actions"><button className="button-dark" type="button" onClick={openTracking} data-testid="button-track-created-order">تتبع الطلب</button><button className="preview-link" type="button" onClick={closeQuoteForm} data-testid="button-finish-quote">حسنًا</button></div></div>
             ) : (
               <form className="quote-form" onSubmit={submitQuote}>
-                <p className="quote-intro">{cart.length > 0 ? `سيتم تضمين ${cart.length} منتجًا في طلبك.` : 'أدخل بياناتك لنؤكد طلبك وموعد التوصيل.'}</p>
-                <label>الاسم الكامل<input required minLength={2} maxLength={120} value={quoteForm.customerName} onChange={(event) => updateQuoteField('customerName', event.target.value)} autoComplete="name" data-testid="input-quote-name" /></label>
-                <label>رقم الهاتف<input required minLength={5} maxLength={40} value={quoteForm.phone} onChange={(event) => updateQuoteField('phone', event.target.value)} autoComplete="tel" data-testid="input-quote-phone" /></label>
-                <label>اسم النشاط <span>(اختياري)</span><input maxLength={160} value={quoteForm.businessName} onChange={(event) => updateQuoteField('businessName', event.target.value)} autoComplete="organization" data-testid="input-quote-business" /></label>
-                <label>ملاحظات <span>(اختياري)</span><textarea maxLength={1000} rows={4} value={quoteForm.notes} onChange={(event) => updateQuoteField('notes', event.target.value)} data-testid="input-quote-notes" /></label>
+                <p className="quote-intro">سيتم حفظ بيانات العميل والعنوان والمنتجات في سجل الطلبات، ويمكنك تتبع الحالة لاحقًا.</p>
+                <div className="quote-form-grid"><label>الاسم الأول<input required minLength={2} maxLength={100} value={quoteForm.firstName} onChange={(event) => updateQuoteField('firstName', event.target.value)} autoComplete="given-name" data-testid="input-order-first-name" /></label><label>اسم العائلة<input required minLength={2} maxLength={100} value={quoteForm.lastName} onChange={(event) => updateQuoteField('lastName', event.target.value)} autoComplete="family-name" data-testid="input-order-last-name" /></label></div>
+                <label>البريد الإلكتروني<input required type="email" maxLength={255} value={quoteForm.email} onChange={(event) => updateQuoteField('email', event.target.value)} autoComplete="email" data-testid="input-order-email" /></label>
+                <label>رقم الهاتف<input required minLength={5} maxLength={40} value={quoteForm.phoneNumber} onChange={(event) => updateQuoteField('phoneNumber', event.target.value)} autoComplete="tel" data-testid="input-order-phone" /></label>
+                <label>العنوان<input required minLength={3} maxLength={500} value={quoteForm.addressLine1} onChange={(event) => updateQuoteField('addressLine1', event.target.value)} autoComplete="street-address" data-testid="input-order-address" /></label>
+                <div className="quote-form-grid"><label>المدينة<input required minLength={2} maxLength={100} value={quoteForm.city} onChange={(event) => updateQuoteField('city', event.target.value)} autoComplete="address-level2" data-testid="input-order-city" /></label><label>الدولة<input required minLength={2} maxLength={100} value={quoteForm.country} onChange={(event) => updateQuoteField('country', event.target.value)} autoComplete="country-name" data-testid="input-order-country" /></label></div>
+                <label>طريقة الشحن<select required value={selectedShippingId ?? ''} onChange={(event) => setShippingId(Number(event.target.value))} data-testid="select-order-shipping">{shippingOptions.map((option) => <option key={option.id} value={option.id}>{option.name}{option.free ? ' · مجاني' : ` · $${option.charge.toFixed(2)}`}</option>)}</select></label>
                 {quoteError && <p className="form-error" role="alert" data-testid="error-quote">{quoteError}</p>}
-                <button className="button-dark checkout-button" type="submit" disabled={quoteSubmitting} data-testid="button-submit-quote">{quoteSubmitting ? 'جارٍ إرسال الطلب...' : 'تأكيد الطلب'}</button>
+                <button className="button-dark checkout-button" type="submit" disabled={quoteSubmitting || cart.length === 0} data-testid="button-submit-quote">{quoteSubmitting ? 'جارٍ حفظ الطلب...' : 'تأكيد الطلب وحفظه'}</button>
               </form>
             )}
+          </section>
+        </div>
+      )}
+      {trackingOpen && (
+        <div className="modal-backdrop" role="presentation" onClick={() => setTrackingOpen(false)} data-testid="overlay-tracking">
+          <section className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="tracking-title" onClick={(event) => event.stopPropagation()} data-testid="modal-tracking">
+            <div className="drawer-header"><h2 id="tracking-title">تتبع طلبك</h2><button className="close-button" type="button" onClick={() => setTrackingOpen(false)} aria-label="إغلاق التتبع"><X size={16} /></button></div>
+            <form className="quote-form" onSubmit={submitTracking}>
+              <p className="quote-intro">أدخل البريد الإلكتروني ورقم الهاتف المستخدمين عند الطلب لعرض سجل الطلبات وحالة الشحن.</p>
+              <label>البريد الإلكتروني<input required type="email" value={trackingForm.email} onChange={(event) => setTrackingForm((current) => ({ ...current, email: event.target.value }))} data-testid="input-tracking-email" /></label>
+              <label>رقم الهاتف<input required minLength={5} maxLength={40} value={trackingForm.phone} onChange={(event) => setTrackingForm((current) => ({ ...current, phone: event.target.value }))} data-testid="input-tracking-phone" /></label>
+              {trackingError && <p className="form-error" role="alert" data-testid="error-tracking">{trackingError}</p>}
+              <button className="button-dark checkout-button" type="submit" disabled={trackingLoading} data-testid="button-submit-tracking">{trackingLoading ? 'جارٍ البحث...' : 'عرض الطلبات'}</button>
+            </form>
+            {trackingOrders.length > 0 && <div className="tracking-results"><h3>طلباتك</h3>{trackingOrders.map((order) => <button className="tracking-order" key={order.id} type="button" onClick={() => loadTrackingDetail(order.id)}><span><strong>{order.id}</strong><small>{new Date(order.createdAt).toLocaleDateString('ar-YE')}</small></span><span><strong>${order.total.toFixed(2)}</strong><small>{order.status}</small></span></button>)}</div>}
+            {trackingDetail && <div className="quote-success tracking-detail"><strong>{trackingDetail.id}</strong><p>الحالة: {trackingDetail.status}</p><p>الإجمالي: ${trackingDetail.total.toFixed(2)} · الشحن: ${trackingDetail.shippingCost.toFixed(2)}</p><div>{trackingDetail.items.map((item) => <p key={item.productId}>{item.productName} × {item.quantity}</p>)}</div></div>}
           </section>
         </div>
       )}

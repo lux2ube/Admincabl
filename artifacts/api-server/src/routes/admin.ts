@@ -281,6 +281,18 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
       counts.galleries += await seedTable(`INSERT INTO "galleries" ("id","product_id","image_path","thumbail","display_order") VALUES ($1,$2,$3,TRUE,0) ON CONFLICT ("id") DO NOTHING`, [`20000000-0000-4000-8000-${productId.slice(-12)}`, productId, image]);
     }
     counts.shippings = await seedTable(`INSERT INTO "shippings" ("id","name","active","icon_path") VALUES (1,'توصيل داخل اليمن',TRUE,'truck'),(2,'توصيل محلي سريع',TRUE,'sparkles') ON CONFLICT ("id") DO NOTHING`, []);
+    counts.product_shippings = 0;
+    for (const [productId] of productsSeed) {
+      counts.product_shippings += await seedTable(
+        `INSERT INTO "product_shippings" ("product_id","shipping_id","ship_charge","free","estimated_days")
+         VALUES ($1,1,0,TRUE,5),($1,2,3.5,FALSE,2)
+         ON CONFLICT ("product_id","shipping_id") DO UPDATE SET
+           "ship_charge" = EXCLUDED."ship_charge",
+           "free" = EXCLUDED."free",
+           "estimated_days" = EXCLUDED."estimated_days"`,
+        [productId],
+      );
+    }
     counts.order_statuses = await seedTable(`INSERT INTO "order_statuses" ("id","status_name","color","privacy") VALUES (1,'جديد','#d6ee42','public'),(2,'قيد التجهيز','#1748bd','public'),(3,'تم الشحن','#efb12a','public'),(4,'مكتمل','#2f9e44','public') ON CONFLICT ("id") DO NOTHING`, []);
     counts.roles = await seedTable(`INSERT INTO "roles" ("id","role_name","privileges") VALUES (1,'مدير المتجر',ARRAY['catalog.read','catalog.write','orders.read','customers.read']) ON CONFLICT ("id") DO NOTHING`, []);
     counts.attributes = await seedTable(`INSERT INTO "attributes" ("id","attribute_name") VALUES ('30000000-0000-4000-8000-000000000001','نوع الاستخدام'),('30000000-0000-4000-8000-000000000002','المنفذ') ON CONFLICT ("id") DO NOTHING`, []);

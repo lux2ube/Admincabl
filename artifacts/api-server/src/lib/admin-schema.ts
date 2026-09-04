@@ -164,8 +164,8 @@ const tables: AdminTable[] = [
   },
   {
     key: "order_items", label: "عناصر الطلبات", group: "المبيعات", primaryKey: "id",
-    columns: [id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("order_id", "رقم الطلب", "uuid"), column("price", "السعر", "number", { nullable: false }), column("quantity", "الكمية", "number", { nullable: false }), column("shipping_id", "الشحن", "number", { references: "shippings.id" })],
-    relations: [relation("product_id", "products", "id", "belongs_to", "المنتج"), relation("shipping_id", "shippings", "id", "belongs_to", "الشحن")],
+    columns: [id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("order_id", "رقم الطلب", "text", { references: "orders.id" }), column("price", "السعر", "number", { nullable: false }), column("quantity", "الكمية", "number", { nullable: false }), column("shipping_id", "الشحن", "number", { references: "shippings.id" })],
+    relations: [relation("product_id", "products", "id", "belongs_to", "المنتج"), relation("order_id", "orders", "id", "belongs_to", "الطلب"), relation("shipping_id", "shippings", "id", "belongs_to", "الشحن")],
   },
   {
     key: "order_statuses", label: "حالات الطلبات", group: "المبيعات", primaryKey: "id",

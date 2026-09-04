@@ -121,6 +121,10 @@ function Shell({ children }: { children: ReactNode }) {
             <LayoutDashboard size={16} /><span>Overview</span>
             {location === '/' && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary" />}
           </Link>
+           <Link href="/orders" data-testid="link-orders-workflow" onClick={() => setMobileOpen(false)} className={`focus-ring mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition-colors ${location === '/orders' ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground/65 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground'}`}>
+             <Truck size={16} /><span>Order workflow</span>
+             {location === '/orders' && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary" />}
+           </Link>
           <Link href="/seed" data-testid="link-seed" onClick={() => setMobileOpen(false)} className={`focus-ring mb-5 flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition-colors ${location === '/seed' ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground/65 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground'}`}>
             <ServerCog size={16} /><span>Data seeding</span>
             {location === '/seed' && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary" />}
@@ -329,6 +333,75 @@ function Field({ column, value, onChange }: { column: { key: string; label: stri
   return <div className="sm:col-span-1">{label}{column.type === 'json' || column.type === 'array' ? <textarea id={testId} data-testid={testId} value={textValue} onChange={(event) => onChange(event.target.value)} placeholder={column.type === 'array' ? '["value"]' : '{"key":"value"}'} rows={3} className="focus-ring w-full resize-y rounded-xl border border-input bg-background px-3 py-2.5 text-xs outline-none placeholder:text-muted-foreground/55" /> : <input id={testId} data-testid={testId} type={column.type === 'number' ? 'number' : column.type === 'date' ? 'date' : 'text'} value={textValue} onChange={(event) => onChange(event.target.value)} placeholder={column.references ? `References ${column.references}` : `Enter ${column.label.toLowerCase()}`} className="focus-ring h-11 w-full rounded-xl border border-input bg-background px-3 text-xs outline-none placeholder:text-muted-foreground/55" />}</div>;
 }
 
+function OrdersPage() {
+  const listParams = useMemo(() => ({ limit: 100, offset: 0 }), []);
+  const ordersQuery = useListAdminRows('orders', listParams);
+  const statusesQuery = useListAdminRows('order_statuses', listParams);
+  const customersQuery = useListAdminRows('customers', listParams);
+  const itemsQuery = useListAdminRows('order_items', listParams);
+  const shippingsQuery = useListAdminRows('shippings', listParams);
+  const updateOrder = useUpdateAdminRow();
+  const queryClient = useQueryClient();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [notice, setNotice] = useState('');
+  const orders = (ordersQuery.data?.rows ?? []) as Row[];
+  const statuses = (statusesQuery.data?.rows ?? []) as Row[];
+  const customers = (customersQuery.data?.rows ?? []) as Row[];
+  const items = (itemsQuery.data?.rows ?? []) as Row[];
+  const shippings = (shippingsQuery.data?.rows ?? []) as Row[];
+  const selected = orders.find((order) => String(order.id) === selectedId) ?? null;
+  const statusName = (id: unknown) => String(statuses.find((status) => String(status.id) === String(id))?.status_name ?? 'جديد');
+  const customerName = (id: unknown) => {
+    const customer = customers.find((item) => String(item.id) === String(id));
+    return customer ? `${String(customer.first_name ?? '')} ${String(customer.last_name ?? '')}`.trim() || String(customer.email ?? id) : String(id ?? '—');
+  };
+  const saveOrderLifecycle = (order: Row, statusId: number) => {
+    const now = new Date().toISOString();
+    const values: Row = { order_status_id: statusId };
+    if (statusId >= 2 && !order.order_approved_at) values.order_approved_at = now;
+    if (statusId >= 3 && !order.order_delivered_carrier_date) values.order_delivered_carrier_date = now;
+    if (statusId >= 4 && !order.order_delivered_customer_date) values.order_delivered_customer_date = now;
+    updateOrder.mutate({ table: 'orders', id: String(order.id), data: { values } }, {
+      onSuccess: () => {
+        setNotice(`تم تحديث الطلب ${String(order.id)} إلى ${statusName(statusId)}.`);
+        queryClient.invalidateQueries({ queryKey: getListAdminRowsQueryKey('orders') });
+        queryClient.invalidateQueries({ queryKey: getGetAdminDashboardQueryKey() });
+      },
+      onError: () => setNotice('تعذر تحديث دورة حياة الطلب.'),
+    });
+  };
+  const saveShipping = (item: Row, shippingId: number) => {
+    updateOrder.mutate({ table: 'order_items', id: String(item.id), data: { values: { shipping_id: shippingId } } }, {
+      onSuccess: () => {
+        setNotice(`تم تحديث طريقة شحن العنصر في الطلب ${String(item.order_id)}.`);
+        queryClient.invalidateQueries({ queryKey: getListAdminRowsQueryKey('order_items') });
+      },
+      onError: () => setNotice('تعذر تحديث طريقة الشحن.'),
+    });
+  };
+  if (ordersQuery.isLoading || statusesQuery.isLoading) return <LoadingBlocks />;
+  if (ordersQuery.isError) return <ErrorState label="order workflow" onRetry={() => ordersQuery.refetch()} />;
+  return <div className="page-enter space-y-6" data-testid="page-orders-workflow">
+    <section className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+      <div><div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-accent"><Truck size={13} /> fulfillment control</div><h1 className="text-3xl font-extrabold tracking-[-.045em] text-primary md:text-[42px]">Order workflow.</h1><p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">Move each order from new to preparation, carrier handoff, and customer delivery. Every transition writes to the shared order ledger.</p></div>
+      <Link href="/table/customers" className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 text-xs font-bold text-primary hover:bg-muted"><Activity size={15} /> Customer records <ArrowRight size={14} /></Link>
+    </section>
+    {notice && <div className="flex items-center justify-between rounded-xl border border-secondary bg-secondary/50 px-4 py-3 text-xs font-semibold text-secondary-foreground" data-testid="status-order-notice"><span className="flex items-center gap-2"><Check size={14} /> {notice}</span><button onClick={() => setNotice('')}><X size={14} /></button></div>}
+    <section className="grid gap-4 sm:grid-cols-3">
+      {statuses.slice(0, 3).map((status) => <div key={String(status.id)} className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]"><p className="mono text-[10px] uppercase tracking-[.16em] text-muted-foreground">{String(status.status_name)}</p><p className="mt-3 text-2xl font-extrabold text-primary">{orders.filter((order) => String(order.order_status_id) === String(status.id)).length}</p><p className="mt-1 text-[11px] text-muted-foreground">orders in this stage</p></div>)}
+    </section>
+    <div className="grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
+      <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-soft)]">
+        <div className="flex items-center justify-between border-b border-border px-5 py-5"><div><p className="mono text-[10px] uppercase tracking-[.18em] text-muted-foreground">live order ledger</p><h2 className="mt-1 text-base font-extrabold">Customer orders</h2></div><span className="mono text-[10px] text-muted-foreground">{orders.length} total</span></div>
+        {orders.length === 0 ? <EmptyState title="No orders yet" detail="Orders created by the storefront will appear here." testId="empty-order-workflow" /> : <div className="scrollbar-thin overflow-x-auto"><table className="w-full min-w-[690px] text-left"><thead><tr className="border-b border-border/80 text-[10px] uppercase tracking-[.1em] text-muted-foreground"><th className="px-5 py-3">Reference</th><th className="px-4 py-3">Customer</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Created</th><th className="px-4 py-3 text-right">Open</th></tr></thead><tbody>{orders.map((order) => <tr key={String(order.id)} className={`border-b border-border/60 last:border-0 hover:bg-muted/35 ${selectedId === String(order.id) ? 'bg-muted/50' : ''}`}><td className="px-5 py-4 mono text-xs font-bold text-primary">{String(order.id)}</td><td className="px-4 py-4 text-xs font-semibold">{customerName(order.customer_id)}</td><td className="px-4 py-4"><select aria-label={`Status for ${String(order.id)}`} value={String(order.order_status_id ?? '')} onChange={(event) => saveOrderLifecycle(order, Number(event.target.value))} disabled={updateOrder.isPending} className="h-8 rounded-lg border border-border bg-background px-2 text-[11px] font-bold"><option value="">جديد</option>{statuses.map((status) => <option key={String(status.id)} value={String(status.id)}>{String(status.status_name)}</option>)}</select></td><td className="px-4 py-4 text-[11px] text-muted-foreground">{displayValue(order.created_at)}</td><td className="px-4 py-4 text-right"><button onClick={() => setSelectedId(String(order.id))} className="focus-ring rounded-lg border border-border px-3 py-2 text-[10px] font-bold hover:bg-muted" data-testid={`button-open-order-${String(order.id)}`}>Details</button></td></tr>)}</tbody></table></div>}
+      </section>
+      <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)] md:p-6">
+        {!selected ? <div className="flex min-h-[250px] flex-col items-center justify-center text-center"><Truck size={22} className="text-accent" /><p className="mt-4 text-sm font-bold">Select an order</p><p className="mt-2 max-w-xs text-xs leading-5 text-muted-foreground">Review the customer handoff dates and shipping items here.</p></div> : <div><div className="flex items-start justify-between gap-3"><div><p className="mono text-[10px] uppercase tracking-[.16em] text-muted-foreground">order detail</p><h2 className="mt-1 text-lg font-extrabold">{String(selected.id)}</h2><p className="mt-1 text-xs text-muted-foreground">{customerName(selected.customer_id)}</p></div><Package size={20} className="text-accent" /></div><div className="mt-6 space-y-3 text-xs"><div className="flex justify-between border-b border-border pb-3"><span className="text-muted-foreground">Current status</span><strong>{statusName(selected.order_status_id)}</strong></div><div className="flex justify-between border-b border-border pb-3"><span className="text-muted-foreground">Approved</span><strong>{displayValue(selected.order_approved_at)}</strong></div><div className="flex justify-between border-b border-border pb-3"><span className="text-muted-foreground">Carrier handoff</span><strong>{displayValue(selected.order_delivered_carrier_date)}</strong></div><div className="flex justify-between border-b border-border pb-3"><span className="text-muted-foreground">Customer delivery</span><strong>{displayValue(selected.order_delivered_customer_date)}</strong></div></div><div className="mt-6"><p className="mono text-[10px] uppercase tracking-[.16em] text-muted-foreground">shipping items</p>{items.filter((item) => String(item.order_id) === String(selected.id)).map((item) => <div key={String(item.id)} className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-muted/60 p-3 text-xs"><span>{String(item.product_id).slice(0, 12)}… × {String(item.quantity)}</span><select aria-label={`Shipping for item ${String(item.id)}`} value={String(item.shipping_id ?? '')} onChange={(event) => saveShipping(item, Number(event.target.value))} disabled={updateOrder.isPending} className="h-8 max-w-[150px] rounded-lg border border-border bg-background px-2 text-[10px] font-bold"><option value="">Select shipping</option>{shippings.map((shipping) => <option key={String(shipping.id)} value={String(shipping.id)}>{String(shipping.name)}</option>)}</select></div>)}{items.filter((item) => String(item.order_id) === String(selected.id)).length === 0 && <p className="mt-3 text-xs text-muted-foreground">No line items loaded for this order.</p>}</div><Link href={`/table/orders`} className="mt-6 inline-flex items-center gap-2 text-[11px] font-bold text-accent hover:underline">Edit full record <ArrowRight size={13} /></Link></div>}
+      </section>
+    </div>
+  </div>;
+}
+
 function SeedPage() {
   const mutation = useSeedAdminData();
   const queryClient = useQueryClient();
@@ -348,7 +421,7 @@ function SeedPage() {
 
 function Router() {
   const [location] = useLocation();
-  return <ErrorBoundary resetKey={location}><Shell><Switch><Route path="/" component={Dashboard} /><Route path="/table/:table" component={TablePage} /><Route path="/seed" component={SeedPage} /><Route component={NotFound} /></Switch></Shell></ErrorBoundary>;
+  return <ErrorBoundary resetKey={location}><Shell><Switch><Route path="/" component={Dashboard} /><Route path="/orders" component={OrdersPage} /><Route path="/table/:table" component={TablePage} /><Route path="/seed" component={SeedPage} /><Route component={NotFound} /></Switch></Shell></ErrorBoundary>;
 }
 
 export default function App() {
