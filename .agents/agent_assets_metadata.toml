@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "H4knkbUSml4ubjxDndok-"
+uri = "file://artifacts/namshi-store/public/cabl-logo.svg"
+type = "image"
+title = "CABL Logo"
+description = "نسخة SVG متجهية ونظيفة من شعار CABL، مبنية على العلامة المرفقة وقابلة لإعادة الاستخدام."
+logical_id = "a93c002b-c61b-4c7e-8d19-3e8440999711"
+content_hash = "sha256:bd43a6bf67038d7a19edef90f37c6e6ef3435fb1f1572a6e77394a4d3d6847b9"
+size = 291
+mtime_ms = 1788553012213
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:cf9b3bf7-1b5e-4f99-8341-fbb6037e7032/a93c002b-c61b-4c7e-8d19-3e8440999711/fc5473e6-b01e-4a94-a8cc-2659882b2cb7"
+storage_version_token = "1788553169863244"
+content_type = "image/svg+xml"
