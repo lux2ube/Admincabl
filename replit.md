@@ -25,7 +25,7 @@ A Vention charging-accessories storefront for CABL, using the existing Namshi-st
 - `artifacts/namshi-store/src/App.tsx` — active CABL customer storefront, product filters, previews, cart, and checkout request
 - `artifacts/namshi-store/src/index.css` — editorial storefront design system and responsive styles
 - `artifacts/namshi-store/public/images/` — local Vention product and campaign media
-- `artifacts/waslah-store/` — standalone Arabic RTL version of the same Vention shortlist
+- `artifacts/cabl-admin/` — CABL operations dashboard for catalog, customer, order, and shipping data
 - `artifacts/namshi-store/.replit-artifact/artifact.toml` — active artifact routing metadata
 
 ## Architecture decisions
