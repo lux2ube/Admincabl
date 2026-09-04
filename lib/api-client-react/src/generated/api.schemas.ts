@@ -82,3 +82,113 @@ export interface ErrorResponse {
   error: string;
 }
 
+export type AdminColumnType = typeof AdminColumnType[keyof typeof AdminColumnType];
+
+
+export const AdminColumnType = {
+  text: 'text',
+  number: 'number',
+  boolean: 'boolean',
+  date: 'date',
+  uuid: 'uuid',
+  json: 'json',
+  array: 'array',
+} as const;
+
+export interface AdminColumn {
+  key: string;
+  label: string;
+  type: AdminColumnType;
+  nullable: boolean;
+  primaryKey: boolean;
+  generated: boolean;
+  /** @nullable */
+  references: string | null;
+}
+
+export type AdminRelationKind = typeof AdminRelationKind[keyof typeof AdminRelationKind];
+
+
+export const AdminRelationKind = {
+  belongs_to: 'belongs_to',
+  has_many: 'has_many',
+  many_to_many: 'many_to_many',
+  parent: 'parent',
+} as const;
+
+export interface AdminRelation {
+  column: string;
+  targetTable: string;
+  targetColumn: string;
+  kind: AdminRelationKind;
+  label: string;
+}
+
+export interface AdminTable {
+  key: string;
+  label: string;
+  group: string;
+  primaryKey: string;
+  columns: AdminColumn[];
+  relations: AdminRelation[];
+}
+
+export interface AdminMetadata {
+  tables: AdminTable[];
+}
+
+export type AdminRowsRowsItem = { [key: string]: unknown };
+
+export interface AdminRows {
+  table: string;
+  rows: AdminRowsRowsItem[];
+  total: number;
+}
+
+export type AdminRowInputValues = { [key: string]: unknown };
+
+export interface AdminRowInput {
+  values: AdminRowInputValues;
+}
+
+export type AdminRowRow = { [key: string]: unknown };
+
+export interface AdminRow {
+  row: AdminRowRow;
+}
+
+export interface AdminTableCount {
+  table: string;
+  label: string;
+  count: number;
+}
+
+export type AdminDashboardRecentOrdersItem = { [key: string]: unknown };
+
+export interface AdminDashboard {
+  totalRows: number;
+  tableCounts: AdminTableCount[];
+  recentOrders: AdminDashboardRecentOrdersItem[];
+}
+
+export type AdminSeedResultTables = {[key: string]: number};
+
+export interface AdminSeedResult {
+  seeded: boolean;
+  inserted: number;
+  tables: AdminSeedResultTables;
+}
+
+export type ListAdminRowsParams = {
+search?: string;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
+};
+

@@ -20,8 +20,15 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdminDashboard,
+  AdminMetadata,
+  AdminRow,
+  AdminRowInput,
+  AdminRows,
+  AdminSeedResult,
   ErrorResponse,
   HealthStatus,
+  ListAdminRowsParams,
   NewsletterSubscription,
   NewsletterSubscriptionInput,
   QuoteRequest,
@@ -273,5 +280,538 @@ export const useSubscribeNewsletter = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getSubscribeNewsletterMutationOptions(options));
+    }
+
+export const getGetAdminMetadataUrl = () => {
+
+
+
+
+  return `/api/admin/metadata`
+}
+
+/**
+ * @summary Get admin tables and relationships
+ */
+export const getAdminMetadata = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminMetadata> => {
+
+  return customFetch<AdminMetadata>(getGetAdminMetadataUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAdminMetadataQueryKey = () => {
+    return [
+    `/api/admin/metadata`
+    ] as const;
+    }
+
+
+export const getGetAdminMetadataQueryOptions = <TData = Awaited<ReturnType<typeof getAdminMetadata>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminMetadata>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminMetadataQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminMetadata>>> = ({ signal }) => getAdminMetadata({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminMetadata>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAdminMetadataQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminMetadata>>>
+export type GetAdminMetadataQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get admin tables and relationships
+ */
+
+export function useGetAdminMetadata<TData = Awaited<ReturnType<typeof getAdminMetadata>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminMetadata>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAdminMetadataQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetAdminDashboardUrl = () => {
+
+
+
+
+  return `/api/admin/dashboard`
+}
+
+/**
+ * @summary Get admin dashboard summary
+ */
+export const getAdminDashboard = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminDashboard> => {
+
+  return customFetch<AdminDashboard>(getGetAdminDashboardUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAdminDashboardQueryKey = () => {
+    return [
+    `/api/admin/dashboard`
+    ] as const;
+    }
+
+
+export const getGetAdminDashboardQueryOptions = <TData = Awaited<ReturnType<typeof getAdminDashboard>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminDashboard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminDashboardQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminDashboard>>> = ({ signal }) => getAdminDashboard({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminDashboard>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAdminDashboardQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminDashboard>>>
+export type GetAdminDashboardQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get admin dashboard summary
+ */
+
+export function useGetAdminDashboard<TData = Awaited<ReturnType<typeof getAdminDashboard>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminDashboard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAdminDashboardQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListAdminRowsUrl = (table: string,
+    params?: ListAdminRowsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/tables/${table}/rows?${stringifiedParams}` : `/api/admin/tables/${table}/rows`
+}
+
+/**
+ * @summary List rows for an allowed admin table
+ */
+export const listAdminRows = async (table: string,
+    params?: ListAdminRowsParams, options?: Parameters<typeof customFetch>[1]): Promise<AdminRows> => {
+
+  return customFetch<AdminRows>(getListAdminRowsUrl(table,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAdminRowsQueryKey = (table: string,
+    params?: ListAdminRowsParams,) => {
+    return [
+    `/api/admin/tables/${table}/rows`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListAdminRowsQueryOptions = <TData = Awaited<ReturnType<typeof listAdminRows>>, TError = ErrorType<ErrorResponse>>(table: string,
+    params?: ListAdminRowsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminRows>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminRowsQueryKey(table,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminRows>>> = ({ signal }) => listAdminRows(table,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: table !== null && table !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdminRows>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdminRowsQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminRows>>>
+export type ListAdminRowsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List rows for an allowed admin table
+ */
+
+export function useListAdminRows<TData = Awaited<ReturnType<typeof listAdminRows>>, TError = ErrorType<ErrorResponse>>(
+ table: string,
+    params?: ListAdminRowsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminRows>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdminRowsQueryOptions(table,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateAdminRowUrl = (table: string,) => {
+
+
+
+
+  return `/api/admin/tables/${table}/rows`
+}
+
+/**
+ * @summary Create a row in an allowed admin table
+ */
+export const createAdminRow = async (table: string,
+    adminRowInput: AdminRowInput, options?: Parameters<typeof customFetch>[1]): Promise<AdminRow> => {
+
+  return customFetch<AdminRow>(getCreateAdminRowUrl(table),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(adminRowInput)
+  }
+);}
+
+
+
+
+
+export const getCreateAdminRowMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAdminRow>>, TError,{table: string;data: BodyType<AdminRowInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createAdminRow>>, TError,{table: string;data: BodyType<AdminRowInput>}, TContext> => {
+
+const mutationKey = ['createAdminRow'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAdminRow>>, {table: string;data: BodyType<AdminRowInput>}> = (props) => {
+          const {table,data} = props ?? {};
+
+          return  createAdminRow(table,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateAdminRowMutationResult = NonNullable<Awaited<ReturnType<typeof createAdminRow>>>
+    export type CreateAdminRowMutationBody = BodyType<AdminRowInput>
+    export type CreateAdminRowMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Create a row in an allowed admin table
+ */
+export const useCreateAdminRow = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAdminRow>>, TError,{table: string;data: BodyType<AdminRowInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createAdminRow>>,
+        TError,
+        {table: string;data: BodyType<AdminRowInput>},
+        TContext
+      > => {
+      return useMutation(getCreateAdminRowMutationOptions(options));
+    }
+
+export const getUpdateAdminRowUrl = (table: string,
+    id: string,) => {
+
+
+
+
+  return `/api/admin/tables/${table}/rows/${id}`
+}
+
+/**
+ * @summary Update a row in an allowed admin table
+ */
+export const updateAdminRow = async (table: string,
+    id: string,
+    adminRowInput: AdminRowInput, options?: Parameters<typeof customFetch>[1]): Promise<AdminRow> => {
+
+  return customFetch<AdminRow>(getUpdateAdminRowUrl(table,id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(adminRowInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateAdminRowMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminRow>>, TError,{table: string;id: string;data: BodyType<AdminRowInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAdminRow>>, TError,{table: string;id: string;data: BodyType<AdminRowInput>}, TContext> => {
+
+const mutationKey = ['updateAdminRow'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAdminRow>>, {table: string;id: string;data: BodyType<AdminRowInput>}> = (props) => {
+          const {table,id,data} = props ?? {};
+
+          return  updateAdminRow(table,id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAdminRowMutationResult = NonNullable<Awaited<ReturnType<typeof updateAdminRow>>>
+    export type UpdateAdminRowMutationBody = BodyType<AdminRowInput>
+    export type UpdateAdminRowMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Update a row in an allowed admin table
+ */
+export const useUpdateAdminRow = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminRow>>, TError,{table: string;id: string;data: BodyType<AdminRowInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAdminRow>>,
+        TError,
+        {table: string;id: string;data: BodyType<AdminRowInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateAdminRowMutationOptions(options));
+    }
+
+export const getDeleteAdminRowUrl = (table: string,
+    id: string,) => {
+
+
+
+
+  return `/api/admin/tables/${table}/rows/${id}`
+}
+
+/**
+ * @summary Delete a row from an allowed admin table
+ */
+export const deleteAdminRow = async (table: string,
+    id: string, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteAdminRowUrl(table,id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteAdminRowMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdminRow>>, TError,{table: string;id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteAdminRow>>, TError,{table: string;id: string}, TContext> => {
+
+const mutationKey = ['deleteAdminRow'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAdminRow>>, {table: string;id: string}> = (props) => {
+          const {table,id} = props ?? {};
+
+          return  deleteAdminRow(table,id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAdminRowMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAdminRow>>>
+
+    export type DeleteAdminRowMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Delete a row from an allowed admin table
+ */
+export const useDeleteAdminRow = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdminRow>>, TError,{table: string;id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteAdminRow>>,
+        TError,
+        {table: string;id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteAdminRowMutationOptions(options));
+    }
+
+export const getSeedAdminDataUrl = () => {
+
+
+
+
+  return `/api/admin/seed`
+}
+
+/**
+ * @summary Seed CABL catalog and reference data
+ */
+export const seedAdminData = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminSeedResult> => {
+
+  return customFetch<AdminSeedResult>(getSeedAdminDataUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getSeedAdminDataMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof seedAdminData>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof seedAdminData>>, TError,void, TContext> => {
+
+const mutationKey = ['seedAdminData'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof seedAdminData>>, void> = () => {
+
+
+          return  seedAdminData(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SeedAdminDataMutationResult = NonNullable<Awaited<ReturnType<typeof seedAdminData>>>
+
+    export type SeedAdminDataMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Seed CABL catalog and reference data
+ */
+export const useSeedAdminData = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof seedAdminData>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof seedAdminData>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getSeedAdminDataMutationOptions(options));
     }
 

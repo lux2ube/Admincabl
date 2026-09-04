@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: sourcing
     description: CABL sourcing and newsletter operations
+  - name: admin
+    description: CABL administration and catalog operations
 paths:
   /healthz:
     get:
@@ -74,7 +76,179 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /admin/metadata:
+    get:
+      operationId: getAdminMetadata
+      tags: [admin]
+      summary: Get admin tables and relationships
+      responses:
+        "200":
+          description: Admin metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminMetadata"
+  /admin/dashboard:
+    get:
+      operationId: getAdminDashboard
+      tags: [admin]
+      summary: Get admin dashboard summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDashboard"
+  /admin/tables/{table}/rows:
+    get:
+      operationId: listAdminRows
+      tags: [admin]
+      summary: List rows for an allowed admin table
+      parameters:
+        - $ref: "#/components/parameters/AdminTable"
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: number
+            minimum: 1
+            maximum: 100
+            default: 25
+        - name: offset
+          in: query
+          schema:
+            type: number
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Table rows
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminRows"
+        "404":
+          description: Unknown table
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createAdminRow
+      tags: [admin]
+      summary: Create a row in an allowed admin table
+      parameters:
+        - $ref: "#/components/parameters/AdminTable"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminRowInput"
+      responses:
+        "201":
+          description: Created row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminRow"
+        "400":
+          description: Invalid row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/tables/{table}/rows/{id}:
+    patch:
+      operationId: updateAdminRow
+      tags: [admin]
+      summary: Update a row in an allowed admin table
+      parameters:
+        - $ref: "#/components/parameters/AdminTable"
+        - $ref: "#/components/parameters/AdminRowId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminRowInput"
+      responses:
+        "200":
+          description: Updated row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminRow"
+        "400":
+          description: Invalid row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Row not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteAdminRow
+      tags: [admin]
+      summary: Delete a row from an allowed admin table
+      parameters:
+        - $ref: "#/components/parameters/AdminTable"
+        - $ref: "#/components/parameters/AdminRowId"
+      responses:
+        "204":
+          description: Row deleted
+        "400":
+          description: Delete blocked by a relationship
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Row not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/seed:
+    post:
+      operationId: seedAdminData
+      tags: [admin]
+      summary: Seed CABL catalog and reference data
+      responses:
+        "200":
+          description: Seed summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSeedResult"
+        "500":
+          description: Seed failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
+  parameters:
+    AdminTable:
+      name: table
+      in: path
+      required: true
+      schema:
+        type: string
+    AdminRowId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
   schemas:
     HealthStatus:
       type: object
@@ -172,4 +346,130 @@ components:
           type: string
       required:
         - error
+    AdminColumn:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        type:
+          type: string
+          enum: [text, number, boolean, date, uuid, json, array]
+        nullable:
+          type: boolean
+        primaryKey:
+          type: boolean
+        generated:
+          type: boolean
+        references:
+          type: ["string", "null"]
+      required: [key, label, type, nullable, primaryKey, generated, references]
+    AdminRelation:
+      type: object
+      properties:
+        column:
+          type: string
+        targetTable:
+          type: string
+        targetColumn:
+          type: string
+        kind:
+          type: string
+          enum: [belongs_to, has_many, many_to_many, parent]
+        label:
+          type: string
+      required: [column, targetTable, targetColumn, kind, label]
+    AdminTable:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        group:
+          type: string
+        primaryKey:
+          type: string
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminColumn"
+        relations:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminRelation"
+      required: [key, label, group, primaryKey, columns, relations]
+    AdminMetadata:
+      type: object
+      properties:
+        tables:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminTable"
+      required: [tables]
+    AdminRows:
+      type: object
+      properties:
+        table:
+          type: string
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        total:
+          type: number
+      required: [table, rows, total]
+    AdminRowInput:
+      type: object
+      properties:
+        values:
+          type: object
+          additionalProperties: true
+      required: [values]
+    AdminRow:
+      type: object
+      properties:
+        row:
+          type: object
+          additionalProperties: true
+      required: [row]
+    AdminTableCount:
+      type: object
+      properties:
+        table:
+          type: string
+        label:
+          type: string
+        count:
+          type: number
+      required: [table, label, count]
+    AdminDashboard:
+      type: object
+      properties:
+        totalRows:
+          type: number
+        tableCounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminTableCount"
+        recentOrders:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+      required: [totalRows, tableCounts, recentOrders]
+    AdminSeedResult:
+      type: object
+      properties:
+        seeded:
+          type: boolean
+        inserted:
+          type: number
+        tables:
+          type: object
+          additionalProperties:
+            type: number
+      required: [seeded, inserted, tables]
 

@@ -7,4 +7,4 @@ Keep the generated API validation compatible with the workspace's installed Zod 
 
 **Why:** Code generation can succeed while the generated validators fail the workspace typecheck if the spec causes Orval to emit helpers unavailable in the installed Zod runtime.
 
-**How to apply:** After every OpenAPI change, run codegen and the library typecheck before wiring new routes or client calls.
+**How to apply:** After every OpenAPI change, run codegen and the library typecheck before wiring new routes or client calls. Keep the generated Zod barrel explicit when a generated params type collides with the API module; normalize the barrel after Orval runs.

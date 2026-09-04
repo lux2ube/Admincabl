@@ -76,3 +76,128 @@ export const SubscribeNewsletterResponse = zod.object({
 })
 
 
+/**
+ * @summary Get admin tables and relationships
+ */
+export const GetAdminMetadataResponse = zod.object({
+  "tables": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "group": zod.string(),
+  "primaryKey": zod.string(),
+  "columns": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "type": zod.enum(['text', 'number', 'boolean', 'date', 'uuid', 'json', 'array']),
+  "nullable": zod.boolean(),
+  "primaryKey": zod.boolean(),
+  "generated": zod.boolean(),
+  "references": zod.string().nullable()
+})),
+  "relations": zod.array(zod.object({
+  "column": zod.string(),
+  "targetTable": zod.string(),
+  "targetColumn": zod.string(),
+  "kind": zod.enum(['belongs_to', 'has_many', 'many_to_many', 'parent']),
+  "label": zod.string()
+}))
+}))
+})
+
+
+/**
+ * @summary Get admin dashboard summary
+ */
+export const GetAdminDashboardResponse = zod.object({
+  "totalRows": zod.number(),
+  "tableCounts": zod.array(zod.object({
+  "table": zod.string(),
+  "label": zod.string(),
+  "count": zod.number()
+})),
+  "recentOrders": zod.array(zod.record(zod.string(), zod.unknown()))
+})
+
+
+/**
+ * @summary List rows for an allowed admin table
+ */
+export const ListAdminRowsParams = zod.object({
+  "table": zod.coerce.string()
+})
+
+export const listAdminRowsQueryLimitDefault = 25;
+export const listAdminRowsQueryLimitMax = 100;
+
+export const listAdminRowsQueryOffsetDefault = 0;
+export const listAdminRowsQueryOffsetMin = 0;
+
+
+
+export const ListAdminRowsQueryParams = zod.object({
+  "search": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().min(1).max(listAdminRowsQueryLimitMax).default(listAdminRowsQueryLimitDefault),
+  "offset": zod.coerce.number().min(listAdminRowsQueryOffsetMin).default(listAdminRowsQueryOffsetDefault)
+})
+
+export const ListAdminRowsResponse = zod.object({
+  "table": zod.string(),
+  "rows": zod.array(zod.record(zod.string(), zod.unknown())),
+  "total": zod.number()
+})
+
+
+/**
+ * @summary Create a row in an allowed admin table
+ */
+export const CreateAdminRowParams = zod.object({
+  "table": zod.coerce.string()
+})
+
+export const CreateAdminRowBody = zod.object({
+  "values": zod.record(zod.string(), zod.unknown())
+})
+
+export const CreateAdminRowResponse = zod.object({
+  "row": zod.record(zod.string(), zod.unknown())
+})
+
+
+/**
+ * @summary Update a row in an allowed admin table
+ */
+export const UpdateAdminRowParams = zod.object({
+  "table": zod.coerce.string(),
+  "id": zod.coerce.string()
+})
+
+export const UpdateAdminRowBody = zod.object({
+  "values": zod.record(zod.string(), zod.unknown())
+})
+
+export const UpdateAdminRowResponse = zod.object({
+  "row": zod.record(zod.string(), zod.unknown())
+})
+
+
+/**
+ * @summary Delete a row from an allowed admin table
+ */
+export const DeleteAdminRowParams = zod.object({
+  "table": zod.coerce.string(),
+  "id": zod.coerce.string()
+})
+
+export const DeleteAdminRowResponse = zod.void()
+
+
+/**
+ * @summary Seed CABL catalog and reference data
+ */
+export const SeedAdminDataResponse = zod.object({
+  "seeded": zod.boolean(),
+  "inserted": zod.number(),
+  "tables": zod.record(zod.string(), zod.number())
+})
+
+
