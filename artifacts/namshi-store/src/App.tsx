@@ -383,7 +383,7 @@ function App() {
           <div className="footer-top">
             <div className="footer-brand" lang="ar" dir="rtl">
               <span className="footer-brand-name">CABL</span>
-              <span className="footer-brand-subtitle">كابل لصاحبها عمار القراحي وشركاه</span>
+              <span className="footer-brand-subtitle">الوكيل الحصري لشركة Vention في اليمن</span>
               <p>منتجات Vention للشحن والطاقة، مختارة للتوريد داخل السوق اليمني.</p>
             </div>
             <div className="footer-col"><h4>تصفح</h4><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="footer-power-banks">باور بانك</button><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="footer-chargers">الشواحن</button><button type="button" onClick={() => chooseCategory('CABLES')} data-testid="footer-cables">الكابلات</button><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="footer-travel">السفر والسيارة</button></div>
@@ -391,7 +391,7 @@ function App() {
             <div className="footer-col"><h4>المساعدة</h4><button type="button" onClick={() => scrollTo('about')} data-testid="footer-about">عن CABL</button><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">الشحن والجمارك</button><button type="button" onClick={() => announce('مواصفات المنتجات متاحة عند الطلب')} data-testid="footer-help">مواصفات المنتجات</button><button type="button" onClick={() => announce('نموذج التواصل قريبًا')} data-testid="footer-contact">اطلب عرض سعر</button></div>
             <div className="footer-col"><h4>تابعنا</h4><button type="button" onClick={() => announce('تم نسخ رابط Instagram')} data-testid="footer-instagram">Instagram</button><button type="button" onClick={() => announce('تم نسخ رابط TikTok')} data-testid="footer-tiktok">TikTok</button><button type="button" onClick={() => announce('تم نسخ رابط WhatsApp')} data-testid="footer-whatsapp">WhatsApp</button></div>
           </div>
-          <div className="footer-bottom"><span>© 2026 CABL. كابل لصاحبها عمار القراحي وشركاه.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
+          <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لشركة Vention في اليمن.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
         </div>
       </footer>
 
