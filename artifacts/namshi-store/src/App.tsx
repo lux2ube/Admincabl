@@ -153,11 +153,6 @@ function App() {
 
   return (
     <div className="site-shell">
-      <div className="top-strip" data-testid="banner-promotion">
-        الأسعار المعروضة مرجعية فقط · أسعار الجملة عند الطلب
-        <button type="button" onClick={() => scrollTo('discover')} data-testid="button-promotion-details">تصفح المنتجات</button>
-      </div>
-
       <header className="main-header" data-testid="header-storefront">
         <div className="header-inner">
           <div className="header-row">
@@ -173,7 +168,7 @@ function App() {
             <button className="wordmark" type="button" onClick={() => scrollTo('top')} data-testid="button-wordmark">
               <span className="brand-lockup" lang="ar" dir="rtl">
                 <span className="brand-name">CABL</span>
-                <span className="brand-subtitle">كابل لصاحبها عمار القراحي وشركاه</span>
+                  <span className="brand-subtitle">الوكيل الحصري لشركة Vention في اليمن</span>
               </span>
             </button>
             <div className="header-actions">
