@@ -136,7 +136,7 @@ function App() {
   const addToCart = (product: Product) => {
     setCart((current) => current.some((item) => item.id === product.id) ? current : [...current, product]);
     setCartOpen(true);
-    announce(`${product.name} added to bag`);
+    announce(`${product.name} added to shortlist`);
   };
 
   const chooseCategory = (filter: string) => {
@@ -171,7 +171,10 @@ function App() {
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <button className="wordmark" type="button" onClick={() => scrollTo('top')} data-testid="button-wordmark">
-              waslah<span>.</span>
+              <span className="brand-lockup" lang="ar" dir="rtl">
+                <span className="brand-name">القراحي الكترونيك</span>
+                <span className="brand-subtitle">الوكيل الحصري لشركة Vention في اليمن</span>
+              </span>
             </button>
             <div className="header-actions">
               <button className="header-action" type="button" onClick={() => setSearchOpen((current) => !current)} aria-label="Search" data-testid="button-search">
@@ -368,13 +371,17 @@ function App() {
       <footer className="footer" data-testid="footer-storefront">
         <div className="footer-inner">
           <div className="footer-top">
-            <div className="footer-brand">waslah.<p>Vention charging products curated for regional sourcing, clear product conversations, and practical everyday power.</p></div>
+            <div className="footer-brand" lang="ar" dir="rtl">
+              <span className="footer-brand-name">القراحي الكترونيك</span>
+              <span className="footer-brand-subtitle">الوكيل الحصري لشركة Vention في اليمن</span>
+              <p>منتجات Vention للشحن والطاقة، مختارة للتوريد داخل السوق اليمني.</p>
+            </div>
             <div className="footer-col"><h4>Shop</h4><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="footer-power-banks">Power Banks</button><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="footer-chargers">Chargers</button><button type="button" onClick={() => chooseCategory('CABLES')} data-testid="footer-cables">Cables</button><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="footer-travel">Travel & Car</button></div>
             <div className="footer-col"><h4>Source</h4><button type="button" onClick={() => announce('The Vention shortlist is ready')} data-testid="footer-shortlist">Vention shortlist</button><button type="button" onClick={() => announce('MOQ guidance is coming soon')} data-testid="footer-moq">MOQ guidance</button><button type="button" onClick={() => announce('A wholesale price list is coming soon')} data-testid="footer-pricing">Wholesale pricing</button></div>
             <div className="footer-col"><h4>Help</h4><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">Shipping & customs</button><button type="button" onClick={() => announce('Product specifications are available on request')} data-testid="footer-help">Product specs</button><button type="button" onClick={() => announce('Contact form is coming soon')} data-testid="footer-contact">Request a quote</button></div>
             <div className="footer-col"><h4>Follow along</h4><button type="button" onClick={() => announce('Instagram link copied')} data-testid="footer-instagram">Instagram</button><button type="button" onClick={() => announce('TikTok link copied')} data-testid="footer-tiktok">TikTok</button><button type="button" onClick={() => announce('WhatsApp link copied')} data-testid="footer-whatsapp">WhatsApp</button></div>
           </div>
-          <div className="footer-bottom"><span>© 2024 Waslah. Vention sourcing shortlist.</span><div className="footer-socials"><button type="button" onClick={() => announce('Yemen selected')} data-testid="button-country">Yemen <ChevronDown size={12} /></button><button type="button" onClick={() => announce('Language selector opened')} data-testid="button-language">EN <ChevronDown size={12} /></button></div></div>
+          <div className="footer-bottom"><span>© 2024 القراحي الكترونيك. Vention Yemen.</span><div className="footer-socials"><button type="button" onClick={() => announce('Yemen selected')} data-testid="button-country">Yemen <ChevronDown size={12} /></button><button type="button" onClick={() => announce('Language selector opened')} data-testid="button-language">EN <ChevronDown size={12} /></button></div></div>
         </div>
       </footer>
 
