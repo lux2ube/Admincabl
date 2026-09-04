@@ -37,55 +37,55 @@ type HeroSlide = {
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 
 const products: Product[] = [
-  { id: 1, brand: 'Vention', name: '20,000mAh Power Bank / 22.5W', price: '$28.09', color: 'USB-C + USB-A + built-in cable', category: 'POWER_BANKS', image: asset('vention-powerbank-20k.jpg'), sku: 'XGYP0-40-TY', warranty: '12-month warranty', tag: 'Retail reference' },
-  { id: 2, brand: 'Vention', name: '10,000mAh Power Bank / 22.5W', price: '$24.18 SGD', color: 'Built-in charging cable', category: 'POWER_BANKS', image: asset('vention-powerbank-10k.jpg'), tag: 'Retail reference' },
-  { id: 3, brand: 'Vention', name: '10,000mAh Power Bank / USB-C + Lightning', price: '$24.82 SGD', color: 'Built-in USB-C + Lightning', category: 'POWER_BANKS', image: asset('vention-powerbank-10k-lightning.jpg'), tag: 'Retail reference' },
-  { id: 4, brand: 'Vention', name: '30W Dual-Port GaN Charger', price: '$11.69', color: 'USB-C + USB-A · EU plug', category: 'CHARGERS', image: asset('vention-charger-30w.jpg'), tag: 'Retail reference' },
-  { id: 5, brand: 'Vention', name: '30W GaN Charging Kit', price: '$15.90', color: 'Charger + USB-C to USB-C cable', category: 'CHARGERS', image: asset('vention-charger-30w-kit.jpg'), tag: 'Bundle-ready' },
-  { id: 6, brand: 'Vention', name: '65W 3-Port GaN Charger', price: '$37.59', color: 'C+C+A · 65W / 65W / 60W', category: 'CHARGERS', image: asset('vention-charger-65w.jpg'), tag: 'Retail reference' },
-  { id: 7, brand: 'Vention', name: '70W 3-Port GaN Charger', price: '$39.90', color: 'C+C+A · 70W / 70W / 22.5W', category: 'CHARGERS', image: asset('vention-charger-70w.jpg'), tag: 'Retail reference' },
-  { id: 8, brand: 'Vention', name: '100W 3-Port GaN Charger', price: '$79.39', color: 'C+C+A · 100W / 100W / 30W', category: 'CHARGERS', image: asset('vention-charger-100w.jpg'), tag: 'Retail reference' },
-  { id: 9, brand: 'Vention', name: 'USB-C to USB-C 5A / 100W Cable', price: '$11.27 SGD', color: '5A fast charge · USB 2.0', category: 'CABLES', image: asset('vention-cable-100w.jpg'), tag: 'Retail reference' },
-  { id: 10, brand: 'Vention', name: '65W GaN Universal Travel Adapter', price: '$95.88 SGD', color: 'Universal travel charging', category: 'TRAVEL', image: asset('vention-adapter-65w.jpg'), tag: 'Retail reference' },
+  { id: 1, brand: 'Vention', name: 'باور بنك 20,000mAh / 22.5W', price: '$28.09', color: 'USB-C + USB-A + كابل مدمج', category: 'POWER_BANKS', image: asset('vention-powerbank-20k.jpg'), sku: 'XGYP0-40-TY', warranty: 'ضمان 12 شهرًا', tag: 'سعر مرجعي' },
+  { id: 2, brand: 'Vention', name: 'باور بنك 10,000mAh / 22.5W', price: '$24.18 SGD', color: 'كابل شحن مدمج', category: 'POWER_BANKS', image: asset('vention-powerbank-10k.jpg'), tag: 'سعر مرجعي' },
+  { id: 3, brand: 'Vention', name: 'باور بنك 10,000mAh / USB-C + Lightning', price: '$24.82 SGD', color: 'USB-C + Lightning مدمجان', category: 'POWER_BANKS', image: asset('vention-powerbank-10k-lightning.jpg'), tag: 'سعر مرجعي' },
+  { id: 4, brand: 'Vention', name: 'شاحن GaN بمنفذين 30W', price: '$11.69', color: 'USB-C + USB-A · قابس أوروبي', category: 'CHARGERS', image: asset('vention-charger-30w.jpg'), tag: 'سعر مرجعي' },
+  { id: 5, brand: 'Vention', name: 'طقم شحن GaN بقدرة 30W', price: '$15.90', color: 'شاحن + كابل USB-C إلى USB-C', category: 'CHARGERS', image: asset('vention-charger-30w-kit.jpg'), tag: 'باقة جاهزة' },
+  { id: 6, brand: 'Vention', name: 'شاحن GaN بثلاثة منافذ 65W', price: '$37.59', color: 'C+C+A · 65W / 65W / 60W', category: 'CHARGERS', image: asset('vention-charger-65w.jpg'), tag: 'سعر مرجعي' },
+  { id: 7, brand: 'Vention', name: 'شاحن GaN بثلاثة منافذ 70W', price: '$39.90', color: 'C+C+A · 70W / 70W / 22.5W', category: 'CHARGERS', image: asset('vention-charger-70w.jpg'), tag: 'سعر مرجعي' },
+  { id: 8, brand: 'Vention', name: 'شاحن GaN بثلاثة منافذ 100W', price: '$79.39', color: 'C+C+A · 100W / 100W / 30W', category: 'CHARGERS', image: asset('vention-charger-100w.jpg'), tag: 'سعر مرجعي' },
+  { id: 9, brand: 'Vention', name: 'كابل USB-C إلى USB-C بقدرة 100W', price: '$11.27 SGD', color: 'شحن سريع 5A · USB 2.0', category: 'CABLES', image: asset('vention-cable-100w.jpg'), tag: 'سعر مرجعي' },
+  { id: 10, brand: 'Vention', name: 'محول سفر عالمي GaN بقدرة 65W', price: '$95.88 SGD', color: 'شحن عالمي للسفر', category: 'TRAVEL', image: asset('vention-adapter-65w.jpg'), tag: 'سعر مرجعي' },
 ];
 
 const heroes: HeroSlide[] = [
   {
     image: asset('vention-powerbank-20k.jpg'),
-    eyebrow: 'The Vention shortlist',
-    title: 'Charge the next move.',
-    body: 'Ten focused products for a smarter charging shelf, ready for wholesale pricing.',
-    action: 'Explore the shortlist',
+    eyebrow: 'قائمة Vention المختارة',
+    title: 'اشحن خطوتك القادمة.',
+    body: 'عشرة منتجات مختارة لرف شحن عملي، جاهزة لطلب أسعار الجملة.',
+    action: 'تصفح القائمة',
   },
   {
     image: asset('vention-charger-65w.jpg'),
-    eyebrow: 'Power, without the bulk',
-    title: 'GaN that earns its space.',
-    body: 'From 30W everyday kits to 100W multi-port chargers, selected for the region.',
-    action: 'Shop chargers',
+    eyebrow: 'طاقة بلا حجم زائد',
+    title: 'تقنية GaN تستحق مكانها.',
+    body: 'من أطقم 30W اليومية إلى شواحن 100W متعددة المنافذ، مختارة للسوق المحلي.',
+    action: 'تصفح الشواحن',
   },
   {
     image: asset('vention-adapter-65w.jpg'),
-    eyebrow: 'Ready for the road',
-    title: 'One adapter. More places.',
-    body: 'A 65W universal travel adapter for customers who need one setup everywhere.',
-    action: 'Shop travel',
+    eyebrow: 'جاهز للطريق',
+    title: 'محول واحد. أماكن أكثر.',
+    body: 'محول سفر عالمي 65W لمن يحتاج إعداد شحن واحدًا في كل مكان.',
+    action: 'تصفح محولات السفر',
   },
 ];
 
 const categories = [
-  { name: 'Power Banks', count: '3 products', image: asset('vention-powerbank-10k.jpg'), filter: 'POWER_BANKS' },
-  { name: 'GaN Chargers', count: '5 products', image: asset('vention-charger-65w.jpg'), filter: 'CHARGERS' },
-  { name: 'Cables', count: '1 product', image: asset('vention-cable-100w.jpg'), filter: 'CABLES' },
-  { name: 'Travel & Car', count: '1 product', image: asset('vention-adapter-65w.jpg'), filter: 'TRAVEL' },
+  { name: 'باور بانك', count: '3 منتجات', image: asset('vention-powerbank-10k.jpg'), filter: 'POWER_BANKS' },
+  { name: 'شواحن GaN', count: '5 منتجات', image: asset('vention-charger-65w.jpg'), filter: 'CHARGERS' },
+  { name: 'كابلات', count: 'منتج واحد', image: asset('vention-cable-100w.jpg'), filter: 'CABLES' },
+  { name: 'السفر والسيارة', count: 'منتج واحد', image: asset('vention-adapter-65w.jpg'), filter: 'TRAVEL' },
 ];
 
 const filterOptions = [
-  { value: 'ALL', label: 'All products' },
-  { value: 'POWER_BANKS', label: 'Power banks' },
-  { value: 'CHARGERS', label: 'Chargers' },
-  { value: 'CABLES', label: 'Cables' },
-  { value: 'TRAVEL', label: 'Travel & car' },
+  { value: 'ALL', label: 'كل المنتجات' },
+  { value: 'POWER_BANKS', label: 'باور بانك' },
+  { value: 'CHARGERS', label: 'الشواحن' },
+  { value: 'CABLES', label: 'الكابلات' },
+  { value: 'TRAVEL', label: 'السفر والسيارة' },
 ];
 
 function App() {
@@ -130,13 +130,13 @@ function App() {
 
   const toggleFavorite = (id: number) => {
     setFavorites((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
-    announce(favorites.includes(id) ? 'Removed from wishlist' : 'Added to wishlist');
+    announce(favorites.includes(id) ? 'تمت إزالة المنتج من المفضلة' : 'تمت إضافة المنتج إلى المفضلة');
   };
 
   const addToCart = (product: Product) => {
     setCart((current) => current.some((item) => item.id === product.id) ? current : [...current, product]);
     setCartOpen(true);
-    announce(`${product.name} added to shortlist`);
+    announce(`تمت إضافة ${product.name} إلى القائمة`);
   };
 
   const chooseCategory = (filter: string) => {
@@ -147,15 +147,15 @@ function App() {
   const submitEmail = () => {
     if (email.trim()) {
       setSubscribed(true);
-      announce('You are on the list');
+      announce('تمت إضافتك إلى القائمة');
     }
   };
 
   return (
     <div className="site-shell">
       <div className="top-strip" data-testid="banner-promotion">
-        Retail references only · wholesale pricing available on request
-        <button type="button" onClick={() => scrollTo('discover')} data-testid="button-promotion-details">View shortlist</button>
+        الأسعار المعروضة مرجعية فقط · أسعار الجملة عند الطلب
+        <button type="button" onClick={() => scrollTo('discover')} data-testid="button-promotion-details">تصفح المنتجات</button>
       </div>
 
       <header className="main-header" data-testid="header-storefront">
@@ -164,7 +164,7 @@ function App() {
             <button
               className="mobile-menu"
               type="button"
-              aria-label="Open menu"
+               aria-label="فتح القائمة"
               onClick={() => setMobileMenuOpen((current) => !current)}
               data-testid="button-open-menu"
             >
@@ -177,36 +177,36 @@ function App() {
               </span>
             </button>
             <div className="header-actions">
-              <button className="header-action" type="button" onClick={() => setSearchOpen((current) => !current)} aria-label="Search" data-testid="button-search">
-                <Search /><span>Search</span>
+              <button className="header-action" type="button" onClick={() => setSearchOpen((current) => !current)} aria-label="بحث" data-testid="button-search">
+                <Search /><span>بحث</span>
               </button>
-              <button className="header-action" type="button" onClick={() => announce(`${favorites.length} saved item${favorites.length === 1 ? '' : 's'}`)} aria-label="Wishlist" data-testid="button-wishlist">
-                <Heart /><span>Wishlist</span>
+              <button className="header-action" type="button" onClick={() => announce(`لديك ${favorites.length} منتجًا في المفضلة`)} aria-label="المفضلة" data-testid="button-wishlist">
+                <Heart /><span>المفضلة</span>
                 {favorites.length > 0 && <span className="count-bubble" data-testid="count-wishlist">{favorites.length}</span>}
               </button>
-              <button className="header-action" type="button" onClick={() => setCartOpen(true)} aria-label="Shortlist" data-testid="button-cart">
-                <ShoppingBag /><span>Shortlist</span>
+              <button className="header-action" type="button" onClick={() => setCartOpen(true)} aria-label="قائمة الطلب" data-testid="button-cart">
+                <ShoppingBag /><span>قائمة الطلب</span>
                 {cart.length > 0 && <span className="count-bubble" data-testid="count-cart">{cart.length}</span>}
               </button>
             </div>
           </div>
 
-          <nav className="desktop-nav" aria-label="Main navigation" data-testid="nav-main">
-            <button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="nav-power-banks">Power Banks</button>
-            <button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="nav-chargers">Chargers</button>
-            <button type="button" onClick={() => chooseCategory('CABLES')} data-testid="nav-cables">Cables</button>
-            <button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="nav-travel">Travel & Car</button>
+          <nav className="desktop-nav" aria-label="التنقل الرئيسي" data-testid="nav-main">
+            <button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="nav-power-banks">باور بانك</button>
+            <button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="nav-chargers">الشواحن</button>
+            <button type="button" onClick={() => chooseCategory('CABLES')} data-testid="nav-cables">الكابلات</button>
+            <button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="nav-travel">السفر والسيارة</button>
             <button type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-brands">Vention</button>
-            <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="nav-sale">Request quote</button>
+            <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="nav-sale">اطلب عرض سعر</button>
           </nav>
 
           {mobileMenuOpen && (
-            <nav className="desktop-nav" aria-label="Mobile navigation" data-testid="nav-mobile">
-              <button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="mobile-nav-power-banks">Power Banks</button>
-              <button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="mobile-nav-chargers">Chargers</button>
-              <button type="button" onClick={() => chooseCategory('CABLES')} data-testid="mobile-nav-cables">Cables</button>
-              <button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="mobile-nav-travel">Travel & Car</button>
-              <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="mobile-nav-quote">Request quote</button>
+            <nav className="mobile-nav" aria-label="تنقل الهاتف" data-testid="nav-mobile">
+              <button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="mobile-nav-power-banks">باور بانك</button>
+              <button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="mobile-nav-chargers">الشواحن</button>
+              <button type="button" onClick={() => chooseCategory('CABLES')} data-testid="mobile-nav-cables">الكابلات</button>
+              <button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="mobile-nav-travel">السفر والسيارة</button>
+              <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="mobile-nav-quote">اطلب عرض سعر</button>
             </nav>
           )}
 
@@ -217,16 +217,16 @@ function App() {
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                 placeholder="Search products, SKU, specs"
-                 aria-label="Search products, SKU, specs"
+                  placeholder="ابحث عن منتج أو SKU أو مواصفة"
+                  aria-label="ابحث عن منتج أو SKU أو مواصفة"
                 data-testid="input-search"
               />
-              <button className="search-submit" type="button" onClick={() => scrollTo('discover')} aria-label="Submit search" data-testid="button-submit-search">
+               <button className="search-submit" type="button" onClick={() => scrollTo('discover')} aria-label="تنفيذ البحث" data-testid="button-submit-search">
                 <Search size={18} />
               </button>
               {query && (
                 <div className="search-suggestions" data-testid="search-results-count">
-                   <p>{visibleProducts.length} result{visibleProducts.length === 1 ? '' : 's'} for “{query}”</p>
+                   <p>{visibleProducts.length} نتيجة للبحث عن «{query}»</p>
                 </div>
               )}
             </div>
@@ -235,7 +235,7 @@ function App() {
       </header>
 
       <main id="top">
-        <section className="hero" aria-label="Electronics campaigns" data-testid="section-hero">
+        <section className="hero" aria-label="حملات الإلكترونيات" data-testid="section-hero">
           {heroes.map((hero, index) => (
             <article className={`hero-frame ${slide === index ? 'active' : ''}`} key={hero.title} aria-hidden={slide !== index}>
               <img src={hero.image} alt={hero.title} data-testid={`img-hero-${index}`} />
@@ -262,10 +262,10 @@ function App() {
         <section className="section" id="categories" data-testid="section-categories">
           <div className="section-header">
             <div>
-              <span className="eyebrow">Start here</span>
-              <h2>Power your<br />next move.</h2>
+              <span className="eyebrow">ابدأ من هنا</span>
+              <h2>طاقة لخطوتك<br />القادمة.</h2>
             </div>
-            <p>Four focused categories for a charging shelf that covers everyday carry, desk setups, and travel.</p>
+            <p>أربع فئات مختارة لرف شحن يغطي الاستخدام اليومي، المكتب، والسفر.</p>
           </div>
           <div className="category-grid">
             {categories.map((category) => (
@@ -283,23 +283,23 @@ function App() {
         <section className="section campaign-section" id="campaigns" data-testid="section-campaigns">
           <div className="section-header">
             <div>
-              <span className="eyebrow">The edit</span>
-              <h2>Charge the<br />moment.</h2>
+              <span className="eyebrow">اختياراتنا</span>
+              <h2>اشحن<br />لحظتك.</h2>
             </div>
-            <p>Vention essentials selected for easy product education, clear specifications, and wholesale conversations.</p>
+            <p>منتجات Vention الأساسية بمواصفات واضحة، ومختارة لتسهيل التوريد وأسعار الجملة.</p>
           </div>
           <div className="campaign-grid">
             <article className="campaign-card">
               <img src={asset('vention-powerbank-10k.jpg')} alt="Vention power banks" data-testid="img-campaign-season" />
-              <span className="campaign-label"><h3>Power<br />on the go.</h3><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="button-campaign-season">Shop power banks</button></span>
+              <span className="campaign-label"><h3>طاقة<br />أينما ذهبت.</h3><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="button-campaign-season">تصفح الباور بانك</button></span>
             </article>
             <article className="campaign-card">
               <img src={asset('vention-charger-70w.jpg')} alt="Vention GaN chargers" data-testid="img-campaign-women" />
-              <span className="campaign-label"><h3>Small<br />but mighty.</h3><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="button-campaign-women">Shop chargers</button></span>
+              <span className="campaign-label"><h3>حجم صغير،<br />أداء كبير.</h3><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="button-campaign-women">تصفح الشواحن</button></span>
             </article>
             <article className="campaign-card">
               <img src={asset('vention-adapter-65w.jpg')} alt="Vention travel adapter" data-testid="img-campaign-men" />
-              <span className="campaign-label"><h3>Ready<br />to roam.</h3><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="button-campaign-men">Shop travel</button></span>
+              <span className="campaign-label"><h3>جاهز<br />للسفر.</h3><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="button-campaign-men">تصفح محولات السفر</button></span>
             </article>
           </div>
         </section>
@@ -307,10 +307,10 @@ function App() {
         <section className="section" id="discover" data-testid="section-discover">
           <div className="section-header">
             <div>
-              <span className="eyebrow">Curated for your shelf</span>
-              <h2>The Vention<br />shortlist.</h2>
+              <span className="eyebrow">مختارة لرفك</span>
+              <h2>قائمة Vention<br />المختارة.</h2>
             </div>
-            <button className="text-link" type="button" onClick={() => { setActiveFilter('ALL'); setQuery(''); }} data-testid="button-view-all">View all products</button>
+            <button className="text-link" type="button" onClick={() => { setActiveFilter('ALL'); setQuery(''); }} data-testid="button-view-all">عرض كل المنتجات</button>
           </div>
           <div className="product-toolbar">
             <div className="filter-row" role="tablist" aria-label="Product categories">
@@ -318,7 +318,7 @@ function App() {
                 <button className={`filter-button ${activeFilter === filter.value ? 'active' : ''}`} type="button" key={filter.value} onClick={() => setActiveFilter(filter.value)} data-testid={`filter-${filter.value.toLowerCase()}`}>{filter.label}</button>
               ))}
             </div>
-            <button className="sort-button" type="button" onClick={() => announce('Showing our latest arrivals')} data-testid="button-sort">Latest arrivals <ChevronDown size={13} /></button>
+            <button className="sort-button" type="button" onClick={() => announce('يتم عرض أحدث المنتجات')} data-testid="button-sort">الأحدث <ChevronDown size={13} /></button>
           </div>
           <div className="product-grid">
             {visibleProducts.map((product) => (
@@ -337,33 +337,33 @@ function App() {
                   <div className="product-color">{product.color}</div>
                   {product.sku && <div className="product-color">SKU: {product.sku}</div>}
                   {product.warranty && <div className="product-color">{product.warranty}</div>}
-                  <button className="text-link" type="button" onClick={() => addToCart(product)} data-testid={`button-add-product-${product.id}`}>Add to shortlist</button>
+                  <button className="text-link" type="button" onClick={() => addToCart(product)} data-testid={`button-add-product-${product.id}`}>أضف إلى القائمة</button>
                 </div>
               </article>
             ))}
-            {visibleProducts.length === 0 && <div className="empty-products" data-testid="empty-product-results">No products match that search. Try another SKU or category.</div>}
+            {visibleProducts.length === 0 && <div className="empty-products" data-testid="empty-product-results">لا توجد منتجات مطابقة. جرّب SKU أو فئة أخرى.</div>}
           </div>
         </section>
 
-        <section className="service-band" id="services" aria-label="Shopping services" data-testid="section-services">
-          <div className="service-item"><Truck /><span><strong>Shipping-ready shortlist</strong><span>Built for regional sourcing conversations</span></span></div>
-          <div className="service-item"><ShieldCheck /><span><strong>Original Vention products</strong><span>SKU and warranty details where supplied</span></span></div>
-          <div className="service-item"><Sparkles /><span><strong>Wholesale quote focus</strong><span>Retail references shown, wholesale pricing pending</span></span></div>
+        <section className="service-band" id="services" aria-label="خدمات المتجر" data-testid="section-services">
+          <div className="service-item"><Truck /><span><strong>قائمة جاهزة للتوريد</strong><span>مصممة لاحتياجات السوق اليمني</span></span></div>
+          <div className="service-item"><ShieldCheck /><span><strong>منتجات Vention أصلية</strong><span>SKU والضمان عند توفر المعلومات</span></span></div>
+          <div className="service-item"><Sparkles /><span><strong>أسعار جملة عند الطلب</strong><span>الأسعار الحالية مرجعية فقط</span></span></div>
         </section>
 
         <section className="section newsletter" data-testid="section-newsletter">
-          <h2>Keep the<br />current moving.</h2>
+          <h2>خلّ الطاقة<br />مستمرة.</h2>
           <div className="newsletter-right">
-            <p>Leave your email to receive the wholesale-ready shortlist and future sourcing updates.</p>
+            <p>أدخل بريدك لاستلام قائمة المنتجات الجاهزة للتوريد وآخر تحديثاتنا.</p>
             {subscribed ? (
-              <p data-testid="status-subscribed"><strong>You are on the list.</strong> Watch your inbox.</p>
+              <p data-testid="status-subscribed"><strong>تمت إضافتك إلى القائمة.</strong> تابع بريدك الإلكتروني.</p>
             ) : (
               <div className="email-form">
-                <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Your email address" aria-label="Your email address" data-testid="input-newsletter-email" />
-                 <button type="button" onClick={submitEmail} data-testid="button-newsletter-submit">Request the list <ArrowRight size={14} /></button>
+                <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="بريدك الإلكتروني" aria-label="بريدك الإلكتروني" data-testid="input-newsletter-email" />
+                 <button type="button" onClick={submitEmail} data-testid="button-newsletter-submit">اطلب القائمة <ArrowRight size={14} /></button>
               </div>
             )}
-            <p className="signup-note">By subscribing, you agree to receive marketing emails.</p>
+            <p className="signup-note">بإدخال بريدك، توافق على استلام التحديثات التسويقية.</p>
           </div>
         </section>
       </main>
@@ -376,28 +376,28 @@ function App() {
               <span className="footer-brand-subtitle">الوكيل الحصري لشركة Vention في اليمن</span>
               <p>منتجات Vention للشحن والطاقة، مختارة للتوريد داخل السوق اليمني.</p>
             </div>
-            <div className="footer-col"><h4>Shop</h4><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="footer-power-banks">Power Banks</button><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="footer-chargers">Chargers</button><button type="button" onClick={() => chooseCategory('CABLES')} data-testid="footer-cables">Cables</button><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="footer-travel">Travel & Car</button></div>
-            <div className="footer-col"><h4>Source</h4><button type="button" onClick={() => announce('The Vention shortlist is ready')} data-testid="footer-shortlist">Vention shortlist</button><button type="button" onClick={() => announce('MOQ guidance is coming soon')} data-testid="footer-moq">MOQ guidance</button><button type="button" onClick={() => announce('A wholesale price list is coming soon')} data-testid="footer-pricing">Wholesale pricing</button></div>
-            <div className="footer-col"><h4>Help</h4><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">Shipping & customs</button><button type="button" onClick={() => announce('Product specifications are available on request')} data-testid="footer-help">Product specs</button><button type="button" onClick={() => announce('Contact form is coming soon')} data-testid="footer-contact">Request a quote</button></div>
-            <div className="footer-col"><h4>Follow along</h4><button type="button" onClick={() => announce('Instagram link copied')} data-testid="footer-instagram">Instagram</button><button type="button" onClick={() => announce('TikTok link copied')} data-testid="footer-tiktok">TikTok</button><button type="button" onClick={() => announce('WhatsApp link copied')} data-testid="footer-whatsapp">WhatsApp</button></div>
+            <div className="footer-col"><h4>تصفح</h4><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="footer-power-banks">باور بانك</button><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="footer-chargers">الشواحن</button><button type="button" onClick={() => chooseCategory('CABLES')} data-testid="footer-cables">الكابلات</button><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="footer-travel">السفر والسيارة</button></div>
+            <div className="footer-col"><h4>التوريد</h4><button type="button" onClick={() => announce('قائمة Vention جاهزة')} data-testid="footer-shortlist">قائمة Vention</button><button type="button" onClick={() => announce('تفاصيل الحد الأدنى للطلب قريبًا')} data-testid="footer-moq">الحد الأدنى للطلب</button><button type="button" onClick={() => announce('قائمة أسعار الجملة قريبًا')} data-testid="footer-pricing">أسعار الجملة</button></div>
+            <div className="footer-col"><h4>المساعدة</h4><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">الشحن والجمارك</button><button type="button" onClick={() => announce('مواصفات المنتجات متاحة عند الطلب')} data-testid="footer-help">مواصفات المنتجات</button><button type="button" onClick={() => announce('نموذج التواصل قريبًا')} data-testid="footer-contact">اطلب عرض سعر</button></div>
+            <div className="footer-col"><h4>تابعنا</h4><button type="button" onClick={() => announce('تم نسخ رابط Instagram')} data-testid="footer-instagram">Instagram</button><button type="button" onClick={() => announce('تم نسخ رابط TikTok')} data-testid="footer-tiktok">TikTok</button><button type="button" onClick={() => announce('تم نسخ رابط WhatsApp')} data-testid="footer-whatsapp">WhatsApp</button></div>
           </div>
-          <div className="footer-bottom"><span>© 2024 القراحي الكترونيك. Vention Yemen.</span><div className="footer-socials"><button type="button" onClick={() => announce('Yemen selected')} data-testid="button-country">Yemen <ChevronDown size={12} /></button><button type="button" onClick={() => announce('Language selector opened')} data-testid="button-language">EN <ChevronDown size={12} /></button></div></div>
+          <div className="footer-bottom"><span>© 2026 القراحي الكترونيك. الوكيل الحصري لـ Vention في اليمن.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
         </div>
       </footer>
 
       {cartOpen && (
         <div className="drawer-backdrop" role="presentation" onClick={() => setCartOpen(false)} data-testid="overlay-cart">
-            <aside className="cart-drawer" role="dialog" aria-label="Quote shortlist" onClick={(event) => event.stopPropagation()} data-testid="drawer-cart">
-            <div className="drawer-header"><h2>Your shortlist <span>({cart.length})</span></h2><button className="close-button" type="button" onClick={() => setCartOpen(false)} aria-label="Close shortlist" data-testid="button-close-cart"><X size={16} /></button></div>
+            <aside className="cart-drawer" role="dialog" aria-label="قائمة طلب عرض السعر" onClick={(event) => event.stopPropagation()} data-testid="drawer-cart">
+            <div className="drawer-header"><h2>قائمة الطلب <span>({cart.length})</span></h2><button className="close-button" type="button" onClick={() => setCartOpen(false)} aria-label="إغلاق القائمة" data-testid="button-close-cart"><X size={16} /></button></div>
             {cart.length === 0 ? (
-              <div className="cart-empty"><div><ShoppingBag size={29} strokeWidth={1.2} /><p>Your quote shortlist is ready for products.</p><button className="button-dark" type="button" onClick={() => { setCartOpen(false); scrollTo('discover'); }} data-testid="button-start-shopping">Browse products</button></div></div>
+              <div className="cart-empty"><div><ShoppingBag size={29} strokeWidth={1.2} /><p>أضف المنتجات التي تريد طلب عرض سعر لها.</p><button className="button-dark" type="button" onClick={() => { setCartOpen(false); scrollTo('discover'); }} data-testid="button-start-shopping">تصفح المنتجات</button></div></div>
             ) : (
               <>
                 <div>
-                  {cart.map((product) => <div className="cart-item" key={product.id}><img src={product.image} alt={product.name} /><div className="cart-item-info"><button className="remove-item" type="button" onClick={() => setCart((current) => current.filter((item) => item.id !== product.id))} data-testid={`button-remove-cart-${product.id}`}>Remove</button><strong>{product.brand}</strong><span>{product.name}</span><br /><span>{product.price}</span></div></div>)}
+                  {cart.map((product) => <div className="cart-item" key={product.id}><img src={product.image} alt={product.name} /><div className="cart-item-info"><button className="remove-item" type="button" onClick={() => setCart((current) => current.filter((item) => item.id !== product.id))} data-testid={`button-remove-cart-${product.id}`}>حذف</button><strong>{product.brand}</strong><span>{product.name}</span><br /><span>{product.price}</span></div></div>)}
                 </div>
-                 <div className="drawer-total"><span>Selected products</span><span data-testid="text-cart-total">{cart.length}</span></div>
-                 <button className="button-dark checkout-button" type="button" onClick={() => announce('Quote request flow is ready for backend wiring')} data-testid="button-checkout">Request wholesale quote</button>
+                  <div className="drawer-total"><span>المنتجات المختارة</span><span data-testid="text-cart-total">{cart.length}</span></div>
+                  <button className="button-dark checkout-button" type="button" onClick={() => announce('نموذج طلب عرض السعر جاهز للربط')} data-testid="button-checkout">اطلب عرض سعر للجملة</button>
               </>
             )}
           </aside>
