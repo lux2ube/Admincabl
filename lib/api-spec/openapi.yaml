@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: sourcing
+    description: CABL sourcing and newsletter operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,54 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /quote-requests:
+    post:
+      operationId: createQuoteRequest
+      tags: [sourcing]
+      summary: Create a wholesale quote request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuoteRequestInput"
+      responses:
+        "201":
+          description: Quote request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuoteRequest"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /newsletter-subscriptions:
+    post:
+      operationId: subscribeNewsletter
+      tags: [sourcing]
+      summary: Subscribe an email address to CABL updates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewsletterSubscriptionInput"
+      responses:
+        "201":
+          description: Newsletter subscription created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsletterSubscription"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +83,93 @@ components:
           type: string
       required:
         - status
+    QuoteRequestItem:
+      type: object
+      properties:
+        productId:
+          type: number
+          minimum: 1
+        productName:
+          type: string
+          minLength: 1
+        sku:
+          type: ["string", "null"]
+        quantity:
+          type: number
+          minimum: 1
+      required:
+        - productId
+        - productName
+        - sku
+        - quantity
+    QuoteRequestInput:
+      type: object
+      properties:
+        customerName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        phone:
+          type: string
+          minLength: 5
+          maxLength: 40
+        businessName:
+          type: ["string", "null"]
+          maxLength: 160
+        notes:
+          type: ["string", "null"]
+          maxLength: 1000
+        items:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/QuoteRequestItem"
+      required:
+        - customerName
+        - phone
+        - businessName
+        - notes
+        - items
+    QuoteRequest:
+      type: object
+      properties:
+        id:
+          type: number
+        status:
+          type: string
+          enum: [received]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - status
+        - createdAt
+    NewsletterSubscriptionInput:
+      type: object
+      properties:
+        email:
+          type: string
+          pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+          maxLength: 254
+      required:
+        - email
+    NewsletterSubscription:
+      type: object
+      properties:
+        id:
+          type: number
+        status:
+          type: string
+          enum: [subscribed]
+      required:
+        - id
+        - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
 

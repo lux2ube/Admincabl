@@ -1,1 +1,2 @@
 - [Reference-site access](reference-site-access.md) — keep clones portable with local assets when automated live-site extraction is unavailable.
+- [API validation version](api-validation-version.md) — check Orval-generated Zod helpers against the workspace's installed Zod version.

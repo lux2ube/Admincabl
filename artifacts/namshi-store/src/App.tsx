@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,6 +12,11 @@ import {
   Truck,
   X,
 } from 'lucide-react';
+import {
+  createQuoteRequest,
+  subscribeNewsletter,
+  type QuoteRequestInput,
+} from '@workspace/api-client-react';
 
 type Product = {
   id: number;
@@ -93,13 +98,34 @@ function App() {
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const [favorites, setFavorites] = useState<number[]>(() => {
+    try {
+      const saved = window.localStorage.getItem('cabl-favorites');
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed.filter((id): id is number => Number.isInteger(id)) : [];
+    } catch {
+      return [];
+    }
+  });
   const [cart, setCart] = useState<Product[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [wishlistOpen, setWishlistOpen] = useState(false);
+  const [quoteOpen, setQuoteOpen] = useState(false);
+  const [quoteSubmitted, setQuoteSubmitted] = useState(false);
+  const [quoteSubmitting, setQuoteSubmitting] = useState(false);
+  const [quoteError, setQuoteError] = useState('');
+  const [quoteForm, setQuoteForm] = useState({
+    customerName: '',
+    phone: '',
+    businessName: '',
+    notes: '',
+  });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toast, setToast] = useState('');
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
+  const [newsletterError, setNewsletterError] = useState('');
 
   useEffect(() => {
     const timer = window.setInterval(() => setSlide((current) => (current + 1) % heroes.length), 6500);
@@ -111,6 +137,10 @@ function App() {
     const timer = window.setTimeout(() => setToast(''), 2600);
     return () => window.clearTimeout(timer);
   }, [toast]);
+
+  useEffect(() => {
+    window.localStorage.setItem('cabl-favorites', JSON.stringify(favorites));
+  }, [favorites]);
 
   const visibleProducts = useMemo(() => {
     const cleanQuery = query.trim().toLowerCase();
@@ -144,11 +174,79 @@ function App() {
     scrollTo('discover');
   };
 
-  const submitEmail = () => {
-    if (email.trim()) {
-      setSubscribed(true);
-      announce('تمت إضافتك إلى القائمة');
+  const openQuoteForm = () => {
+    setCartOpen(false);
+    setWishlistOpen(false);
+    setQuoteSubmitted(false);
+    setQuoteError('');
+    setQuoteOpen(true);
+  };
+
+  const submitQuote = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setQuoteSubmitting(true);
+    setQuoteError('');
+
+    const payload: QuoteRequestInput = {
+      customerName: quoteForm.customerName.trim(),
+      phone: quoteForm.phone.trim(),
+      businessName: quoteForm.businessName.trim() || null,
+      notes: quoteForm.notes.trim() || null,
+      items: cart.map((product) => ({
+        productId: product.id,
+        productName: product.name,
+        sku: product.sku ?? null,
+        quantity: 1,
+      })),
+    };
+
+    try {
+      await createQuoteRequest(payload);
+      setQuoteSubmitted(true);
+      setCart([]);
+      announce('تم استلام طلب عرض السعر بنجاح');
+    } catch (error) {
+      setQuoteError(getApiErrorMessage(error));
+    } finally {
+      setQuoteSubmitting(false);
     }
+  };
+
+  const submitEmail = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (email.trim()) {
+      setNewsletterSubmitting(true);
+      setNewsletterError('');
+      try {
+        await subscribeNewsletter({ email: email.trim() });
+        setSubscribed(true);
+        announce('تمت إضافتك إلى القائمة');
+      } catch (error) {
+        setNewsletterError(getApiErrorMessage(error));
+      } finally {
+        setNewsletterSubmitting(false);
+      }
+    }
+  };
+
+  const favoriteProducts = products.filter((product) => favorites.includes(product.id));
+
+  const closeQuoteForm = () => {
+    setQuoteOpen(false);
+    setQuoteSubmitted(false);
+    setQuoteError('');
+  };
+
+  const updateQuoteField = (field: keyof typeof quoteForm, value: string) => {
+    setQuoteForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const getApiErrorMessage = (error: unknown) => {
+    if (error && typeof error === 'object' && 'data' in error) {
+      const data = (error as { data?: { error?: string } }).data;
+      if (data?.error) return data.error;
+    }
+    return error instanceof Error ? error.message : 'تعذر تنفيذ الطلب. حاول مرة أخرى.';
   };
 
   return (
@@ -175,7 +273,7 @@ function App() {
               <button className="header-action" type="button" onClick={() => setSearchOpen((current) => !current)} aria-label="بحث" data-testid="button-search">
                 <Search /><span>بحث</span>
               </button>
-              <button className="header-action" type="button" onClick={() => announce(`لديك ${favorites.length} منتجًا في المفضلة`)} aria-label="المفضلة" data-testid="button-wishlist">
+              <button className="header-action" type="button" onClick={() => setWishlistOpen(true)} aria-label="المفضلة" data-testid="button-wishlist">
                 <Heart /><span>المفضلة</span>
                 {favorites.length > 0 && <span className="count-bubble" data-testid="count-wishlist">{favorites.length}</span>}
               </button>
@@ -193,7 +291,7 @@ function App() {
             <button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="nav-travel">السفر والسيارة</button>
             <button type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-brands">Vention</button>
             <button type="button" onClick={() => scrollTo('about')} data-testid="nav-about">عن CABL</button>
-            <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="nav-sale">اطلب عرض سعر</button>
+            <button className="nav-highlight" type="button" onClick={openQuoteForm} data-testid="nav-sale">اطلب عرض سعر</button>
           </nav>
 
           {mobileMenuOpen && (
@@ -203,7 +301,7 @@ function App() {
               <button type="button" onClick={() => chooseCategory('CABLES')} data-testid="mobile-nav-cables">الكابلات</button>
               <button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="mobile-nav-travel">السفر والسيارة</button>
               <button type="button" onClick={() => scrollTo('about')} data-testid="mobile-nav-about">عن CABL</button>
-              <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="mobile-nav-quote">اطلب عرض سعر</button>
+              <button className="nav-highlight" type="button" onClick={openQuoteForm} data-testid="mobile-nav-quote">اطلب عرض سعر</button>
             </nav>
           )}
 
@@ -368,11 +466,12 @@ function App() {
             {subscribed ? (
               <p data-testid="status-subscribed"><strong>تمت إضافتك إلى القائمة.</strong> تابع بريدك الإلكتروني.</p>
             ) : (
-              <div className="email-form">
+              <form className="email-form" onSubmit={submitEmail}>
                 <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="بريدك الإلكتروني" aria-label="بريدك الإلكتروني" data-testid="input-newsletter-email" />
-                 <button type="button" onClick={submitEmail} data-testid="button-newsletter-submit">اطلب القائمة <ArrowRight size={14} /></button>
-              </div>
+                <button type="submit" disabled={newsletterSubmitting} data-testid="button-newsletter-submit">{newsletterSubmitting ? 'جارٍ الحفظ...' : 'اطلب القائمة'} <ArrowRight size={14} /></button>
+              </form>
             )}
+            {newsletterError && <p className="form-error" role="alert" data-testid="error-newsletter">{newsletterError}</p>}
             <p className="signup-note">بإدخال بريدك، توافق على استلام التحديثات التسويقية.</p>
           </div>
         </section>
@@ -387,17 +486,37 @@ function App() {
               <p>منتجات Vention للشحن والطاقة، مختارة للتوريد داخل السوق اليمني.</p>
             </div>
             <div className="footer-col"><h4>تصفح</h4><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="footer-power-banks">باور بانك</button><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="footer-chargers">الشواحن</button><button type="button" onClick={() => chooseCategory('CABLES')} data-testid="footer-cables">الكابلات</button><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="footer-travel">السفر والسيارة</button></div>
-            <div className="footer-col"><h4>التوريد</h4><button type="button" onClick={() => announce('قائمة Vention جاهزة')} data-testid="footer-shortlist">قائمة Vention</button><button type="button" onClick={() => announce('تفاصيل الحد الأدنى للطلب قريبًا')} data-testid="footer-moq">الحد الأدنى للطلب</button><button type="button" onClick={() => announce('قائمة أسعار الجملة قريبًا')} data-testid="footer-pricing">أسعار الجملة</button></div>
-            <div className="footer-col"><h4>المساعدة</h4><button type="button" onClick={() => scrollTo('about')} data-testid="footer-about">عن CABL</button><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">الشحن والجمارك</button><button type="button" onClick={() => announce('مواصفات المنتجات متاحة عند الطلب')} data-testid="footer-help">مواصفات المنتجات</button><button type="button" onClick={() => announce('نموذج التواصل قريبًا')} data-testid="footer-contact">اطلب عرض سعر</button></div>
+            <div className="footer-col"><h4>التوريد</h4><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-shortlist">قائمة Vention</button><button type="button" onClick={() => scrollTo('services')} data-testid="footer-moq">الحد الأدنى للطلب</button><button type="button" onClick={openQuoteForm} data-testid="footer-pricing">أسعار الجملة</button></div>
+            <div className="footer-col"><h4>المساعدة</h4><button type="button" onClick={() => scrollTo('about')} data-testid="footer-about">عن CABL</button><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">الشحن والجمارك</button><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-help">مواصفات المنتجات</button><button type="button" onClick={openQuoteForm} data-testid="footer-contact">اطلب عرض سعر</button></div>
             <div className="footer-col"><h4>تابعنا</h4><button type="button" onClick={() => announce('تم نسخ رابط Instagram')} data-testid="footer-instagram">Instagram</button><button type="button" onClick={() => announce('تم نسخ رابط TikTok')} data-testid="footer-tiktok">TikTok</button><button type="button" onClick={() => announce('تم نسخ رابط WhatsApp')} data-testid="footer-whatsapp">WhatsApp</button></div>
           </div>
           <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لشركة Vention في اليمن.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
         </div>
       </footer>
 
+      {wishlistOpen && (
+        <div className="drawer-backdrop" role="presentation" onClick={() => setWishlistOpen(false)} data-testid="overlay-wishlist">
+          <aside className="cart-drawer" role="dialog" aria-modal="true" aria-label="المفضلة" onClick={(event) => event.stopPropagation()} data-testid="drawer-wishlist">
+            <div className="drawer-header"><h2>المفضلة <span>({favoriteProducts.length})</span></h2><button className="close-button" type="button" onClick={() => setWishlistOpen(false)} aria-label="إغلاق المفضلة" data-testid="button-close-wishlist"><X size={16} /></button></div>
+            {favoriteProducts.length === 0 ? (
+              <div className="cart-empty"><div><Heart size={29} strokeWidth={1.2} /><p>احفظ المنتجات التي تريد العودة إليها لاحقًا.</p><button className="button-dark" type="button" onClick={() => { setWishlistOpen(false); scrollTo('discover'); }} data-testid="button-browse-wishlist">تصفح المنتجات</button></div></div>
+            ) : (
+              <div>
+                {favoriteProducts.map((product) => (
+                  <div className="cart-item" key={product.id}>
+                    <img src={product.image} alt={product.name} />
+                    <div className="cart-item-info"><button className="remove-item" type="button" onClick={() => toggleFavorite(product.id)} data-testid={`button-remove-wishlist-${product.id}`}>إزالة</button><strong>{product.brand}</strong><span>{product.name}</span><br /><span>{product.price}</span></div>
+                  </div>
+                ))}
+                <button className="button-dark checkout-button" type="button" onClick={openQuoteForm} data-testid="button-quote-wishlist">اطلب عرض سعر</button>
+              </div>
+            )}
+          </aside>
+        </div>
+      )}
       {cartOpen && (
         <div className="drawer-backdrop" role="presentation" onClick={() => setCartOpen(false)} data-testid="overlay-cart">
-            <aside className="cart-drawer" role="dialog" aria-label="قائمة طلب عرض السعر" onClick={(event) => event.stopPropagation()} data-testid="drawer-cart">
+            <aside className="cart-drawer" role="dialog" aria-modal="true" aria-label="قائمة طلب عرض السعر" onClick={(event) => event.stopPropagation()} data-testid="drawer-cart">
             <div className="drawer-header"><h2>قائمة الطلب <span>({cart.length})</span></h2><button className="close-button" type="button" onClick={() => setCartOpen(false)} aria-label="إغلاق القائمة" data-testid="button-close-cart"><X size={16} /></button></div>
             {cart.length === 0 ? (
               <div className="cart-empty"><div><ShoppingBag size={29} strokeWidth={1.2} /><p>أضف المنتجات التي تريد طلب عرض سعر لها.</p><button className="button-dark" type="button" onClick={() => { setCartOpen(false); scrollTo('discover'); }} data-testid="button-start-shopping">تصفح المنتجات</button></div></div>
@@ -407,10 +526,30 @@ function App() {
                   {cart.map((product) => <div className="cart-item" key={product.id}><img src={product.image} alt={product.name} /><div className="cart-item-info"><button className="remove-item" type="button" onClick={() => setCart((current) => current.filter((item) => item.id !== product.id))} data-testid={`button-remove-cart-${product.id}`}>حذف</button><strong>{product.brand}</strong><span>{product.name}</span><br /><span>{product.price}</span></div></div>)}
                 </div>
                   <div className="drawer-total"><span>المنتجات المختارة</span><span data-testid="text-cart-total">{cart.length}</span></div>
-                  <button className="button-dark checkout-button" type="button" onClick={() => announce('نموذج طلب عرض السعر جاهز للربط')} data-testid="button-checkout">اطلب عرض سعر للجملة</button>
+                  <button className="button-dark checkout-button" type="button" onClick={openQuoteForm} data-testid="button-checkout">اطلب عرض سعر للجملة</button>
               </>
             )}
           </aside>
+        </div>
+      )}
+      {quoteOpen && (
+        <div className="modal-backdrop" role="presentation" onClick={closeQuoteForm} data-testid="overlay-quote">
+          <section className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title" onClick={(event) => event.stopPropagation()} data-testid="modal-quote">
+            <div className="drawer-header"><h2 id="quote-title">اطلب عرض سعر</h2><button className="close-button" type="button" onClick={closeQuoteForm} aria-label="إغلاق النموذج" data-testid="button-close-quote"><X size={16} /></button></div>
+            {quoteSubmitted ? (
+              <div className="quote-success" data-testid="status-quote-submitted"><strong>وصل طلبك إلى CABL.</strong><p>سنراجع المنتجات المختارة ونتواصل معك على رقم الهاتف المرسل.</p><button className="button-dark" type="button" onClick={closeQuoteForm} data-testid="button-finish-quote">حسنًا</button></div>
+            ) : (
+              <form className="quote-form" onSubmit={submitQuote}>
+                <p className="quote-intro">{cart.length > 0 ? `سيتم تضمين ${cart.length} منتجًا في الطلب.` : 'أرسل بياناتك وسنتواصل معك لمناقشة احتياجك.'}</p>
+                <label>الاسم الكامل<input required minLength={2} maxLength={120} value={quoteForm.customerName} onChange={(event) => updateQuoteField('customerName', event.target.value)} autoComplete="name" data-testid="input-quote-name" /></label>
+                <label>رقم الهاتف<input required minLength={5} maxLength={40} value={quoteForm.phone} onChange={(event) => updateQuoteField('phone', event.target.value)} autoComplete="tel" data-testid="input-quote-phone" /></label>
+                <label>اسم النشاط <span>(اختياري)</span><input maxLength={160} value={quoteForm.businessName} onChange={(event) => updateQuoteField('businessName', event.target.value)} autoComplete="organization" data-testid="input-quote-business" /></label>
+                <label>ملاحظات <span>(اختياري)</span><textarea maxLength={1000} rows={4} value={quoteForm.notes} onChange={(event) => updateQuoteField('notes', event.target.value)} data-testid="input-quote-notes" /></label>
+                {quoteError && <p className="form-error" role="alert" data-testid="error-quote">{quoteError}</p>}
+                <button className="button-dark checkout-button" type="submit" disabled={quoteSubmitting} data-testid="button-submit-quote">{quoteSubmitting ? 'جارٍ إرسال الطلب...' : 'إرسال طلب عرض السعر'}</button>
+              </form>
+            )}
+          </section>
         </div>
       )}
       {toast && <div className="toast-message" role="status" data-testid="status-toast">{toast}</div>}

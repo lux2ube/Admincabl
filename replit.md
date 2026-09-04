@@ -30,13 +30,13 @@ A Vention charging-accessories storefront for CABL, using the existing Namshi-st
 
 ## Architecture decisions
 
-- The initial experience is frontend-only so the shortlist can be reviewed without authentication or a database.
+- Quote requests and newsletter subscriptions are persisted in PostgreSQL without requiring visitor authentication; favorites remain browser-local.
 - Retail prices are shown only as reference values; wholesale pricing is intentionally not invented and the primary action is a quotation request.
 - Product imagery is local to the artifact rather than hotlinked, so the storefront remains previewable and portable.
 
 ## Product
 
-The CABL homepage presents the ten-product Vention shortlist across power banks, GaN chargers, cables, and travel adapters. Visitors can search and filter products, review SKUs and retail references, and build a quote shortlist for Yemen sourcing.
+The CABL homepage presents the ten-product Vention shortlist across power banks, GaN chargers, cables, and travel adapters. Visitors can search and filter products, review SKUs and retail references, save favorites, build a quote shortlist, submit a wholesale quote request, and subscribe to updates.
 
 ## User preferences
 
