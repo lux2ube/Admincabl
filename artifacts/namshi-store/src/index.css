@@ -61,9 +61,11 @@ img { display: block; max-width: 100%; }
 .header-inner { max-width: 1440px; margin: 0 auto; padding: 18px 5.2vw 15px; }
 .header-row { display: flex; align-items: center; justify-content: space-between; gap: 28px; }
 .wordmark { border: 0; background: transparent; padding: 0; color: var(--ink); line-height: 1; }
-.brand-lockup { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 4px; white-space: nowrap; text-align: right; }
-.brand-name { font-family: var(--font-display); font-size: clamp(18px, 2vw, 27px); font-weight: 800; letter-spacing: 0; }
-.brand-subtitle { color: var(--muted-ink); font-family: var(--font-sans); font-size: 9px; font-weight: 700; letter-spacing: 0; }
+.cabl-logo { display: inline-flex; direction: ltr; align-items: center; gap: 9px; color: var(--ink); white-space: nowrap; }
+.cabl-logo-mark { width: 39px; height: auto; flex: 0 0 auto; }
+.cabl-logo-copy { display: inline-flex; direction: rtl; flex-direction: column; align-items: flex-start; gap: 3px; text-align: right; }
+.cabl-logo-copy strong { font-family: var(--font-display); font-size: clamp(18px, 2vw, 27px); font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+.cabl-logo-copy small { color: var(--muted-ink); font-family: var(--font-sans); font-size: 8px; font-weight: 700; letter-spacing: 0; line-height: 1.2; }
 .header-actions { display: flex; align-items: center; gap: 18px; }
 .header-action {
   display: inline-flex; position: relative; align-items: center; gap: 6px; border: 0;
@@ -209,8 +211,11 @@ img { display: block; max-width: 100%; }
 .footer-inner { max-width: 1440px; margin: 0 auto; }
 .footer-top { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1.15fr; gap: 30px; padding-bottom: 56px; }
 .footer-brand { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; text-align: right; }
-.footer-brand-name { font-family: var(--font-display); font-size: 28px; letter-spacing: -.045em; font-weight: 800; }
-.footer-brand-subtitle { color: #9a9890; font-family: var(--font-sans); font-size: 11px; font-weight: 700; letter-spacing: 0; }
+.footer-brand .cabl-logo { flex-direction: row-reverse; }
+.footer-brand .cabl-logo-copy { align-items: flex-end; }
+.footer-brand .cabl-logo-mark { width: 43px; color: var(--paper); }
+.footer-brand .cabl-logo-copy strong { font-size: 28px; color: var(--paper); }
+.footer-brand .cabl-logo-copy small { color: #9a9890; font-size: 9px; }
 .footer-brand p { max-width: 220px; margin: 9px 0 0; color: #9a9890; font-family: var(--font-sans); font-size: 11px; line-height: 1.5; letter-spacing: 0; }
 .footer-col h4 { margin: 0 0 17px; color: #9a9890; font-size: 9px; }
 .footer-col button { display: block; border: 0; background: transparent; color: var(--paper); padding: 0; margin: 0 0 11px; font-size: 12px; text-align: right; }
@@ -266,8 +271,10 @@ img { display: block; max-width: 100%; }
   .desktop-nav { display: none; }
   .mobile-nav { display: grid; gap: 15px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
   .mobile-nav button { border: 0; background: transparent; padding: 0; font-size: 13px; font-weight: 700; text-align: right; }
-   .brand-name { font-size: 17px; }
-   .brand-subtitle { font-size: 7px; }
+   .cabl-logo { gap: 6px; }
+   .cabl-logo-mark { width: 30px; }
+   .cabl-logo-copy strong { font-size: 17px; }
+   .cabl-logo-copy small { font-size: 6px; }
   .hero-frame, .hero-copy { min-height: 535px; }
   .hero-copy { padding: 50px 25px 85px; justify-content: end; }
   .hero-copy h1 { max-width: 350px; font-size: clamp(53px, 16vw, 76px); }
@@ -318,7 +325,8 @@ img { display: block; max-width: 100%; }
   .footer { padding: 41px 17px 20px; }
   .footer-top { grid-template-columns: 1fr 1fr; gap: 35px 18px; padding-bottom: 38px; }
    .footer-brand { grid-column: 1 / -1; }
-   .footer-brand-name { font-size: 23px; }
+  .footer-brand .cabl-logo-mark { width: 36px; }
+  .footer-brand .cabl-logo-copy strong { font-size: 23px; }
   .footer-bottom { display: block; }
   .footer-socials { margin-top: 15px; }
   .modal-backdrop { padding: 10px; }

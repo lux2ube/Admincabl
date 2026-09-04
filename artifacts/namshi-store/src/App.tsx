@@ -100,6 +100,21 @@ const categoryNames: Record<Product['category'], string> = {
   TRAVEL: 'السفر والسيارة',
 };
 
+function CablLogo({ className = '', showTagline = true }: { className?: string; showTagline?: boolean }) {
+  return (
+    <span className={`cabl-logo ${className}`} aria-label="CABL">
+      <svg className="cabl-logo-mark" viewBox="0 0 96 56" role="img" aria-hidden="true">
+        <rect x="8" y="8" width="80" height="40" rx="20" fill="none" stroke="currentColor" strokeWidth="8" />
+        <rect x="29" y="23" width="38" height="10" rx="5" fill="currentColor" />
+      </svg>
+      <span className="cabl-logo-copy">
+        <strong>CABL</strong>
+        {showTagline && <small>الوكيل الحصري لشركة Vention في اليمن</small>}
+      </span>
+    </span>
+  );
+}
+
 function ProductPreview({
   product,
   isFavorite,
@@ -353,10 +368,7 @@ function App() {
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <button className="wordmark" type="button" onClick={() => scrollTo('top')} data-testid="button-wordmark">
-              <span className="brand-lockup" lang="ar" dir="rtl">
-                <span className="brand-name">CABL</span>
-                  <span className="brand-subtitle">الوكيل الحصري لشركة Vention في اليمن</span>
-              </span>
+              <CablLogo />
             </button>
             <div className="header-actions">
               <button className="header-action" type="button" onClick={() => setSearchOpen((current) => !current)} aria-label="بحث" data-testid="button-search">
@@ -585,8 +597,7 @@ function App() {
         <div className="footer-inner">
           <div className="footer-top">
             <div className="footer-brand" lang="ar" dir="rtl">
-              <span className="footer-brand-name">CABL</span>
-              <span className="footer-brand-subtitle">الوكيل الحصري لشركة Vention في اليمن</span>
+              <CablLogo className="cabl-logo-footer" />
               <p>منتجات Vention الأصلية للشحن والطاقة، متوفرة للشراء داخل اليمن.</p>
             </div>
             <div className="footer-col"><h4>تصفح</h4><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="footer-power-banks">باور بانك</button><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="footer-chargers">الشواحن</button><button type="button" onClick={() => chooseCategory('CABLES')} data-testid="footer-cables">الكابلات</button><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="footer-travel">السفر والسيارة</button></div>
