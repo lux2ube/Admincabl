@@ -38,39 +38,7 @@ type Product = {
   shippingOptions: StoreShippingOption[];
 };
 
-type HeroSlide = {
-  image: string;
-  eyebrow: string;
-  title: string;
-  body: string;
-  action: string;
-};
-
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
-
-const heroes: HeroSlide[] = [
-  {
-    image: asset('vention-powerbank-20k.jpg'),
-    eyebrow: 'منتجات Vention الأصلية',
-    title: 'اشحن خطوتك القادمة.',
-    body: 'حلول شحن وطاقة عملية للاستخدام اليومي، متوفرة الآن من CABL.',
-    action: 'تصفح القائمة',
-  },
-  {
-    image: asset('vention-charger-65w.jpg'),
-    eyebrow: 'طاقة بلا حجم زائد',
-    title: 'تقنية GaN تستحق مكانها.',
-    body: 'من أطقم 30W اليومية إلى شواحن 100W متعددة المنافذ، مختارة للسوق المحلي.',
-    action: 'تصفح المنتجات',
-  },
-  {
-    image: asset('vention-adapter-65w.jpg'),
-    eyebrow: 'جاهز للطريق',
-    title: 'محول واحد. أماكن أكثر.',
-    body: 'محول سفر عالمي 65W لمن يحتاج إعداد شحن واحدًا في كل مكان.',
-    action: 'تصفح محولات السفر',
-  },
-];
 
 function CablLogo({ className = '', showTagline = true }: { className?: string; showTagline?: boolean }) {
   return (
@@ -189,9 +157,10 @@ function App() {
   const [newsletterError, setNewsletterError] = useState('');
 
   useEffect(() => {
-    const timer = window.setInterval(() => setSlide((current) => (current + 1) % heroes.length), 6500);
+    const heroCount = Math.min(catalogQuery.data?.products.length ?? 1, 3);
+    const timer = window.setInterval(() => setSlide((current) => (current + 1) % Math.max(heroCount, 1)), 6500);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [catalogQuery.data?.products.length]);
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -262,6 +231,16 @@ function App() {
 
   const categoryIdFor = (...hints: string[]) =>
     categories.find((category) => hints.some((hint) => category.name.includes(hint)))?.id ?? 'ALL';
+
+  const heroes = useMemo(() => products.slice(0, 3).map((product) => ({
+    productId: product.id,
+    categoryId: product.category?.id ?? 'ALL',
+    image: product.image,
+    eyebrow: product.category?.name ?? 'CABL',
+    title: product.name,
+    body: product.color,
+    action: 'عرض المنتج',
+  })), [products]);
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
