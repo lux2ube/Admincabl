@@ -192,7 +192,9 @@ function App() {
     price: product.discountPrice ?? product.regularPrice,
     color: product.shortDescription ?? product.productDescription ?? 'منتج أصلي من Vention',
     category: product.category,
-    image: product.images[0]?.startsWith('http') ? product.images[0] : `${import.meta.env.BASE_URL}${product.images[0] ?? 'images/vention-powerbank-20k.jpg'}`,
+    image: product.images[0]
+      ? product.images[0].startsWith('http') ? product.images[0] : `${import.meta.env.BASE_URL}${product.images[0]}`
+      : '',
     sku: product.sku,
     quantity: product.quantity,
     shippingOptions: product.shippingOptions,
@@ -501,27 +503,38 @@ function App() {
         ) : (
         <>
         <section className="hero" aria-label="حملات الإلكترونيات" data-testid="section-hero">
-          {heroes.map((hero, index) => (
-            <article className={`hero-frame ${slide === index ? 'active' : ''}`} key={hero.title} aria-hidden={slide !== index}>
+          {heroes.length > 0 ? heroes.map((hero, index) => (
+            <article className={`hero-frame ${slide === index ? 'active' : ''}`} key={hero.productId} aria-hidden={slide !== index}>
               <img src={hero.image} alt={hero.title} data-testid={`img-hero-${index}`} />
               <div className="hero-shade" />
               <div className="hero-copy">
                 <span className="eyebrow">{hero.eyebrow}</span>
                 <h1>{hero.title}</h1>
                 <p>{hero.body}</p>
-                <button className="button-light" type="button" onClick={() => scrollTo('discover')} data-testid={`button-hero-${index}`}>{hero.action}</button>
+                <button className="button-light" type="button" onClick={() => {
+                  setActiveFilter(hero.categoryId);
+                  openProductPreview(products.find((product) => product.id === hero.productId)!);
+                }} data-testid={`button-hero-${index}`}>{hero.action}</button>
               </div>
             </article>
-          ))}
-          <div className="hero-controls" data-testid="controls-hero">
-            <button className="hero-arrow" type="button" aria-label="Previous campaign" onClick={() => setSlide((current) => (current - 1 + heroes.length) % heroes.length)} data-testid="button-hero-previous"><ArrowLeft size={17} /></button>
+          )) : (
+            <div className="hero-frame active">
+              <div className="hero-copy">
+                <span className="eyebrow">{catalogQuery.isLoading ? 'جاري تحميل الكتالوج' : 'الكتالوج غير متاح'}</span>
+                <h1>{catalogQuery.isLoading ? 'جاري تحميل المنتجات.' : 'لا توجد منتجات منشورة.'}</h1>
+                <p>{catalogQuery.isLoading ? 'يتم تحميل البيانات من قاعدة البيانات.' : 'أضف منتجات منشورة من لوحة الإدارة لتظهر هنا.'}</p>
+              </div>
+            </div>
+          )}
+          {heroes.length > 0 && <div className="hero-controls" data-testid="controls-hero">
+            <button className="hero-arrow" type="button" aria-label="Previous product" onClick={() => setSlide((current) => (current - 1 + heroes.length) % heroes.length)} data-testid="button-hero-previous"><ArrowLeft size={17} /></button>
             <div className="hero-dots">
               {heroes.map((hero, index) => (
-                <button className={`hero-dot ${slide === index ? 'active' : ''}`} type="button" key={hero.title} aria-label={`Show campaign ${index + 1}`} onClick={() => setSlide(index)} data-testid={`button-hero-dot-${index}`} />
+                <button className={`hero-dot ${slide === index ? 'active' : ''}`} type="button" key={hero.productId} aria-label={`Show product ${index + 1}`} onClick={() => setSlide(index)} data-testid={`button-hero-dot-${index}`} />
               ))}
             </div>
-            <button className="hero-arrow" type="button" aria-label="Next campaign" onClick={() => setSlide((current) => (current + 1) % heroes.length)} data-testid="button-hero-next"><ArrowRight size={17} /></button>
-          </div>
+            <button className="hero-arrow" type="button" aria-label="Next product" onClick={() => setSlide((current) => (current + 1) % heroes.length)} data-testid="button-hero-next"><ArrowRight size={17} /></button>
+          </div>}
         </section>
 
         <section className="section" id="categories" data-testid="section-categories">
