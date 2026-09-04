@@ -1,6 +1,6 @@
-# [Project name]
+# Namshi Store Clone
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A premium, responsive fashion storefront recreation with browsing, search, wishlist, cart, newsletter, and campaign interactions.
 
 ## Run & Operate
 
@@ -22,23 +22,29 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/namshi-store/src/App.tsx` — storefront page and interaction state
+- `artifacts/namshi-store/src/index.css` — storefront design system and responsive styles
+- `artifacts/namshi-store/public/images/` — local campaign and product media
+- `artifacts/namshi-store/.replit-artifact/artifact.toml` — artifact routing metadata
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The initial experience is frontend-only so the catalog can be browsed without authentication or a database.
+- Product filtering, search, wishlist, cart, and newsletter signup are intentionally local interactions for the first release.
+- Campaign and product imagery is local to the artifact rather than hotlinked, so the storefront remains previewable and portable.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+The homepage presents seasonal campaigns, category discovery, curated product cards, service promises, and newsletter signup. Shoppers can search the curated catalog, filter by category, save items, add/remove items from the bag, and move between sections from the navigation.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+Use the supplied Namshi page as the visual benchmark while keeping the storefront editable for the user's own or client-approved brand assets and catalog.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The app is registered at the root preview path and must be run through the managed `artifacts/namshi-store: web` workflow.
+- Images resolve through `import.meta.env.BASE_URL`, which keeps the app working behind the artifact route.
 
 ## Pointers
 

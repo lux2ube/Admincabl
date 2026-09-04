@@ -1,0 +1,1 @@
+- [Reference-site access](reference-site-access.md) — keep clones portable with local assets when automated live-site extraction is unavailable.
