@@ -1,0 +1,283 @@
+# E-Commerce DB Diagram — Extracted Schema
+
+Legend: PK = primary key, table names in original naming (snake_case)
+
+---
+
+## Tags & Categories
+
+### tags
+- id serial PK
+- tag_name varchar(255)
+- icon text
+- created_at timestamptz
+- updated_at timestamptz
+- created_by UUID
+- updated_by UUID
+
+### product_tags
+- tag_id integer
+- product_id UUID
+
+### categories
+- id UUID PK
+- parent_id UUID
+- category_name VARCHAR(255)
+- category_description TEXT
+- icon TEXT
+- image_path TEXT
+- active BOOLEAN
+- created_at timestamptz
+- updated_at timestamptz
+- created_by UUID
+- updated_by UUID
+
+### product_categories
+- category_id UUID
+- product_id UUID
+
+---
+
+## Products & Variants
+
+### products
+- id UUID PK
+- product_name VARCHAR(255)
+- SKU VARCHAR(255)
+- regular_price numeric
+- discount_price numeric
+- quantity integer
+- short_description VARCHAR(165)
+- product_description TEXT
+- product_weight NUMERIC
+- product_note VARCHAR(255)
+- published BOOLEAN
+- created_at timestamptz
+- updated_at timestamptz
+
+### variants
+- id UUID PK
+- variant_attribute_value_id UUID
+- product_id UUID
+
+### variant_values
+- id UUID PK
+- variant_id UUID
+- price numeric
+- quantity integer
+
+### variant_attribute_values
+- id UUID PK
+- variant_attribute_value_id UUID
+- attribute_value_id UUID
+
+### attribute_values
+- id UUID PK
+- attribute_id UUID
+- attribute_value VARCHAR(255)
+- color VARCHAR(50)
+
+### product_attributes
+- product_id UUID
+- attribute_id UUID
+
+### attributes
+- id UUID PK
+- attribute_name VARCHAR(255)
+- created_at timestamptz
+- updated_at timestamptz
+- created_by UUID
+- updated_by UUID
+
+### galleries
+- id UUID PK
+- product_id UUID
+- image_path TEXT
+- thumbail BOOLEAN *(sic — as spelled in source)*
+- display_order SMALLINT
+- created_at timestamptz
+- updated_at timestamptz
+- created_by UUID
+- updated_by UUID
+
+---
+
+## Staff / Roles
+
+### staff_accounts
+- id UUID PK
+- first_name VARCHAR(100)
+- last_name VARCHAR(100)
+- phone_number VARCHAR(100)
+- email VARCHAR(255)
+- password_hash TEXT
+- active BOOLEAN
+- profile_img TEXT
+- registered_at timestamptz
+- updated_at timestamptz
+- created_by UUID
+- updated_by UUID
+
+### staff_roles
+- staff_id UUID
+- role_id integer
+
+### roles
+- id serial PK
+- role_name VARCHAR(255)
+- privileges TEXT[]
+- created_at timestamptz
+- updated_at timestamptz
+- created_by UUID
+- updated_by UUID
+
+---
+
+## Sales / Cart / Shipping
+
+### sells
+- id UUID PK
+- product_id UUID
+- price FLOAT
+- quantity SMALLINT
+
+### card_items
+- id UUID PK
+- card_id UUID
+- product_id UUID
+- quantity SMALLINT
+
+### cards
+- card_id UUID PK
+- customer_id UUID
+
+### product_shippings
+- product_id UUID
+- shipping_id integer
+- ship_charge numeric
+- free BOOLEAN
+- estimated_days numeric
+
+### shippings
+- id serial PK
+- name TEXT
+- active BOOLEAN
+- icon_path TEXT
+- created_at timestamptz
+- updated_at timestamptz
+- created_by UUID
+- updated_by UUID
+
+---
+
+## Orders
+
+### orders
+- id VARCHAR(50) PK
+- coupon_id integer
+- customer_id UUID
+- order_status_id integer
+- order_approved_at timestamptz
+- order_delivered_carrier_date timestamptz
+- order_delivered_customer_date timestamptz
+- created_at timestamptz
+
+### order_items
+- id UUID PK
+- product_id UUID
+- order_id UUID
+- price numeric
+- quantity integer
+- shipping_id integer
+
+### order_statuses
+- id serial PK
+- status_name VARCHAR(255)
+- color VARCHAR(50)
+- privacy VARCHAR(50)
+- created_at timestamptz
+- updated_at timestamptz
+- created_by UUID
+- updated_by UUID
+
+---
+
+## Coupons
+
+### coupons
+- id serial PK
+- code VARCHAR(255)
+- coupon_description TEXT
+- discount_value numeric
+- times_used integer
+- max_usage integer
+- coupon_start_date timestamptz
+- coupon_end_date timestamptz
+- created_at timestamptz
+- updated_at timestamptz
+- created_by UUID
+- updated_by UUID
+
+### product_coupons
+- coupon_id UUID
+- product_id UUID
+
+---
+
+## Customers
+
+### customers
+- id UUID PK
+- first_name VARCHAR(100)
+- last_name VARCHAR(100)
+- phone_number VARCHAR(255)
+- email TEXT
+- password_hash TEXT
+- active BOOLEAN
+- registered_at timestamptz
+- created_at timestamptz
+
+### customer_addresses
+- id UUID PK
+- customer_id UUID
+- address_line1 TEXT
+- address_line2 TEXT
+- postal_code VARCHAR(255)
+- country VARCHAR(255)
+- city VARCHAR(255)
+- phone_number VARCHAR(255)
+
+---
+
+## Misc
+
+### notifications
+- id UUID PK
+- account_id UUID
+- title VARCHAR(100)
+- content TEXT
+- seen BOOLEAN
+- created_at timestamptz
+- receive_time timestamptz
+- notification_expiry_date DATE
+
+### slideshows
+- id UUID PK
+- destination_url TEXT
+- image_url TEXT
+- clicks SMALLINT
+- created_at timestamptz
+- updated_at timestamptz
+- created_by UUID
+- updated_by UUID
+
+---
+
+## Relationship notes
+
+- **products** is the hub: linked to categories (via product_categories), tags (via product_tags), attributes (via product_attributes → variant_attribute_values → attribute_values), variants, galleries, sells, order_items, card_items, product_shippings, product_coupons.
+- **customers** links to customer_addresses, orders, cards.
+- **orders** links to order_items, order_statuses, coupons.
+- **staff_accounts** links to roles via staff_roles (many-to-many).
+- **categories** is self-referencing via parent_id (subcategories).
+- Junction/pivot tables (no own surrogate PK shown): product_tags, product_categories, product_attributes, product_coupons, product_shippings, staff_roles.

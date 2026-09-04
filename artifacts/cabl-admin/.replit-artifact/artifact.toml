@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/cabl-admin/"
+title = "CABL Admin"
+description = "A secure operations dashboard for managing the CABL commerce catalog, customers, orders, shipping, and supporting database relationships through the shared API."
+version = "1.0.0"
+id = "artifacts/cabl-admin"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/cabl-admin/" ]
+localPort = 22761
+
+[services.development]
+run = "pnpm --filter @workspace/cabl-admin run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cabl-admin", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/cabl-admin/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22761"
+BASE_PATH = "/cabl-admin/"
