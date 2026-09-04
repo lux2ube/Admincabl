@@ -29,7 +29,7 @@ type Product = {
   name: string;
   price: number;
   color: string;
-  category: 'POWER_BANKS' | 'CHARGERS' | 'CABLES' | 'TRAVEL';
+  category: { id: string; name: string } | null;
   image: string;
   sku: string;
   warranty?: string;
@@ -61,7 +61,7 @@ const heroes: HeroSlide[] = [
     eyebrow: 'طاقة بلا حجم زائد',
     title: 'تقنية GaN تستحق مكانها.',
     body: 'من أطقم 30W اليومية إلى شواحن 100W متعددة المنافذ، مختارة للسوق المحلي.',
-    action: 'تصفح الشواحن',
+    action: 'تصفح المنتجات',
   },
   {
     image: asset('vention-adapter-65w.jpg'),
@@ -71,28 +71,6 @@ const heroes: HeroSlide[] = [
     action: 'تصفح محولات السفر',
   },
 ];
-
-const categoryMeta = [
-  { name: 'باور بانك', image: asset('vention-powerbank-10k.jpg'), filter: 'POWER_BANKS' as const },
-  { name: 'شواحن GaN', image: asset('vention-charger-65w.jpg'), filter: 'CHARGERS' as const },
-  { name: 'كابلات', image: asset('vention-cable-100w.jpg'), filter: 'CABLES' as const },
-  { name: 'السفر والسيارة', image: asset('vention-adapter-65w.jpg'), filter: 'TRAVEL' as const },
-];
-
-const filterOptions = [
-  { value: 'ALL', label: 'كل المنتجات' },
-  { value: 'POWER_BANKS', label: 'باور بانك' },
-  { value: 'CHARGERS', label: 'الشواحن' },
-  { value: 'CABLES', label: 'الكابلات' },
-  { value: 'TRAVEL', label: 'السفر والسيارة' },
-];
-
-const categoryNames: Record<Product['category'], string> = {
-  POWER_BANKS: 'باور بانك',
-  CHARGERS: 'الشواحن',
-  CABLES: 'الكابلات',
-  TRAVEL: 'السفر والسيارة',
-};
 
 function CablLogo({ className = '', showTagline = true }: { className?: string; showTagline?: boolean }) {
   return (
@@ -132,13 +110,13 @@ function ProductPreview({
           <img src={product.image} alt={product.name} data-testid={`img-product-preview-${product.id}`} />
         </div>
         <div className="product-preview-copy">
-          <span className="eyebrow">{product.brand} · {categoryNames[product.category]}</span>
+          <span className="eyebrow">{product.brand} · {product.category?.name ?? '—'}</span>
           <h1>{product.name}</h1>
            <div className="product-preview-price">${product.price.toFixed(2)}</div>
           <p className="product-preview-description">{product.color}. حل عملي للشحن اليومي، المكتب، والسفر.</p>
           <div className="product-spec-list">
             <div><span>العلامة</span><strong>Vention</strong></div>
-            <div><span>الفئة</span><strong>{categoryNames[product.category]}</strong></div>
+            <div><span>الفئة</span><strong>{product.category?.name ?? '—'}</strong></div>
             {product.sku && <div><span>SKU</span><strong>{product.sku}</strong></div>}
             {product.warranty && <div><span>الضمان</span><strong>{product.warranty}</strong></div>}
           </div>
@@ -244,7 +222,7 @@ function App() {
     name: product.productName,
     price: product.discountPrice ?? product.regularPrice,
     color: product.shortDescription ?? product.productDescription ?? 'منتج أصلي من Vention',
-    category: product.category?.name.includes('باور') ? 'POWER_BANKS' : /شاحن|شواحن/.test(product.category?.name ?? '') ? 'CHARGERS' : product.category?.name.includes('كابل') ? 'CABLES' : 'TRAVEL',
+    category: product.category,
     image: product.images[0]?.startsWith('http') ? product.images[0] : `${import.meta.env.BASE_URL}${product.images[0] ?? 'images/vention-powerbank-20k.jpg'}`,
     sku: product.sku,
     quantity: product.quantity,
@@ -257,16 +235,33 @@ function App() {
   const visibleProducts = useMemo(() => {
     const cleanQuery = query.trim().toLowerCase();
     return products.filter((product) => {
-      const matchesFilter = activeFilter === 'ALL' || product.category === activeFilter;
-      const matchesQuery = !cleanQuery || `${product.brand} ${product.name} ${product.category}`.toLowerCase().includes(cleanQuery);
+      const matchesFilter = activeFilter === 'ALL' || product.category?.id === activeFilter;
+      const matchesQuery = !cleanQuery || `${product.brand} ${product.name} ${product.category?.name ?? ''} ${product.sku} ${product.color}`.toLowerCase().includes(cleanQuery);
       return matchesFilter && matchesQuery;
     });
   }, [activeFilter, query]);
 
-  const categories = useMemo(() => categoryMeta.map((category) => ({
-    ...category,
-    count: `${products.filter((product) => product.category === category.filter).length} منتجات`,
-  })), [products]);
+  const categories = useMemo(() => {
+    const categoryMap = new Map<string, { id: string; name: string; image: string; count: string }>();
+    for (const product of products) {
+      if (!product.category || categoryMap.has(product.category.id)) continue;
+      categoryMap.set(product.category.id, {
+        id: product.category.id,
+        name: product.category.name,
+        image: product.image,
+        count: `${products.filter((item) => item.category?.id === product.category?.id).length} منتجات`,
+      });
+    }
+    return [...categoryMap.values()];
+  }, [products]);
+
+  const filterOptions = useMemo(() => [
+    { value: 'ALL', label: 'كل المنتجات' },
+    ...categories.map((category) => ({ value: category.id, label: category.name })),
+  ], [categories]);
+
+  const categoryIdFor = (...hints: string[]) =>
+    categories.find((category) => hints.some((hint) => category.name.includes(hint)))?.id ?? 'ALL';
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -477,10 +472,7 @@ function App() {
           </div>
 
           <nav className="desktop-nav" aria-label="التنقل الرئيسي" data-testid="nav-main">
-            <button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="nav-power-banks">باور بانك</button>
-            <button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="nav-chargers">الشواحن</button>
-            <button type="button" onClick={() => chooseCategory('CABLES')} data-testid="nav-cables">الكابلات</button>
-            <button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="nav-travel">السفر والسيارة</button>
+            {filterOptions.slice(1).map((filter) => <button type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`nav-category-${filter.value}`}>{filter.label}</button>)}
             <button type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-brands">Vention</button>
             <button type="button" onClick={() => scrollTo('about')} data-testid="nav-about">عن CABL</button>
             <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="nav-sale">تسوق الآن</button>
@@ -488,10 +480,7 @@ function App() {
 
           {mobileMenuOpen && (
             <nav className="mobile-nav" aria-label="تنقل الهاتف" data-testid="nav-mobile">
-              <button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="mobile-nav-power-banks">باور بانك</button>
-              <button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="mobile-nav-chargers">الشواحن</button>
-              <button type="button" onClick={() => chooseCategory('CABLES')} data-testid="mobile-nav-cables">الكابلات</button>
-              <button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="mobile-nav-travel">السفر والسيارة</button>
+              {filterOptions.slice(1).map((filter) => <button type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`mobile-nav-category-${filter.value}`}>{filter.label}</button>)}
               <button type="button" onClick={() => scrollTo('about')} data-testid="mobile-nav-about">عن CABL</button>
               <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="mobile-nav-quote">تسوق الآن</button>
             </nav>
@@ -566,8 +555,8 @@ function App() {
           </div>
           <div className="category-grid">
             {categories.map((category) => (
-              <button className="category-tile" type="button" key={category.name} onClick={() => chooseCategory(category.filter)} data-testid={`card-category-${category.filter.toLowerCase()}`}>
-                <img src={category.image} alt={`${category.name} collection`} data-testid={`img-category-${category.filter.toLowerCase()}`} />
+              <button className="category-tile" type="button" key={category.id} onClick={() => chooseCategory(category.id)} data-testid={`card-category-${category.id}`}>
+                <img src={category.image} alt={`${category.name} collection`} data-testid={`img-category-${category.id}`} />
                 <span className="category-info">
                   <h3>{category.name}</h3>
                   <span>{category.count} <ChevronDown size={11} /></span>
@@ -587,16 +576,16 @@ function App() {
           </div>
           <div className="campaign-grid">
             <article className="campaign-card">
-              <img src={asset('vention-powerbank-10k.jpg')} alt="Vention power banks" data-testid="img-campaign-season" />
-              <span className="campaign-label"><h3>طاقة<br />أينما ذهبت.</h3><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="button-campaign-season">تصفح الباور بانك</button></span>
+              <img src={asset('vention-powerbank-10k.jpg')} alt={categories.find((category) => category.id === categoryIdFor('باور', 'طاقة'))?.name ?? 'منتجات Vention'} data-testid="img-campaign-season" />
+              <span className="campaign-label"><h3>طاقة<br />أينما ذهبت.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('باور', 'طاقة'))} data-testid="button-campaign-season">تصفح {categories.find((category) => category.id === categoryIdFor('باور', 'طاقة'))?.name ?? 'الفئة'}</button></span>
             </article>
             <article className="campaign-card">
-              <img src={asset('vention-charger-70w.jpg')} alt="Vention GaN chargers" data-testid="img-campaign-women" />
-              <span className="campaign-label"><h3>حجم صغير،<br />أداء كبير.</h3><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="button-campaign-women">تصفح الشواحن</button></span>
+              <img src={asset('vention-charger-70w.jpg')} alt={categories.find((category) => category.id === categoryIdFor('شاحن', 'شواحن'))?.name ?? 'منتجات Vention'} data-testid="img-campaign-women" />
+              <span className="campaign-label"><h3>حجم صغير،<br />أداء كبير.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('شاحن', 'شواحن'))} data-testid="button-campaign-women">تصفح {categories.find((category) => category.id === categoryIdFor('شاحن', 'شواحن'))?.name ?? 'الفئة'}</button></span>
             </article>
             <article className="campaign-card">
-              <img src={asset('vention-adapter-65w.jpg')} alt="Vention travel adapter" data-testid="img-campaign-men" />
-              <span className="campaign-label"><h3>جاهز<br />للسفر.</h3><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="button-campaign-men">تصفح محولات السفر</button></span>
+              <img src={asset('vention-adapter-65w.jpg')} alt={categories.find((category) => category.id === categoryIdFor('سفر'))?.name ?? 'منتجات Vention'} data-testid="img-campaign-men" />
+              <span className="campaign-label"><h3>جاهز<br />للسفر.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('سفر'))} data-testid="button-campaign-men">تصفح {categories.find((category) => category.id === categoryIdFor('سفر'))?.name ?? 'الفئة'}</button></span>
             </article>
           </div>
         </section>
@@ -691,7 +680,7 @@ function App() {
               <CablLogo className="cabl-logo-footer" />
               <p>منتجات Vention الأصلية للشحن والطاقة، متوفرة للشراء داخل اليمن.</p>
             </div>
-            <div className="footer-col"><h4>تصفح</h4><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="footer-power-banks">باور بانك</button><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="footer-chargers">الشواحن</button><button type="button" onClick={() => chooseCategory('CABLES')} data-testid="footer-cables">الكابلات</button><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="footer-travel">السفر والسيارة</button></div>
+            <div className="footer-col"><h4>تصفح</h4>{filterOptions.slice(1).map((filter) => <button type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`footer-category-${filter.value}`}>{filter.label}</button>)}</div>
             <div className="footer-col"><h4>المتجر</h4><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-shortlist">كل المنتجات</button><button type="button" onClick={() => setCartOpen(true)} data-testid="footer-moq">السلة</button><button type="button" onClick={() => setWishlistOpen(true)} data-testid="footer-pricing">المفضلة</button></div>
             <div className="footer-col"><h4>خدمة العملاء</h4><button type="button" onClick={() => scrollTo('about')} data-testid="footer-about">عن CABL</button><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">الشحن والتوصيل</button><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-help">مواصفات المنتجات</button><button type="button" onClick={openTracking} data-testid="footer-track-order">تتبع طلبك</button><button type="button" onClick={openQuoteForm} data-testid="footer-contact">إتمام الطلب</button></div>
             <div className="footer-col"><h4>تابعنا</h4><button type="button" onClick={() => announce('تم نسخ رابط Instagram')} data-testid="footer-instagram">Instagram</button><button type="button" onClick={() => announce('تم نسخ رابط TikTok')} data-testid="footer-tiktok">TikTok</button><button type="button" onClick={() => announce('تم نسخ رابط WhatsApp')} data-testid="footer-whatsapp">WhatsApp</button></div>
