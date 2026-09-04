@@ -1,6 +1,6 @@
-# القراحي الكترونيك — Vention Yemen
+# CABL — كابل لصاحبها عمار القراحي وشركاه
 
-A Vention charging-accessories storefront for القراحي الكترونيك, the exclusive Vention agent in Yemen, using the existing Namshi-style editorial layout.
+A Vention charging-accessories storefront for CABL, using the existing Namshi-style editorial layout.
 
 ## Run & Operate
 
@@ -22,7 +22,7 @@ A Vention charging-accessories storefront for القراحي الكترونيك,
 
 ## Where things live
 
-- `artifacts/namshi-store/src/App.tsx` — active القراحي الكترونيك electronics catalog, filters, and quote-shortlist interactions
+- `artifacts/namshi-store/src/App.tsx` — active CABL electronics catalog, filters, and quote-shortlist interactions
 - `artifacts/namshi-store/src/index.css` — editorial storefront design system and responsive styles
 - `artifacts/namshi-store/public/images/` — local Vention product and campaign media
 - `artifacts/waslah-store/` — standalone Arabic RTL version of the same Vention shortlist
@@ -36,7 +36,7 @@ A Vention charging-accessories storefront for القراحي الكترونيك,
 
 ## Product
 
-The القراحي الكترونيك homepage presents the ten-product Vention shortlist across power banks, GaN chargers, cables, and travel adapters. Visitors can search and filter products, review SKUs and retail references, and build a quote shortlist for Yemen sourcing.
+The CABL homepage presents the ten-product Vention shortlist across power banks, GaN chargers, cables, and travel adapters. Visitors can search and filter products, review SKUs and retail references, and build a quote shortlist for Yemen sourcing.
 
 ## User preferences
 
