@@ -333,6 +333,9 @@ export interface AdminSeedResult {
 }
 
 export type ListStoreOrdersParams = {
+/**
+ * @pattern ^[^\s@]+@[^\s@]+\.[^\s@]+$
+ */
 email: string;
 /**
  * @minLength 5

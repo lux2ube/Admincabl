@@ -116,13 +116,14 @@ export const GetStoreCatalogResponse = zod.object({
 /**
  * @summary List a customer's orders using verified contact details
  */
+export const listStoreOrdersQueryEmailRegExp = new RegExp('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$');
 export const listStoreOrdersQueryPhoneMin = 5;
 export const listStoreOrdersQueryPhoneMax = 40;
 
 
 
 export const ListStoreOrdersQueryParams = zod.object({
-  "email": zod.email(),
+  "email": zod.coerce.string().regex(listStoreOrdersQueryEmailRegExp),
   "phone": zod.coerce.string().min(listStoreOrdersQueryPhoneMin).max(listStoreOrdersQueryPhoneMax)
 })
 

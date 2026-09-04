@@ -99,7 +99,7 @@ paths:
           required: true
           schema:
             type: string
-            format: email
+            pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
         - name: phone
           in: query
           required: true
