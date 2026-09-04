@@ -244,7 +244,7 @@ function App() {
     name: product.productName,
     price: product.discountPrice ?? product.regularPrice,
     color: product.shortDescription ?? product.productDescription ?? 'منتج أصلي من Vention',
-    category: product.category?.name.includes('باور') ? 'POWER_BANKS' : product.category?.name.includes('شاحن') ? 'CHARGERS' : product.category?.name.includes('كابل') ? 'CABLES' : 'TRAVEL',
+    category: product.category?.name.includes('باور') ? 'POWER_BANKS' : /شاحن|شواحن/.test(product.category?.name ?? '') ? 'CHARGERS' : product.category?.name.includes('كابل') ? 'CABLES' : 'TRAVEL',
     image: product.images[0]?.startsWith('http') ? product.images[0] : `${import.meta.env.BASE_URL}${product.images[0] ?? 'images/vention-powerbank-20k.jpg'}`,
     sku: product.sku,
     quantity: product.quantity,
