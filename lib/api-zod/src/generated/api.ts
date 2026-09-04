@@ -147,6 +147,8 @@ export const createStoreOrderBodyCustomerLastNameMax = 100;
 
 export const createStoreOrderBodyCustomerEmailMax = 255;
 
+
+export const createStoreOrderBodyCustomerEmailRegExp = new RegExp('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$');
 export const createStoreOrderBodyCustomerPhoneNumberMin = 5;
 export const createStoreOrderBodyCustomerPhoneNumberMax = 40;
 
@@ -178,7 +180,7 @@ export const CreateStoreOrderBody = zod.object({
   "customer": zod.object({
   "firstName": zod.string().min(createStoreOrderBodyCustomerFirstNameMin).max(createStoreOrderBodyCustomerFirstNameMax),
   "lastName": zod.string().min(createStoreOrderBodyCustomerLastNameMin).max(createStoreOrderBodyCustomerLastNameMax),
-  "email": zod.email().max(createStoreOrderBodyCustomerEmailMax),
+  "email": zod.string().max(createStoreOrderBodyCustomerEmailMax).regex(createStoreOrderBodyCustomerEmailRegExp),
   "phoneNumber": zod.string().min(createStoreOrderBodyCustomerPhoneNumberMin).max(createStoreOrderBodyCustomerPhoneNumberMax)
 }),
   "address": zod.object({

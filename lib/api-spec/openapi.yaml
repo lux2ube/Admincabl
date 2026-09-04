@@ -435,7 +435,7 @@ components:
           maxLength: 100
         email:
           type: string
-          format: email
+          pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
           maxLength: 255
         phoneNumber:
           type: string
