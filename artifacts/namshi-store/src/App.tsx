@@ -42,24 +42,24 @@ type HeroSlide = {
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 
 const products: Product[] = [
-  { id: 1, brand: 'Vention', name: 'باور بنك 20,000mAh / 22.5W', price: '$28.09', color: 'USB-C + USB-A + كابل مدمج', category: 'POWER_BANKS', image: asset('vention-powerbank-20k.jpg'), sku: 'XGYP0-40-TY', warranty: 'ضمان 12 شهرًا', tag: 'سعر مرجعي' },
-  { id: 2, brand: 'Vention', name: 'باور بنك 10,000mAh / 22.5W', price: '$24.18 SGD', color: 'كابل شحن مدمج', category: 'POWER_BANKS', image: asset('vention-powerbank-10k.jpg'), tag: 'سعر مرجعي' },
-  { id: 3, brand: 'Vention', name: 'باور بنك 10,000mAh / USB-C + Lightning', price: '$24.82 SGD', color: 'USB-C + Lightning مدمجان', category: 'POWER_BANKS', image: asset('vention-powerbank-10k-lightning.jpg'), tag: 'سعر مرجعي' },
-  { id: 4, brand: 'Vention', name: 'شاحن GaN بمنفذين 30W', price: '$11.69', color: 'USB-C + USB-A · قابس أوروبي', category: 'CHARGERS', image: asset('vention-charger-30w.jpg'), tag: 'سعر مرجعي' },
+  { id: 1, brand: 'Vention', name: 'باور بنك 20,000mAh / 22.5W', price: '$28.09', color: 'USB-C + USB-A + كابل مدمج', category: 'POWER_BANKS', image: asset('vention-powerbank-20k.jpg'), sku: 'XGYP0-40-TY', warranty: 'ضمان 12 شهرًا' },
+  { id: 2, brand: 'Vention', name: 'باور بنك 10,000mAh / 22.5W', price: '$24.18 SGD', color: 'كابل شحن مدمج', category: 'POWER_BANKS', image: asset('vention-powerbank-10k.jpg') },
+  { id: 3, brand: 'Vention', name: 'باور بنك 10,000mAh / USB-C + Lightning', price: '$24.82 SGD', color: 'USB-C + Lightning مدمجان', category: 'POWER_BANKS', image: asset('vention-powerbank-10k-lightning.jpg') },
+  { id: 4, brand: 'Vention', name: 'شاحن GaN بمنفذين 30W', price: '$11.69', color: 'USB-C + USB-A · قابس أوروبي', category: 'CHARGERS', image: asset('vention-charger-30w.jpg') },
   { id: 5, brand: 'Vention', name: 'طقم شحن GaN بقدرة 30W', price: '$15.90', color: 'شاحن + كابل USB-C إلى USB-C', category: 'CHARGERS', image: asset('vention-charger-30w-kit.jpg'), tag: 'باقة جاهزة' },
-  { id: 6, brand: 'Vention', name: 'شاحن GaN بثلاثة منافذ 65W', price: '$37.59', color: 'C+C+A · 65W / 65W / 60W', category: 'CHARGERS', image: asset('vention-charger-65w.jpg'), tag: 'سعر مرجعي' },
-  { id: 7, brand: 'Vention', name: 'شاحن GaN بثلاثة منافذ 70W', price: '$39.90', color: 'C+C+A · 70W / 70W / 22.5W', category: 'CHARGERS', image: asset('vention-charger-70w.jpg'), tag: 'سعر مرجعي' },
-  { id: 8, brand: 'Vention', name: 'شاحن GaN بثلاثة منافذ 100W', price: '$79.39', color: 'C+C+A · 100W / 100W / 30W', category: 'CHARGERS', image: asset('vention-charger-100w.jpg'), tag: 'سعر مرجعي' },
-  { id: 9, brand: 'Vention', name: 'كابل USB-C إلى USB-C بقدرة 100W', price: '$11.27 SGD', color: 'شحن سريع 5A · USB 2.0', category: 'CABLES', image: asset('vention-cable-100w.jpg'), tag: 'سعر مرجعي' },
-  { id: 10, brand: 'Vention', name: 'محول سفر عالمي GaN بقدرة 65W', price: '$95.88 SGD', color: 'شحن عالمي للسفر', category: 'TRAVEL', image: asset('vention-adapter-65w.jpg'), tag: 'سعر مرجعي' },
+  { id: 6, brand: 'Vention', name: 'شاحن GaN بثلاثة منافذ 65W', price: '$37.59', color: 'C+C+A · 65W / 65W / 60W', category: 'CHARGERS', image: asset('vention-charger-65w.jpg') },
+  { id: 7, brand: 'Vention', name: 'شاحن GaN بثلاثة منافذ 70W', price: '$39.90', color: 'C+C+A · 70W / 70W / 22.5W', category: 'CHARGERS', image: asset('vention-charger-70w.jpg') },
+  { id: 8, brand: 'Vention', name: 'شاحن GaN بثلاثة منافذ 100W', price: '$79.39', color: 'C+C+A · 100W / 100W / 30W', category: 'CHARGERS', image: asset('vention-charger-100w.jpg') },
+  { id: 9, brand: 'Vention', name: 'كابل USB-C إلى USB-C بقدرة 100W', price: '$11.27 SGD', color: 'شحن سريع 5A · USB 2.0', category: 'CABLES', image: asset('vention-cable-100w.jpg') },
+  { id: 10, brand: 'Vention', name: 'محول سفر عالمي GaN بقدرة 65W', price: '$95.88 SGD', color: 'شحن عالمي للسفر', category: 'TRAVEL', image: asset('vention-adapter-65w.jpg') },
 ];
 
 const heroes: HeroSlide[] = [
   {
     image: asset('vention-powerbank-20k.jpg'),
-    eyebrow: 'قائمة Vention المختارة',
+    eyebrow: 'منتجات Vention الأصلية',
     title: 'اشحن خطوتك القادمة.',
-    body: 'عشرة منتجات مختارة لرف شحن عملي، جاهزة لطلب أسعار الجملة.',
+    body: 'حلول شحن وطاقة عملية للاستخدام اليومي، متوفرة الآن من CABL.',
     action: 'تصفح القائمة',
   },
   {
