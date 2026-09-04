@@ -18,10 +18,11 @@ type Product = {
   brand: string;
   name: string;
   price: string;
-  oldPrice?: string;
   color: string;
-  category: 'WOMEN' | 'MEN' | 'FOOTWEAR' | 'ACCESSORIES';
+  category: 'POWER_BANKS' | 'CHARGERS' | 'CABLES' | 'TRAVEL';
   image: string;
+  sku?: string;
+  warranty?: string;
   tag?: string;
 };
 
@@ -36,45 +37,55 @@ type HeroSlide = {
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 
 const products: Product[] = [
-  { id: 1, brand: 'Polo Ralph Lauren', name: 'Slim Oxford Shirt', price: 'AED 495', color: 'Cloud white', category: 'MEN', image: asset('men-campaign.jpg'), tag: 'New in' },
-  { id: 2, brand: 'Aeyde', name: 'Uma Leather Loafers', price: 'AED 1,090', oldPrice: 'AED 1,350', color: 'Ink black', category: 'FOOTWEAR', image: asset('footwear-campaign.jpg'), tag: 'Sale' },
-  { id: 3, brand: 'Nanushka', name: 'Luna Draped Dress', price: 'AED 1,780', color: 'Ivory', category: 'WOMEN', image: asset('women-campaign.jpg') },
-  { id: 4, brand: 'By Far', name: 'Miranda Shoulder Bag', price: 'AED 1,250', color: 'Cobalt', category: 'ACCESSORIES', image: asset('accessories-campaign.jpg'), tag: 'Only on Namshi' },
-  { id: 5, brand: 'Puma', name: 'Speedcat Ballet', price: 'AED 390', color: 'Bone / graphite', category: 'FOOTWEAR', image: asset('footwear-campaign.jpg') },
-  { id: 6, brand: 'COS', name: 'Relaxed Wool Blazer', price: 'AED 890', color: 'Charcoal', category: 'MEN', image: asset('hero-editorial.jpg') },
-  { id: 7, brand: 'Stella McCartney', name: 'Falabella Mini', price: 'AED 2,490', color: 'Black', category: 'ACCESSORIES', image: asset('accessories-campaign.jpg') },
-  { id: 8, brand: 'Rains', name: 'Curve Puffer Jacket', price: 'AED 620', oldPrice: 'AED 790', color: 'Moss green', category: 'WOMEN', image: asset('women-campaign.jpg'), tag: 'Sale' },
+  { id: 1, brand: 'Vention', name: '20,000mAh Power Bank / 22.5W', price: '$28.09', color: 'USB-C + USB-A + built-in cable', category: 'POWER_BANKS', image: asset('waslah-powerbank.png'), sku: 'XGYP0-40-TY', warranty: '12-month warranty', tag: 'Retail reference' },
+  { id: 2, brand: 'Vention', name: '10,000mAh Power Bank / 22.5W', price: '$24.18 SGD', color: 'Built-in charging cable', category: 'POWER_BANKS', image: asset('waslah-powerbank.png'), tag: 'Retail reference' },
+  { id: 3, brand: 'Vention', name: '10,000mAh Power Bank / USB-C + Lightning', price: '$24.82 SGD', color: 'Built-in USB-C + Lightning', category: 'POWER_BANKS', image: asset('waslah-powerbank.png'), tag: 'Retail reference' },
+  { id: 4, brand: 'Vention', name: '30W Dual-Port GaN Charger', price: '$11.69', color: 'USB-C + USB-A · EU plug', category: 'CHARGERS', image: asset('waslah-charger.png'), tag: 'Retail reference' },
+  { id: 5, brand: 'Vention', name: '30W GaN Charging Kit', price: '$15.90', color: 'Charger + USB-C to USB-C cable', category: 'CHARGERS', image: asset('waslah-charger.png'), tag: 'Bundle-ready' },
+  { id: 6, brand: 'Vention', name: '65W 3-Port GaN Charger', price: '$37.59', color: 'C+C+A · 65W / 65W / 60W', category: 'CHARGERS', image: asset('waslah-charger.png'), tag: 'Retail reference' },
+  { id: 7, brand: 'Vention', name: '70W 3-Port GaN Charger', price: '$39.90', color: 'C+C+A · 70W / 70W / 22.5W', category: 'CHARGERS', image: asset('waslah-charger.png'), tag: 'Retail reference' },
+  { id: 8, brand: 'Vention', name: '100W 3-Port GaN Charger', price: '$79.39', color: 'C+C+A · 100W / 100W / 30W', category: 'CHARGERS', image: asset('waslah-charger.png'), tag: 'Retail reference' },
+  { id: 9, brand: 'Vention', name: 'USB-C to USB-C PD100W Cable', price: '$11.27 SGD', color: '100W fast charge', category: 'CABLES', image: asset('waslah-charger.png'), tag: 'Retail reference' },
+  { id: 10, brand: 'Vention', name: '65W GaN Universal Travel Adapter', price: '$95.88 SGD', color: 'Universal travel charging', category: 'TRAVEL', image: asset('waslah-adapter.png'), tag: 'Retail reference' },
 ];
 
 const heroes: HeroSlide[] = [
   {
-    image: asset('hero-editorial.jpg'),
-    eyebrow: 'The new season edit',
-    title: 'Make room for more.',
-    body: 'Fresh silhouettes, considered layers, and the pieces you will reach for first.',
-    action: 'Shop new arrivals',
+    image: asset('waslah-hero.png'),
+    eyebrow: 'The Vention shortlist',
+    title: 'Charge the next move.',
+    body: 'Ten focused products for a smarter charging shelf, ready for wholesale pricing.',
+    action: 'Explore the shortlist',
   },
   {
-    image: asset('women-campaign.jpg'),
-    eyebrow: 'For every version of you',
-    title: 'The art of getting dressed.',
-    body: 'Quietly directional womenswear for days that move at your pace.',
-    action: 'Shop women',
+    image: asset('waslah-charger.png'),
+    eyebrow: 'Power, without the bulk',
+    title: 'GaN that earns its space.',
+    body: 'From 30W everyday kits to 100W multi-port chargers, selected for the region.',
+    action: 'Shop chargers',
   },
   {
-    image: asset('men-campaign.jpg'),
-    eyebrow: 'Good form',
-    title: 'A sharper everyday.',
-    body: 'The new rules of menswear, cut for now and made to stay.',
-    action: 'Shop men',
+    image: asset('waslah-adapter.png'),
+    eyebrow: 'Ready for the road',
+    title: 'One adapter. More places.',
+    body: 'A 65W universal travel adapter for customers who need one setup everywhere.',
+    action: 'Shop travel',
   },
 ];
 
 const categories = [
-  { name: 'Women', count: '12,480 styles', image: asset('women-campaign.jpg'), filter: 'WOMEN' },
-  { name: 'Men', count: '9,340 styles', image: asset('men-campaign.jpg'), filter: 'MEN' },
-  { name: 'Footwear', count: '6,200 styles', image: asset('footwear-campaign.jpg'), filter: 'FOOTWEAR' },
-  { name: 'Accessories', count: '8,100 styles', image: asset('accessories-campaign.jpg'), filter: 'ACCESSORIES' },
+  { name: 'Power Banks', count: '3 products', image: asset('waslah-powerbank.png'), filter: 'POWER_BANKS' },
+  { name: 'GaN Chargers', count: '5 products', image: asset('waslah-charger.png'), filter: 'CHARGERS' },
+  { name: 'Cables', count: '1 product', image: asset('waslah-charger.png'), filter: 'CABLES' },
+  { name: 'Travel & Car', count: '1 product', image: asset('waslah-adapter.png'), filter: 'TRAVEL' },
+];
+
+const filterOptions = [
+  { value: 'ALL', label: 'All products' },
+  { value: 'POWER_BANKS', label: 'Power banks' },
+  { value: 'CHARGERS', label: 'Chargers' },
+  { value: 'CABLES', label: 'Cables' },
+  { value: 'TRAVEL', label: 'Travel & car' },
 ];
 
 function App() {
@@ -143,8 +154,8 @@ function App() {
   return (
     <div className="site-shell">
       <div className="top-strip" data-testid="banner-promotion">
-        Complimentary delivery on orders over AED 250
-        <button type="button" onClick={() => scrollTo('services')} data-testid="button-promotion-details">View details</button>
+        Retail references only · wholesale pricing available on request
+        <button type="button" onClick={() => scrollTo('discover')} data-testid="button-promotion-details">View shortlist</button>
       </div>
 
       <header className="main-header" data-testid="header-storefront">
@@ -160,7 +171,7 @@ function App() {
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <button className="wordmark" type="button" onClick={() => scrollTo('top')} data-testid="button-wordmark">
-              namshi<span>.</span>
+              waslah<span>.</span>
             </button>
             <div className="header-actions">
               <button className="header-action" type="button" onClick={() => setSearchOpen((current) => !current)} aria-label="Search" data-testid="button-search">
@@ -170,29 +181,29 @@ function App() {
                 <Heart /><span>Wishlist</span>
                 {favorites.length > 0 && <span className="count-bubble" data-testid="count-wishlist">{favorites.length}</span>}
               </button>
-              <button className="header-action" type="button" onClick={() => setCartOpen(true)} aria-label="Shopping bag" data-testid="button-cart">
-                <ShoppingBag /><span>Bag</span>
+              <button className="header-action" type="button" onClick={() => setCartOpen(true)} aria-label="Shortlist" data-testid="button-cart">
+                <ShoppingBag /><span>Shortlist</span>
                 {cart.length > 0 && <span className="count-bubble" data-testid="count-cart">{cart.length}</span>}
               </button>
             </div>
           </div>
 
           <nav className="desktop-nav" aria-label="Main navigation" data-testid="nav-main">
-            <button type="button" onClick={() => chooseCategory('WOMEN')} data-testid="nav-women">Women</button>
-            <button type="button" onClick={() => chooseCategory('MEN')} data-testid="nav-men">Men</button>
-            <button type="button" onClick={() => chooseCategory('FOOTWEAR')} data-testid="nav-footwear">Footwear</button>
-            <button type="button" onClick={() => chooseCategory('ACCESSORIES')} data-testid="nav-accessories">Accessories</button>
-            <button type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-brands">Brands</button>
-            <button className="nav-highlight" type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-sale">Sale</button>
+            <button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="nav-power-banks">Power Banks</button>
+            <button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="nav-chargers">Chargers</button>
+            <button type="button" onClick={() => chooseCategory('CABLES')} data-testid="nav-cables">Cables</button>
+            <button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="nav-travel">Travel & Car</button>
+            <button type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-brands">Vention</button>
+            <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="nav-sale">Request quote</button>
           </nav>
 
           {mobileMenuOpen && (
             <nav className="desktop-nav" aria-label="Mobile navigation" data-testid="nav-mobile">
-              <button type="button" onClick={() => chooseCategory('WOMEN')} data-testid="mobile-nav-women">Women</button>
-              <button type="button" onClick={() => chooseCategory('MEN')} data-testid="mobile-nav-men">Men</button>
-              <button type="button" onClick={() => chooseCategory('FOOTWEAR')} data-testid="mobile-nav-footwear">Footwear</button>
-              <button type="button" onClick={() => chooseCategory('ACCESSORIES')} data-testid="mobile-nav-accessories">Accessories</button>
-              <button className="nav-highlight" type="button" onClick={() => chooseCategory('ALL')} data-testid="mobile-nav-sale">Sale</button>
+              <button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="mobile-nav-power-banks">Power Banks</button>
+              <button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="mobile-nav-chargers">Chargers</button>
+              <button type="button" onClick={() => chooseCategory('CABLES')} data-testid="mobile-nav-cables">Cables</button>
+              <button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="mobile-nav-travel">Travel & Car</button>
+              <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="mobile-nav-quote">Request quote</button>
             </nav>
           )}
 
@@ -203,8 +214,8 @@ function App() {
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search brands, styles, categories"
-                aria-label="Search brands, styles, categories"
+                 placeholder="Search products, SKU, specs"
+                 aria-label="Search products, SKU, specs"
                 data-testid="input-search"
               />
               <button className="search-submit" type="button" onClick={() => scrollTo('discover')} aria-label="Submit search" data-testid="button-submit-search">
@@ -212,7 +223,7 @@ function App() {
               </button>
               {query && (
                 <div className="search-suggestions" data-testid="search-results-count">
-                  <p>{visibleProducts.length} result{visibleProducts.length === 1 ? '' : 's'} for “{query}”</p>
+                   <p>{visibleProducts.length} result{visibleProducts.length === 1 ? '' : 's'} for “{query}”</p>
                 </div>
               )}
             </div>
@@ -221,7 +232,7 @@ function App() {
       </header>
 
       <main id="top">
-        <section className="hero" aria-label="Seasonal campaigns" data-testid="section-hero">
+        <section className="hero" aria-label="Electronics campaigns" data-testid="section-hero">
           {heroes.map((hero, index) => (
             <article className={`hero-frame ${slide === index ? 'active' : ''}`} key={hero.title} aria-hidden={slide !== index}>
               <img src={hero.image} alt={hero.title} data-testid={`img-hero-${index}`} />
@@ -249,9 +260,9 @@ function App() {
           <div className="section-header">
             <div>
               <span className="eyebrow">Start here</span>
-              <h2>Find your<br />next favourite.</h2>
+              <h2>Power your<br />next move.</h2>
             </div>
-            <p>Four ways into a wardrobe that looks like you. Browse the edit, then make it yours.</p>
+            <p>Four focused categories for a charging shelf that covers everyday carry, desk setups, and travel.</p>
           </div>
           <div className="category-grid">
             {categories.map((category) => (
@@ -270,22 +281,22 @@ function App() {
           <div className="section-header">
             <div>
               <span className="eyebrow">The edit</span>
-              <h2>Wear the<br />moment.</h2>
+              <h2>Charge the<br />moment.</h2>
             </div>
-            <p>Distinct pieces for the plans already in your calendar and the ones that are not.</p>
+            <p>Vention essentials selected for easy product education, clear specifications, and wholesale conversations.</p>
           </div>
           <div className="campaign-grid">
             <article className="campaign-card">
-              <img src={asset('hero-editorial.jpg')} alt="New season editorial" data-testid="img-campaign-season" />
-              <span className="campaign-label"><h3>New season,<br />new energy.</h3><button type="button" onClick={() => chooseCategory('ALL')} data-testid="button-campaign-season">Shop new in</button></span>
+              <img src={asset('waslah-powerbank.png')} alt="Vention power banks" data-testid="img-campaign-season" />
+              <span className="campaign-label"><h3>Power<br />on the go.</h3><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="button-campaign-season">Shop power banks</button></span>
             </article>
             <article className="campaign-card">
-              <img src={asset('women-campaign.jpg')} alt="Women's collection" data-testid="img-campaign-women" />
-              <span className="campaign-label"><h3>Soft<br />power.</h3><button type="button" onClick={() => chooseCategory('WOMEN')} data-testid="button-campaign-women">Shop women</button></span>
+              <img src={asset('waslah-charger.png')} alt="Vention GaN chargers" data-testid="img-campaign-women" />
+              <span className="campaign-label"><h3>Small<br />but mighty.</h3><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="button-campaign-women">Shop chargers</button></span>
             </article>
             <article className="campaign-card">
-              <img src={asset('men-campaign.jpg')} alt="Men's collection" data-testid="img-campaign-men" />
-              <span className="campaign-label"><h3>Good<br />form.</h3><button type="button" onClick={() => chooseCategory('MEN')} data-testid="button-campaign-men">Shop men</button></span>
+              <img src={asset('waslah-adapter.png')} alt="Vention travel adapter" data-testid="img-campaign-men" />
+              <span className="campaign-label"><h3>Ready<br />to roam.</h3><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="button-campaign-men">Shop travel</button></span>
             </article>
           </div>
         </section>
@@ -293,15 +304,15 @@ function App() {
         <section className="section" id="discover" data-testid="section-discover">
           <div className="section-header">
             <div>
-              <span className="eyebrow">Curated for you</span>
-              <h2>Worth<br />a closer look.</h2>
+              <span className="eyebrow">Curated for your shelf</span>
+              <h2>The Vention<br />shortlist.</h2>
             </div>
-            <button className="text-link" type="button" onClick={() => { setActiveFilter('ALL'); setQuery(''); }} data-testid="button-view-all">View all</button>
+            <button className="text-link" type="button" onClick={() => { setActiveFilter('ALL'); setQuery(''); }} data-testid="button-view-all">View all products</button>
           </div>
           <div className="product-toolbar">
             <div className="filter-row" role="tablist" aria-label="Product categories">
-              {['ALL', 'WOMEN', 'MEN', 'FOOTWEAR', 'ACCESSORIES'].map((filter) => (
-                <button className={`filter-button ${activeFilter === filter ? 'active' : ''}`} type="button" key={filter} onClick={() => setActiveFilter(filter)} data-testid={`filter-${filter.toLowerCase()}`}>{filter === 'ALL' ? 'All pieces' : filter}</button>
+              {filterOptions.map((filter) => (
+                <button className={`filter-button ${activeFilter === filter.value ? 'active' : ''}`} type="button" key={filter.value} onClick={() => setActiveFilter(filter.value)} data-testid={`filter-${filter.value.toLowerCase()}`}>{filter.label}</button>
               ))}
             </div>
             <button className="sort-button" type="button" onClick={() => announce('Showing our latest arrivals')} data-testid="button-sort">Latest arrivals <ChevronDown size={13} /></button>
@@ -319,32 +330,34 @@ function App() {
                 <div className="product-details">
                   <div className="product-brand">{product.brand}</div>
                   <div className="product-name">{product.name}</div>
-                  <div className="product-price">{product.price}{product.oldPrice && <del>{product.oldPrice}</del>}</div>
+                  <div className="product-price">{product.price}</div>
                   <div className="product-color">{product.color}</div>
-                  <button className="text-link" type="button" onClick={() => addToCart(product)} data-testid={`button-add-product-${product.id}`}>Add to bag</button>
+                  {product.sku && <div className="product-color">SKU: {product.sku}</div>}
+                  {product.warranty && <div className="product-color">{product.warranty}</div>}
+                  <button className="text-link" type="button" onClick={() => addToCart(product)} data-testid={`button-add-product-${product.id}`}>Add to shortlist</button>
                 </div>
               </article>
             ))}
-            {visibleProducts.length === 0 && <div className="empty-products" data-testid="empty-product-results">No pieces match that search. Try another edit.</div>}
+            {visibleProducts.length === 0 && <div className="empty-products" data-testid="empty-product-results">No products match that search. Try another SKU or category.</div>}
           </div>
         </section>
 
         <section className="service-band" id="services" aria-label="Shopping services" data-testid="section-services">
-          <div className="service-item"><Truck /><span><strong>Fast delivery</strong><span>Across the UAE and beyond</span></span></div>
-          <div className="service-item"><ShieldCheck /><span><strong>100% genuine</strong><span>Every piece, every time</span></span></div>
-          <div className="service-item"><Sparkles /><span><strong>Easy returns</strong><span>Changed your mind? No problem</span></span></div>
+          <div className="service-item"><Truck /><span><strong>Shipping-ready shortlist</strong><span>Built for regional sourcing conversations</span></span></div>
+          <div className="service-item"><ShieldCheck /><span><strong>Original Vention products</strong><span>SKU and warranty details where supplied</span></span></div>
+          <div className="service-item"><Sparkles /><span><strong>Wholesale quote focus</strong><span>Retail references shown, wholesale pricing pending</span></span></div>
         </section>
 
         <section className="section newsletter" data-testid="section-newsletter">
-          <h2>Stay close<br />to good things.</h2>
+          <h2>Keep the<br />current moving.</h2>
           <div className="newsletter-right">
-            <p>New arrivals, considered edits, and the occasional reason to treat yourself. Delivered with restraint.</p>
+            <p>Leave your email to receive the wholesale-ready shortlist and future sourcing updates.</p>
             {subscribed ? (
               <p data-testid="status-subscribed"><strong>You are on the list.</strong> Watch your inbox.</p>
             ) : (
               <div className="email-form">
                 <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Your email address" aria-label="Your email address" data-testid="input-newsletter-email" />
-                <button type="button" onClick={submitEmail} data-testid="button-newsletter-submit">Sign me up <ArrowRight size={14} /></button>
+                 <button type="button" onClick={submitEmail} data-testid="button-newsletter-submit">Request the list <ArrowRight size={14} /></button>
               </div>
             )}
             <p className="signup-note">By subscribing, you agree to receive marketing emails.</p>
