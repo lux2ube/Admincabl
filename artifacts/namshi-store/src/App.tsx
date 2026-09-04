@@ -368,29 +368,29 @@ function App() {
       <footer className="footer" data-testid="footer-storefront">
         <div className="footer-inner">
           <div className="footer-top">
-            <div className="footer-brand">namshi.<p>Everything you want to wear, in one place. Curated for the region, ready for wherever you are going.</p></div>
-            <div className="footer-col"><h4>Shop</h4><button type="button" onClick={() => chooseCategory('WOMEN')} data-testid="footer-women">Women</button><button type="button" onClick={() => chooseCategory('MEN')} data-testid="footer-men">Men</button><button type="button" onClick={() => chooseCategory('FOOTWEAR')} data-testid="footer-footwear">Footwear</button><button type="button" onClick={() => chooseCategory('ACCESSORIES')} data-testid="footer-accessories">Accessories</button></div>
-            <div className="footer-col"><h4>About</h4><button type="button" onClick={() => announce('Our story is coming soon')} data-testid="footer-story">Our story</button><button type="button" onClick={() => announce('Careers are coming soon')} data-testid="footer-careers">Careers</button><button type="button" onClick={() => announce('Download links are coming soon')} data-testid="footer-app">Get the app</button></div>
-            <div className="footer-col"><h4>Help</h4><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">Delivery & returns</button><button type="button" onClick={() => announce('Help centre is coming soon')} data-testid="footer-help">Help centre</button><button type="button" onClick={() => announce('Contact form is coming soon')} data-testid="footer-contact">Contact us</button></div>
-            <div className="footer-col"><h4>Follow along</h4><button type="button" onClick={() => announce('Instagram link copied')} data-testid="footer-instagram">Instagram</button><button type="button" onClick={() => announce('TikTok link copied')} data-testid="footer-tiktok">TikTok</button><button type="button" onClick={() => announce('Pinterest link copied')} data-testid="footer-pinterest">Pinterest</button></div>
+            <div className="footer-brand">waslah.<p>Vention charging products curated for regional sourcing, clear product conversations, and practical everyday power.</p></div>
+            <div className="footer-col"><h4>Shop</h4><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="footer-power-banks">Power Banks</button><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="footer-chargers">Chargers</button><button type="button" onClick={() => chooseCategory('CABLES')} data-testid="footer-cables">Cables</button><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="footer-travel">Travel & Car</button></div>
+            <div className="footer-col"><h4>Source</h4><button type="button" onClick={() => announce('The Vention shortlist is ready')} data-testid="footer-shortlist">Vention shortlist</button><button type="button" onClick={() => announce('MOQ guidance is coming soon')} data-testid="footer-moq">MOQ guidance</button><button type="button" onClick={() => announce('A wholesale price list is coming soon')} data-testid="footer-pricing">Wholesale pricing</button></div>
+            <div className="footer-col"><h4>Help</h4><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">Shipping & customs</button><button type="button" onClick={() => announce('Product specifications are available on request')} data-testid="footer-help">Product specs</button><button type="button" onClick={() => announce('Contact form is coming soon')} data-testid="footer-contact">Request a quote</button></div>
+            <div className="footer-col"><h4>Follow along</h4><button type="button" onClick={() => announce('Instagram link copied')} data-testid="footer-instagram">Instagram</button><button type="button" onClick={() => announce('TikTok link copied')} data-testid="footer-tiktok">TikTok</button><button type="button" onClick={() => announce('WhatsApp link copied')} data-testid="footer-whatsapp">WhatsApp</button></div>
           </div>
-          <div className="footer-bottom"><span>© 2024 Namshi. All rights reserved.</span><div className="footer-socials"><button type="button" onClick={() => announce('United Arab Emirates selected')} data-testid="button-country">UAE <ChevronDown size={12} /></button><button type="button" onClick={() => announce('Language selector opened')} data-testid="button-language">EN <ChevronDown size={12} /></button></div></div>
+          <div className="footer-bottom"><span>© 2024 Waslah. Vention sourcing shortlist.</span><div className="footer-socials"><button type="button" onClick={() => announce('Yemen selected')} data-testid="button-country">Yemen <ChevronDown size={12} /></button><button type="button" onClick={() => announce('Language selector opened')} data-testid="button-language">EN <ChevronDown size={12} /></button></div></div>
         </div>
       </footer>
 
       {cartOpen && (
         <div className="drawer-backdrop" role="presentation" onClick={() => setCartOpen(false)} data-testid="overlay-cart">
-          <aside className="cart-drawer" role="dialog" aria-label="Shopping bag" onClick={(event) => event.stopPropagation()} data-testid="drawer-cart">
-            <div className="drawer-header"><h2>Your bag <span>({cart.length})</span></h2><button className="close-button" type="button" onClick={() => setCartOpen(false)} aria-label="Close bag" data-testid="button-close-cart"><X size={16} /></button></div>
+            <aside className="cart-drawer" role="dialog" aria-label="Quote shortlist" onClick={(event) => event.stopPropagation()} data-testid="drawer-cart">
+            <div className="drawer-header"><h2>Your shortlist <span>({cart.length})</span></h2><button className="close-button" type="button" onClick={() => setCartOpen(false)} aria-label="Close shortlist" data-testid="button-close-cart"><X size={16} /></button></div>
             {cart.length === 0 ? (
-              <div className="cart-empty"><div><ShoppingBag size={29} strokeWidth={1.2} /><p>Your bag is waiting for something good.</p><button className="button-dark" type="button" onClick={() => { setCartOpen(false); scrollTo('discover'); }} data-testid="button-start-shopping">Start shopping</button></div></div>
+              <div className="cart-empty"><div><ShoppingBag size={29} strokeWidth={1.2} /><p>Your quote shortlist is ready for products.</p><button className="button-dark" type="button" onClick={() => { setCartOpen(false); scrollTo('discover'); }} data-testid="button-start-shopping">Browse products</button></div></div>
             ) : (
               <>
                 <div>
                   {cart.map((product) => <div className="cart-item" key={product.id}><img src={product.image} alt={product.name} /><div className="cart-item-info"><button className="remove-item" type="button" onClick={() => setCart((current) => current.filter((item) => item.id !== product.id))} data-testid={`button-remove-cart-${product.id}`}>Remove</button><strong>{product.brand}</strong><span>{product.name}</span><br /><span>{product.price}</span></div></div>)}
                 </div>
-                <div className="drawer-total"><span>Subtotal</span><span data-testid="text-cart-total">AED {cart.reduce((total, product) => total + Number(product.price.replace(/[^0-9]/g, '')), 0).toLocaleString()}</span></div>
-                <button className="button-dark checkout-button" type="button" onClick={() => announce('Checkout is ready for your next step')} data-testid="button-checkout">Checkout</button>
+                 <div className="drawer-total"><span>Selected products</span><span data-testid="text-cart-total">{cart.length}</span></div>
+                 <button className="button-dark checkout-button" type="button" onClick={() => announce('Quote request flow is ready for backend wiring')} data-testid="button-checkout">Request wholesale quote</button>
               </>
             )}
           </aside>

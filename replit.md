@@ -1,6 +1,6 @@
-# Waslah Tech Store
+# Waslah Electronics Store
 
-An Arabic-first sourcing storefront for a focused Vention charging-accessories shortlist, with retail reference pricing and wholesale quote-request flows.
+A Vention charging-accessories storefront using the existing Namshi-style editorial layout, with retail reference pricing and wholesale quote-request flows.
 
 ## Run & Operate
 
@@ -22,15 +22,15 @@ An Arabic-first sourcing storefront for a focused Vention charging-accessories s
 
 ## Where things live
 
-- `artifacts/waslah-store/src/App.tsx` — Waslah catalog, filters, comparison, and quote-shortlist interactions
-- `artifacts/waslah-store/src/index.css` — RTL storefront design system and responsive styles
-- `artifacts/waslah-store/public/images/` — local product and campaign media
-- `artifacts/namshi-store/` — earlier reference build retained separately from the active Waslah storefront
-- `artifacts/namshi-store/.replit-artifact/artifact.toml` — artifact routing metadata
+- `artifacts/namshi-store/src/App.tsx` — active Waslah electronics catalog, filters, and quote-shortlist interactions
+- `artifacts/namshi-store/src/index.css` — editorial storefront design system and responsive styles
+- `artifacts/namshi-store/public/images/` — local Vention product and campaign media
+- `artifacts/waslah-store/` — standalone Arabic RTL version of the same Vention shortlist
+- `artifacts/namshi-store/.replit-artifact/artifact.toml` — active artifact routing metadata
 
 ## Architecture decisions
 
-- The initial Waslah experience is frontend-only so the shortlist can be reviewed without authentication or a database.
+- The initial experience is frontend-only so the shortlist can be reviewed without authentication or a database.
 - Retail prices are shown only as reference values; wholesale pricing is intentionally not invented and the primary action is a quotation request.
 - Product imagery is local to the artifact rather than hotlinked, so the storefront remains previewable and portable.
 
@@ -44,7 +44,7 @@ Use the supplied Vention shortlist as the source of truth. Keep retail reference
 
 ## Gotchas
 
-- The active app is registered at `/waslah/` and must be run through the managed `artifacts/waslah-store: web` workflow.
+- The active app is registered at `/` and must be run through the managed `artifacts/namshi-store: web` workflow.
 - Images resolve through `import.meta.env.BASE_URL`, which keeps the app working behind the artifact route.
 
 ## Pointers
