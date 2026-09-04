@@ -1,4 +1,4 @@
-# CABL — كابل لصاحبها عمار القراحي وشركاه
+# CABL — متجر منتجات Vention الأصلية في اليمن
 
 A Vention charging-accessories storefront for CABL, using the existing Namshi-style editorial layout.
 
@@ -22,7 +22,7 @@ A Vention charging-accessories storefront for CABL, using the existing Namshi-st
 
 ## Where things live
 
-- `artifacts/namshi-store/src/App.tsx` — active CABL electronics catalog, filters, and quote-shortlist interactions
+- `artifacts/namshi-store/src/App.tsx` — active CABL customer storefront, product filters, previews, cart, and checkout request
 - `artifacts/namshi-store/src/index.css` — editorial storefront design system and responsive styles
 - `artifacts/namshi-store/public/images/` — local Vention product and campaign media
 - `artifacts/waslah-store/` — standalone Arabic RTL version of the same Vention shortlist
@@ -30,17 +30,17 @@ A Vention charging-accessories storefront for CABL, using the existing Namshi-st
 
 ## Architecture decisions
 
-- Quote requests and newsletter subscriptions are persisted in PostgreSQL without requiring visitor authentication; favorites remain browser-local.
-- Retail prices are shown only as reference values; wholesale pricing is intentionally not invented and the primary action is a quotation request.
+- Customer order requests and newsletter subscriptions are persisted in PostgreSQL without requiring visitor authentication; favorites remain browser-local.
+- Prices are shown directly on products and the storefront is written for customers buying from CABL, not for presenting a wholesale proposal.
 - Product imagery is local to the artifact rather than hotlinked, so the storefront remains previewable and portable.
 
 ## Product
 
-The CABL homepage presents the ten-product Vention shortlist across power banks, GaN chargers, cables, and travel adapters. Visitors can search and filter products, review SKUs and retail references, save favorites, build a quote shortlist, submit a wholesale quote request, and subscribe to updates.
+The CABL homepage presents ten Vention products across power banks, GaN chargers, cables, and travel adapters. Customers can search and filter products, open a detailed product preview, save favorites, add products to the cart, submit an order request, and subscribe to updates.
 
 ## User preferences
 
-Use the supplied Vention shortlist as the source of truth. Keep retail references distinct from the eventual wholesale price list and do not treat the current retail figures as purchase costs.
+Use the supplied Vention catalog as the source of truth. Keep the customer experience focused on products, pricing, ordering, delivery, and support from CABL.
 
 ## Gotchas
 
