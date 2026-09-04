@@ -37,35 +37,35 @@ type HeroSlide = {
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 
 const products: Product[] = [
-  { id: 1, brand: 'Vention', name: '20,000mAh Power Bank / 22.5W', price: '$28.09', color: 'USB-C + USB-A + built-in cable', category: 'POWER_BANKS', image: asset('waslah-powerbank.png'), sku: 'XGYP0-40-TY', warranty: '12-month warranty', tag: 'Retail reference' },
-  { id: 2, brand: 'Vention', name: '10,000mAh Power Bank / 22.5W', price: '$24.18 SGD', color: 'Built-in charging cable', category: 'POWER_BANKS', image: asset('waslah-powerbank.png'), tag: 'Retail reference' },
-  { id: 3, brand: 'Vention', name: '10,000mAh Power Bank / USB-C + Lightning', price: '$24.82 SGD', color: 'Built-in USB-C + Lightning', category: 'POWER_BANKS', image: asset('waslah-powerbank.png'), tag: 'Retail reference' },
-  { id: 4, brand: 'Vention', name: '30W Dual-Port GaN Charger', price: '$11.69', color: 'USB-C + USB-A · EU plug', category: 'CHARGERS', image: asset('waslah-charger.png'), tag: 'Retail reference' },
-  { id: 5, brand: 'Vention', name: '30W GaN Charging Kit', price: '$15.90', color: 'Charger + USB-C to USB-C cable', category: 'CHARGERS', image: asset('waslah-charger.png'), tag: 'Bundle-ready' },
-  { id: 6, brand: 'Vention', name: '65W 3-Port GaN Charger', price: '$37.59', color: 'C+C+A · 65W / 65W / 60W', category: 'CHARGERS', image: asset('waslah-charger.png'), tag: 'Retail reference' },
-  { id: 7, brand: 'Vention', name: '70W 3-Port GaN Charger', price: '$39.90', color: 'C+C+A · 70W / 70W / 22.5W', category: 'CHARGERS', image: asset('waslah-charger.png'), tag: 'Retail reference' },
-  { id: 8, brand: 'Vention', name: '100W 3-Port GaN Charger', price: '$79.39', color: 'C+C+A · 100W / 100W / 30W', category: 'CHARGERS', image: asset('waslah-charger.png'), tag: 'Retail reference' },
-  { id: 9, brand: 'Vention', name: 'USB-C to USB-C PD100W Cable', price: '$11.27 SGD', color: '100W fast charge', category: 'CABLES', image: asset('waslah-charger.png'), tag: 'Retail reference' },
-  { id: 10, brand: 'Vention', name: '65W GaN Universal Travel Adapter', price: '$95.88 SGD', color: 'Universal travel charging', category: 'TRAVEL', image: asset('waslah-adapter.png'), tag: 'Retail reference' },
+  { id: 1, brand: 'Vention', name: '20,000mAh Power Bank / 22.5W', price: '$28.09', color: 'USB-C + USB-A + built-in cable', category: 'POWER_BANKS', image: asset('vention-powerbank-20k.jpg'), sku: 'XGYP0-40-TY', warranty: '12-month warranty', tag: 'Retail reference' },
+  { id: 2, brand: 'Vention', name: '10,000mAh Power Bank / 22.5W', price: '$24.18 SGD', color: 'Built-in charging cable', category: 'POWER_BANKS', image: asset('vention-powerbank-10k.jpg'), tag: 'Retail reference' },
+  { id: 3, brand: 'Vention', name: '10,000mAh Power Bank / USB-C + Lightning', price: '$24.82 SGD', color: 'Built-in USB-C + Lightning', category: 'POWER_BANKS', image: asset('vention-powerbank-10k-lightning.jpg'), tag: 'Retail reference' },
+  { id: 4, brand: 'Vention', name: '30W Dual-Port GaN Charger', price: '$11.69', color: 'USB-C + USB-A · EU plug', category: 'CHARGERS', image: asset('vention-charger-30w.jpg'), tag: 'Retail reference' },
+  { id: 5, brand: 'Vention', name: '30W GaN Charging Kit', price: '$15.90', color: 'Charger + USB-C to USB-C cable', category: 'CHARGERS', image: asset('vention-charger-30w-kit.jpg'), tag: 'Bundle-ready' },
+  { id: 6, brand: 'Vention', name: '65W 3-Port GaN Charger', price: '$37.59', color: 'C+C+A · 65W / 65W / 60W', category: 'CHARGERS', image: asset('vention-charger-65w.jpg'), tag: 'Retail reference' },
+  { id: 7, brand: 'Vention', name: '70W 3-Port GaN Charger', price: '$39.90', color: 'C+C+A · 70W / 70W / 22.5W', category: 'CHARGERS', image: asset('vention-charger-70w.jpg'), tag: 'Retail reference' },
+  { id: 8, brand: 'Vention', name: '100W 3-Port GaN Charger', price: '$79.39', color: 'C+C+A · 100W / 100W / 30W', category: 'CHARGERS', image: asset('vention-charger-100w.jpg'), tag: 'Retail reference' },
+  { id: 9, brand: 'Vention', name: 'USB-C to USB-C 5A / 100W Cable', price: '$11.27 SGD', color: '5A fast charge · USB 2.0', category: 'CABLES', image: asset('vention-cable-100w.jpg'), tag: 'Retail reference' },
+  { id: 10, brand: 'Vention', name: '65W GaN Universal Travel Adapter', price: '$95.88 SGD', color: 'Universal travel charging', category: 'TRAVEL', image: asset('vention-adapter-65w.jpg'), tag: 'Retail reference' },
 ];
 
 const heroes: HeroSlide[] = [
   {
-    image: asset('waslah-hero.png'),
+    image: asset('vention-powerbank-20k.jpg'),
     eyebrow: 'The Vention shortlist',
     title: 'Charge the next move.',
     body: 'Ten focused products for a smarter charging shelf, ready for wholesale pricing.',
     action: 'Explore the shortlist',
   },
   {
-    image: asset('waslah-charger.png'),
+    image: asset('vention-charger-65w.jpg'),
     eyebrow: 'Power, without the bulk',
     title: 'GaN that earns its space.',
     body: 'From 30W everyday kits to 100W multi-port chargers, selected for the region.',
     action: 'Shop chargers',
   },
   {
-    image: asset('waslah-adapter.png'),
+    image: asset('vention-adapter-65w.jpg'),
     eyebrow: 'Ready for the road',
     title: 'One adapter. More places.',
     body: 'A 65W universal travel adapter for customers who need one setup everywhere.',
@@ -74,10 +74,10 @@ const heroes: HeroSlide[] = [
 ];
 
 const categories = [
-  { name: 'Power Banks', count: '3 products', image: asset('waslah-powerbank.png'), filter: 'POWER_BANKS' },
-  { name: 'GaN Chargers', count: '5 products', image: asset('waslah-charger.png'), filter: 'CHARGERS' },
-  { name: 'Cables', count: '1 product', image: asset('waslah-charger.png'), filter: 'CABLES' },
-  { name: 'Travel & Car', count: '1 product', image: asset('waslah-adapter.png'), filter: 'TRAVEL' },
+  { name: 'Power Banks', count: '3 products', image: asset('vention-powerbank-10k.jpg'), filter: 'POWER_BANKS' },
+  { name: 'GaN Chargers', count: '5 products', image: asset('vention-charger-65w.jpg'), filter: 'CHARGERS' },
+  { name: 'Cables', count: '1 product', image: asset('vention-cable-100w.jpg'), filter: 'CABLES' },
+  { name: 'Travel & Car', count: '1 product', image: asset('vention-adapter-65w.jpg'), filter: 'TRAVEL' },
 ];
 
 const filterOptions = [
@@ -287,15 +287,15 @@ function App() {
           </div>
           <div className="campaign-grid">
             <article className="campaign-card">
-              <img src={asset('waslah-powerbank.png')} alt="Vention power banks" data-testid="img-campaign-season" />
+              <img src={asset('vention-powerbank-10k.jpg')} alt="Vention power banks" data-testid="img-campaign-season" />
               <span className="campaign-label"><h3>Power<br />on the go.</h3><button type="button" onClick={() => chooseCategory('POWER_BANKS')} data-testid="button-campaign-season">Shop power banks</button></span>
             </article>
             <article className="campaign-card">
-              <img src={asset('waslah-charger.png')} alt="Vention GaN chargers" data-testid="img-campaign-women" />
+              <img src={asset('vention-charger-70w.jpg')} alt="Vention GaN chargers" data-testid="img-campaign-women" />
               <span className="campaign-label"><h3>Small<br />but mighty.</h3><button type="button" onClick={() => chooseCategory('CHARGERS')} data-testid="button-campaign-women">Shop chargers</button></span>
             </article>
             <article className="campaign-card">
-              <img src={asset('waslah-adapter.png')} alt="Vention travel adapter" data-testid="img-campaign-men" />
+              <img src={asset('vention-adapter-65w.jpg')} alt="Vention travel adapter" data-testid="img-campaign-men" />
               <span className="campaign-label"><h3>Ready<br />to roam.</h3><button type="button" onClick={() => chooseCategory('TRAVEL')} data-testid="button-campaign-men">Shop travel</button></span>
             </article>
           </div>
