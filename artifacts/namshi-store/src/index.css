@@ -142,6 +142,13 @@ img { display: block; max-width: 100%; }
 .campaign-label h3 { margin: 0 0 11px; font-family: var(--font-display); font-size: clamp(26px, 3vw, 44px); letter-spacing: 0; line-height: 1.25; }
 .campaign-label button { border: 0; border-bottom: 1px solid currentColor; padding: 0 0 4px; background: transparent; color: inherit; font-size: 10px; font-weight: 800; }
 
+.about-section { max-width: none; background: var(--warm); padding-left: max(5.2vw, calc((100vw - 1440px)/2)); padding-right: max(5.2vw, calc((100vw - 1440px)/2)); }
+.about-layout { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 40px; }
+.about-layout h2 { margin: 0; font-family: var(--font-display); font-size: clamp(38px, 5.5vw, 76px); letter-spacing: 0; line-height: 1.15; }
+.about-copy { max-width: 500px; }
+.about-copy p { margin: 0 0 18px; color: var(--muted-ink); font-size: 14px; line-height: 1.8; }
+.about-copy .about-lead { color: var(--ink); font-size: clamp(18px, 2vw, 25px); font-weight: 700; line-height: 1.65; }
+
 .product-toolbar { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); margin-bottom: 23px; padding-bottom: 13px; }
 .filter-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .filter-button { border: 1px solid transparent; background: transparent; padding: 6px 0; margin-left: 19px; color: var(--muted-ink); font-size: 11px; }
@@ -249,6 +256,11 @@ img { display: block; max-width: 100%; }
   .campaign-card { min-height: 235px; }
   .campaign-label { left: 14px; right: 13px; bottom: 14px; }
   .campaign-label h3 { font-size: 25px; }
+  .about-section { padding-left: 17px; padding-right: 17px; }
+  .about-layout { display: block; }
+  .about-layout h2 { font-size: 53px; margin-bottom: 27px; }
+  .about-copy p { font-size: 13px; line-height: 1.75; }
+  .about-copy .about-lead { font-size: 19px; }
   .product-toolbar { display: block; }
   .filter-row { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; margin-bottom: 13px; }
   .filter-row::-webkit-scrollbar { display: none; }
