@@ -1,6 +1,6 @@
-# Namshi Store Clone
+# Waslah Tech Store
 
-A premium, responsive fashion storefront recreation with browsing, search, wishlist, cart, newsletter, and campaign interactions.
+An Arabic-first sourcing storefront for a focused Vention charging-accessories shortlist, with retail reference pricing and wholesale quote-request flows.
 
 ## Run & Operate
 
@@ -22,28 +22,29 @@ A premium, responsive fashion storefront recreation with browsing, search, wishl
 
 ## Where things live
 
-- `artifacts/namshi-store/src/App.tsx` — storefront page and interaction state
-- `artifacts/namshi-store/src/index.css` — storefront design system and responsive styles
-- `artifacts/namshi-store/public/images/` — local campaign and product media
+- `artifacts/waslah-store/src/App.tsx` — Waslah catalog, filters, comparison, and quote-shortlist interactions
+- `artifacts/waslah-store/src/index.css` — RTL storefront design system and responsive styles
+- `artifacts/waslah-store/public/images/` — local product and campaign media
+- `artifacts/namshi-store/` — earlier reference build retained separately from the active Waslah storefront
 - `artifacts/namshi-store/.replit-artifact/artifact.toml` — artifact routing metadata
 
 ## Architecture decisions
 
-- The initial experience is frontend-only so the catalog can be browsed without authentication or a database.
-- Product filtering, search, wishlist, cart, and newsletter signup are intentionally local interactions for the first release.
-- Campaign and product imagery is local to the artifact rather than hotlinked, so the storefront remains previewable and portable.
+- The initial Waslah experience is frontend-only so the shortlist can be reviewed without authentication or a database.
+- Retail prices are shown only as reference values; wholesale pricing is intentionally not invented and the primary action is a quotation request.
+- Product imagery is local to the artifact rather than hotlinked, so the storefront remains previewable and portable.
 
 ## Product
 
-The homepage presents seasonal campaigns, category discovery, curated product cards, service promises, and newsletter signup. Shoppers can search the curated catalog, filter by category, save items, add/remove items from the bag, and move between sections from the navigation.
+The Waslah homepage presents the ten-product Vention shortlist across power banks, GaN chargers, cables, and travel adapters. Visitors can search and filter products, compare selected items, review SKUs and retail references, build a quote shortlist, and see the planned costing chain from wholesale price through shipping, customs, and local selling price.
 
 ## User preferences
 
-Use the supplied Namshi page as the visual benchmark while keeping the storefront editable for the user's own or client-approved brand assets and catalog.
+Use the supplied Vention shortlist as the source of truth. Keep retail references distinct from the eventual wholesale price list and do not treat the current retail figures as purchase costs.
 
 ## Gotchas
 
-- The app is registered at the root preview path and must be run through the managed `artifacts/namshi-store: web` workflow.
+- The active app is registered at `/waslah/` and must be run through the managed `artifacts/waslah-store: web` workflow.
 - Images resolve through `import.meta.env.BASE_URL`, which keeps the app working behind the artifact route.
 
 ## Pointers
