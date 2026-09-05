@@ -51,11 +51,17 @@ const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 const CACHED_CATALOG_KEY = 'cabl-catalog-v1';
 const PENDING_ORDERS_KEY = 'cabl-pending-orders-v1';
 const WHATSAPP_URL = 'https://wa.me/967771106977?text=' + encodeURIComponent('مرحبًا CABL، أريد الاستفسار عن أحد المنتجات.');
+const HOME_TITLE = 'CABL | شاحن جوال أصلي وسريع في اليمن';
+const HOME_DESCRIPTION = 'اشترِ شاحن جوال أصلي وسريع، شاحن Type-C وPD وGaN، شاحن آيفون وسامسونج وباور بانك من CABL مع توصيل داخل اليمن.';
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 };
+
+function productAlt(product: Product) {
+  return `${product.name} من ${product.brand}، ${product.category?.name ?? 'منتج شحن'} أصلي في اليمن`;
+}
 
 function readCachedCatalog(): GetStoreCatalogQueryResult | null {
   try {
@@ -119,7 +125,7 @@ function ProductPreview({
       </button>
       <div className="product-preview-layout">
         <div className="product-preview-image">
-          <img src={product.image} alt={product.name} data-testid={`img-product-preview-${product.id}`} />
+          <img src={product.image} alt={productAlt(product)} width="900" height="980" data-testid={`img-product-preview-${product.id}`} />
         </div>
         <div className="product-preview-copy">
           <span className="eyebrow">{product.brand} · {product.category?.name ?? '—'}</span>
@@ -553,6 +559,32 @@ function App() {
     ? null
     : products.find((product) => product.id === selectedProductId) ?? null;
 
+  useEffect(() => {
+    const title = selectedProduct
+      ? `${selectedProduct.name} | ${selectedProduct.brand} | CABL اليمن`
+      : HOME_TITLE;
+    const description = selectedProduct
+      ? `${selectedProduct.name} من ${selectedProduct.brand} — ${selectedProduct.category?.name ?? 'شاحن ومنتج شحن'} أصلي مع توصيل داخل اليمن.`
+      : HOME_DESCRIPTION;
+    document.title = title;
+    const setMeta = (selector: string, attribute: 'name' | 'property', content: string) => {
+      let element = document.head.querySelector<HTMLMetaElement>(selector);
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(attribute, selector.includes('og:') ? selector.replace('[property="', '').replace('"]', '') : selector.replace('[name="', '').replace('"]', ''));
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+    setMeta('meta[name="description"]', 'name', description);
+    setMeta('meta[property="og:title"]', 'property', title);
+    setMeta('meta[property="og:description"]', 'property', description);
+    setMeta('meta[name="twitter:title"]', 'name', title);
+    setMeta('meta[name="twitter:description"]', 'name', description);
+    const canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    canonical?.setAttribute('href', `${window.location.origin}${window.location.pathname}`);
+  }, [selectedProduct]);
+
   const closeQuoteForm = () => {
     setQuoteOpen(false);
     setQuoteSubmitted(false);
@@ -691,7 +723,7 @@ function App() {
         <section className="hero" aria-label="حملات الإلكترونيات" data-testid="section-hero">
           {heroes.length > 0 ? heroes.map((hero, index) => (
             <article className={`hero-frame ${slide === index ? 'active' : ''}`} key={hero.productId} aria-hidden={slide !== index}>
-              <img src={hero.image} alt={hero.title} data-testid={`img-hero-${index}`} />
+              <img src={hero.image} alt={`${hero.title} من CABL`} width="1440" height="620" fetchPriority="high" data-testid={`img-hero-${index}`} />
               <div className="hero-shade" />
               <div className="hero-copy">
                 <span className="eyebrow">{hero.eyebrow}</span>
@@ -728,6 +760,44 @@ function App() {
            <p><strong>CABL هو الوكيل الحصري لعلامة Baseus في اليمن.</strong><br />اكتشف الشواحن والكابلات والبطاريات المحمولة الأصلية، مع توصيل داخل اليمن ودعم محلي.</p>
          </section>
 
+         <section className="section seo-section" aria-labelledby="seo-heading" data-testid="section-seo-content">
+           <div className="section-header">
+             <div>
+               <span className="eyebrow">دليل الشراء في اليمن</span>
+               <h2 id="seo-heading">شاحن جوال أصلي<br />وسريع في اليمن.</h2>
+             </div>
+             <p>اختر شاحنًا مناسبًا لجهازك من كتالوج CABL، مع مواصفات واضحة وخيارات توصيل داخل اليمن.</p>
+           </div>
+           <div className="seo-grid">
+             <article>
+               <h3>شاحن سريع وموثوق</h3>
+               <p>لشراء شاحن جوال سريع أو شاحن أصلي بسعر مناسب، قارن القدرة والتوافق والمنفذ قبل الطلب. ستجد شواحن USB وType-C وشواحن PD وGaN للاستخدام اليومي والسفر.</p>
+             </article>
+             <article>
+               <h3>آيفون وسامسونج وUSB-C</h3>
+               <p>نوفر حلول شحن للآيفون وسامسونج وهواوي وشاومي، إضافة إلى سلك شاحن وكيبل شاحن وشاحن لاسلكي وشاحن سيارة وباور بانك حسب احتياجك.</p>
+             </article>
+             <article>
+               <h3>توصيل داخل اليمن</h3>
+               <p>يمكنك شراء شاحن جوال أونلاين من CABL وطلب التوصيل إلى صنعاء أو عدن أو تعز أو الحديدة أو إب أو حضرموت أو مأرب، بحسب خيارات الشحن المتاحة لعنوانك.</p>
+             </article>
+           </div>
+           <div className="seo-faq" aria-label="أسئلة شائعة عن الشواحن">
+             <details>
+               <summary>أين أجد شاحن جوال أصلي في اليمن؟</summary>
+               <p>تصفح منتجات CABL الأصلية من Baseus وVention وAnker وUGREEN، ثم اختر طريقة الدفع والتوصيل المناسبة داخل اليمن.</p>
+             </details>
+             <details>
+               <summary>ما الشاحن المناسب للطاقة الضعيفة أو الاستخدام اليومي؟</summary>
+               <p>يعتمد الاختيار على جهازك وقدرة الشاحن المطلوبة. راجع القدرة بالواط، نوع المنفذ، والتوافق قبل شراء شاحن سريع أو شاحن متنقل.</p>
+             </details>
+             <details>
+               <summary>كم سعر الشاحن في اليمن؟</summary>
+               <p>تختلف أسعار الشواحن حسب العلامة والقدرة والمواصفات. يعرض الكتالوج سعر كل منتج بوضوح قبل إتمام الطلب.</p>
+             </details>
+           </div>
+         </section>
+
         <section className="section" id="categories" data-testid="section-categories">
           <div className="section-header">
             <div>
@@ -739,7 +809,7 @@ function App() {
           <div className="category-grid">
             {categories.map((category) => (
               <button className="category-tile" type="button" key={category.id} onClick={() => chooseCategory(category.id)} data-testid={`card-category-${category.id}`}>
-                <img src={category.image} alt={`${category.name} collection`} data-testid={`img-category-${category.id}`} />
+                <img src={category.image} alt={`${category.name} شواحن ومنتجات في اليمن`} width="600" height="600" loading="lazy" data-testid={`img-category-${category.id}`} />
                 <span className="category-info">
                   <h3>{category.name}</h3>
                   <span>{category.count} <ChevronDown size={11} /></span>
@@ -759,15 +829,15 @@ function App() {
           </div>
           <div className="campaign-grid">
             <article className="campaign-card">
-              <img src={asset('vention-powerbank-10k.jpg')} alt={categories.find((category) => category.id === categoryIdFor('باور', 'طاقة'))?.name ?? 'منتجات Vention'} data-testid="img-campaign-season" />
+              <img src={asset('vention-powerbank-10k.jpg')} alt="باور بانك وشاحن متنقل أصلي في اليمن" width="800" height="1000" loading="lazy" data-testid="img-campaign-season" />
               <span className="campaign-label"><h3>طاقة<br />أينما ذهبت.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('باور', 'طاقة'))} data-testid="button-campaign-season">تصفح {categories.find((category) => category.id === categoryIdFor('باور', 'طاقة'))?.name ?? 'الفئة'}</button></span>
             </article>
             <article className="campaign-card">
-              <img src={asset('vention-charger-70w.jpg')} alt={categories.find((category) => category.id === categoryIdFor('شاحن', 'شواحن'))?.name ?? 'منتجات Vention'} data-testid="img-campaign-women" />
+              <img src={asset('vention-charger-70w.jpg')} alt="شاحن سريع 70W أصلي في اليمن" width="800" height="1000" loading="lazy" data-testid="img-campaign-women" />
               <span className="campaign-label"><h3>حجم صغير،<br />أداء كبير.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('شاحن', 'شواحن'))} data-testid="button-campaign-women">تصفح {categories.find((category) => category.id === categoryIdFor('شاحن', 'شواحن'))?.name ?? 'الفئة'}</button></span>
             </article>
             <article className="campaign-card">
-              <img src={asset('vention-adapter-65w.jpg')} alt={categories.find((category) => category.id === categoryIdFor('سفر'))?.name ?? 'منتجات Vention'} data-testid="img-campaign-men" />
+              <img src={asset('vention-adapter-65w.jpg')} alt="شاحن Type-C للسفر مع توصيل داخل اليمن" width="800" height="1000" loading="lazy" data-testid="img-campaign-men" />
               <span className="campaign-label"><h3>جاهز<br />للسفر.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('سفر'))} data-testid="button-campaign-men">تصفح {categories.find((category) => category.id === categoryIdFor('سفر'))?.name ?? 'الفئة'}</button></span>
             </article>
           </div>
@@ -806,7 +876,7 @@ function App() {
             {visibleProducts.map((product) => (
               <article className="product-card" key={product.id} data-testid={`card-product-${product.id}`}>
                 <div className="product-image">
-                  <img src={product.image} alt={product.name} data-testid={`img-product-${product.id}`} />
+                  <img src={product.image} alt={productAlt(product)} width="800" height="1000" loading="lazy" data-testid={`img-product-${product.id}`} />
                   <button className={`wish-button ${favorites.includes(product.id) ? 'active' : ''}`} type="button" onClick={() => toggleFavorite(product.id)} aria-label={`Save ${product.name}`} data-testid={`button-favorite-${product.id}`}>
                     <Heart size={15} fill={favorites.includes(product.id) ? 'currentColor' : 'none'} />
                   </button>
