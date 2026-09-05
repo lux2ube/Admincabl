@@ -796,6 +796,16 @@ function App() {
                <p>تختلف أسعار الشواحن حسب العلامة والقدرة والمواصفات. يعرض الكتالوج سعر كل منتج بوضوح قبل إتمام الطلب.</p>
              </details>
            </div>
+           <nav className="seo-links" aria-label="صفحات الشواحن">
+             <a href={`${import.meta.env.BASE_URL}chargers/`}>شواحن الجوال</a>
+             <a href={`${import.meta.env.BASE_URL}fast-chargers/`}>الشواحن السريعة</a>
+             <a href={`${import.meta.env.BASE_URL}type-c-chargers/`}>شواحن Type-C</a>
+             <a href={`${import.meta.env.BASE_URL}iphone-chargers/`}>شواحن الآيفون</a>
+             <a href={`${import.meta.env.BASE_URL}samsung-chargers/`}>شواحن سامسونج</a>
+             <a href={`${import.meta.env.BASE_URL}car-chargers/`}>شواحن السيارات</a>
+             <a href={`${import.meta.env.BASE_URL}wireless-chargers/`}>الشواحن اللاسلكية</a>
+             <a href={`${import.meta.env.BASE_URL}delivery/yemen/`}>التوصيل داخل اليمن</a>
+           </nav>
          </section>
 
         <section className="section" id="categories" data-testid="section-categories">

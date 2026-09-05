@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
@@ -27,6 +28,8 @@ if (!basePath) {
   );
 }
 
+const publicRoot = path.resolve(import.meta.dirname, 'public');
+
 export default defineConfig({
   base: basePath,
   plugins: [
@@ -46,6 +49,24 @@ export default defineConfig({
           ),
         ]
       : []),
+    {
+      name: 'serve-seo-directory-pages',
+      configureServer(server) {
+        server.middlewares.use((request, _response, next) => {
+          const rawUrl = request.url ?? '/';
+          const [pathname, query = ''] = rawUrl.split('?');
+          if (
+            pathname !== '/' &&
+            pathname.endsWith('/') &&
+            !pathname.includes('/.') &&
+            fs.existsSync(path.join(publicRoot, pathname, 'index.html'))
+          ) {
+            request.url = `${pathname}index.html${query ? `?${query}` : ''}`;
+          }
+          next();
+        });
+      },
+    },
   ],
   resolve: {
     alias: {
