@@ -896,11 +896,18 @@ function App() {
             </div>
             <button className="sort-button" type="button" onClick={() => announce('يتم عرض أحدث المنتجات')} data-testid="button-sort">الأحدث <ChevronDown size={13} /></button>
           </div>
-          <div className="product-grid">
+           <div className="product-grid" aria-live="polite">
             {visibleProducts.map((product) => (
               <article className="product-card" key={product.id} data-testid={`card-product-${product.id}`}>
                 <div className="product-image">
                   <img src={product.image} alt={productAlt(product)} width="800" height="1000" loading="lazy" data-testid={`img-product-${product.id}`} />
+                   <button
+                     className="image-open-button"
+                     type="button"
+                     onClick={() => openProductPreview(product)}
+                     aria-label={`عرض ${product.name}`}
+                     data-testid={`button-open-product-${product.id}`}
+                   />
                   <button className={`wish-button ${favorites.includes(product.id) ? 'active' : ''}`} type="button" onClick={() => toggleFavorite(product.id)} aria-label={`Save ${product.name}`} data-testid={`button-favorite-${product.id}`}>
                     <Heart size={15} fill={favorites.includes(product.id) ? 'currentColor' : 'none'} />
                   </button>
