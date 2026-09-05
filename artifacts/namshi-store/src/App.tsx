@@ -62,7 +62,7 @@ function CablLogo({ className = '', showTagline = true }: { className?: string; 
       </svg>
       <span className="cabl-logo-copy">
         <strong>CABL</strong>
-        {showTagline && <small>الوكيل الحصري لـ Baseus و Vention في اليمن · منتجات Anker متوفرة</small>}
+        {showTagline && <small>الوكيل الحصري لـ Baseus و Vention في اليمن · منتجات Anker و UGREEN متوفرة</small>}
       </span>
     </span>
   );
@@ -486,7 +486,7 @@ function App() {
 
           <nav className="desktop-nav" aria-label="التنقل الرئيسي" data-testid="nav-main">
             {filterOptions.slice(1).map((filter) => <button type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`nav-category-${filter.value}`}>{filter.label}</button>)}
-            <button type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-brands">Baseus و Vention و Anker</button>
+            <button type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-brands">Baseus و Vention و Anker و UGREEN</button>
             <button type="button" onClick={() => scrollTo('about')} data-testid="nav-about">عن CABL</button>
             <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="nav-sale">تسوق الآن</button>
           </nav>
@@ -601,7 +601,7 @@ function App() {
               <span className="eyebrow">اختياراتنا</span>
               <h2>اشحن<br />لحظتك.</h2>
             </div>
-            <p>منتجات Baseus و Vention و Anker الأصلية بمواصفات واضحة لتختار ما يناسب أجهزتك ويومك.</p>
+            <p>منتجات Baseus و Vention و Anker و UGREEN الأصلية بمواصفات واضحة لتختار ما يناسب أجهزتك ويومك.</p>
           </div>
           <div className="campaign-grid">
             <article className="campaign-card">
@@ -636,7 +636,7 @@ function App() {
           <div className="section-header">
             <div>
               <span className="eyebrow">مختارة لرفك</span>
-                <h2>Baseus و Vention و Anker<br />لك.</h2>
+                <h2>Baseus و Vention و Anker و UGREEN<br />لك.</h2>
             </div>
             <button className="text-link" type="button" onClick={() => { setActiveFilter('ALL'); setQuery(''); }} data-testid="button-view-all">عرض كل المنتجات</button>
           </div>
@@ -678,7 +678,7 @@ function App() {
 
         <section className="service-band" id="services" aria-label="خدمات المتجر" data-testid="section-services">
           <div className="service-item"><Truck /><span><strong>توصيل داخل اليمن</strong><span>نرتب الشحن إلى مدينتك عند تأكيد الطلب</span></span></div>
-          <div className="service-item"><ShieldCheck /><span><strong>منتجات Baseus و Vention و Anker أصلية</strong><span>مواصفات واضحة وضمان عند توفره</span></span></div>
+          <div className="service-item"><ShieldCheck /><span><strong>منتجات Baseus و Vention و Anker و UGREEN أصلية</strong><span>مواصفات واضحة وضمان عند توفره</span></span></div>
           <div className="service-item"><Sparkles /><span><strong>دعم قبل وبعد الشراء</strong><span>نساعدك في اختيار الحل المناسب</span></span></div>
         </section>
 
@@ -707,14 +707,14 @@ function App() {
           <div className="footer-top">
             <div className="footer-brand" lang="ar" dir="rtl">
               <CablLogo className="cabl-logo-footer" />
-              <p>منتجات Baseus و Vention و Anker الأصلية للشحن والطاقة، متوفرة للشراء داخل اليمن.</p>
+              <p>منتجات Baseus و Vention و Anker و UGREEN الأصلية للشحن والطاقة، متوفرة للشراء داخل اليمن.</p>
             </div>
             <div className="footer-col"><h4>تصفح</h4>{filterOptions.slice(1).map((filter) => <button type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`footer-category-${filter.value}`}>{filter.label}</button>)}</div>
             <div className="footer-col"><h4>المتجر</h4><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-shortlist">كل المنتجات</button><button type="button" onClick={() => setCartOpen(true)} data-testid="footer-moq">السلة</button><button type="button" onClick={() => setWishlistOpen(true)} data-testid="footer-pricing">المفضلة</button></div>
             <div className="footer-col"><h4>خدمة العملاء</h4><button type="button" onClick={() => scrollTo('about')} data-testid="footer-about">عن CABL</button><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">الشحن والتوصيل</button><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-help">مواصفات المنتجات</button><button type="button" onClick={openTracking} data-testid="footer-track-order">تتبع طلبك</button><button type="button" onClick={openQuoteForm} data-testid="footer-contact">إتمام الطلب</button></div>
             <div className="footer-col"><h4>تابعنا</h4><button type="button" onClick={() => announce('تم نسخ رابط Instagram')} data-testid="footer-instagram">Instagram</button><button type="button" onClick={() => announce('تم نسخ رابط TikTok')} data-testid="footer-tiktok">TikTok</button><button type="button" onClick={() => announce('تم نسخ رابط WhatsApp')} data-testid="footer-whatsapp">WhatsApp</button></div>
           </div>
-          <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لـ Baseus و Vention في اليمن · منتجات Anker متوفرة.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
+          <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لـ Baseus و Vention في اليمن · منتجات Anker و UGREEN متوفرة.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
         </div>
       </footer>
 

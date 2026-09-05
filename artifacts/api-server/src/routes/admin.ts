@@ -271,6 +271,19 @@ const productsSeed = [
   ["00000000-0000-4000-8000-000000000035", "Anker", "باور بنك Anker بسعة 20,000mAh / 30W", "CABL-ANK-PB20K30", 42.00, "باور بنك عالي السعة بقدرة 30W", "https://cdn.shopify.com/s/files/1/0493/9834/9974/files/Black_20_000_mAh-01_3840x.png?v=1732159201", "10000000-0000-4000-8000-000000000001"],
   ["00000000-0000-4000-8000-000000000036", "Anker", "شاحن سيارة Anker بقدرة 30W أو 50W", "CABL-ANK-CAR50", 21.00, "شاحن سيارة سريع متعدد المنافذ", "https://cdn.shopify.com/s/files/1/0493/9834/9974/files/B2735011_ND01_3840x.png?v=1749783207", "10000000-0000-4000-8000-000000000004"],
   ["00000000-0000-4000-8000-000000000037", "Anker", "محور Anker USB-C ‏7 في 1", "CABL-ANK-HUB7", 45.00, "محور USB-C من Anker بسبعة منافذ", "https://cdn.shopify.com/s/files/1/0493/9834/9974/files/image_11_3f856f3b-1d0b-4609-974f-af0ea4ca2d12_3840x.png?v=1764833041", "10000000-0000-4000-8000-000000000005"],
+  ["00000000-0000-4000-8000-000000000038", "UGREEN", "شاحن UGREEN USB-C بقدرة 20W", "CABL-UGR-20W", 13.00, "شاحن USB-C سريع بقدرة 20W", "https://www.ugreen.com/cdn/shop/files/65786.png?v=1762323345&width=300", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000039", "UGREEN", "شاحن UGREEN USB-C بقدرة 30W", "CABL-UGR-30W", 18.00, "شاحن USB-C سريع بقدرة 30W", "https://www.ugreen.com/cdn/shop/files/65786.png?v=1762323345&width=300", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000040", "UGREEN", "شاحن UGREEN Nexode GaN بقدرة 45W", "CABL-UGR-45W", 27.00, "شاحن UGREEN Nexode ثنائي المنافذ بتقنية GaN وقدرة 45W", "https://www.ugreen.com/cdn/shop/files/c25a0e077dd5d91597a8b4d5c6990840.png?v=1762321987&width=300", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000041", "UGREEN", "شاحن UGREEN GaN بقدرة 65W", "CABL-UGR-65W", 36.00, "شاحن UGREEN GaN بقدرة 65W", "https://www.ugreen.com/cdn/shop/files/15817.png?v=1762323446&width=300", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000042", "UGREEN", "كابل UGREEN USB-A إلى USB-C", "CABL-UGR-A2C", 8.00, "كابل UGREEN من USB-A إلى USB-C", "https://www.ugreen.com/cdn/shop/files/5ecbd42ae6b223a53267218ec68a4b9e.png?v=1762322059&width=300", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000043", "UGREEN", "كابل UGREEN USB-C إلى USB-C بقدرة 60W", "CABL-UGR-C2C60", 10.00, "كابل UGREEN USB-C إلى USB-C للشحن السريع بقدرة 60W", "https://www.ugreen.com/cdn/shop/files/b81dd756173ef421d96d0ecc0069022f.png?v=1762322048&width=300", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000044", "UGREEN", "كابل UGREEN USB-C إلى USB-C بقدرة 100W", "CABL-UGR-C2C100", 14.00, "كابل UGREEN USB-C إلى USB-C بقدرة 100W", "https://www.ugreen.com/cdn/shop/files/bab5255d39b70ee3027845fad0648f10.png?v=1762322054&width=300", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000045", "UGREEN", "كابل UGREEN USB-C إلى Lightning", "CABL-UGR-C2L", 12.00, "كابل UGREEN USB-C إلى Lightning", "https://www.ugreen.com/cdn/shop/files/eb6684f5edbb3b8de07faf881b0195ac.png?v=1762322051&width=300", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000046", "UGREEN", "باور بنك UGREEN بسعة 10,000mAh", "CABL-UGR-PB10K", 28.00, "باور بنك UGREEN Uno بقدرة 30W وسعة 10,000mAh", "https://www.ugreen.com/cdn/shop/files/0f8988c44c76c157a802a4a21d0032ce.png?v=1762322015&width=300", "10000000-0000-4000-8000-000000000001"],
+  ["00000000-0000-4000-8000-000000000047", "UGREEN", "باور بنك UGREEN بسعة 20,000mAh / 30W", "CABL-UGR-PB20K30", 41.00, "باور بنك UGREEN عالي السعة", "https://www.ugreen.com/cdn/shop/files/247309e266dff4f7659607ac05079b41.png?v=1762322020&width=300", "10000000-0000-4000-8000-000000000001"],
+  ["00000000-0000-4000-8000-000000000048", "UGREEN", "شاحن سيارة UGREEN بقدرة 30W", "CABL-UGR-CAR30", 19.00, "شاحن سيارة UGREEN لاسلكي بقدرة 30W", "https://www.ugreen.com/cdn/shop/files/ff27cd7abcb96a42eea60b5ed0980508.png?v=1762322031&width=300", "10000000-0000-4000-8000-000000000004"],
+  ["00000000-0000-4000-8000-000000000049", "UGREEN", "شاحن سيارة UGREEN بقدرة 50W", "CABL-UGR-CAR50", 22.00, "شاحن سيارة UGREEN سريع", "https://www.ugreen.com/cdn/shop/files/ff27cd7abcb96a42eea60b5ed0980508.png?v=1762322031&width=300", "10000000-0000-4000-8000-000000000004"],
+  ["00000000-0000-4000-8000-000000000050", "UGREEN", "محور UGREEN USB-C ‏7 في 1", "CABL-UGR-HUB7", 43.00, "محور UGREEN Revodok Pro USB-C بسبعة منافذ", "https://www.ugreen.com/cdn/shop/files/1795373640d911068a5841b77e48e007.png?v=1762322086&width=300", "10000000-0000-4000-8000-000000000005"],
 ] as const;
 
 async function seedTable(query: string, values: unknown[], conflict = "DO NOTHING") {
@@ -289,7 +302,7 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
        ('10000000-0000-4000-8000-000000000004','السفر والسيارة','حلول الشحن أثناء التنقل','images/vention-adapter-65w.jpg',TRUE),
        ('10000000-0000-4000-8000-000000000005','الملحقات','محاور وكابلات العرض والاتصال','images/baseus-hub.svg',TRUE)
        ON CONFLICT ("id") DO NOTHING`, []);
-     counts.tags = await seedTable(`INSERT INTO "tags" ("id","tag_name","icon") VALUES (1,'Vention','brand'),(2,'USB-C','cable'),(3,'GaN','bolt'),(4,'Baseus','brand'),(5,'Anker','brand') ON CONFLICT ("id") DO NOTHING`, []);
+     counts.tags = await seedTable(`INSERT INTO "tags" ("id","tag_name","icon") VALUES (1,'Vention','brand'),(2,'USB-C','cable'),(3,'GaN','bolt'),(4,'Baseus','brand'),(5,'Anker','brand'),(6,'UGREEN','brand') ON CONFLICT ("id") DO NOTHING`, []);
     counts.products = 0;
     for (const [productId, brand, name, sku, price, description, image] of productsSeed) {
       counts.products += await seedTable(
