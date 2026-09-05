@@ -1,19 +1,27 @@
 import { createRoot } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import App from './App';
 import { ErrorBoundary } from '@/components/error-boundary';
 
 import './index.css';
 
-const queryClient = new QueryClient();
-
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch((error) => {
-      console.warn('CABL offline cache could not be registered', error);
+  if (import.meta.env.DEV) {
+    void navigator.serviceWorker.getRegistrations().then((registrations) => (
+      Promise.all(registrations.map((registration) => registration.unregister()))
+    ));
+    if ('caches' in window) {
+      void caches.keys().then((keys) => (
+        Promise.all(keys.filter((key) => key.startsWith('cabl-pwa-')).map((key) => caches.delete(key)))
+      ));
+    }
+  } else {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch((error) => {
+        console.warn('CABL offline cache could not be registered', error);
+      });
     });
-  });
+  }
 }
 
 createRoot(document.getElementById('root')!, {
@@ -23,8 +31,6 @@ createRoot(document.getElementById('root')!, {
   },
 }).render(
   <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
+    <App />
   </ErrorBoundary>,
 );

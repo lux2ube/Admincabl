@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -29,7 +29,6 @@ import {
   type StoreProduct,
   type StoreShippingOption,
   type GetStoreCatalogQueryResult,
-  useGetStoreCatalog,
 } from '@workspace/api-client-react';
 
 type Product = {
@@ -156,8 +155,8 @@ function ProductPreview({
 }
 
 function App() {
-  const catalogQuery = useGetStoreCatalog();
-  const [cachedCatalog, setCachedCatalog] = useState<GetStoreCatalogQueryResult | null>(() => readCachedCatalog());
+  const [catalog, setCatalog] = useState<GetStoreCatalogQueryResult | null>(() => readCachedCatalog());
+  const [catalogLoading, setCatalogLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isAppInstalled, setIsAppInstalled] = useState(() => (
@@ -214,7 +213,28 @@ function App() {
   const [subscribed, setSubscribed] = useState(false);
   const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
   const [newsletterError, setNewsletterError] = useState('');
-  const catalog = catalogQuery.data ?? cachedCatalog;
+  const loadCatalog = useCallback(async () => {
+    setCatalogLoading(true);
+    try {
+      const response = await fetch(`${import.meta.env.BASE_URL}api/store/catalog`, {
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) {
+        throw new Error(`Catalog request failed with status ${response.status}`);
+      }
+      const nextCatalog = await response.json() as GetStoreCatalogQueryResult;
+      setCatalog(nextCatalog);
+      try {
+        window.localStorage.setItem(CACHED_CATALOG_KEY, JSON.stringify(nextCatalog));
+      } catch {
+        // The live catalog remains usable even when storage is unavailable.
+      }
+    } catch {
+      // Keep the cached catalog visible when the network is unavailable.
+    } finally {
+      setCatalogLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const updateConnection = () => setIsOffline(!navigator.onLine);
@@ -245,14 +265,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!catalogQuery.data) return;
-    setCachedCatalog(catalogQuery.data);
-    try {
-      window.localStorage.setItem(CACHED_CATALOG_KEY, JSON.stringify(catalogQuery.data));
-    } catch {
-      // The storefront remains usable even when storage is unavailable.
-    }
-  }, [catalogQuery.data]);
+    void loadCatalog();
+  }, [loadCatalog]);
 
   useEffect(() => {
     if (!catalog?.products?.length || !navigator.serviceWorker.controller) return;
@@ -410,7 +424,7 @@ function App() {
     }
     if (sentCount > 0) {
       announce(`تم إرسال ${sentCount} طلب محفوظ بعد عودة الاتصال`);
-      catalogQuery.refetch();
+      void loadCatalog();
     }
   };
 
@@ -528,7 +542,7 @@ function App() {
       setQuoteSubmitted(true);
       setCart([]);
       setCartQuantities({});
-      catalogQuery.refetch();
+      void loadCatalog();
       announce('تم استلام طلب عرض السعر بنجاح');
     } catch (error) {
       setQuoteError(getApiErrorMessage(error));
@@ -738,9 +752,9 @@ function App() {
           )) : (
             <div className="hero-frame active">
               <div className="hero-copy">
-                <span className="eyebrow">{catalogQuery.isLoading ? 'جاري تحميل الكتالوج' : 'الكتالوج غير متاح'}</span>
-                <h1>{catalogQuery.isLoading ? 'جاري تحميل المنتجات.' : 'لا توجد منتجات منشورة.'}</h1>
-                <p>{catalogQuery.isLoading ? 'يتم تحميل البيانات من قاعدة البيانات.' : 'أضف منتجات منشورة من لوحة الإدارة لتظهر هنا.'}</p>
+                <span className="eyebrow">{catalogLoading ? 'جاري تحميل الكتالوج' : 'الكتالوج غير متاح'}</span>
+                <h1>{catalogLoading ? 'جاري تحميل المنتجات.' : 'لا توجد منتجات منشورة.'}</h1>
+                <p>{catalogLoading ? 'يتم تحميل البيانات من قاعدة البيانات.' : 'أضف منتجات منشورة من لوحة الإدارة لتظهر هنا.'}</p>
               </div>
             </div>
           )}

@@ -1,3 +1,4 @@
 - [Reference-site access](reference-site-access.md) — keep clones portable with local assets when automated live-site extraction is unavailable.
 - [API validation version](api-validation-version.md) — check Orval-generated Zod helpers against the workspace's installed Zod version.
 - [Static SEO routes](static-seo-routes.md) — clean directory SEO pages need static-file precedence over SPA fallbacks in dev and production.
+- [PWA cache in Vite development](vite-pwa-dev-cache.md) — never let the production service worker cache Vite source or optimized dependency modules.
