@@ -301,6 +301,9 @@ img { display: block; max-width: 100%; }
 .tracking-order small { color: var(--muted-ink); font-size: 10px; }
 .tracking-detail { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 18px; }
 .toast-message { position: fixed; right: 22px; bottom: 22px; z-index: 80; background: var(--ink); color: var(--paper); padding: 13px 17px; font-size: 12px; animation: toast-in .25s ease both; }
+.offline-badge { position: fixed; top: 76px; left: 50%; z-index: 65; display: inline-flex; align-items: center; gap: 7px; transform: translateX(-50%); border: 1px solid var(--line); border-radius: 999px; background: var(--paper); color: var(--muted-ink); padding: 8px 13px; box-shadow: 0 8px 25px rgba(21,21,21,.08); font-size: 11px; white-space: nowrap; }
+.whatsapp-float { position: fixed; right: 22px; bottom: 22px; z-index: 75; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; background: #25d366; color: #fff; padding: 13px 17px; box-shadow: 0 10px 25px rgba(37,211,102,.28); font-size: 12px; font-weight: 800; direction: ltr; transition: transform .2s ease, box-shadow .2s ease; }
+.whatsapp-float:hover { color: #fff; transform: translateY(-3px); box-shadow: 0 14px 30px rgba(37,211,102,.38); }
 
 @keyframes hero-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }

@@ -1,0 +1,21 @@
+{
+  "name": "CABL | الشحن والطاقة في اليمن",
+  "short_name": "CABL",
+  "description": "متجر CABL لمنتجات الشحن والطاقة الأصلية مع توصيل داخل اليمن.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f6f2",
+  "theme_color": "#f7f6f2",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

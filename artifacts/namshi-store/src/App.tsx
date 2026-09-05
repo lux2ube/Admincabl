@@ -7,12 +7,14 @@ import {
   Landmark,
   Heart,
   Menu,
+  MessageCircle,
   Search,
   ShieldCheck,
   ShoppingBag,
   Smartphone,
   Sparkles,
   Truck,
+  WifiOff,
   X,
   Wallet,
 } from 'lucide-react';
@@ -25,6 +27,7 @@ import {
   type StorePaymentMethod,
   type StoreProduct,
   type StoreShippingOption,
+  type GetStoreCatalogQueryResult,
   useGetStoreCatalog,
 } from '@workspace/api-client-react';
 
@@ -44,6 +47,28 @@ type Product = {
 };
 
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
+const CACHED_CATALOG_KEY = 'cabl-catalog-v1';
+const PENDING_ORDERS_KEY = 'cabl-pending-orders-v1';
+const WHATSAPP_URL = 'https://wa.me/967771106977?text=' + encodeURIComponent('مرحبًا CABL، أريد الاستفسار عن أحد المنتجات.');
+
+function readCachedCatalog(): GetStoreCatalogQueryResult | null {
+  try {
+    const saved = window.localStorage.getItem(CACHED_CATALOG_KEY);
+    return saved ? JSON.parse(saved) as GetStoreCatalogQueryResult : null;
+  } catch {
+    return null;
+  }
+}
+
+function readPendingOrders(): Array<Parameters<typeof createStoreOrder>[0]> {
+  try {
+    const saved = window.localStorage.getItem(PENDING_ORDERS_KEY);
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 function PaymentMethodIcon({ method }: { method: StorePaymentMethod }) {
   if (method.iconKey === 'bank') return <Landmark size={22} />;
@@ -120,6 +145,8 @@ function ProductPreview({
 
 function App() {
   const catalogQuery = useGetStoreCatalog();
+  const [cachedCatalog, setCachedCatalog] = useState<GetStoreCatalogQueryResult | null>(() => readCachedCatalog());
+  const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
   const [slide, setSlide] = useState(0);
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -170,12 +197,43 @@ function App() {
   const [subscribed, setSubscribed] = useState(false);
   const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
   const [newsletterError, setNewsletterError] = useState('');
+  const catalog = catalogQuery.data ?? cachedCatalog;
 
   useEffect(() => {
-    const heroCount = Math.min(catalogQuery.data?.products.length ?? 1, 3);
+    const updateConnection = () => setIsOffline(!navigator.onLine);
+    window.addEventListener('online', updateConnection);
+    window.addEventListener('offline', updateConnection);
+    return () => {
+      window.removeEventListener('online', updateConnection);
+      window.removeEventListener('offline', updateConnection);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!catalogQuery.data) return;
+    setCachedCatalog(catalogQuery.data);
+    try {
+      window.localStorage.setItem(CACHED_CATALOG_KEY, JSON.stringify(catalogQuery.data));
+    } catch {
+      // The storefront remains usable even when storage is unavailable.
+    }
+  }, [catalogQuery.data]);
+
+  useEffect(() => {
+    if (!catalog?.products?.length || !navigator.serviceWorker.controller) return;
+    const urls = catalog.products.flatMap((product) => product.images.map((image) => (
+      image.startsWith('http')
+        ? image
+        : new URL(`${import.meta.env.BASE_URL}${image}`, window.location.href).href
+    )));
+    navigator.serviceWorker.controller.postMessage({ type: 'CACHE_CATALOG_IMAGES', urls });
+  }, [catalog]);
+
+  useEffect(() => {
+    const heroCount = Math.min(catalog?.products.length ?? 1, 3);
     const timer = window.setInterval(() => setSlide((current) => (current + 1) % Math.max(heroCount, 1)), 6500);
     return () => window.clearInterval(timer);
-  }, [catalogQuery.data?.products.length]);
+  }, [catalog?.products.length]);
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -200,7 +258,7 @@ function App() {
     };
   }, []);
 
-  const products = useMemo<Product[]>(() => (catalogQuery.data?.products ?? []).map((product: StoreProduct) => ({
+  const products = useMemo<Product[]>(() => (catalog?.products ?? []).map((product: StoreProduct) => ({
     id: product.id,
     brand: product.brand,
     name: product.productName,
@@ -213,12 +271,12 @@ function App() {
     sku: product.sku,
     quantity: product.quantity,
     shippingOptions: product.shippingOptions,
-  })), [catalogQuery.data]);
+  })), [catalog]);
 
-  const shippingOptions = catalogQuery.data?.shippingOptions ?? [];
+  const shippingOptions = catalog?.shippingOptions ?? [];
   const selectedShippingId = shippingId ?? shippingOptions[0]?.id ?? null;
   const selectedShippingOption = shippingOptions.find((option) => option.id === selectedShippingId) ?? null;
-  const paymentMethods = catalogQuery.data?.paymentMethods ?? [];
+  const paymentMethods = catalog?.paymentMethods ?? [];
   const selectedPaymentMethodId = paymentMethodId ?? paymentMethods[0]?.id ?? null;
   const selectedPaymentMethod = paymentMethods.find((method) => method.id === selectedPaymentMethodId) ?? null;
   const cartSubtotal = cart.reduce((sum, product) => sum + product.price * (cartQuantities[product.id] ?? 1), 0);
@@ -278,6 +336,42 @@ function App() {
   };
 
   const announce = (message: string) => setToast(message);
+
+  const flushPendingOrders = async () => {
+    if (!navigator.onLine) return;
+    const pendingOrders = readPendingOrders();
+    if (pendingOrders.length === 0) return;
+    const remaining = [...pendingOrders];
+    let sentCount = 0;
+    while (remaining.length > 0) {
+      try {
+        await createStoreOrder(remaining[0]);
+        remaining.shift();
+        sentCount += 1;
+      } catch {
+        break;
+      }
+    }
+    try {
+      if (remaining.length > 0) {
+        window.localStorage.setItem(PENDING_ORDERS_KEY, JSON.stringify(remaining));
+      } else {
+        window.localStorage.removeItem(PENDING_ORDERS_KEY);
+      }
+    } catch {
+      // A later online visit can retry the order if storage is unavailable.
+    }
+    if (sentCount > 0) {
+      announce(`تم إرسال ${sentCount} طلب محفوظ بعد عودة الاتصال`);
+      catalogQuery.refetch();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('online', flushPendingOrders);
+    void flushPendingOrders();
+    return () => window.removeEventListener('online', flushPendingOrders);
+  }, []);
 
   const openProductPreview = (product: Product) => {
     window.history.pushState({ productId: product.id }, '', `#product-${product.id}`);
@@ -342,8 +436,7 @@ function App() {
       return;
     }
 
-    try {
-      const order = await createStoreOrder({
+    const orderPayload: Parameters<typeof createStoreOrder>[0] = {
         customer: {
           firstName: quoteForm.firstName.trim(),
           lastName: quoteForm.lastName.trim(),
@@ -363,7 +456,27 @@ function App() {
         paymentMethodId: selectedPaymentMethodId,
         paymentReference: selectedPaymentMethod?.requiresTransactionReference ? paymentReference.trim() || null : null,
         couponCode: null,
-      });
+    };
+
+    if (!navigator.onLine) {
+      try {
+        window.localStorage.setItem(PENDING_ORDERS_KEY, JSON.stringify([...readPendingOrders(), orderPayload]));
+      } catch {
+        setQuoteError('تعذر حفظ الطلب على هذا الجهاز. اتصل بالإنترنت لإرساله الآن.');
+        setQuoteSubmitting(false);
+        return;
+      }
+      setLastOrder(null);
+      setQuoteSubmitted(true);
+      setCart([]);
+      setCartQuantities({});
+      announce('تم حفظ الطلب وسيُرسل تلقائيًا عند عودة الاتصال');
+      setQuoteSubmitting(false);
+      return;
+    }
+
+    try {
+      const order = await createStoreOrder(orderPayload);
       setLastOrder(order);
       setQuoteSubmitted(true);
       setCart([]);
@@ -761,7 +874,9 @@ function App() {
           <section className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title" onClick={(event) => event.stopPropagation()} data-testid="modal-quote">
             <div className="drawer-header"><h2 id="quote-title">إتمام الطلب</h2><button className="close-button" type="button" onClick={closeQuoteForm} aria-label="إغلاق النموذج" data-testid="button-close-quote"><X size={16} /></button></div>
             {quoteSubmitted ? (
-              <div className="quote-success" data-testid="status-quote-submitted"><strong>تم حفظ طلبك بنجاح.</strong><p>رقم الطلب: <strong>{lastOrder?.id}</strong></p><p>طريقة الدفع: {lastOrder?.paymentMethodName}. حالة الدفع: {lastOrder?.paymentStatus === 'cod_pending' ? 'الدفع عند الاستلام' : 'بانتظار مراجعة التحويل'}</p><p>الحالة الحالية: {lastOrder?.status}. يمكنك متابعة الشحن من زر تتبع الطلب.</p><div className="product-card-actions"><button className="button-dark" type="button" onClick={openTracking} data-testid="button-track-created-order">تتبع الطلب</button><button className="preview-link" type="button" onClick={closeQuoteForm} data-testid="button-finish-quote">حسنًا</button></div></div>
+                <div className="quote-success" data-testid="status-quote-submitted">
+                  {lastOrder ? <><strong>تم حفظ طلبك بنجاح.</strong><p>رقم الطلب: <strong>{lastOrder.id}</strong></p><p>طريقة الدفع: {lastOrder.paymentMethodName}. حالة الدفع: {lastOrder.paymentStatus === 'cod_pending' ? 'الدفع عند الاستلام' : 'بانتظار مراجعة التحويل'}</p><p>الحالة الحالية: {lastOrder.status}. يمكنك متابعة الشحن من زر تتبع الطلب.</p><div className="product-card-actions"><button className="button-dark" type="button" onClick={openTracking} data-testid="button-track-created-order">تتبع الطلب</button><button className="preview-link" type="button" onClick={closeQuoteForm} data-testid="button-finish-quote">حسنًا</button></div></> : <><strong>تم حفظ طلبك على الجهاز.</strong><p>لا يوجد اتصال حاليًا. سيُرسل الطلب تلقائيًا إلى CABL عند عودة الإنترنت.</p><button className="button-dark" type="button" onClick={closeQuoteForm} data-testid="button-finish-offline-order">حسنًا</button></>}
+                </div>
              ) : (
                <form className="quote-form checkout-layout" onSubmit={submitQuote}>
                  <div className="checkout-details">
@@ -799,6 +914,11 @@ function App() {
           </section>
         </div>
       )}
+      {isOffline && <div className="offline-badge" role="status" data-testid="status-offline"><WifiOff size={14} /> تعمل دون اتصال · البيانات المحفوظة متاحة</div>}
+      <a className="whatsapp-float" href={WHATSAPP_URL} target="_blank" rel="noreferrer" aria-label="تواصل معنا عبر WhatsApp" data-testid="button-whatsapp-float">
+        <MessageCircle size={25} fill="currentColor" />
+        <span>WhatsApp</span>
+      </a>
       {toast && <div className="toast-message" role="status" data-testid="status-toast">{toast}</div>}
     </div>
   );
