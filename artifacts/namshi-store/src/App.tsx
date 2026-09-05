@@ -37,6 +37,8 @@ type Product = {
   name: string;
   price: number;
   color: string;
+  description: string;
+  note?: string | null;
   category: { id: string; name: string } | null;
   image: string;
   sku: string;
@@ -52,6 +54,88 @@ const PENDING_ORDERS_KEY = 'cabl-pending-orders-v1';
 const WHATSAPP_URL = 'https://wa.me/967771106977?text=' + encodeURIComponent('مرحبًا CABL، أريد الاستفسار عن أحد المنتجات.');
 const HOME_TITLE = 'CABL | شاحن جوال أصلي وسريع في اليمن';
 const HOME_DESCRIPTION = 'اشترِ شاحن جوال أصلي وسريع، شاحن Type-C وPD وGaN، شاحن آيفون وسامسونج وباور بانك من CABL مع توصيل داخل اليمن.';
+const GLOBAL_SEARCH_KEYWORDS = [
+  'شواحن', 'شاحن جوال', 'شاحن تلفون', 'شواحن تلفونات', 'شاحن سريع', 'شاحن أصلي', 'شاحن سامسونج', 'Samsung',
+  'شاحن آيفون', 'iPhone', 'شاحن تايب سي', 'Type-C', 'شاحن يو إس بي', 'USB', 'شاحن 20 واط', 'شاحن 25 واط',
+  'شاحن 30 واط', 'شاحن 45 واط', 'شاحن 65 واط', 'شاحن 100 واط', 'شاحن جان', 'GaN', 'شاحن بي دي', 'PD',
+  'شاحن سامسونج الأصلي', 'شاحن آيفون الأصلي', 'شواحن سريعة', 'وصلات شحن', 'وصلة شحن', 'وصلات تايب سي',
+  'وصلة تايب سي', 'وصلة يو إس بي', 'وصلة تايب سي إلى تايب سي', 'Type-C to Type-C', 'وصلة شحن سريع',
+  'وصلات شحن سريعة', 'وصلة 60 واط', 'وصلة 100 واط', 'وصلة 240 واط', 'خازن', 'خازن شحن', 'خازن متنقل',
+  'Power Bank', 'خازن 10000', 'خازن 20000', 'خازن 30000', 'خازن 30 واط', 'شاحن سيارة', 'شاحن سيارة سريع',
+  'شاحن سيارة يو إس بي', 'شاحن سيارة تايب سي', 'شاحن لاسلكي', 'شاحن وايرلس', 'Wireless', 'شاحن ماج سيف',
+  'MagSafe', 'شاحن 3 في 1', 'شواحن ووصلات', 'اكسسوارات جوال', 'اكسسوارات موبايل', 'اكسسوارات آيفون',
+  'اكسسوارات سامسونج', 'بيسوس', 'Baseus', 'منتجات بيسوس', 'شواحن بيسوس', 'وصلات بيسوس', 'فينشن', 'Vention',
+  'منتجات فينشن', 'شواحن فينشن', 'وصلات فينشن', 'يوقرين', 'UGREEN', 'منتجات يوقرين', 'شواحن يوقرين',
+  'وصلات يوقرين', 'انكر', 'Anker', 'منتجات انكر', 'شواحن انكر', 'وصلات انكر', 'شواحن أصلية', 'وصلات أصلية',
+  'اكسسوارات جوال أصلية', 'شراء شاحن', 'شراء وصلة', 'شراء خازن', 'متجر شواحن', 'متجر اكسسوارات جوال',
+  'متجر إلكترونيات', 'شواحن اليمن', 'شواحن ووصلات اليمن', 'اكسسوارات جوال اليمن', 'متجر إلكترونيات اليمن',
+  'CABL اليمن',
+];
+
+const dedupeKeywords = (keywords: string[]) => [...new Set(keywords.filter(Boolean))];
+
+function productKind(product: Pick<Product, 'name' | 'color' | 'description' | 'category'>) {
+  const text = `${product.name} ${product.color} ${product.description} ${product.category?.name ?? ''}`.toLowerCase();
+  if (text.includes('باور') || text.includes('power bank') || text.includes('خازن')) return 'powerbank';
+  if (text.includes('كابل') || text.includes('وصلة') || text.includes('cable') || text.includes('lightning')) return 'cable';
+  if (text.includes('سيارة') || text.includes('car')) return 'car';
+  if (text.includes('محور') || text.includes('hub') || text.includes('حامل')) return 'accessory';
+  if (text.includes('لاسلكي') || text.includes('wireless') || text.includes('magsafe')) return 'wireless';
+  return 'charger';
+}
+
+function getProductKeywords(product: Product) {
+  const text = `${product.name} ${product.color} ${product.description} ${product.category?.name ?? ''}`;
+  const kind = productKind(product);
+  const keywords = [
+    product.name,
+    product.brand,
+    product.category?.name ?? '',
+    product.sku,
+    product.color,
+    'CABL اليمن',
+    'منتجات أصلية',
+    'متجر إلكترونيات اليمن',
+  ];
+  const brandKeywords: Record<string, string[]> = {
+    Baseus: ['بيسوس', 'Baseus', 'منتجات بيسوس', 'شواحن بيسوس', 'وصلات بيسوس'],
+    Vention: ['فينشن', 'Vention', 'منتجات فينشن', 'شواحن فينشن', 'وصلات فينشن'],
+    UGREEN: ['يوقرين', 'UGREEN', 'منتجات يوقرين', 'شواحن يوقرين', 'وصلات يوقرين'],
+    Anker: ['انكر', 'Anker', 'منتجات انكر', 'شواحن انكر', 'وصلات انكر'],
+  };
+  keywords.push(...(brandKeywords[product.brand] ?? []));
+  if (kind === 'charger') {
+    keywords.push('شواحن', 'شاحن جوال', 'شاحن تلفون', 'شواحن تلفونات', 'شاحن سريع', 'شاحن أصلي', 'شواحن سريعة', 'شراء شاحن', 'متجر شواحن');
+  }
+  if (kind === 'cable') {
+    keywords.push('وصلات شحن', 'وصلة شحن', 'وصلات تايب سي', 'وصلة تايب سي', 'Type-C', 'وصلة يو إس بي', 'USB', 'شراء وصلة', 'وصلات أصلية');
+    if (text.toLowerCase().includes('usb-c إلى usb-c') || text.toLowerCase().includes('usb-c to usb-c')) keywords.push('وصلة تايب سي إلى تايب سي', 'Type-C to Type-C');
+    if (/\b100w\b|100 واط/i.test(text)) keywords.push('وصلة 100 واط');
+    if (/\b60w\b|60 واط/i.test(text)) keywords.push('وصلة 60 واط');
+  }
+  if (kind === 'powerbank') {
+    keywords.push('خازن', 'خازن شحن', 'خازن متنقل', 'Power Bank', 'شراء خازن', 'متجر شواحن');
+    if (/10[,.]?000|10000/.test(text)) keywords.push('خازن 10000');
+    if (/20[,.]?000|20000/.test(text)) keywords.push('خازن 20000');
+    if (/30[,.]?000|30000/.test(text)) keywords.push('خازن 30000');
+    if (/30w|30 واط/i.test(text)) keywords.push('خازن 30 واط');
+  }
+  if (kind === 'car') keywords.push('شاحن سيارة', 'شاحن سيارة سريع', 'شاحن سيارة يو إس بي', 'شاحن سيارة تايب سي');
+  if (kind === 'wireless') keywords.push('شاحن لاسلكي', 'شاحن وايرلس', 'Wireless', 'شاحن ماج سيف', 'MagSafe');
+  if (kind === 'accessory') keywords.push('شواحن ووصلات', 'اكسسوارات جوال', 'اكسسوارات موبايل', 'اكسسوارات جوال أصلية');
+  const wattage = text.match(/(?:\d{2,3})\s*(?:w|واط)/gi) ?? [];
+  for (const value of wattage) {
+    const watts = value.replace(/\D/g, '');
+    keywords.push(`${watts}W`, `${watts} واط`, `شاحن ${watts} واط`);
+  }
+  if (/gan/i.test(text) || text.includes('جان')) keywords.push('شاحن جان', 'GaN');
+  if (/pd/i.test(text) || text.includes('بي دي')) keywords.push('شاحن بي دي', 'PD');
+  if (/usb/i.test(text) || text.includes('يو إس بي')) keywords.push('شاحن يو إس بي', 'USB');
+  if (/type-c/i.test(text) || text.includes('تايب سي')) keywords.push('شاحن تايب سي', 'Type-C');
+  if (/iphone|آيفون|lightning/i.test(text)) keywords.push('شاحن آيفون', 'iPhone', 'شاحن آيفون الأصلي', 'اكسسوارات آيفون');
+  if (/samsung|سامسونج/i.test(text)) keywords.push('شاحن سامسونج', 'Samsung', 'شاحن سامسونج الأصلي', 'اكسسوارات سامسونج');
+  return dedupeKeywords(keywords);
+}
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -106,17 +190,22 @@ function CablLogo({ className = '', showTagline = true }: { className?: string; 
 
 function ProductPreview({
   product,
+  relatedProducts,
   isFavorite,
   onBack,
   onAddToCart,
   onToggleFavorite,
+  onOpenRelatedProduct,
 }: {
   product: Product;
+  relatedProducts: Product[];
   isFavorite: boolean;
   onBack: () => void;
   onAddToCart: (product: Product) => void;
   onToggleFavorite: (id: string) => void;
+  onOpenRelatedProduct: (product: Product) => void;
 }) {
+  const productKeywords = getProductKeywords(product);
   return (
     <section className="product-preview section" aria-label={`تفاصيل ${product.name}`} data-testid="page-product-preview">
       <button className="back-link" type="button" onClick={onBack} data-testid="button-back-products">
@@ -130,7 +219,10 @@ function ProductPreview({
           <span className="eyebrow">{product.brand} · {product.category?.name ?? '—'}</span>
           <h1>{product.name}</h1>
            <div className="product-preview-price">${product.price.toFixed(2)}</div>
-          <p className="product-preview-description">{product.color}. حل عملي للشحن اليومي، المكتب، والسفر.</p>
+          <p className="product-preview-description">{product.description || product.color}. حل عملي للشحن اليومي، المكتب، والسفر داخل اليمن.</p>
+          <p className="product-preview-search-copy">
+            يبحث العملاء عن هذا المنتج باسم {product.name}، وضمن كلمات مثل {productKeywords.slice(1, 5).join('، ')}. تعرّف على المواصفات قبل شراء {productKind(product) === 'cable' ? 'وصلة شحن' : productKind(product) === 'powerbank' ? 'خازن متنقل' : 'شاحن جوال'} أصلي.
+          </p>
           <div className="product-spec-list">
             <div><span>العلامة</span><strong>{product.brand}</strong></div>
             <div><span>الفئة</span><strong>{product.category?.name ?? '—'}</strong></div>
@@ -150,6 +242,39 @@ function ProductPreview({
           </div>
         </div>
       </div>
+      <section className="product-seo-section" aria-labelledby="product-keywords-heading">
+        <span className="eyebrow">بحث مرتبط بالمنتج</span>
+        <h2 id="product-keywords-heading">كلمات ومواصفات {product.name}</h2>
+        <p>{product.color}. {product.description} العلامة: {product.brand}. الفئة: {product.category?.name ?? 'منتجات الشحن والإكسسوارات'}.</p>
+        <div className="product-keywords" aria-label="كلمات البحث المرتبطة">
+          {productKeywords.map((keyword) => <span key={keyword}>{keyword}</span>)}
+        </div>
+      </section>
+      {relatedProducts.length > 0 && (
+        <section className="related-products" aria-labelledby="related-products-heading">
+          <div className="section-header">
+            <div>
+              <span className="eyebrow">اقتراحات مناسبة</span>
+              <h2 id="related-products-heading">منتجات ذات صلة</h2>
+            </div>
+            <p>منتجات من نفس العلامة أو الفئة لتقارن المواصفات والقدرة قبل الشراء.</p>
+          </div>
+          <div className="related-product-grid">
+            {relatedProducts.map((relatedProduct) => (
+              <article className="related-product-card" key={relatedProduct.id}>
+                <button type="button" onClick={() => onOpenRelatedProduct(relatedProduct)} aria-label={`عرض ${relatedProduct.name}`}>
+                  <img src={relatedProduct.image} alt={productAlt(relatedProduct)} width="500" height="600" loading="lazy" />
+                </button>
+                <div>
+                  <span>{relatedProduct.brand}</span>
+                  <h3>{relatedProduct.name}</h3>
+                  <strong>${relatedProduct.price.toFixed(2)}</strong>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
     </section>
   );
 }
@@ -313,6 +438,8 @@ function App() {
     name: product.productName,
     price: product.discountPrice ?? product.regularPrice,
     color: product.shortDescription ?? product.productDescription ?? `منتج أصلي من ${product.brand}`,
+    description: product.productDescription ?? product.shortDescription ?? `منتج أصلي من ${product.brand} متوفر في CABL اليمن.`,
+    note: product.productNote,
     category: product.category,
     image: product.images[0]
       ? product.images[0].startsWith('http') ? product.images[0] : `${import.meta.env.BASE_URL}${product.images[0]}`
@@ -572,13 +699,30 @@ function App() {
   const selectedProduct = selectedProductId === null
     ? null
     : products.find((product) => product.id === selectedProductId) ?? null;
+  const relatedProducts = useMemo(() => {
+    if (!selectedProduct) return [];
+    const selectedKind = productKind(selectedProduct);
+    return products
+      .filter((product) => product.id !== selectedProduct.id)
+      .map((product) => {
+        let score = 0;
+        if (product.brand === selectedProduct.brand) score += 4;
+        if (product.category?.id && product.category.id === selectedProduct.category?.id) score += 5;
+        if (productKind(product) === selectedKind) score += 3;
+        if (product.name.match(/\d{2,3}W/i)?.[0] === selectedProduct.name.match(/\d{2,3}W/i)?.[0]) score += 1;
+        return { product, score };
+      })
+      .sort((a, b) => b.score - a.score || a.product.name.localeCompare(b.product.name))
+      .slice(0, 4)
+      .map(({ product }) => product);
+  }, [products, selectedProduct]);
 
   useEffect(() => {
     const title = selectedProduct
       ? `${selectedProduct.name} | ${selectedProduct.brand} | CABL اليمن`
       : HOME_TITLE;
     const description = selectedProduct
-      ? `${selectedProduct.name} من ${selectedProduct.brand} — ${selectedProduct.category?.name ?? 'شاحن ومنتج شحن'} أصلي مع توصيل داخل اليمن.`
+      ? `${selectedProduct.name} من ${selectedProduct.brand} — ${selectedProduct.description || selectedProduct.category?.name || 'منتج شحن'} مع توصيل داخل اليمن. كلمات البحث: ${getProductKeywords(selectedProduct).slice(0, 8).join('، ')}.`
       : HOME_DESCRIPTION;
     document.title = title;
     const setMeta = (selector: string, attribute: 'name' | 'property', content: string) => {
@@ -595,6 +739,7 @@ function App() {
     setMeta('meta[property="og:description"]', 'property', description);
     setMeta('meta[name="twitter:title"]', 'name', title);
     setMeta('meta[name="twitter:description"]', 'name', description);
+    setMeta('meta[name="keywords"]', 'name', selectedProduct ? getProductKeywords(selectedProduct).join(', ') : GLOBAL_SEARCH_KEYWORDS.join(', '));
     const canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     canonical?.setAttribute('href', `${window.location.origin}${window.location.pathname}`);
   }, [selectedProduct]);
@@ -727,10 +872,12 @@ function App() {
         {selectedProduct ? (
           <ProductPreview
             product={products.find((product) => product.id === selectedProductId) ?? products[0]}
+            relatedProducts={relatedProducts}
             isFavorite={selectedProductId !== null && favorites.includes(selectedProductId)}
             onBack={closeProductPreview}
             onAddToCart={addToCart}
             onToggleFavorite={toggleFavorite}
+            onOpenRelatedProduct={openProductPreview}
           />
         ) : (
         <>
@@ -927,8 +1074,17 @@ function App() {
               <a href={`${import.meta.env.BASE_URL}samsung-chargers/`}>شواحن سامسونج</a>
               <a href={`${import.meta.env.BASE_URL}car-chargers/`}>شواحن السيارات</a>
               <a href={`${import.meta.env.BASE_URL}wireless-chargers/`}>الشواحن اللاسلكية</a>
+              <a href={`${import.meta.env.BASE_URL}charging-cables/`}>وصلات الشحن</a>
+              <a href={`${import.meta.env.BASE_URL}power-banks/`}>الباور بانك والخازن المتنقل</a>
+              <a href={`${import.meta.env.BASE_URL}phone-accessories/`}>اكسسوارات الجوال</a>
               <a href={`${import.meta.env.BASE_URL}delivery/yemen/`}>التوصيل داخل اليمن</a>
             </nav>
+            <details className="seo-keyword-details">
+              <summary>عمليات البحث الشائعة عن الشواحن والإكسسوارات في اليمن</summary>
+              <div className="seo-keyword-cloud">
+                {GLOBAL_SEARCH_KEYWORDS.map((keyword) => <span key={keyword}>{keyword}</span>)}
+              </div>
+            </details>
           </section>
 
         <section className="service-band" id="services" aria-label="خدمات المتجر" data-testid="section-services">
