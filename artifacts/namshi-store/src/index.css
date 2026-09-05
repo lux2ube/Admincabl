@@ -320,7 +320,7 @@ img { display: block; max-width: 100%; }
    .cabl-logo { gap: 6px; }
    .cabl-logo-mark { width: 30px; }
    .cabl-logo-copy strong { font-size: 17px; }
-   .cabl-logo-copy small { font-size: 6px; }
+   .cabl-logo-copy small { display: none; }
   .hero-frame, .hero-copy { min-height: 535px; }
   .hero-copy { padding: 50px 25px 85px; justify-content: end; }
   .hero-copy h1 { max-width: 350px; font-size: clamp(53px, 16vw, 76px); }
