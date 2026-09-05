@@ -774,54 +774,6 @@ function App() {
            <p><strong>CABL هو الوكيل الحصري لعلامة Baseus في اليمن.</strong><br />اكتشف الشواحن والكابلات والبطاريات المحمولة الأصلية، مع توصيل داخل اليمن ودعم محلي.</p>
          </section>
 
-         <section className="section seo-section" aria-labelledby="seo-heading" data-testid="section-seo-content">
-           <div className="section-header">
-             <div>
-               <span className="eyebrow">دليل الشراء في اليمن</span>
-               <h2 id="seo-heading">شاحن جوال أصلي<br />وسريع في اليمن.</h2>
-             </div>
-             <p>اختر شاحنًا مناسبًا لجهازك من كتالوج CABL، مع مواصفات واضحة وخيارات توصيل داخل اليمن.</p>
-           </div>
-           <div className="seo-grid">
-             <article>
-               <h3>شاحن سريع وموثوق</h3>
-               <p>لشراء شاحن جوال سريع أو شاحن أصلي بسعر مناسب، قارن القدرة والتوافق والمنفذ قبل الطلب. ستجد شواحن USB وType-C وشواحن PD وGaN للاستخدام اليومي والسفر.</p>
-             </article>
-             <article>
-               <h3>آيفون وسامسونج وUSB-C</h3>
-               <p>نوفر حلول شحن للآيفون وسامسونج وهواوي وشاومي، إضافة إلى سلك شاحن وكيبل شاحن وشاحن لاسلكي وشاحن سيارة وباور بانك حسب احتياجك.</p>
-             </article>
-             <article>
-               <h3>توصيل داخل اليمن</h3>
-               <p>يمكنك شراء شاحن جوال أونلاين من CABL وطلب التوصيل إلى صنعاء أو عدن أو تعز أو الحديدة أو إب أو حضرموت أو مأرب، بحسب خيارات الشحن المتاحة لعنوانك.</p>
-             </article>
-           </div>
-           <div className="seo-faq" aria-label="أسئلة شائعة عن الشواحن">
-             <details>
-               <summary>أين أجد شاحن جوال أصلي في اليمن؟</summary>
-               <p>تصفح منتجات CABL الأصلية من Baseus وVention وAnker وUGREEN، ثم اختر طريقة الدفع والتوصيل المناسبة داخل اليمن.</p>
-             </details>
-             <details>
-               <summary>ما الشاحن المناسب للطاقة الضعيفة أو الاستخدام اليومي؟</summary>
-               <p>يعتمد الاختيار على جهازك وقدرة الشاحن المطلوبة. راجع القدرة بالواط، نوع المنفذ، والتوافق قبل شراء شاحن سريع أو شاحن متنقل.</p>
-             </details>
-             <details>
-               <summary>كم سعر الشاحن في اليمن؟</summary>
-               <p>تختلف أسعار الشواحن حسب العلامة والقدرة والمواصفات. يعرض الكتالوج سعر كل منتج بوضوح قبل إتمام الطلب.</p>
-             </details>
-           </div>
-           <nav className="seo-links" aria-label="صفحات الشواحن">
-             <a href={`${import.meta.env.BASE_URL}chargers/`}>شواحن الجوال</a>
-             <a href={`${import.meta.env.BASE_URL}fast-chargers/`}>الشواحن السريعة</a>
-             <a href={`${import.meta.env.BASE_URL}type-c-chargers/`}>شواحن Type-C</a>
-             <a href={`${import.meta.env.BASE_URL}iphone-chargers/`}>شواحن الآيفون</a>
-             <a href={`${import.meta.env.BASE_URL}samsung-chargers/`}>شواحن سامسونج</a>
-             <a href={`${import.meta.env.BASE_URL}car-chargers/`}>شواحن السيارات</a>
-             <a href={`${import.meta.env.BASE_URL}wireless-chargers/`}>الشواحن اللاسلكية</a>
-             <a href={`${import.meta.env.BASE_URL}delivery/yemen/`}>التوصيل داخل اليمن</a>
-           </nav>
-         </section>
-
         <section className="section" id="categories" data-testid="section-categories">
           <div className="section-header">
             <div>
@@ -930,6 +882,54 @@ function App() {
             {visibleProducts.length === 0 && <div className="empty-products" data-testid="empty-product-results">لا توجد منتجات مطابقة. جرّب SKU أو فئة أخرى.</div>}
           </div>
         </section>
+
+          <section className="section seo-section" aria-labelledby="seo-heading" data-testid="section-seo-content">
+            <div className="section-header">
+              <div>
+                <span className="eyebrow">دليل الشراء في اليمن</span>
+                <h2 id="seo-heading">شاحن جوال أصلي<br />وسريع في اليمن.</h2>
+              </div>
+              <p>اختر شاحنًا مناسبًا لجهازك من كتالوج CABL، مع مواصفات واضحة وخيارات توصيل داخل اليمن.</p>
+            </div>
+            <div className="seo-grid">
+              <article>
+                <h3>شاحن سريع وموثوق</h3>
+                <p>لشراء شاحن جوال سريع أو شاحن أصلي بسعر مناسب، قارن القدرة والتوافق والمنفذ قبل الطلب. ستجد شواحن USB وType-C وشواحن PD وGaN للاستخدام اليومي والسفر.</p>
+              </article>
+              <article>
+                <h3>آيفون وسامسونج وUSB-C</h3>
+                <p>نوفر حلول شحن للآيفون وسامسونج وهواوي وشاومي، إضافة إلى سلك شاحن وكيبل شاحن وشاحن لاسلكي وشاحن سيارة وباور بانك حسب احتياجك.</p>
+              </article>
+              <article>
+                <h3>توصيل داخل اليمن</h3>
+                <p>يمكنك شراء شاحن جوال أونلاين من CABL وطلب التوصيل إلى صنعاء أو عدن أو تعز أو الحديدة أو إب أو حضرموت أو مأرب، بحسب خيارات الشحن المتاحة لعنوانك.</p>
+              </article>
+            </div>
+            <div className="seo-faq" aria-label="أسئلة شائعة عن الشواحن">
+              <details>
+                <summary>أين أجد شاحن جوال أصلي في اليمن؟</summary>
+                <p>تصفح منتجات CABL الأصلية من Baseus وVention وAnker وUGREEN، ثم اختر طريقة الدفع والتوصيل المناسبة داخل اليمن.</p>
+              </details>
+              <details>
+                <summary>ما الشاحن المناسب للطاقة الضعيفة أو الاستخدام اليومي؟</summary>
+                <p>يعتمد الاختيار على جهازك وقدرة الشاحن المطلوبة. راجع القدرة بالواط، نوع المنفذ، والتوافق قبل شراء شاحن سريع أو شاحن متنقل.</p>
+              </details>
+              <details>
+                <summary>كم سعر الشاحن في اليمن؟</summary>
+                <p>تختلف أسعار الشواحن حسب العلامة والقدرة والمواصفات. يعرض الكتالوج سعر كل منتج بوضوح قبل إتمام الطلب.</p>
+              </details>
+            </div>
+            <nav className="seo-links" aria-label="صفحات الشواحن">
+              <a href={`${import.meta.env.BASE_URL}chargers/`}>شواحن الجوال</a>
+              <a href={`${import.meta.env.BASE_URL}fast-chargers/`}>الشواحن السريعة</a>
+              <a href={`${import.meta.env.BASE_URL}type-c-chargers/`}>شواحن Type-C</a>
+              <a href={`${import.meta.env.BASE_URL}iphone-chargers/`}>شواحن الآيفون</a>
+              <a href={`${import.meta.env.BASE_URL}samsung-chargers/`}>شواحن سامسونج</a>
+              <a href={`${import.meta.env.BASE_URL}car-chargers/`}>شواحن السيارات</a>
+              <a href={`${import.meta.env.BASE_URL}wireless-chargers/`}>الشواحن اللاسلكية</a>
+              <a href={`${import.meta.env.BASE_URL}delivery/yemen/`}>التوصيل داخل اليمن</a>
+            </nav>
+          </section>
 
         <section className="service-band" id="services" aria-label="خدمات المتجر" data-testid="section-services">
           <div className="service-item"><Truck /><span><strong>توصيل داخل اليمن</strong><span>نرتب الشحن إلى مدينتك عند تأكيد الطلب</span></span></div>
