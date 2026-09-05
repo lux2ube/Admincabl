@@ -130,15 +130,15 @@ img { display: block; max-width: 100%; }
 .category-info h3 { margin: 0 0 5px; font-family: var(--font-display); font-size: 24px; letter-spacing: 0; }
 .category-info span { font-size: 10px; font-weight: 700; }
 
-.campaign-section { background: var(--ink); color: var(--paper); max-width: none; padding-left: max(5.2vw, calc((100vw - 1440px)/2)); padding-right: max(5.2vw, calc((100vw - 1440px)/2)); }
-.campaign-section .section-header p { color: #aaa8a1; }
+.campaign-section { background: var(--warm); color: var(--ink); max-width: none; padding-left: max(5.2vw, calc((100vw - 1440px)/2)); padding-right: max(5.2vw, calc((100vw - 1440px)/2)); }
+.campaign-section .section-header p { color: var(--muted-ink); }
 .campaign-grid { display: grid; grid-template-columns: 1.1fr 1fr 1fr; min-height: 500px; gap: 10px; }
-.campaign-card { position: relative; min-height: 370px; overflow: hidden; }
+.campaign-card { position: relative; min-height: 370px; overflow: hidden; background: var(--paper); }
 .campaign-card:first-child { min-height: 500px; }
 .campaign-card img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
 .campaign-card:hover img { transform: scale(1.035); }
-.campaign-card::after { position: absolute; content: ""; inset: 0; background: linear-gradient(180deg, transparent 47%, rgba(0,0,0,.63)); }
-.campaign-label { position: absolute; left: 22px; right: 22px; bottom: 20px; z-index: 1; }
+.campaign-card::after { position: absolute; content: ""; inset: 0; background: linear-gradient(180deg, transparent 42%, rgba(247,246,242,.94)); }
+.campaign-label { position: absolute; left: 22px; right: 22px; bottom: 20px; z-index: 1; color: var(--ink); }
 .campaign-label h3 { margin: 0 0 11px; font-family: var(--font-display); font-size: clamp(26px, 3vw, 44px); letter-spacing: 0; line-height: 1.25; }
 .campaign-label button { border: 0; border-bottom: 1px solid currentColor; padding: 0 0 4px; background: transparent; color: inherit; font-size: 10px; font-weight: 800; }
 
@@ -156,14 +156,14 @@ img { display: block; max-width: 100%; }
 .sort-button { border: 0; background: transparent; color: var(--muted-ink); font-size: 11px; }
 .product-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px 10px; }
 .product-card { position: relative; min-width: 0; }
-.product-image { position: relative; overflow: hidden; aspect-ratio: .79; background: var(--warm); }
-.product-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .45s ease; }
+.product-image { position: relative; overflow: hidden; aspect-ratio: .79; background: var(--paper); }
+.product-image img { width: 100%; height: 100%; padding: 20px; object-fit: contain; mix-blend-mode: multiply; transition: transform .45s ease; }
 .product-card:hover .product-image img { transform: scale(1.035); }
 .wish-button { position: absolute; top: 12px; left: 12px; z-index: 2; display: grid; place-items: center; width: 31px; height: 31px; border: 0; border-radius: 50%; background: rgba(247,246,242,.88); color: var(--ink); }
 .wish-button.active { background: var(--lime); }
 .wish-button svg { width: 15px; }
 .product-tag { position: absolute; right: 10px; bottom: 10px; background: var(--lime); padding: 5px 8px; color: var(--ink); font-size: 9px; font-weight: 800; }
-.product-details { padding: 12px 3px; }
+.product-details { padding: 12px 3px; color: var(--ink); }
 .product-brand { color: var(--muted-ink); font-size: 10px; letter-spacing: .04em; }
 .product-name { margin: 5px 0 8px; font-size: 13px; font-weight: 600; }
 .product-price { font-size: 12px; font-weight: 700; }
@@ -178,9 +178,9 @@ img { display: block; max-width: 100%; }
 .back-link { display: inline-flex; align-items: center; gap: 7px; border: 0; background: transparent; padding: 0; color: var(--muted-ink); font-size: 11px; font-weight: 700; }
 .back-link:hover { color: var(--ink); }
 .product-preview-layout { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(340px, .92fr); gap: clamp(35px, 7vw, 110px); align-items: center; margin-top: 40px; }
-.product-preview-image { background: var(--warm); aspect-ratio: 1 / 1.08; overflow: hidden; }
-.product-preview-image img { width: 100%; height: 100%; object-fit: cover; }
-.product-preview-copy { max-width: 520px; }
+.product-preview-image { background: var(--paper); aspect-ratio: 1 / 1.08; overflow: hidden; }
+.product-preview-image img { width: 100%; height: 100%; padding: 32px; object-fit: contain; mix-blend-mode: multiply; }
+.product-preview-copy { max-width: 520px; color: var(--ink); }
 .product-preview-copy h1 { margin: 0; font-family: var(--font-display); font-size: clamp(29px, 4vw, 56px); line-height: 1.3; }
 .product-preview-price { margin-top: 21px; font-size: 19px; font-weight: 800; }
 .product-preview-description { max-width: 430px; margin: 15px 0 0; color: var(--muted-ink); font-size: 14px; line-height: 1.8; }
