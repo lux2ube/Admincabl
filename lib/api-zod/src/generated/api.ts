@@ -82,6 +82,7 @@ export const SubscribeNewsletterResponse = zod.object({
 export const GetStoreCatalogResponse = zod.object({
   "products": zod.array(zod.object({
   "id": zod.string(),
+  "brand": zod.string(),
   "productName": zod.string(),
   "sku": zod.string(),
   "regularPrice": zod.number(),

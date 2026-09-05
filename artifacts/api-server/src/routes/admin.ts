@@ -234,16 +234,31 @@ router.delete("/admin/tables/:table/rows/:id", async (req, res): Promise<void> =
 });
 
 const productsSeed = [
-  ["00000000-0000-4000-8000-000000000001", "باور بنك 20,000mAh / 22.5W", "CABL-VEN-PB20K", 28.09, "USB-C + USB-A + كابل مدمج", "images/vention-powerbank-20k.jpg"],
-  ["00000000-0000-4000-8000-000000000002", "باور بنك 10,000mAh / 22.5W", "CABL-VEN-PB10K", 24.18, "كابل شحن مدمج", "images/vention-powerbank-10k.jpg"],
-  ["00000000-0000-4000-8000-000000000003", "باور بنك 10,000mAh / USB-C + Lightning", "CABL-VEN-PB10KL", 24.82, "USB-C + Lightning مدمجان", "images/vention-powerbank-10k-lightning.jpg"],
-  ["00000000-0000-4000-8000-000000000004", "شاحن GaN بمنفذين 30W", "CABL-VEN-GAN30", 11.69, "USB-C + USB-A · قابس أوروبي", "images/vention-charger-30w.jpg"],
-  ["00000000-0000-4000-8000-000000000005", "طقم شحن GaN بقدرة 30W", "CABL-VEN-GAN30K", 15.90, "شاحن + كابل USB-C إلى USB-C", "images/vention-charger-30w-kit.jpg"],
-  ["00000000-0000-4000-8000-000000000006", "شاحن GaN بثلاثة منافذ 65W", "CABL-VEN-GAN65", 37.59, "C+C+A · 65W / 65W / 60W", "images/vention-charger-65w.jpg"],
-  ["00000000-0000-4000-8000-000000000007", "شاحن GaN بثلاثة منافذ 70W", "CABL-VEN-GAN70", 39.90, "C+C+A · 70W / 70W / 22.5W", "images/vention-charger-70w.jpg"],
-  ["00000000-0000-4000-8000-000000000008", "شاحن GaN بثلاثة منافذ 100W", "CABL-VEN-GAN100", 79.39, "C+C+A · 100W / 100W / 30W", "images/vention-charger-100w.jpg"],
-  ["00000000-0000-4000-8000-000000000009", "كابل USB-C إلى USB-C بقدرة 100W", "CABL-VEN-C100", 11.27, "شحن سريع 5A · USB 2.0", "images/vention-cable-100w.jpg"],
-  ["00000000-0000-4000-8000-000000000010", "محول سفر عالمي GaN بقدرة 65W", "CABL-VEN-TRAVEL65", 95.88, "شحن عالمي للسفر", "images/vention-adapter-65w.jpg"],
+  ["00000000-0000-4000-8000-000000000001", "Vention", "باور بنك 20,000mAh / 22.5W", "CABL-VEN-PB20K", 28.09, "USB-C + USB-A + كابل مدمج", "images/vention-powerbank-20k.jpg", "10000000-0000-4000-8000-000000000001"],
+  ["00000000-0000-4000-8000-000000000002", "Vention", "باور بنك 10,000mAh / 22.5W", "CABL-VEN-PB10K", 24.18, "كابل شحن مدمج", "images/vention-powerbank-10k.jpg", "10000000-0000-4000-8000-000000000001"],
+  ["00000000-0000-4000-8000-000000000003", "Vention", "باور بنك 10,000mAh / USB-C + Lightning", "CABL-VEN-PB10KL", 24.82, "USB-C + Lightning مدمجان", "images/vention-powerbank-10k-lightning.jpg", "10000000-0000-4000-8000-000000000001"],
+  ["00000000-0000-4000-8000-000000000004", "Vention", "شاحن GaN بمنفذين 30W", "CABL-VEN-GAN30", 11.69, "USB-C + USB-A · قابس أوروبي", "images/vention-charger-30w.jpg", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000005", "Vention", "طقم شحن GaN بقدرة 30W", "CABL-VEN-GAN30K", 15.90, "شاحن + كابل USB-C إلى USB-C", "images/vention-charger-30w-kit.jpg", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000006", "Vention", "شاحن GaN بثلاثة منافذ 65W", "CABL-VEN-GAN65", 37.59, "C+C+A · 65W / 65W / 60W", "images/vention-charger-65w.jpg", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000007", "Vention", "شاحن GaN بثلاثة منافذ 70W", "CABL-VEN-GAN70", 39.90, "C+C+A · 70W / 70W / 22.5W", "images/vention-charger-70w.jpg", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000008", "Vention", "شاحن GaN بثلاثة منافذ 100W", "CABL-VEN-GAN100", 79.39, "C+C+A · 100W / 100W / 30W", "images/vention-charger-100w.jpg", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000009", "Vention", "كابل USB-C إلى USB-C بقدرة 100W", "CABL-VEN-C100", 11.27, "شحن سريع 5A · USB 2.0", "images/vention-cable-100w.jpg", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000010", "Vention", "محول سفر عالمي GaN بقدرة 65W", "CABL-VEN-TRAVEL65", 95.88, "شحن عالمي للسفر", "images/vention-adapter-65w.jpg", "10000000-0000-4000-8000-000000000004"],
+  ["00000000-0000-4000-8000-000000000011", "Baseus", "شاحن Baseus 20W USB-C", "CABL-BAS-20W", 12.50, "شاحن USB-C سريع بقدرة 20W", "images/baseus-charger.svg", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000012", "Baseus", "شاحن Baseus بمنفذين 33W", "CABL-BAS-33W", 18.00, "شاحن مزدوج USB-C و USB-A بقدرة 33W", "images/baseus-charger.svg", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000013", "Baseus", "شاحن Baseus GaN بقدرة 65W", "CABL-BAS-65W", 34.00, "شحن GaN سريع للأجهزة اليومية", "images/baseus-charger.svg", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000014", "Baseus", "شاحن Baseus GaN بقدرة 100W", "CABL-BAS-100W", 54.00, "طاقة عالية للحواسيب والأجهزة المحمولة", "images/baseus-charger.svg", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000015", "Baseus", "كابل Baseus USB-A إلى USB-C", "CABL-BAS-A2C", 7.50, "كابل شحن ومزامنة USB-A إلى USB-C", "images/baseus-cable.svg", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000016", "Baseus", "كابل Baseus USB-C إلى USB-C بقدرة 60W", "CABL-BAS-C2C60", 9.50, "كابل USB-C إلى USB-C بقدرة 60W", "images/baseus-cable.svg", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000017", "Baseus", "كابل Baseus USB-C إلى USB-C بقدرة 100W", "CABL-BAS-C2C100", 12.50, "كابل USB-C إلى USB-C بقدرة 100W", "images/baseus-cable.svg", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000018", "Baseus", "كابل Baseus USB-C إلى Lightning", "CABL-BAS-C2L", 11.50, "كابل USB-C إلى Lightning للشحن السريع", "images/baseus-cable.svg", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000019", "Baseus", "باور بنك Baseus بسعة 10,000mAh", "CABL-BAS-PB10K", 22.00, "طاقة محمولة للاستخدام اليومي", "images/baseus-powerbank.svg", "10000000-0000-4000-8000-000000000001"],
+  ["00000000-0000-4000-8000-000000000020", "Baseus", "باور بنك Baseus 20,000mAh / 22.5W", "CABL-BAS-PB20K22", 30.00, "سعة كبيرة وشحن سريع 22.5W", "images/baseus-powerbank.svg", "10000000-0000-4000-8000-000000000001"],
+  ["00000000-0000-4000-8000-000000000021", "Baseus", "باور بنك Baseus 20,000mAh / 30W", "CABL-BAS-PB20K30", 38.00, "سعة كبيرة وشحن سريع 30W", "images/baseus-powerbank.svg", "10000000-0000-4000-8000-000000000001"],
+  ["00000000-0000-4000-8000-000000000022", "Baseus", "شاحن سيارة Baseus بمنفذين 30W", "CABL-BAS-CAR30", 16.00, "شاحن سيارة مزدوج بقدرة 30W", "images/baseus-car.svg", "10000000-0000-4000-8000-000000000004"],
+  ["00000000-0000-4000-8000-000000000023", "Baseus", "حامل هاتف Baseus مغناطيسي للسيارة", "CABL-BAS-HOLDER", 18.00, "حامل هاتف مغناطيسي للسيارة", "images/baseus-car.svg", "10000000-0000-4000-8000-000000000004"],
+  ["00000000-0000-4000-8000-000000000024", "Baseus", "محور Baseus USB-C ‏5 في 1 مع HDMI", "CABL-BAS-HUB5", 35.00, "محور USB-C متعدد المنافذ مع HDMI", "images/baseus-hub.svg", "10000000-0000-4000-8000-000000000005"],
+  ["00000000-0000-4000-8000-000000000025", "Baseus", "كابل Baseus HDMI 2.1", "CABL-BAS-HDMI21", 15.00, "كابل HDMI 2.1 للصورة والصوت عاليي الجودة", "images/baseus-hub.svg", "10000000-0000-4000-8000-000000000005"],
 ] as const;
 
 async function seedTable(query: string, values: unknown[], conflict = "DO NOTHING") {
@@ -259,25 +274,26 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
        ('10000000-0000-4000-8000-000000000001','باور بانك','حلول طاقة محمولة للاستخدام اليومي','images/vention-powerbank-10k.jpg',TRUE),
        ('10000000-0000-4000-8000-000000000002','الشواحن','شواحن Vention بتقنية GaN','images/vention-charger-65w.jpg',TRUE),
        ('10000000-0000-4000-8000-000000000003','الكابلات','كابلات شحن ونقل بيانات','images/vention-cable-100w.jpg',TRUE),
-       ('10000000-0000-4000-8000-000000000004','السفر والسيارة','حلول الشحن أثناء التنقل','images/vention-adapter-65w.jpg',TRUE)
+       ('10000000-0000-4000-8000-000000000004','السفر والسيارة','حلول الشحن أثناء التنقل','images/vention-adapter-65w.jpg',TRUE),
+       ('10000000-0000-4000-8000-000000000005','الملحقات','محاور وكابلات العرض والاتصال','images/baseus-hub.svg',TRUE)
        ON CONFLICT ("id") DO NOTHING`, []);
-    counts.tags = await seedTable(`INSERT INTO "tags" ("id","tag_name","icon") VALUES (1,'Vention','brand'),(2,'USB-C','cable'),(3,'GaN','bolt') ON CONFLICT ("id") DO NOTHING`, []);
+    counts.tags = await seedTable(`INSERT INTO "tags" ("id","tag_name","icon") VALUES (1,'Vention','brand'),(2,'USB-C','cable'),(3,'GaN','bolt'),(4,'Baseus','brand') ON CONFLICT ("id") DO NOTHING`, []);
     counts.products = 0;
-    for (const [productId, name, sku, price, description, image] of productsSeed) {
+    for (const [productId, brand, name, sku, price, description, image] of productsSeed) {
       counts.products += await seedTable(
-        `INSERT INTO "products" ("id","product_name","SKU","regular_price","quantity","short_description","product_description","published")
-         VALUES ($1,$2,$3,$4,$5,$6,$7,TRUE)
-         ON CONFLICT ("id") DO UPDATE SET "product_name"=EXCLUDED."product_name","SKU"=EXCLUDED."SKU","regular_price"=EXCLUDED."regular_price","short_description"=EXCLUDED."short_description","product_description"=EXCLUDED."product_description","published"=TRUE`,
-        [productId, name, sku, price, 25, description, `${name}. منتج أصلي متوفر من CABL مع توصيل داخل اليمن.`],
+        `INSERT INTO "products" ("id","brand","product_name","SKU","regular_price","quantity","short_description","product_description","published")
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,TRUE)
+         ON CONFLICT ("id") DO UPDATE SET "brand"=EXCLUDED."brand","product_name"=EXCLUDED."product_name","SKU"=EXCLUDED."SKU","regular_price"=EXCLUDED."regular_price","short_description"=EXCLUDED."short_description","product_description"=EXCLUDED."product_description","published"=TRUE`,
+        [productId, brand, name, sku, price, 25, description, `${name}. منتج أصلي متوفر من CABL، الوكيل الحصري لـ ${brand} في اليمن، مع توصيل داخل اليمن.`],
       );
     }
     counts.product_categories = 0;
-    for (let index = 0; index < productsSeed.length; index += 1) {
-      const categoryId = index < 3 ? "10000000-0000-4000-8000-000000000001" : index < 8 ? "10000000-0000-4000-8000-000000000002" : index === 8 ? "10000000-0000-4000-8000-000000000003" : "10000000-0000-4000-8000-000000000004";
-      counts.product_categories += await seedTable(`INSERT INTO "product_categories" ("category_id","product_id") VALUES ($1,$2) ON CONFLICT DO NOTHING`, [categoryId, productsSeed[index][0]]);
+    for (const product of productsSeed) {
+      const categoryId = product[7];
+      counts.product_categories += await seedTable(`INSERT INTO "product_categories" ("category_id","product_id") VALUES ($1,$2) ON CONFLICT DO NOTHING`, [categoryId, product[0]]);
     }
     counts.galleries = 0;
-    for (const [productId, , , , , image] of productsSeed) {
+    for (const [productId, , , , , , image] of productsSeed) {
       counts.galleries += await seedTable(`INSERT INTO "galleries" ("id","product_id","image_path","thumbail","display_order") VALUES ($1,$2,$3,TRUE,0) ON CONFLICT ("id") DO NOTHING`, [`20000000-0000-4000-8000-${productId.slice(-12)}`, productId, image]);
     }
     counts.shippings = await seedTable(`INSERT INTO "shippings" ("id","name","active","icon_path") VALUES (1,'توصيل داخل اليمن',TRUE,'truck'),(2,'توصيل محلي سريع',TRUE,'sparkles') ON CONFLICT ("id") DO NOTHING`, []);

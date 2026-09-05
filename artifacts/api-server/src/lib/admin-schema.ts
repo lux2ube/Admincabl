@@ -59,7 +59,7 @@ const tables: AdminTable[] = [
   {
     key: "products", label: "المنتجات", group: "الكتالوج", primaryKey: "id",
     columns: [
-      id(), column("product_name", "اسم المنتج", "text", { nullable: false }), column("SKU", "SKU", "text", { nullable: false }),
+      id(), column("brand", "العلامة التجارية", "text", { nullable: false }), column("product_name", "اسم المنتج", "text", { nullable: false }), column("SKU", "SKU", "text", { nullable: false }),
       column("regular_price", "السعر الأساسي", "number", { nullable: false }), column("discount_price", "سعر الخصم", "number"),
       column("quantity", "الكمية", "number", { nullable: false }), column("short_description", "الوصف المختصر", "text"),
       column("product_description", "وصف المنتج", "text"), column("product_weight", "الوزن", "number"),

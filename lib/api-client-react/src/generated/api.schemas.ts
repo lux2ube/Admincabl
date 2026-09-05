@@ -39,6 +39,7 @@ export type StoreProductCategory = {
 
 export interface StoreProduct {
   id: string;
+  brand: string;
   productName: string;
   sku: string;
   regularPrice: number;

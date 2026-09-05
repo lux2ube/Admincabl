@@ -62,7 +62,7 @@ function CablLogo({ className = '', showTagline = true }: { className?: string; 
       </svg>
       <span className="cabl-logo-copy">
         <strong>CABL</strong>
-        {showTagline && <small>الوكيل الحصري لشركة Vention في اليمن</small>}
+        {showTagline && <small>الوكيل الحصري لـ Baseus و Vention في اليمن</small>}
       </span>
     </span>
   );
@@ -96,7 +96,7 @@ function ProductPreview({
            <div className="product-preview-price">${product.price.toFixed(2)}</div>
           <p className="product-preview-description">{product.color}. حل عملي للشحن اليومي، المكتب، والسفر.</p>
           <div className="product-spec-list">
-            <div><span>العلامة</span><strong>Vention</strong></div>
+            <div><span>العلامة</span><strong>{product.brand}</strong></div>
             <div><span>الفئة</span><strong>{product.category?.name ?? '—'}</strong></div>
             {product.sku && <div><span>SKU</span><strong>{product.sku}</strong></div>}
             {product.warranty && <div><span>الضمان</span><strong>{product.warranty}</strong></div>}
@@ -109,7 +109,7 @@ function ProductPreview({
           </div>
           <div className="product-preview-notes">
             <span><Truck size={16} /> توصيل داخل اليمن</span>
-            <span><ShieldCheck size={16} /> منتجات أصلية من Vention</span>
+            <span><ShieldCheck size={16} /> منتجات أصلية من {product.brand}</span>
             <span><Sparkles size={16} /> دعم قبل وبعد الشراء</span>
           </div>
         </div>
@@ -202,10 +202,10 @@ function App() {
 
   const products = useMemo<Product[]>(() => (catalogQuery.data?.products ?? []).map((product: StoreProduct) => ({
     id: product.id,
-    brand: 'Vention',
+    brand: product.brand,
     name: product.productName,
     price: product.discountPrice ?? product.regularPrice,
-    color: product.shortDescription ?? product.productDescription ?? 'منتج أصلي من Vention',
+    color: product.shortDescription ?? product.productDescription ?? `منتج أصلي من ${product.brand}`,
     category: product.category,
     image: product.images[0]
       ? product.images[0].startsWith('http') ? product.images[0] : `${import.meta.env.BASE_URL}${product.images[0]}`
@@ -486,7 +486,7 @@ function App() {
 
           <nav className="desktop-nav" aria-label="التنقل الرئيسي" data-testid="nav-main">
             {filterOptions.slice(1).map((filter) => <button type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`nav-category-${filter.value}`}>{filter.label}</button>)}
-            <button type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-brands">Vention</button>
+            <button type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-brands">Baseus و Vention</button>
             <button type="button" onClick={() => scrollTo('about')} data-testid="nav-about">عن CABL</button>
             <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="nav-sale">تسوق الآن</button>
           </nav>
@@ -569,13 +569,18 @@ function App() {
           </div>}
         </section>
 
+         <section className="brand-announcement" aria-label="وكالة Baseus" data-testid="section-brand-announcement">
+           <div><span className="eyebrow">شراكة رسمية</span><h2>Baseus<br />في اليمن.</h2></div>
+           <p><strong>CABL هو الوكيل الحصري لعلامة Baseus في اليمن.</strong><br />اكتشف الشواحن والكابلات والبطاريات المحمولة الأصلية، مع توصيل داخل اليمن ودعم محلي.</p>
+         </section>
+
         <section className="section" id="categories" data-testid="section-categories">
           <div className="section-header">
             <div>
               <span className="eyebrow">ابدأ من هنا</span>
               <h2>طاقة لخطوتك<br />القادمة.</h2>
             </div>
-            <p>أربع فئات من منتجات الشحن والطاقة للاستخدام اليومي، المكتب، والسفر.</p>
+             <p>خمس فئات من منتجات الشحن والطاقة للاستخدام اليومي، المكتب، والسيارة.</p>
           </div>
           <div className="category-grid">
             {categories.map((category) => (
@@ -596,7 +601,7 @@ function App() {
               <span className="eyebrow">اختياراتنا</span>
               <h2>اشحن<br />لحظتك.</h2>
             </div>
-            <p>منتجات Vention الأساسية بمواصفات واضحة لتختار ما يناسب أجهزتك ويومك.</p>
+            <p>منتجات Baseus و Vention الأصلية بمواصفات واضحة لتختار ما يناسب أجهزتك ويومك.</p>
           </div>
           <div className="campaign-grid">
             <article className="campaign-card">
@@ -621,7 +626,7 @@ function App() {
               <h2>كابل<br />لليمن.</h2>
             </div>
             <div className="about-copy">
-              <p className="about-lead">CABL — منتجات Vention الأصلية للشحن والطاقة داخل اليمن.</p>
+              <p className="about-lead">CABL — الوكيل الحصري لـ Baseus و Vention للشحن والطاقة داخل اليمن.</p>
               <p>نوفر لك حلولًا عملية للاستخدام اليومي، مع تجربة شراء واضحة ودعم يساعدك في اختيار المنتج المناسب.</p>
             </div>
           </div>
@@ -631,7 +636,7 @@ function App() {
           <div className="section-header">
             <div>
               <span className="eyebrow">مختارة لرفك</span>
-                <h2>منتجات Vention<br />لك.</h2>
+                <h2>Baseus و Vention<br />لك.</h2>
             </div>
             <button className="text-link" type="button" onClick={() => { setActiveFilter('ALL'); setQuery(''); }} data-testid="button-view-all">عرض كل المنتجات</button>
           </div>
@@ -673,7 +678,7 @@ function App() {
 
         <section className="service-band" id="services" aria-label="خدمات المتجر" data-testid="section-services">
           <div className="service-item"><Truck /><span><strong>توصيل داخل اليمن</strong><span>نرتب الشحن إلى مدينتك عند تأكيد الطلب</span></span></div>
-          <div className="service-item"><ShieldCheck /><span><strong>منتجات Vention أصلية</strong><span>مواصفات واضحة وضمان عند توفره</span></span></div>
+          <div className="service-item"><ShieldCheck /><span><strong>منتجات Baseus و Vention أصلية</strong><span>مواصفات واضحة وضمان عند توفره</span></span></div>
           <div className="service-item"><Sparkles /><span><strong>دعم قبل وبعد الشراء</strong><span>نساعدك في اختيار الحل المناسب</span></span></div>
         </section>
 
@@ -702,14 +707,14 @@ function App() {
           <div className="footer-top">
             <div className="footer-brand" lang="ar" dir="rtl">
               <CablLogo className="cabl-logo-footer" />
-              <p>منتجات Vention الأصلية للشحن والطاقة، متوفرة للشراء داخل اليمن.</p>
+              <p>منتجات Baseus و Vention الأصلية للشحن والطاقة، متوفرة للشراء داخل اليمن.</p>
             </div>
             <div className="footer-col"><h4>تصفح</h4>{filterOptions.slice(1).map((filter) => <button type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`footer-category-${filter.value}`}>{filter.label}</button>)}</div>
             <div className="footer-col"><h4>المتجر</h4><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-shortlist">كل المنتجات</button><button type="button" onClick={() => setCartOpen(true)} data-testid="footer-moq">السلة</button><button type="button" onClick={() => setWishlistOpen(true)} data-testid="footer-pricing">المفضلة</button></div>
             <div className="footer-col"><h4>خدمة العملاء</h4><button type="button" onClick={() => scrollTo('about')} data-testid="footer-about">عن CABL</button><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">الشحن والتوصيل</button><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-help">مواصفات المنتجات</button><button type="button" onClick={openTracking} data-testid="footer-track-order">تتبع طلبك</button><button type="button" onClick={openQuoteForm} data-testid="footer-contact">إتمام الطلب</button></div>
             <div className="footer-col"><h4>تابعنا</h4><button type="button" onClick={() => announce('تم نسخ رابط Instagram')} data-testid="footer-instagram">Instagram</button><button type="button" onClick={() => announce('تم نسخ رابط TikTok')} data-testid="footer-tiktok">TikTok</button><button type="button" onClick={() => announce('تم نسخ رابط WhatsApp')} data-testid="footer-whatsapp">WhatsApp</button></div>
           </div>
-          <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لشركة Vention في اليمن.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
+          <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لـ Baseus و Vention في اليمن.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
         </div>
       </footer>
 

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <rect width="800" height="800" fill="#f0f0eb"/>
+  <circle cx="674" cy="126" r="63" fill="#f5d547"/>
+  <path d="M171 275c170-158 288 196 458 36" fill="none" stroke="#151515" stroke-width="32" stroke-linecap="round"/>
+  <path d="M171 275c170-158 288 196 458 36" fill="none" stroke="#444" stroke-width="9" stroke-linecap="round"/>
+  <rect x="124" y="228" width="108" height="92" rx="18" fill="#151515"/>
+  <rect x="568" y="262" width="112" height="86" rx="18" fill="#151515"/>
+  <rect x="151" y="205" width="44" height="35" rx="7" fill="#f5d547"/>
+  <rect x="600" y="238" width="44" height="35" rx="7" fill="#f5d547"/>
+  <text x="400" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="58" font-weight="700" fill="#151515">Baseus</text>
+</svg>

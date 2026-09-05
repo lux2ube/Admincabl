@@ -15,6 +15,7 @@ const router: IRouter = Router();
 
 type ProductRow = {
   id: string;
+  brand: string;
   product_name: string;
   SKU: string;
   regular_price: string | number;
@@ -56,6 +57,7 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
     const result = await pool.query<ProductRow>(`
       SELECT
         p."id",
+        p."brand",
         p."product_name",
         p."SKU",
         p."regular_price",
@@ -84,6 +86,7 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
 
     const productMap = new Map<string, {
       id: string;
+      brand: string;
       productName: string;
       sku: string;
       regularPrice: number;
@@ -100,6 +103,7 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
     for (const row of result.rows) {
       const existing = productMap.get(row.id) ?? {
         id: row.id,
+        brand: row.brand,
         productName: row.product_name,
         sku: row.SKU,
         regularPrice: asNumber(row.regular_price),

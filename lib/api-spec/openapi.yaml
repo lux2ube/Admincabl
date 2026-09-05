@@ -387,6 +387,8 @@ components:
       properties:
         id:
           type: string
+        brand:
+          type: string
         productName:
           type: string
         sku:
@@ -419,7 +421,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/StoreShippingOption"
-      required: [id, productName, sku, regularPrice, discountPrice, quantity, shortDescription, productDescription, productNote, category, images, shippingOptions]
+      required: [id, brand, productName, sku, regularPrice, discountPrice, quantity, shortDescription, productDescription, productNote, category, images, shippingOptions]
     StoreCatalog:
       type: object
       properties:
