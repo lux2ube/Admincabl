@@ -44,6 +44,7 @@ export * from './storeOrderItemInput';
 export * from './storeOrderItemsItem';
 export * from './storeOrders';
 export * from './storeOrderSummary';
+export * from './storePaymentMethod';
 export * from './storeProduct';
 export * from './storeProductCategory';
 export * from './storeShippingOption';

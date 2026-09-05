@@ -147,10 +147,37 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
       free: shipping.free,
       estimatedDays: shipping.estimated_days === null ? null : asNumber(shipping.estimated_days),
     }));
+    const paymentMethodsResult = await pool.query<{
+      id: number;
+      name: string;
+      description: string | null;
+      account_name: string | null;
+      account_number: string | null;
+      instructions: string | null;
+      icon_key: string;
+      requires_transaction_reference: boolean;
+    }>(
+      `SELECT "id", "name", "description", "account_name", "account_number", "instructions",
+              "icon_key", "requires_transaction_reference"
+       FROM "payment_methods"
+       WHERE "active" = TRUE
+       ORDER BY "sort_order" ASC, "id" ASC`,
+    );
+    const paymentMethods = paymentMethodsResult.rows.map((method) => ({
+      id: method.id,
+      name: method.name,
+      description: method.description,
+      accountName: method.account_name,
+      accountNumber: method.account_number,
+      instructions: method.instructions,
+      iconKey: method.icon_key,
+      requiresTransactionReference: method.requires_transaction_reference,
+    }));
 
     const response = GetStoreCatalogResponse.parse({
       products: [...productMap.values()],
       shippingOptions,
+      paymentMethods,
     });
     res.json(response);
   } catch (error) {
@@ -221,6 +248,22 @@ router.post("/store/orders", async (req, res): Promise<void> => {
       name: string;
     }>(`SELECT "id", "name" FROM "shippings" WHERE "id" = $1 AND "active" = TRUE`, [input.shippingId]);
     if (!shippingResult.rows[0]) throw new Error("طريقة الشحن المحددة غير متاحة");
+    const paymentMethodResult = await client.query<{
+      id: number;
+      name: string;
+      requires_transaction_reference: boolean;
+    }>(
+      `SELECT "id", "name", "requires_transaction_reference"
+       FROM "payment_methods"
+       WHERE "id" = $1 AND "active" = TRUE`,
+      [input.paymentMethodId],
+    );
+    const paymentMethod = paymentMethodResult.rows[0];
+    if (!paymentMethod) throw new Error("طريقة الدفع المحددة غير متاحة");
+    const paymentReference = input.paymentReference?.trim() || null;
+    if (paymentMethod.requires_transaction_reference && !paymentReference) {
+      throw new Error("يرجى إدخال رقم عملية التحويل");
+    }
 
     const productsResult = await client.query<{
       id: string;
@@ -316,10 +359,11 @@ router.post("/store/orders", async (req, res): Promise<void> => {
     const statusName = statusResult.rows[0]?.status_name ?? "جديد";
     const id = orderId();
     const total = roundMoney(subtotal + shippingCost - discount);
+    const paymentStatus = paymentMethod.requires_transaction_reference ? "awaiting_verification" : "cod_pending";
     await client.query(
-      `INSERT INTO "orders" ("id", "coupon_id", "customer_id", "order_status_id", "created_at")
-       VALUES ($1, $2, $3, $4, NOW())`,
-      [id, couponId, customerId, statusId],
+      `INSERT INTO "orders" ("id", "coupon_id", "customer_id", "payment_method_id", "payment_reference", "payment_status", "payment_submitted_at", "order_status_id", "created_at")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
+      [id, couponId, customerId, paymentMethod.id, paymentReference, paymentStatus, paymentReference ? new Date() : null, statusId],
     );
     for (const item of items) {
       await client.query(
@@ -342,6 +386,9 @@ router.post("/store/orders", async (req, res): Promise<void> => {
       shippingCost: roundMoney(shippingCost),
       discount: roundMoney(discount),
       total,
+      paymentMethodName: paymentMethod.name,
+      paymentStatus,
+      paymentReference,
       createdAt: new Date().toISOString(),
       items,
     }));
@@ -368,18 +415,25 @@ router.get("/store/orders/:id", async (req, res): Promise<void> => {
       created_at: Date;
       subtotal: string | number;
       shipping_cost: string | number;
+      payment_method_name: string;
+      payment_status: string;
+      payment_reference: string | null;
       items: unknown;
     }>(
-      `SELECT o."id", COALESCE(os."status_name", 'جديد') AS "status", o."created_at",
+       `SELECT o."id", COALESCE(os."status_name", 'جديد') AS "status", o."created_at",
+         COALESCE(pm."name", 'غير محددة') AS "payment_method_name",
+         COALESCE(o."payment_status", 'awaiting_payment') AS "payment_status",
+         o."payment_reference",
         COALESCE(SUM(oi."price" * oi."quantity"), 0) AS "subtotal",
         COALESCE(SUM(CASE WHEN oi."shipping_id" IS NOT NULL THEN COALESCE(ps."ship_charge", 0) * oi."quantity" ELSE 0 END), 0) AS "shipping_cost"
        FROM "orders" o
        JOIN "customers" c ON c."id" = o."customer_id"
        LEFT JOIN "order_statuses" os ON os."id" = o."order_status_id"
+        LEFT JOIN "payment_methods" pm ON pm."id" = o."payment_method_id"
        LEFT JOIN "order_items" oi ON oi."order_id" = o."id"
        LEFT JOIN "product_shippings" ps ON ps."product_id" = oi."product_id" AND ps."shipping_id" = oi."shipping_id"
        WHERE o."id" = $1 AND c."phone_number" = $2
-       GROUP BY o."id", os."status_name", o."created_at"`,
+        GROUP BY o."id", os."status_name", pm."name", o."payment_status", o."payment_reference", o."created_at"`,
       [parsedParams.data.id, parsedQuery.data.phone.trim()],
     );
     const order = orderResult.rows[0];
@@ -407,6 +461,9 @@ router.get("/store/orders/:id", async (req, res): Promise<void> => {
       shippingCost,
       discount: 0,
       total: roundMoney(subtotal + shippingCost),
+      paymentMethodName: order.payment_method_name,
+      paymentStatus: order.payment_status,
+      paymentReference: order.payment_reference,
       createdAt: asIso(order.created_at),
       items: itemsResult.rows.map((item) => ({
         productId: item.product_id,

@@ -2,15 +2,19 @@ import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
+  Banknote,
   ChevronDown,
+  Landmark,
   Heart,
   Menu,
   Search,
   ShieldCheck,
   ShoppingBag,
+  Smartphone,
   Sparkles,
   Truck,
   X,
+  Wallet,
 } from 'lucide-react';
 import {
   createStoreOrder,
@@ -18,6 +22,7 @@ import {
   listStoreOrders,
   subscribeNewsletter,
   type StoreOrder,
+  type StorePaymentMethod,
   type StoreProduct,
   type StoreShippingOption,
   useGetStoreCatalog,
@@ -39,6 +44,14 @@ type Product = {
 };
 
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
+
+function PaymentMethodIcon({ method }: { method: StorePaymentMethod }) {
+  if (method.iconKey === 'bank') return <Landmark size={22} />;
+  if (method.iconKey === 'smartphone') return <Smartphone size={22} />;
+  if (method.iconKey === 'cash' || !method.requiresTransactionReference) return <Banknote size={22} />;
+  if (method.iconKey === 'onecash') return <span className="payment-letter-icon">1</span>;
+  return <Wallet size={22} />;
+}
 
 function CablLogo({ className = '', showTagline = true }: { className?: string; showTagline?: boolean }) {
   return (
@@ -134,6 +147,8 @@ function App() {
   const [quoteError, setQuoteError] = useState('');
   const [lastOrder, setLastOrder] = useState<StoreOrder | null>(null);
   const [shippingId, setShippingId] = useState<number | null>(null);
+  const [paymentMethodId, setPaymentMethodId] = useState<number | null>(null);
+  const [paymentReference, setPaymentReference] = useState('');
   const [quoteForm, setQuoteForm] = useState({
     firstName: '',
     lastName: '',
@@ -202,6 +217,15 @@ function App() {
 
   const shippingOptions = catalogQuery.data?.shippingOptions ?? [];
   const selectedShippingId = shippingId ?? shippingOptions[0]?.id ?? null;
+  const paymentMethods = catalogQuery.data?.paymentMethods ?? [];
+  const selectedPaymentMethodId = paymentMethodId ?? paymentMethods[0]?.id ?? null;
+  const selectedPaymentMethod = paymentMethods.find((method) => method.id === selectedPaymentMethodId) ?? null;
+
+  useEffect(() => {
+    if (paymentMethods.length > 0 && paymentMethodId === null) {
+      setPaymentMethodId(paymentMethods[0].id);
+    }
+  }, [paymentMethodId, paymentMethods]);
 
   const visibleProducts = useMemo(() => {
     const cleanQuery = query.trim().toLowerCase();
@@ -298,6 +322,8 @@ function App() {
     setQuoteError('');
     setLastOrder(null);
     setShippingId((current) => current ?? shippingOptions[0]?.id ?? null);
+    setPaymentMethodId((current) => current ?? paymentMethods[0]?.id ?? null);
+    setPaymentReference('');
     setQuoteOpen(true);
   };
 
@@ -330,6 +356,8 @@ function App() {
         },
         items: cart.map((product) => ({ productId: product.id, quantity: cartQuantities[product.id] ?? 1 })),
         shippingId: selectedShippingId,
+        paymentMethodId: selectedPaymentMethodId,
+        paymentReference: selectedPaymentMethod?.requiresTransactionReference ? paymentReference.trim() || null : null,
         couponCode: null,
       });
       setLastOrder(order);
@@ -724,7 +752,7 @@ function App() {
           <section className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title" onClick={(event) => event.stopPropagation()} data-testid="modal-quote">
             <div className="drawer-header"><h2 id="quote-title">إتمام الطلب</h2><button className="close-button" type="button" onClick={closeQuoteForm} aria-label="إغلاق النموذج" data-testid="button-close-quote"><X size={16} /></button></div>
             {quoteSubmitted ? (
-              <div className="quote-success" data-testid="status-quote-submitted"><strong>تم حفظ طلبك بنجاح.</strong><p>رقم الطلب: <strong>{lastOrder?.id}</strong></p><p>الحالة الحالية: {lastOrder?.status}. يمكنك متابعة الشحن من زر تتبع الطلب.</p><div className="product-card-actions"><button className="button-dark" type="button" onClick={openTracking} data-testid="button-track-created-order">تتبع الطلب</button><button className="preview-link" type="button" onClick={closeQuoteForm} data-testid="button-finish-quote">حسنًا</button></div></div>
+              <div className="quote-success" data-testid="status-quote-submitted"><strong>تم حفظ طلبك بنجاح.</strong><p>رقم الطلب: <strong>{lastOrder?.id}</strong></p><p>طريقة الدفع: {lastOrder?.paymentMethodName}. حالة الدفع: {lastOrder?.paymentStatus === 'cod_pending' ? 'الدفع عند الاستلام' : 'بانتظار مراجعة التحويل'}</p><p>الحالة الحالية: {lastOrder?.status}. يمكنك متابعة الشحن من زر تتبع الطلب.</p><div className="product-card-actions"><button className="button-dark" type="button" onClick={openTracking} data-testid="button-track-created-order">تتبع الطلب</button><button className="preview-link" type="button" onClick={closeQuoteForm} data-testid="button-finish-quote">حسنًا</button></div></div>
             ) : (
               <form className="quote-form" onSubmit={submitQuote}>
                 <p className="quote-intro">سيتم حفظ بيانات العميل والعنوان والمنتجات في سجل الطلبات، ويمكنك تتبع الحالة لاحقًا.</p>
@@ -734,8 +762,10 @@ function App() {
                 <label>العنوان<input required minLength={3} maxLength={500} value={quoteForm.addressLine1} onChange={(event) => updateQuoteField('addressLine1', event.target.value)} autoComplete="street-address" data-testid="input-order-address" /></label>
                 <div className="quote-form-grid"><label>المدينة<input required minLength={2} maxLength={100} value={quoteForm.city} onChange={(event) => updateQuoteField('city', event.target.value)} autoComplete="address-level2" data-testid="input-order-city" /></label><label>الدولة<input required minLength={2} maxLength={100} value={quoteForm.country} onChange={(event) => updateQuoteField('country', event.target.value)} autoComplete="country-name" data-testid="input-order-country" /></label></div>
                 <label>طريقة الشحن<select required value={selectedShippingId ?? ''} onChange={(event) => setShippingId(Number(event.target.value))} data-testid="select-order-shipping">{shippingOptions.map((option) => <option key={option.id} value={option.id}>{option.name}{option.free ? ' · مجاني' : ` · $${option.charge.toFixed(2)}`}</option>)}</select></label>
+                 <fieldset className="payment-method-fieldset"><legend>طريقة الدفع</legend><div className="payment-method-list">{paymentMethods.map((method) => <label className={`payment-method-option ${selectedPaymentMethodId === method.id ? 'selected' : ''}`} key={method.id}><input type="radio" name="paymentMethod" value={method.id} checked={selectedPaymentMethodId === method.id} onChange={() => { setPaymentMethodId(method.id); setPaymentReference(''); }} data-testid={`radio-payment-method-${method.id}`} /><span className="payment-method-icon"><PaymentMethodIcon method={method} /></span><span className="payment-method-copy"><strong>{method.name}</strong><small>{method.description}</small></span></label>)}</div></fieldset>
+                 {selectedPaymentMethod && <div className="payment-instructions" data-testid="payment-instructions"><strong>{selectedPaymentMethod.requiresTransactionReference ? 'تعليمات التحويل' : 'تعليمات الدفع'}</strong>{selectedPaymentMethod.accountName && <p>اسم الحساب: <b>{selectedPaymentMethod.accountName}</b></p>}{selectedPaymentMethod.accountNumber && <p>رقم الحساب: <b dir="ltr">{selectedPaymentMethod.accountNumber}</b></p>}<p>{selectedPaymentMethod.instructions ?? 'اتبع تعليمات الدفع الظاهرة ثم أكمل الطلب.'}</p>{selectedPaymentMethod.requiresTransactionReference && <label>رقم العملية بعد التحويل<input required value={paymentReference} onChange={(event) => setPaymentReference(event.target.value)} maxLength={255} placeholder="أدخل رقم العملية" data-testid="input-payment-reference" /></label>}</div>}
                 {quoteError && <p className="form-error" role="alert" data-testid="error-quote">{quoteError}</p>}
-                <button className="button-dark checkout-button" type="submit" disabled={quoteSubmitting || cart.length === 0} data-testid="button-submit-quote">{quoteSubmitting ? 'جارٍ حفظ الطلب...' : 'تأكيد الطلب وحفظه'}</button>
+                 <button className="button-dark checkout-button" type="submit" disabled={quoteSubmitting || cart.length === 0 || !selectedPaymentMethodId} data-testid="button-submit-quote">{quoteSubmitting ? 'جارٍ حفظ الطلب...' : selectedPaymentMethod?.requiresTransactionReference ? 'تأكيد التحويل وإرسال الطلب' : 'تأكيد الطلب والدفع عند الاستلام'}</button>
               </form>
             )}
           </section>
@@ -753,7 +783,7 @@ function App() {
               <button className="button-dark checkout-button" type="submit" disabled={trackingLoading} data-testid="button-submit-tracking">{trackingLoading ? 'جارٍ البحث...' : 'عرض الطلبات'}</button>
             </form>
             {trackingOrders.length > 0 && <div className="tracking-results"><h3>طلباتك</h3>{trackingOrders.map((order) => <button className="tracking-order" key={order.id} type="button" onClick={() => loadTrackingDetail(order.id)}><span><strong>{order.id}</strong><small>{new Date(order.createdAt).toLocaleDateString('ar-YE')}</small></span><span><strong>${order.total.toFixed(2)}</strong><small>{order.status}</small></span></button>)}</div>}
-            {trackingDetail && <div className="quote-success tracking-detail"><strong>{trackingDetail.id}</strong><p>الحالة: {trackingDetail.status}</p><p>الإجمالي: ${trackingDetail.total.toFixed(2)} · الشحن: ${trackingDetail.shippingCost.toFixed(2)}</p><div>{trackingDetail.items.map((item) => <p key={item.productId}>{item.productName} × {item.quantity}</p>)}</div></div>}
+             {trackingDetail && <div className="quote-success tracking-detail"><strong>{trackingDetail.id}</strong><p>الحالة: {trackingDetail.status}</p><p>الدفع: {trackingDetail.paymentMethodName} · {trackingDetail.paymentStatus === 'cod_pending' ? 'الدفع عند الاستلام' : 'بانتظار مراجعة التحويل'}</p><p>الإجمالي: ${trackingDetail.total.toFixed(2)} · الشحن: ${trackingDetail.shippingCost.toFixed(2)}</p><div>{trackingDetail.items.map((item) => <p key={item.productId}>{item.productName} × {item.quantity}</p>)}</div></div>}
           </section>
         </div>
       )}

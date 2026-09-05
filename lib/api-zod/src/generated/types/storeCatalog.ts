@@ -5,10 +5,12 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { StorePaymentMethod } from './storePaymentMethod';
 import type { StoreProduct } from './storeProduct';
 import type { StoreShippingOption } from './storeShippingOption';
 
 export interface StoreCatalog {
   products: StoreProduct[];
   shippingOptions: StoreShippingOption[];
+  paymentMethods: StorePaymentMethod[];
 }

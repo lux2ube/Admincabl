@@ -109,6 +109,16 @@ export const GetStoreCatalogResponse = zod.object({
   "charge": zod.number(),
   "free": zod.boolean(),
   "estimatedDays": zod.number().nullable()
+})),
+  "paymentMethods": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().nullable(),
+  "accountName": zod.string().nullable(),
+  "accountNumber": zod.string().nullable(),
+  "instructions": zod.string().nullable(),
+  "iconKey": zod.string(),
+  "requiresTransactionReference": zod.boolean()
 }))
 })
 
@@ -173,6 +183,9 @@ export const createStoreOrderBodyItemsItemQuantityMax = 99;
 export const createStoreOrderBodyItemsMax = 50;
 
 
+
+export const createStoreOrderBodyPaymentReferenceMax = 255;
+
 export const createStoreOrderBodyCouponCodeMax = 255;
 
 
@@ -197,6 +210,8 @@ export const CreateStoreOrderBody = zod.object({
   "quantity": zod.number().min(1).max(createStoreOrderBodyItemsItemQuantityMax)
 })).min(1).max(createStoreOrderBodyItemsMax),
   "shippingId": zod.number().min(1),
+  "paymentMethodId": zod.number().min(1),
+  "paymentReference": zod.string().max(createStoreOrderBodyPaymentReferenceMax).nullable(),
   "couponCode": zod.string().max(createStoreOrderBodyCouponCodeMax).nullable()
 })
 
@@ -207,6 +222,9 @@ export const CreateStoreOrderResponse = zod.object({
   "shippingCost": zod.number(),
   "discount": zod.number(),
   "total": zod.number(),
+  "paymentMethodName": zod.string(),
+  "paymentStatus": zod.string(),
+  "paymentReference": zod.string().nullable(),
   "createdAt": zod.coerce.date(),
   "items": zod.array(zod.object({
   "productId": zod.string(),
@@ -240,6 +258,9 @@ export const GetStoreOrderResponse = zod.object({
   "shippingCost": zod.number(),
   "discount": zod.number(),
   "total": zod.number(),
+  "paymentMethodName": zod.string(),
+  "paymentStatus": zod.string(),
+  "paymentReference": zod.string().nullable(),
   "createdAt": zod.coerce.date(),
   "items": zod.array(zod.object({
   "productId": zod.string(),

@@ -362,6 +362,26 @@ components:
         estimatedDays:
           type: ["number", "null"]
       required: [id, name, charge, free, estimatedDays]
+    StorePaymentMethod:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        accountName:
+          type: ["string", "null"]
+        accountNumber:
+          type: ["string", "null"]
+        instructions:
+          type: ["string", "null"]
+        iconKey:
+          type: string
+        requiresTransactionReference:
+          type: boolean
+      required: [id, name, description, accountName, accountNumber, instructions, iconKey, requiresTransactionReference]
     StoreProduct:
       type: object
       properties:
@@ -411,7 +431,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/StoreShippingOption"
-      required: [products, shippingOptions]
+        paymentMethods:
+          type: array
+          items:
+            $ref: "#/components/schemas/StorePaymentMethod"
+      required: [products, shippingOptions, paymentMethods]
     StoreOrderItemInput:
       type: object
       properties:
@@ -483,10 +507,16 @@ components:
         shippingId:
           type: number
           minimum: 1
+        paymentMethodId:
+          type: number
+          minimum: 1
+        paymentReference:
+          type: ["string", "null"]
+          maxLength: 255
         couponCode:
           type: ["string", "null"]
           maxLength: 255
-      required: [customer, address, items, shippingId, couponCode]
+      required: [customer, address, items, shippingId, paymentMethodId, paymentReference, couponCode]
     StoreOrder:
       type: object
       properties:
@@ -502,6 +532,12 @@ components:
           type: number
         total:
           type: number
+        paymentMethodName:
+          type: string
+        paymentStatus:
+          type: string
+        paymentReference:
+          type: ["string", "null"]
         createdAt:
           type: string
           format: date-time
@@ -519,7 +555,7 @@ components:
               price:
                 type: number
             required: [productId, productName, quantity, price]
-      required: [id, status, subtotal, shippingCost, discount, total, createdAt, items]
+      required: [id, status, subtotal, shippingCost, discount, total, paymentMethodName, paymentStatus, paymentReference, createdAt, items]
     StoreOrderSummary:
       type: object
       properties:

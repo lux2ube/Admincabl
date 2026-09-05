@@ -251,6 +251,20 @@ img { display: block; max-width: 100%; }
 .quote-form textarea { resize: vertical; min-height: 92px; }
 .quote-form input:focus, .quote-form textarea:focus, .quote-form select:focus { border-color: var(--ink); }
 .quote-form button:disabled, .email-form button:disabled { cursor: wait; opacity: .55; }
+.payment-method-fieldset { margin: 18px 0 0; padding: 0; border: 0; }
+.payment-method-fieldset legend { margin-bottom: 9px; font-size: 11px; font-weight: 800; }
+.payment-method-list { display: grid; gap: 8px; }
+.payment-method-option { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); padding: 10px 11px; cursor: pointer; transition: border-color .2s, background .2s; }
+.payment-method-option.selected { border-color: var(--ink); background: var(--warm); }
+.payment-method-option input { width: auto; margin: 0; accent-color: var(--ink); }
+.payment-method-icon { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; border-radius: 9px; background: var(--ink); color: var(--paper); }
+.payment-letter-icon { font-size: 18px; font-weight: 900; }
+.payment-method-copy { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
+.payment-method-copy strong { font-size: 12px; }
+.payment-method-copy small { color: var(--muted-ink); font-size: 10px; line-height: 1.4; }
+.payment-instructions { margin-top: 12px; border: 1px solid var(--line); background: var(--warm); padding: 13px; font-size: 12px; line-height: 1.7; }
+.payment-instructions p { margin: 5px 0 0; }
+.payment-instructions label { margin-top: 10px; }
 .form-error { margin: 12px 0 0 !important; color: #b13227 !important; font-size: 11px !important; line-height: 1.5; }
 .quote-success { padding: 48px 10px 20px; text-align: center; }
 .quote-success strong { display: block; font-family: var(--font-display); font-size: 20px; }

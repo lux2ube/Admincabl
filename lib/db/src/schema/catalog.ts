@@ -243,6 +243,21 @@ export const customersTable = pgTable("customers", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
+export const paymentMethodsTable = pgTable("payment_methods", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  accountName: varchar("account_name", { length: 255 }),
+  accountNumber: varchar("account_number", { length: 255 }),
+  instructions: text("instructions"),
+  iconKey: varchar("icon_key", { length: 50 }).notNull().default("wallet"),
+  requiresTransactionReference: boolean("requires_transaction_reference").notNull().default(false),
+  active: boolean("active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
 export const customerAddressesTable = pgTable("customer_addresses", {
   id: uuid("id").defaultRandom().primaryKey(),
   customerId: uuid("customer_id").notNull(),
@@ -258,6 +273,11 @@ export const ordersTable = pgTable("orders", {
   id: varchar("id", { length: 50 }).primaryKey(),
   couponId: integer("coupon_id"),
   customerId: uuid("customer_id"),
+  paymentMethodId: integer("payment_method_id"),
+  paymentReference: varchar("payment_reference", { length: 255 }),
+  paymentStatus: varchar("payment_status", { length: 50 }).notNull().default("awaiting_payment"),
+  paymentSubmittedAt: timestamp("payment_submitted_at", { withTimezone: true }),
+  paymentVerifiedAt: timestamp("payment_verified_at", { withTimezone: true }),
   orderStatusId: integer("order_status_id"),
   orderApprovedAt: timestamp("order_approved_at", { withTimezone: true }),
   orderDeliveredCarrierDate: timestamp("order_delivered_carrier_date", { withTimezone: true }),

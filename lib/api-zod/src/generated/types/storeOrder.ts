@@ -14,6 +14,10 @@ export interface StoreOrder {
   shippingCost: number;
   discount: number;
   total: number;
+  paymentMethodName: string;
+  paymentStatus: string;
+  /** @nullable */
+  paymentReference: string | null;
   createdAt: Date;
   items: StoreOrderItemsItem[];
 }

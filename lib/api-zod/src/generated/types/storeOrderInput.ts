@@ -19,6 +19,13 @@ export interface StoreOrderInput {
   items: StoreOrderItemInput[];
   /** @minimum 1 */
   shippingId: number;
+  /** @minimum 1 */
+  paymentMethodId: number;
+  /**
+     * @maxLength 255
+     * @nullable
+     */
+  paymentReference: string | null;
   /**
      * @maxLength 255
      * @nullable

@@ -281,6 +281,23 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
       counts.galleries += await seedTable(`INSERT INTO "galleries" ("id","product_id","image_path","thumbail","display_order") VALUES ($1,$2,$3,TRUE,0) ON CONFLICT ("id") DO NOTHING`, [`20000000-0000-4000-8000-${productId.slice(-12)}`, productId, image]);
     }
     counts.shippings = await seedTable(`INSERT INTO "shippings" ("id","name","active","icon_path") VALUES (1,'توصيل داخل اليمن',TRUE,'truck'),(2,'توصيل محلي سريع',TRUE,'sparkles') ON CONFLICT ("id") DO NOTHING`, []);
+    counts.payment_methods = await seedTable(
+      `INSERT INTO "payment_methods" ("id","name","description","account_name","account_number","instructions","icon_key","requires_transaction_reference","active","sort_order") VALUES
+       (1,'محفظة جيب','تحويل إلى محفظة جيب',NULL,NULL,'أضف رقم الحساب والتعليمات من لوحة الإدارة قبل تفعيل استقبال التحويلات.','wallet',TRUE,TRUE,1),
+       (2,'جوالي','تحويل عبر جوالي',NULL,NULL,'أضف رقم الحساب والتعليمات من لوحة الإدارة قبل تفعيل استقبال التحويلات.','smartphone',TRUE,TRUE,2),
+       (3,'حساب من بنك الكريمي للتحويل الأصغر الإسلامي','تحويل بنكي عبر بنك الكريمي',NULL,NULL,'أضف رقم الحساب والتعليمات من لوحة الإدارة قبل تفعيل استقبال التحويلات.','bank',TRUE,TRUE,3),
+       (4,'ONE كاش','تحويل عبر ONE كاش',NULL,NULL,'أضف رقم الحساب والتعليمات من لوحة الإدارة قبل تفعيل استقبال التحويلات.','onecash',TRUE,TRUE,4),
+       (5,'كاش','تحويل عبر كاش',NULL,NULL,'أضف رقم الحساب والتعليمات من لوحة الإدارة قبل تفعيل استقبال التحويلات.','cash',TRUE,TRUE,5),
+       (6,'فلوسك','تحويل عبر فلوسك',NULL,NULL,'أضف رقم الحساب والتعليمات من لوحة الإدارة قبل تفعيل استقبال التحويلات.','wallet',TRUE,TRUE,6),
+       (7,'بييس','تحويل عبر بييس',NULL,NULL,'أضف رقم الحساب والتعليمات من لوحة الإدارة قبل تفعيل استقبال التحويلات.','wallet',TRUE,TRUE,7),
+       (8,'محفظة إيزي','تحويل عبر محفظة إيزي',NULL,NULL,'أضف رقم الحساب والتعليمات من لوحة الإدارة قبل تفعيل استقبال التحويلات.','wallet',TRUE,TRUE,8),
+       (9,'سبأكاش','تحويل عبر سبأكاش',NULL,NULL,'أضف رقم الحساب والتعليمات من لوحة الإدارة قبل تفعيل استقبال التحويلات.','wallet',TRUE,TRUE,9),
+       (10,'محفظة شامل موني','تحويل عبر شامل موني',NULL,NULL,'أضف رقم الحساب والتعليمات من لوحة الإدارة قبل تفعيل استقبال التحويلات.','wallet',TRUE,TRUE,10),
+       (11,'موبايل موني (رقم النقطة: 996600)','تحويل عبر موبايل موني',NULL,NULL,'أضف رقم الحساب والتعليمات من لوحة الإدارة قبل تفعيل استقبال التحويلات.','smartphone',TRUE,TRUE,11),
+       (12,'الدفع عند الاستلام','الدفع نقدًا عند استلام الطلب',NULL,NULL,'سيتم تحصيل قيمة الطلب عند التسليم. لا تحتاج إلى إدخال رقم عملية.','cash',FALSE,TRUE,12)
+       ON CONFLICT ("id") DO NOTHING`,
+      [],
+    );
     counts.product_shippings = 0;
     for (const [productId] of productsSeed) {
       counts.product_shippings += await seedTable(

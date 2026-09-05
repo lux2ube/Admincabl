@@ -14,6 +14,21 @@ export interface StoreShippingOption {
   estimatedDays: number | null;
 }
 
+export interface StorePaymentMethod {
+  id: number;
+  name: string;
+  /** @nullable */
+  description: string | null;
+  /** @nullable */
+  accountName: string | null;
+  /** @nullable */
+  accountNumber: string | null;
+  /** @nullable */
+  instructions: string | null;
+  iconKey: string;
+  requiresTransactionReference: boolean;
+}
+
 /**
  * @nullable
  */
@@ -45,6 +60,7 @@ export interface StoreProduct {
 export interface StoreCatalog {
   products: StoreProduct[];
   shippingOptions: StoreShippingOption[];
+  paymentMethods: StorePaymentMethod[];
 }
 
 export interface StoreOrderItemInput {
@@ -122,6 +138,13 @@ export interface StoreOrderInput {
   items: StoreOrderItemInput[];
   /** @minimum 1 */
   shippingId: number;
+  /** @minimum 1 */
+  paymentMethodId: number;
+  /**
+     * @maxLength 255
+     * @nullable
+     */
+  paymentReference: string | null;
   /**
      * @maxLength 255
      * @nullable
@@ -143,6 +166,10 @@ export interface StoreOrder {
   shippingCost: number;
   discount: number;
   total: number;
+  paymentMethodName: string;
+  paymentStatus: string;
+  /** @nullable */
+  paymentReference: string | null;
   createdAt: string;
   items: StoreOrderItemsItem[];
 }
