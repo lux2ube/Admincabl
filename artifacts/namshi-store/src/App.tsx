@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Banknote,
   ChevronDown,
+  Download,
   Landmark,
   Heart,
   Menu,
@@ -50,6 +51,11 @@ const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 const CACHED_CATALOG_KEY = 'cabl-catalog-v1';
 const PENDING_ORDERS_KEY = 'cabl-pending-orders-v1';
 const WHATSAPP_URL = 'https://wa.me/967771106977?text=' + encodeURIComponent('مرحبًا CABL، أريد الاستفسار عن أحد المنتجات.');
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+};
 
 function readCachedCatalog(): GetStoreCatalogQueryResult | null {
   try {
@@ -147,6 +153,11 @@ function App() {
   const catalogQuery = useGetStoreCatalog();
   const [cachedCatalog, setCachedCatalog] = useState<GetStoreCatalogQueryResult | null>(() => readCachedCatalog());
   const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isAppInstalled, setIsAppInstalled] = useState(() => (
+    window.matchMedia('(display-mode: standalone)').matches
+    || Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
+  ));
   const [slide, setSlide] = useState(0);
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -206,6 +217,24 @@ function App() {
     return () => {
       window.removeEventListener('online', updateConnection);
       window.removeEventListener('offline', updateConnection);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+    const handleAppInstalled = () => {
+      setIsAppInstalled(true);
+      setInstallPrompt(null);
+      announce('تم تثبيت تطبيق CABL بنجاح');
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
@@ -336,6 +365,18 @@ function App() {
   };
 
   const announce = (message: string) => setToast(message);
+
+  const installApp = async () => {
+    if (!installPrompt) {
+      announce('افتح قائمة المتصفح واختر إضافة إلى الشاشة الرئيسية');
+      return;
+    }
+    const promptEvent = installPrompt;
+    setInstallPrompt(null);
+    await promptEvent.prompt();
+    const choice = await promptEvent.userChoice;
+    announce(choice.outcome === 'accepted' ? 'جاري تثبيت تطبيق CABL' : 'يمكنك تثبيت التطبيق من قائمة المتصفح لاحقًا');
+  };
 
   const flushPendingOrders = async () => {
     if (!navigator.onLine) return;
@@ -915,6 +956,7 @@ function App() {
         </div>
       )}
       {isOffline && <div className="offline-badge" role="status" data-testid="status-offline"><WifiOff size={14} /> تعمل دون اتصال · البيانات المحفوظة متاحة</div>}
+      {!isAppInstalled && <button className="install-float" type="button" onClick={installApp} aria-label="تثبيت تطبيق CABL" data-testid="button-install-app"><Download size={18} /><span>تثبيت التطبيق</span></button>}
       <a className="whatsapp-float" href={WHATSAPP_URL} target="_blank" rel="noreferrer" aria-label="تواصل معنا عبر WhatsApp" data-testid="button-whatsapp-float">
         <MessageCircle size={25} fill="currentColor" />
         <span>WhatsApp</span>
