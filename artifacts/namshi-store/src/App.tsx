@@ -210,7 +210,7 @@ function App() {
       const matchesQuery = !cleanQuery || `${product.brand} ${product.name} ${product.category?.name ?? ''} ${product.sku} ${product.color}`.toLowerCase().includes(cleanQuery);
       return matchesFilter && matchesQuery;
     });
-  }, [activeFilter, query]);
+  }, [activeFilter, products, query]);
 
   const categories = useMemo(() => {
     const categoryMap = new Map<string, { id: string; name: string; image: string; count: string }>();
