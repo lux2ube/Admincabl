@@ -99,7 +99,7 @@ function CablLogo({ className = '', showTagline = true }: { className?: string; 
       </svg>
       <span className="cabl-logo-copy">
         <strong>CABL</strong>
-        {showTagline && <small>الوكيل الحصري لـ Baseus و Vention في اليمن · منتجات Anker و UGREEN متوفرة</small>}
+        {showTagline && <small>كابل للمنتجات الأصلية الفاخرة</small>}
       </span>
     </span>
   );

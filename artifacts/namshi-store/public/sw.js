@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'cabl-pwa-v1';
+const CACHE_VERSION = 'cabl-pwa-v2';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const API_CACHE = `${CACHE_VERSION}-api`;
