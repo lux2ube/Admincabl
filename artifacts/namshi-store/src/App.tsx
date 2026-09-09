@@ -95,14 +95,14 @@ const CACHED_CATALOG_KEY = 'cabl-catalog-v1';
 const PENDING_ORDERS_KEY = 'cabl-pending-orders-v1';
 const FLOATING_POSITIONS_KEY = 'cabl-floating-positions-v3';
 const compactCategoryLabel = (name: string) => {
-  if (/شاحن/.test(name)) return 'الشواحن';
+  if (/شاحن|شواحن/.test(name)) return 'الشواحن';
   if (/كابل|كيبل|وصلة/.test(name)) return 'الكيابل';
   if (/باور|طاقة|بطاري/.test(name)) return 'الباور بنك';
   if (/سيار|سفر/.test(name)) return 'السيارة';
   return 'الملحقات';
 };
 const categoryRank = (name: string) => {
-  if (/شاحن/.test(name)) return 0;
+  if (/شاحن|شواحن/.test(name)) return 0;
   if (/كابل|كيبل|وصلة/.test(name)) return 1;
   if (/باور|طاقة|بطاري/.test(name)) return 2;
   if (/سيار|سفر/.test(name)) return 3;
