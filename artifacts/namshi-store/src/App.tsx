@@ -101,7 +101,7 @@ const DEFAULT_CURRENCIES: StoreCurrency[] = [
   { code: 'NYER', name: 'ريال يمني جديد', ratePerUsd: 1572, isDefault: false },
   { code: 'SAR', name: 'ريال سعودي', ratePerUsd: 3.83, isDefault: false },
 ];
-const WHATSAPP_URL = 'https://wa.me/967771106977?text=' + encodeURIComponent('مرحبًا CABL، أريد الاستفسار عن أحد المنتجات.');
+const WHATSAPP_URL = 'https://wa.me/967771106977?text=' + encodeURIComponent('مرحبًا CABL، أريد مساعدة في اختيار المنتجات المناسبة لي.');
 const HOME_TITLE = 'CABL | شاحن جوال أصلي وسريع في اليمن';
 const HOME_DESCRIPTION = 'اشترِ شاحن جوال أصلي وسريع، شاحن Type-C وPD وGaN، شاحن آيفون وسامسونج وباور بانك من CABL مع توصيل داخل اليمن.';
 const GLOBAL_SEARCH_KEYWORDS = [
@@ -1618,11 +1618,16 @@ function App() {
         </div>
       )}
       {isOffline && <div className="offline-badge" role="status" data-testid="status-offline"><WifiOff size={14} /> تعمل دون اتصال · البيانات المحفوظة متاحة</div>}
-      {!isAppInstalled && <button className="install-float" type="button" onClick={installApp} aria-label="تثبيت تطبيق CABL" data-testid="button-install-app"><Download size={18} /><span>تثبيت التطبيق</span></button>}
-      <a className="whatsapp-float" href={WHATSAPP_URL} target="_blank" rel="noreferrer" aria-label="تواصل معنا عبر WhatsApp" data-testid="button-whatsapp-float">
-        <MessageCircle size={25} fill="currentColor" />
-        <span>WhatsApp</span>
-      </a>
+      <div className="floating-tools" aria-label="مساعدة وتثبيت التطبيق">
+        {!isAppInstalled && <button className="install-float" type="button" onClick={installApp} aria-label="تثبيت تطبيق CABL" data-testid="button-install-app"><Download size={18} /><span>تثبيت التطبيق</span></button>}
+        <div className="whatsapp-float-wrap">
+          <p className="whatsapp-hint">هل تريد مساعدة في اختيار المنتجات المناسبة لك؟</p>
+          <a className="whatsapp-float" href={WHATSAPP_URL} target="_blank" rel="noreferrer" aria-label="تواصل معنا عبر WhatsApp للمساعدة في اختيار المنتجات" data-testid="button-whatsapp-float">
+            <MessageCircle size={25} fill="currentColor" />
+            <span>WhatsApp</span>
+          </a>
+        </div>
+      </div>
       {toast && <div className="toast-message" role="status" data-testid="status-toast">{toast}</div>}
     </div>
   );
