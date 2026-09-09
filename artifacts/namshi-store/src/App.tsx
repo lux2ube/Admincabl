@@ -353,6 +353,24 @@ function ProductPreview({
   onToggleFavorite: (id: string) => void;
   onOpenRelatedProduct: (product: Product) => void;
 }) {
+  const productUrl = new URL(`${import.meta.env.BASE_URL}product/${product.slug}/`, window.location.origin).toString();
+  const shippingSummary = shippingOption
+    ? `${shippingOption.free ? 'مجاني' : formatMoney(shippingOption.charge)} · ${shippingOption.estimatedDays ? `${shippingOption.estimatedDays} أيام تقريبًا` : 'يحدد عند تأكيد العنوان'}`
+    : 'يحدد عند تأكيد العنوان';
+  const whatsappMessage = [
+    'مرحبًا CABL، أريد شراء هذا المنتج مباشرة عبر WhatsApp.',
+    '',
+    `المنتج: ${product.name}`,
+    `العلامة: ${product.brand}`,
+    `السعر: ${formatMoney(product.price)}`,
+    product.sku ? `SKU: ${product.sku}` : '',
+    `التوصيل: ${shippingSummary}`,
+    `رابط المنتج: ${productUrl}`,
+    '',
+    'أرجو تأكيد التوفر وتكلفة التوصيل وإتمام الشراء مباشرة.',
+  ].filter(Boolean).join('\n');
+  const productWhatsAppUrl = `https://wa.me/967771106977?text=${encodeURIComponent(whatsappMessage)}`;
+
   return (
     <section className="product-preview section" aria-label={`تفاصيل ${product.name}`} data-testid="page-product-preview">
       <button className="back-link" type="button" onClick={onBack} data-testid="button-back-products">
@@ -382,7 +400,7 @@ function ProductPreview({
             <div><span>العلامة</span><strong>{product.brand}</strong></div>
             <div><span>الفئة</span><strong>{product.category?.name ?? '—'}</strong></div>
              <div><span>التوفر</span><strong className={product.quantity > 0 ? 'stock-available' : 'stock-unavailable'}>{product.quantity > 0 ? `متوفر · ${product.quantity} قطعة` : 'غير متوفر حاليًا'}</strong></div>
-              <div><span>التوصيل</span><strong>{shippingOption ? `${shippingOption.free ? 'مجاني' : formatMoney(shippingOption.charge)} · ${shippingOption.estimatedDays ? `${shippingOption.estimatedDays} أيام تقريبًا` : 'يحدد عند تأكيد العنوان'}` : 'يحدد عند تأكيد العنوان'}</strong></div>
+              <div><span>التوصيل</span><strong>{shippingSummary}</strong></div>
             {product.sku && <div><span>SKU</span><strong>{product.sku}</strong></div>}
             {product.warranty && <div><span>الضمان</span><strong>{product.warranty}</strong></div>}
              {product.note && <div><span>ملاحظة</span><strong>{product.note}</strong></div>}
@@ -393,6 +411,11 @@ function ProductPreview({
               <Heart size={17} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'في المفضلة' : 'حفظ للمفضلة'}
             </button>
           </div>
+           <a className="product-whatsapp-cta" href={productWhatsAppUrl} target="_blank" rel="noreferrer" data-testid={`button-product-whatsapp-${product.id}`}>
+             <MessageCircle size={22} fill="currentColor" aria-hidden="true" />
+             <span><strong>شراء مباشر عبر WhatsApp</strong><small>تواصل معنا لتأكيد المنتج والتوصيل وإتمام الشراء مباشرة</small></span>
+             <ArrowLeft size={17} aria-hidden="true" />
+           </a>
           <div className="product-preview-notes">
             <span><Truck size={16} /> توصيل داخل اليمن</span>
             <span><ShieldCheck size={16} /> منتجات أصلية من {product.brand}</span>
