@@ -7,13 +7,10 @@ import {
   CircleCheck,
   ClipboardList,
   Download,
-  Grid2X2,
-  Home,
   Landmark,
   Heart,
   Menu,
   Minus,
-  MessageCircle,
   Plus,
   Search,
   ShieldCheck,
@@ -21,11 +18,11 @@ import {
   Smartphone,
   Sparkles,
   Truck,
-  UserRound,
   WifiOff,
   X,
   Wallet,
 } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
 import {
   createStoreOrder,
   getStoreSeo,
@@ -263,6 +260,30 @@ function productAlt(product: Product) {
   return `${product.name} من ${product.brand}، ${product.category?.name ?? 'منتج شحن'} أصلي في اليمن`;
 }
 
+function buildProductWhatsAppUrl(
+  product: Product,
+  formatMoney: (amountUsd: number) => string,
+  shippingOption: StoreShippingOption | null,
+) {
+  const productUrl = new URL(`${import.meta.env.BASE_URL}product/${product.slug}/`, window.location.origin).toString();
+  const shippingSummary = shippingOption
+    ? `${shippingOption.free ? 'مجاني' : formatMoney(shippingOption.charge)} · ${shippingOption.estimatedDays ? `${shippingOption.estimatedDays} أيام تقريبًا` : 'يحدد عند تأكيد العنوان'}`
+    : 'يحدد عند تأكيد العنوان';
+  const message = [
+    'مرحبًا CABL، أريد شراء هذا المنتج مباشرة عبر WhatsApp.',
+    '',
+    `المنتج: ${product.name}`,
+    `العلامة: ${product.brand}`,
+    `السعر: ${formatMoney(product.price)}`,
+    product.sku ? `SKU: ${product.sku}` : '',
+    `التوصيل: ${shippingSummary}`,
+    `رابط المنتج: ${productUrl}`,
+    '',
+    'أرجو تأكيد التوفر وتكلفة التوصيل وإتمام الشراء مباشرة.',
+  ].filter(Boolean).join('\n');
+  return `https://wa.me/967771106977?text=${encodeURIComponent(message)}`;
+}
+
 function readCachedCatalog(): GetStoreCatalogQueryResult | null {
   try {
     const saved = window.localStorage.getItem(CACHED_CATALOG_KEY);
@@ -353,23 +374,9 @@ function ProductPreview({
   onToggleFavorite: (id: string) => void;
   onOpenRelatedProduct: (product: Product) => void;
 }) {
-  const productUrl = new URL(`${import.meta.env.BASE_URL}product/${product.slug}/`, window.location.origin).toString();
   const shippingSummary = shippingOption
     ? `${shippingOption.free ? 'مجاني' : formatMoney(shippingOption.charge)} · ${shippingOption.estimatedDays ? `${shippingOption.estimatedDays} أيام تقريبًا` : 'يحدد عند تأكيد العنوان'}`
     : 'يحدد عند تأكيد العنوان';
-  const whatsappMessage = [
-    'مرحبًا CABL، أريد شراء هذا المنتج مباشرة عبر WhatsApp.',
-    '',
-    `المنتج: ${product.name}`,
-    `العلامة: ${product.brand}`,
-    `السعر: ${formatMoney(product.price)}`,
-    product.sku ? `SKU: ${product.sku}` : '',
-    `التوصيل: ${shippingSummary}`,
-    `رابط المنتج: ${productUrl}`,
-    '',
-    'أرجو تأكيد التوفر وتكلفة التوصيل وإتمام الشراء مباشرة.',
-  ].filter(Boolean).join('\n');
-  const productWhatsAppUrl = `https://wa.me/967771106977?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
     <section className="product-preview section" aria-label={`تفاصيل ${product.name}`} data-testid="page-product-preview">
@@ -411,11 +418,6 @@ function ProductPreview({
               <Heart size={17} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'في المفضلة' : 'حفظ للمفضلة'}
             </button>
           </div>
-           <a className="product-whatsapp-cta" href={productWhatsAppUrl} target="_blank" rel="noreferrer" data-testid={`button-product-whatsapp-${product.id}`}>
-             <MessageCircle size={22} fill="currentColor" aria-hidden="true" />
-             <span><strong>شراء مباشر عبر WhatsApp</strong><small>تواصل معنا لتأكيد المنتج والتوصيل وإتمام الشراء مباشرة</small></span>
-             <ArrowLeft size={17} aria-hidden="true" />
-           </a>
           <div className="product-preview-notes">
             <span><Truck size={16} /> توصيل داخل اليمن</span>
             <span><ShieldCheck size={16} /> منتجات أصلية من {product.brand}</span>
@@ -1077,6 +1079,9 @@ function App() {
     ? products.find((product) => product.slug === route.slug) ?? null
     : null;
   const selectedProductId = selectedProduct?.id ?? null;
+  const floatingWhatsAppUrl = selectedProduct
+    ? buildProductWhatsAppUrl(selectedProduct, formatMoney, selectedShippingOption)
+    : WHATSAPP_URL;
   const relatedProducts = useMemo(() => {
     if (!selectedProduct) return [];
     const selectedKind = productKind(selectedProduct);
@@ -1578,14 +1583,6 @@ function App() {
         )}
       </main>
 
-      <nav className="mobile-bottom-nav" aria-label="تنقل سريع" data-testid="mobile-bottom-nav">
-        <button type="button" onClick={() => { navigateTo('/'); scrollTo('top'); }} data-testid="bottom-nav-home"><Home size={19} /><span>الرئيسية</span></button>
-        <button type="button" onClick={() => scrollTo('categories')} data-testid="bottom-nav-categories"><Grid2X2 size={19} /><span>التصنيفات</span></button>
-        <button type="button" onClick={() => setCartOpen(true)} data-testid="bottom-nav-cart"><ShoppingBag size={19} /><span>السلة{cartItemCount > 0 ? ` · ${cartItemCount}` : ''}</span></button>
-        <button type="button" onClick={openTracking} data-testid="bottom-nav-orders"><ClipboardList size={19} /><span>طلباتي</span></button>
-        <button type="button" onClick={() => setAccountOpen(true)} data-testid="bottom-nav-account"><UserRound size={19} /><span>الحساب</span></button>
-      </nav>
-
       <footer className="footer" data-testid="footer-storefront">
         <div className="footer-inner">
           <div className="footer-top">
@@ -1724,7 +1721,7 @@ function App() {
             <div className="account-actions">
               <button type="button" onClick={openTracking}><ClipboardList size={18} /><span><strong>تتبع طلباتي</strong><small>اعرض حالة الطلب باستخدام بريدك ورقم هاتفك</small></span><ArrowLeft size={15} /></button>
               <button type="button" onClick={() => { setAccountOpen(false); setWishlistOpen(true); }}><Heart size={18} /><span><strong>المفضلة</strong><small>المنتجات التي حفظتها للعودة إليها لاحقًا</small></span><ArrowLeft size={15} /></button>
-              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer"><MessageCircle size={18} /><span><strong>تواصل مع CABL</strong><small>مساعدة قبل وبعد الشراء عبر WhatsApp</small></span><ArrowLeft size={15} /></a>
+              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer"><FaWhatsapp size={18} /><span><strong>تواصل مع CABL</strong><small>مساعدة قبل وبعد الشراء عبر WhatsApp</small></span><ArrowLeft size={15} /></a>
             </div>
           </aside>
         </div>
@@ -1756,10 +1753,9 @@ function App() {
           onPointerCancel={(event) => handleFloatingPointerUp('whatsapp', event)}
           onClick={(event) => preventDraggedClick('whatsapp', event)}
         >
-          <p className="whatsapp-hint">هل تريد مساعدة في اختيار المنتجات المناسبة لك؟</p>
-          <a className="whatsapp-float" href={WHATSAPP_URL} target="_blank" rel="noreferrer" aria-label="تواصل معنا عبر WhatsApp للمساعدة في اختيار المنتجات" data-testid="button-whatsapp-float">
-            <MessageCircle size={25} fill="currentColor" />
-            <span>WhatsApp</span>
+          <a className="whatsapp-float" href={floatingWhatsAppUrl} target="_blank" rel="noreferrer" aria-label={selectedProduct ? `شراء ${selectedProduct.name} مباشرة عبر WhatsApp` : 'تواصل معنا عبر WhatsApp للمساعدة في اختيار المنتجات'} title={selectedProduct ? 'شراء مباشر عبر WhatsApp' : 'تواصل معنا عبر WhatsApp'} data-testid="button-whatsapp-float">
+            <FaWhatsapp size={28} aria-hidden="true" />
+            <span className="sr-only">WhatsApp</span>
           </a>
         </div>
       </div>
