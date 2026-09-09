@@ -68,6 +68,15 @@ type StoreRoute =
   | { kind: 'brand'; slug: string }
   | { kind: 'search'; query: string };
 
+type SearchSuggestion = {
+  kind: 'product' | 'category' | 'brand';
+  id: string;
+  title: string;
+  subtitle: string;
+  slug: string;
+  image?: string;
+};
+
 function readStoreRoute(): StoreRoute {
   const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '');
   const pathname = window.location.pathname.startsWith(basePath)
@@ -162,6 +171,13 @@ function matchesProductSearch(product: Product, query: string) {
     productText.includes(token)
     || productTokens.some((productToken) => token.length > 2 && levenshteinDistance(token, productToken) <= 1)
   ));
+}
+
+function matchesSearchText(value: string, query: string) {
+  const normalizedQuery = normalizeSearch(query);
+  if (!normalizedQuery) return true;
+  const normalizedValue = normalizeSearch(value);
+  return normalizedQuery.split(' ').every((token) => normalizedValue.includes(token));
 }
 
 function productKind(product: Pick<Product, 'name' | 'color' | 'description' | 'category'>) {
@@ -297,7 +313,6 @@ function ProductPreview({
   onToggleFavorite: (id: string) => void;
   onOpenRelatedProduct: (product: Product) => void;
 }) {
-  const productKeywords = getProductKeywords(product);
   return (
     <section className="product-preview section" aria-label={`تفاصيل ${product.name}`} data-testid="page-product-preview">
       <button className="back-link" type="button" onClick={onBack} data-testid="button-back-products">
@@ -323,9 +338,6 @@ function ProductPreview({
              {product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>${product.regularPrice.toFixed(2)}</del>}
            </div>
           <p className="product-preview-description">{product.description || product.color}. حل عملي للشحن اليومي، المكتب، والسفر داخل اليمن.</p>
-          <p className="product-preview-search-copy">
-            يبحث العملاء عن هذا المنتج باسم {product.name}، وضمن كلمات مثل {productKeywords.slice(1, 5).join('، ')}. تعرّف على المواصفات قبل شراء {productKind(product) === 'cable' ? 'وصلة شحن' : productKind(product) === 'powerbank' ? 'خازن متنقل' : 'شاحن جوال'} أصلي.
-          </p>
           <div className="product-spec-list">
             <div><span>العلامة</span><strong>{product.brand}</strong></div>
             <div><span>الفئة</span><strong>{product.category?.name ?? '—'}</strong></div>
@@ -348,14 +360,23 @@ function ProductPreview({
           </div>
         </div>
       </div>
-      <section className="product-seo-section" aria-labelledby="product-keywords-heading">
-        <span className="eyebrow">بحث مرتبط بالمنتج</span>
-        <h2 id="product-keywords-heading">كلمات ومواصفات {product.name}</h2>
-        <p>{product.color}. {product.description} العلامة: {product.brand}. الفئة: {product.category?.name ?? 'منتجات الشحن والإكسسوارات'}.</p>
-        <div className="product-keywords" aria-label="كلمات البحث المرتبطة">
-          {productKeywords.map((keyword) => <span key={keyword}>{keyword}</span>)}
-        </div>
+       <section className="product-seo-section" aria-labelledby="product-information-heading">
+         <span className="eyebrow">معلومات المنتج</span>
+         <h2 id="product-information-heading">قبل شراء {product.name}</h2>
+         <p>{product.description || product.color}. راجع العلامة والفئة والتوفر وطريقة التوصيل الظاهرة أعلاه، ثم اختر الكمية المناسبة قبل إضافة المنتج إلى السلة.</p>
+         <div className="product-information-grid">
+           <div><span>العلامة</span><strong>{product.brand}</strong></div>
+           <div><span>الفئة</span><strong>{product.category?.name ?? 'غير محددة'}</strong></div>
+           {product.sku && <div><span>رمز المنتج</span><strong dir="ltr">{product.sku}</strong></div>}
+           {product.warranty && <div><span>الضمان</span><strong>{product.warranty}</strong></div>}
+         </div>
       </section>
+       <div className="product-sticky-cta" aria-label={`إضافة ${product.name} إلى السلة`}>
+         <div><span>السعر</span><strong>${product.price.toFixed(2)}</strong></div>
+         <button className="button-dark" type="button" disabled={product.quantity <= 0} onClick={() => onAddToCart(product)} data-testid={`button-sticky-add-${product.id}`}>
+           {product.quantity > 0 ? 'أضف إلى السلة' : 'غير متوفر'}
+         </button>
+       </div>
       {relatedProducts.length > 0 && (
         <section className="related-products" aria-labelledby="related-products-heading">
           <div className="section-header">
@@ -582,11 +603,6 @@ function App() {
       return matchesFilter && matchesCategoryRoute && matchesBrandRoute && matchesQuery;
     });
   }, [activeFilter, products, query, route]);
-  const searchSuggestions = useMemo(() => {
-    if (!query.trim()) return [];
-    return products.filter((product) => matchesProductSearch(product, query)).slice(0, 5);
-  }, [products, query]);
-
   const categories = useMemo(() => {
     const categoryMap = new Map<string, { id: string; name: string; slug: string; image: string; count: string }>();
     for (const product of products) {
@@ -602,10 +618,54 @@ function App() {
     return [...categoryMap.values()];
   }, [products]);
 
+  const searchSuggestions = useMemo(() => {
+    if (!query.trim()) return [];
+    const productSuggestions: SearchSuggestion[] = products
+      .filter((product) => matchesProductSearch(product, query))
+      .slice(0, 4)
+      .map((product) => ({
+        kind: 'product',
+        id: product.id,
+        title: product.name,
+        subtitle: `${product.brand} · $${product.price.toFixed(2)}`,
+        slug: product.slug,
+        image: product.image,
+      }));
+    const categorySuggestions: SearchSuggestion[] = categories
+      .filter((category) => matchesSearchText(category.name, query))
+      .slice(0, 2)
+      .map((category) => ({
+        kind: 'category',
+        id: category.id,
+        title: category.name,
+        subtitle: `${category.count} · تصفح الفئة`,
+        slug: category.slug,
+        image: category.image,
+      }));
+    const brandSuggestions: SearchSuggestion[] = [...new Map(products
+      .filter((product) => product.brandSlug && matchesSearchText(product.brand, query))
+      .map((product) => [product.brandSlug, product])).values()]
+      .slice(0, 2)
+      .map((product) => ({
+        kind: 'brand',
+        id: product.brandSlug as string,
+        title: product.brand,
+        subtitle: 'تصفح منتجات العلامة',
+        slug: product.brandSlug as string,
+        image: product.image,
+      }));
+    return [...productSuggestions, ...categorySuggestions, ...brandSuggestions].slice(0, 6);
+  }, [categories, products, query]);
+
   const filterOptions = useMemo(() => [
     { value: 'ALL', label: 'كل المنتجات' },
     ...categories.map((category) => ({ value: category.id, label: category.name })),
   ], [categories]);
+
+  const brandOptions = useMemo(() => [...new Map(products
+    .filter((product) => product.brandSlug)
+    .map((product) => [product.brandSlug, { name: product.brand, slug: product.brandSlug as string }]))
+    .values()], [products]);
 
   useEffect(() => {
     if (route.kind === 'category') {
@@ -1057,20 +1117,28 @@ function App() {
               </button>
               {query && (
                 <div className="search-suggestions" data-testid="search-results-count">
-                    <p>{visibleProducts.length} نتيجة للبحث عن «{query}»</p>
-                    {searchSuggestions.map((product) => (
+                  <p>{visibleProducts.length} نتيجة للبحث عن «{query}»</p>
+                    {searchSuggestions.map((suggestion) => (
                       <button
                         type="button"
-                        key={product.id}
-                        onClick={() => { setSearchOpen(false); openProductPreview(product); }}
-                        data-testid={`search-suggestion-${product.id}`}
+                        key={`${suggestion.kind}-${suggestion.id}`}
+                        onClick={() => {
+                          setSearchOpen(false);
+                          if (suggestion.kind === 'product') {
+                            const product = products.find((item) => item.id === suggestion.id);
+                            if (product) openProductPreview(product);
+                          } else {
+                            navigateTo(`/${suggestion.kind}/${suggestion.slug}`);
+                          }
+                        }}
+                        data-testid={`search-suggestion-${suggestion.kind}-${suggestion.id}`}
                       >
-                        <img src={product.image} alt="" />
-                        <span><strong>{product.name}</strong><small>{product.brand} · ${product.price.toFixed(2)}</small></span>
+                        {suggestion.image ? <img src={suggestion.image} alt="" /> : <span className="search-suggestion-icon"><Search size={15} /></span>}
+                        <span><strong>{suggestion.title}</strong><small>{suggestion.subtitle}</small></span>
                         <ArrowLeft size={14} />
                       </button>
                     ))}
-                    {searchSuggestions.length === 0 && <p className="search-empty">جرّب «USB»، «تايب سي»، «iPhone» أو اسم العلامة التجارية.</p>}
+                    {searchSuggestions.length === 0 && <p className="search-empty">لم نجد تطابقًا مباشرًا. جرّب «USB»، «تايب سي»، «iPhone» أو اسم العلامة التجارية.</p>}
                 </div>
               )}
             </div>
@@ -1242,7 +1310,22 @@ function App() {
                 </div>
               </article>
             ))}
-            {visibleProducts.length === 0 && <div className="empty-products" data-testid="empty-product-results">لا توجد منتجات مطابقة. جرّب SKU أو فئة أخرى.</div>}
+             {visibleProducts.length === 0 && (
+               <div className="empty-products empty-products-card" data-testid="empty-product-results">
+                 <strong>لم نجد منتجات مطابقة</strong>
+                 <p>{query.trim() ? `لا توجد نتائج لعبارة «${query.trim()}».` : 'لا توجد منتجات منشورة في هذه الفئة حاليًا.'}</p>
+                 <div className="empty-products-actions">
+                   <button className="button-dark" type="button" onClick={() => { setQuery(''); navigateTo('/'); scrollTo('discover'); }} data-testid="button-empty-reset">عرض كل المنتجات</button>
+                   {query.trim() && <button className="preview-link" type="button" onClick={() => { setQuery(''); setSearchOpen(true); }} data-testid="button-empty-new-search">بحث جديد</button>}
+                 </div>
+                 {brandOptions.length > 0 && (
+                   <div className="empty-products-links" aria-label="تصفح العلامات التجارية">
+                     <span>أو تصفح علامة:</span>
+                     {brandOptions.slice(0, 4).map((brand) => <button type="button" key={brand.slug} onClick={() => navigateTo(`/brand/${brand.slug}`)}>{brand.name}</button>)}
+                   </div>
+                 )}
+               </div>
+             )}
           </div>
         </section>
 
