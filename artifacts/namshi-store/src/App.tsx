@@ -93,7 +93,7 @@ function readStoreRoute(): StoreRoute {
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 const CACHED_CATALOG_KEY = 'cabl-catalog-v1';
 const PENDING_ORDERS_KEY = 'cabl-pending-orders-v1';
-const FLOATING_POSITIONS_KEY = 'cabl-floating-positions-v2';
+const FLOATING_POSITIONS_KEY = 'cabl-floating-positions-v3';
 const DEFAULT_CURRENCIES: StoreCurrency[] = [
   { code: 'YER', name: 'ريال يمني', ratePerUsd: 535, isDefault: true },
   { code: 'NYER', name: 'ريال يمني جديد', ratePerUsd: 1572, isDefault: false },

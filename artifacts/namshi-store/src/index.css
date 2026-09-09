@@ -1175,3 +1175,56 @@ img { display: block; max-width: 100%; }
   .checkout-steps span + span::before { right: calc(100% + 4px); }
   .checkout-trust { align-items: flex-start; }
 }
+
+/* Keep support available without covering the shopping flow. */
+.floating-tools {
+  right: 16px;
+  left: auto;
+  bottom: 18px;
+  gap: 6px;
+  transform: none;
+}
+.floating-tools.is-positioned {
+  right: auto;
+}
+.install-float {
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 6px 16px rgba(21, 21, 21, .16);
+}
+.whatsapp-float-wrap {
+  width: 42px;
+  height: 42px;
+  flex-basis: 42px;
+}
+.whatsapp-float {
+  width: 42px;
+  height: 42px;
+  box-shadow: 0 6px 16px rgba(37, 211, 102, .22);
+}
+.whatsapp-hint {
+  right: 0;
+  bottom: 52px;
+  max-width: min(200px, calc(100vw - 32px));
+  padding: 7px 9px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+}
+.whatsapp-float-wrap:hover .whatsapp-hint,
+.whatsapp-float-wrap:focus-within .whatsapp-hint {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+@media (max-width: 767px) {
+  .floating-tools {
+    right: 12px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  .product-page-shell .floating-tools {
+    right: 12px;
+    bottom: calc(82px + env(safe-area-inset-bottom));
+  }
+}
