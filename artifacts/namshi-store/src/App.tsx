@@ -4,17 +4,24 @@ import {
   ArrowRight,
   Banknote,
   ChevronDown,
+  CircleCheck,
+  ClipboardList,
   Download,
+  Grid2X2,
+  Home,
   Landmark,
   Heart,
   Menu,
+  Minus,
   MessageCircle,
+  Plus,
   Search,
   ShieldCheck,
   ShoppingBag,
   Smartphone,
   Sparkles,
   Truck,
+  UserRound,
   WifiOff,
   X,
   Wallet,
@@ -35,6 +42,8 @@ type Product = {
   id: string;
   brand: string;
   name: string;
+  regularPrice: number;
+  discountPrice: number | null;
   price: number;
   color: string;
   description: string;
@@ -73,6 +82,61 @@ const GLOBAL_SEARCH_KEYWORDS = [
 ];
 
 const dedupeKeywords = (keywords: string[]) => [...new Set(keywords.filter(Boolean))];
+
+const SEARCH_REPLACEMENTS: Array<[RegExp, string]> = [
+  [/يو\s*إس\s*بي|يو\s*اس\s*بي|يو اس بي/gi, 'usb'],
+  [/تايب\s*سي|تايبسي|تايب-سي/gi, 'type c'],
+  [/آيفون|ايفون/gi, 'iphone'],
+  [/سامسونج|سامسنغ/gi, 'samsung'],
+  [/وايرلس|ويرلس/gi, 'wireless'],
+  [/جان/gi, 'gan'],
+  [/بي\s*دي/gi, 'pd'],
+  [/باور\s*بانك|باوربانك/gi, 'power bank'],
+];
+
+function normalizeSearch(value: string) {
+  return SEARCH_REPLACEMENTS.reduce((normalized, [pattern, replacement]) => normalized.replace(pattern, replacement), value)
+    .toLocaleLowerCase('ar-YE')
+    .normalize('NFKD')
+    .replace(/[\u064B-\u065F\u0670]/g, '')
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .replace(/[-_/.,،]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function levenshteinDistance(left: string, right: string) {
+  const row = Array.from({ length: right.length + 1 }, (_, index) => index);
+  for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
+    let diagonal = row[0];
+    row[0] = leftIndex;
+    for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
+      const above = row[rightIndex];
+      row[rightIndex] = left[leftIndex - 1] === right[rightIndex - 1]
+        ? diagonal
+        : Math.min(diagonal + 1, above + 1, row[rightIndex - 1] + 1);
+      diagonal = above;
+    }
+  }
+  return row[right.length];
+}
+
+function productSearchText(product: Product) {
+  return normalizeSearch(`${product.brand} ${product.name} ${product.category?.name ?? ''} ${product.sku} ${product.color} ${product.description}`);
+}
+
+function matchesProductSearch(product: Product, query: string) {
+  const normalizedQuery = normalizeSearch(query);
+  if (!normalizedQuery) return true;
+  const productText = productSearchText(product);
+  const productTokens = productText.split(' ');
+  return normalizedQuery.split(' ').every((token) => (
+    productText.includes(token)
+    || productTokens.some((productToken) => token.length > 2 && levenshteinDistance(token, productToken) <= 1)
+  ));
+}
 
 function productKind(product: Pick<Product, 'name' | 'color' | 'description' | 'category'>) {
   const text = `${product.name} ${product.color} ${product.description} ${product.category?.name ?? ''}`.toLowerCase();
@@ -191,6 +255,7 @@ function CablLogo({ className = '', showTagline = true }: { className?: string; 
 function ProductPreview({
   product,
   relatedProducts,
+  shippingOption,
   isFavorite,
   onBack,
   onAddToCart,
@@ -199,6 +264,7 @@ function ProductPreview({
 }: {
   product: Product;
   relatedProducts: Product[];
+  shippingOption: StoreShippingOption | null;
   isFavorite: boolean;
   onBack: () => void;
   onAddToCart: (product: Product) => void;
@@ -218,7 +284,10 @@ function ProductPreview({
         <div className="product-preview-copy">
           <span className="eyebrow">{product.brand} · {product.category?.name ?? '—'}</span>
           <h1>{product.name}</h1>
-           <div className="product-preview-price">${product.price.toFixed(2)}</div>
+           <div className="product-preview-price">
+             <strong>${product.price.toFixed(2)}</strong>
+             {product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>${product.regularPrice.toFixed(2)}</del>}
+           </div>
           <p className="product-preview-description">{product.description || product.color}. حل عملي للشحن اليومي، المكتب، والسفر داخل اليمن.</p>
           <p className="product-preview-search-copy">
             يبحث العملاء عن هذا المنتج باسم {product.name}، وضمن كلمات مثل {productKeywords.slice(1, 5).join('، ')}. تعرّف على المواصفات قبل شراء {productKind(product) === 'cable' ? 'وصلة شحن' : productKind(product) === 'powerbank' ? 'خازن متنقل' : 'شاحن جوال'} أصلي.
@@ -226,11 +295,14 @@ function ProductPreview({
           <div className="product-spec-list">
             <div><span>العلامة</span><strong>{product.brand}</strong></div>
             <div><span>الفئة</span><strong>{product.category?.name ?? '—'}</strong></div>
+             <div><span>التوفر</span><strong className={product.quantity > 0 ? 'stock-available' : 'stock-unavailable'}>{product.quantity > 0 ? `متوفر · ${product.quantity} قطعة` : 'غير متوفر حاليًا'}</strong></div>
+             <div><span>التوصيل</span><strong>{shippingOption ? `${shippingOption.free ? 'مجاني' : `$${shippingOption.charge.toFixed(2)}`} · ${shippingOption.estimatedDays ? `${shippingOption.estimatedDays} أيام تقريبًا` : 'يحدد عند تأكيد العنوان'}` : 'يحدد عند تأكيد العنوان'}</strong></div>
             {product.sku && <div><span>SKU</span><strong>{product.sku}</strong></div>}
             {product.warranty && <div><span>الضمان</span><strong>{product.warranty}</strong></div>}
+             {product.note && <div><span>ملاحظة</span><strong>{product.note}</strong></div>}
           </div>
           <div className="product-preview-actions">
-            <button className="button-dark" type="button" onClick={() => onAddToCart(product)} data-testid={`button-preview-add-${product.id}`}>أضف إلى السلة</button>
+             <button className="button-dark" type="button" disabled={product.quantity <= 0} onClick={() => onAddToCart(product)} data-testid={`button-preview-add-${product.id}`}>{product.quantity > 0 ? 'أضف إلى السلة' : 'غير متوفر'}</button>
             <button className={`preview-wish ${isFavorite ? 'active' : ''}`} type="button" onClick={() => onToggleFavorite(product.id)} data-testid={`button-preview-favorite-${product.id}`}>
               <Heart size={17} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'في المفضلة' : 'حفظ للمفضلة'}
             </button>
@@ -327,6 +399,7 @@ function App() {
     country: 'اليمن',
   });
   const [trackingOpen, setTrackingOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [trackingForm, setTrackingForm] = useState({ email: '', phone: '' });
   const [trackingOrders, setTrackingOrders] = useState<Array<{ id: string; status: string; total: number; createdAt: string }>>([]);
   const [trackingLoading, setTrackingLoading] = useState(false);
@@ -436,6 +509,8 @@ function App() {
     id: product.id,
     brand: product.brand,
     name: product.productName,
+    regularPrice: product.regularPrice,
+    discountPrice: product.discountPrice,
     price: product.discountPrice ?? product.regularPrice,
     color: product.shortDescription ?? product.productDescription ?? `منتج أصلي من ${product.brand}`,
     description: product.productDescription ?? product.shortDescription ?? `منتج أصلي من ${product.brand} متوفر في CABL اليمن.`,
@@ -458,6 +533,7 @@ function App() {
   const cartSubtotal = cart.reduce((sum, product) => sum + product.price * (cartQuantities[product.id] ?? 1), 0);
   const cartShipping = selectedShippingOption?.free ? 0 : selectedShippingOption?.charge ?? 0;
   const cartTotal = cartSubtotal + cartShipping;
+  const cartItemCount = cart.reduce((sum, product) => sum + (cartQuantities[product.id] ?? 1), 0);
 
   useEffect(() => {
     if (paymentMethods.length > 0 && paymentMethodId === null) {
@@ -466,13 +542,16 @@ function App() {
   }, [paymentMethodId, paymentMethods]);
 
   const visibleProducts = useMemo(() => {
-    const cleanQuery = query.trim().toLowerCase();
     return products.filter((product) => {
       const matchesFilter = activeFilter === 'ALL' || product.category?.id === activeFilter;
-      const matchesQuery = !cleanQuery || `${product.brand} ${product.name} ${product.category?.name ?? ''} ${product.sku} ${product.color}`.toLowerCase().includes(cleanQuery);
+      const matchesQuery = matchesProductSearch(product, query);
       return matchesFilter && matchesQuery;
     });
   }, [activeFilter, products, query]);
+  const searchSuggestions = useMemo(() => {
+    if (!query.trim()) return [];
+    return products.filter((product) => matchesProductSearch(product, query)).slice(0, 5);
+  }, [products, query]);
 
   const categories = useMemo(() => {
     const categoryMap = new Map<string, { id: string; name: string; image: string; count: string }>();
@@ -579,8 +658,17 @@ function App() {
   };
 
   const addToCart = (product: Product) => {
+    if (product.quantity <= 0) {
+      announce('هذا المنتج غير متوفر حاليًا');
+      return;
+    }
+    const currentQuantity = cartQuantities[product.id] ?? 0;
+    if (currentQuantity >= Math.min(product.quantity, 99)) {
+      announce(`المتاح من ${product.name} هو ${product.quantity} فقط`);
+      return;
+    }
     setCart((current) => current.some((item) => item.id === product.id) ? current : [...current, product]);
-    setCartQuantities((current) => ({ ...current, [product.id]: Math.min((current[product.id] ?? 0) + 1, 99) }));
+    setCartQuantities((current) => ({ ...current, [product.id]: Math.min((current[product.id] ?? 0) + 1, product.quantity, 99) }));
     setCartOpen(true);
     announce(`تمت إضافة ${product.name} إلى القائمة`);
   };
@@ -594,6 +682,7 @@ function App() {
       return next;
     });
     setCart((current) => current.filter((product) => product.id !== productId || (cartQuantities[productId] ?? 1) > 1));
+    announce('تم تحديث الكمية');
   };
 
   const chooseCategory = (filter: string) => {
@@ -755,6 +844,7 @@ function App() {
   };
 
   const openTracking = () => {
+    setAccountOpen(false);
     setTrackingError('');
     setTrackingOrders([]);
     setTrackingDetail(null);
@@ -798,7 +888,7 @@ function App() {
   };
 
   return (
-    <div className="site-shell">
+    <div className={`site-shell ${selectedProduct ? 'product-page-shell' : ''}`}>
       <header className="main-header" data-testid="header-storefront">
         <div className="header-inner">
           <div className="header-row">
@@ -824,7 +914,7 @@ function App() {
               </button>
               <button className="header-action" type="button" onClick={() => setCartOpen(true)} aria-label="السلة" data-testid="button-cart">
                 <ShoppingBag /><span>السلة</span>
-                {cart.length > 0 && <span className="count-bubble" data-testid="count-cart">{cart.length}</span>}
+                {cartItemCount > 0 && <span className="count-bubble" data-testid="count-cart">{cartItemCount}</span>}
               </button>
             </div>
           </div>
@@ -860,7 +950,20 @@ function App() {
               </button>
               {query && (
                 <div className="search-suggestions" data-testid="search-results-count">
-                   <p>{visibleProducts.length} نتيجة للبحث عن «{query}»</p>
+                    <p>{visibleProducts.length} نتيجة للبحث عن «{query}»</p>
+                    {searchSuggestions.map((product) => (
+                      <button
+                        type="button"
+                        key={product.id}
+                        onClick={() => { setSearchOpen(false); openProductPreview(product); }}
+                        data-testid={`search-suggestion-${product.id}`}
+                      >
+                        <img src={product.image} alt="" />
+                        <span><strong>{product.name}</strong><small>{product.brand} · ${product.price.toFixed(2)}</small></span>
+                        <ArrowLeft size={14} />
+                      </button>
+                    ))}
+                    {searchSuggestions.length === 0 && <p className="search-empty">جرّب «USB»، «تايب سي»، «iPhone» أو اسم العلامة التجارية.</p>}
                 </div>
               )}
             </div>
@@ -873,6 +976,7 @@ function App() {
           <ProductPreview
             product={products.find((product) => product.id === selectedProductId) ?? products[0]}
             relatedProducts={relatedProducts}
+            shippingOption={selectedShippingOption}
             isFavorite={selectedProductId !== null && favorites.includes(selectedProductId)}
             onBack={closeProductPreview}
             onAddToCart={addToCart}
@@ -1015,13 +1119,16 @@ function App() {
                 <div className="product-details">
                   <div className="product-brand">{product.brand}</div>
                   <div className="product-name">{product.name}</div>
-                  <div className="product-price">${product.price.toFixed(2)}</div>
-                  <div className="product-color">{product.color}</div>
-                  {product.sku && <div className="product-color">SKU: {product.sku}</div>}
-                  {product.warranty && <div className="product-color">{product.warranty}</div>}
+                   <div className="product-price">
+                     <strong>${product.price.toFixed(2)}</strong>
+                     {product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>${product.regularPrice.toFixed(2)}</del>}
+                   </div>
+                   <div className={`product-stock ${product.quantity > 0 ? 'available' : 'unavailable'}`}>
+                     {product.quantity > 0 ? <><CircleCheck size={13} /> متوفر</> : 'غير متوفر'}
+                   </div>
                    <div className="product-card-actions">
                      <button className="preview-link" type="button" onClick={() => openProductPreview(product)} data-testid={`button-preview-product-${product.id}`}>عرض التفاصيل</button>
-                     <button className="text-link" type="button" onClick={() => addToCart(product)} data-testid={`button-add-product-${product.id}`}>أضف إلى السلة</button>
+                      <button className="text-link" type="button" disabled={product.quantity <= 0} onClick={() => addToCart(product)} data-testid={`button-add-product-${product.id}`}>{product.quantity > 0 ? 'أضف إلى السلة' : 'غير متوفر'}</button>
                    </div>
                 </div>
               </article>
@@ -1113,6 +1220,14 @@ function App() {
         )}
       </main>
 
+      <nav className="mobile-bottom-nav" aria-label="تنقل سريع" data-testid="mobile-bottom-nav">
+        <button type="button" onClick={() => { setSelectedProductId(null); scrollTo('top'); }} data-testid="bottom-nav-home"><Home size={19} /><span>الرئيسية</span></button>
+        <button type="button" onClick={() => scrollTo('categories')} data-testid="bottom-nav-categories"><Grid2X2 size={19} /><span>التصنيفات</span></button>
+        <button type="button" onClick={() => setCartOpen(true)} data-testid="bottom-nav-cart"><ShoppingBag size={19} /><span>السلة{cartItemCount > 0 ? ` · ${cartItemCount}` : ''}</span></button>
+        <button type="button" onClick={openTracking} data-testid="bottom-nav-orders"><ClipboardList size={19} /><span>طلباتي</span></button>
+        <button type="button" onClick={() => setAccountOpen(true)} data-testid="bottom-nav-account"><UserRound size={19} /><span>الحساب</span></button>
+      </nav>
+
       <footer className="footer" data-testid="footer-storefront">
         <div className="footer-inner">
           <div className="footer-top">
@@ -1158,9 +1273,35 @@ function App() {
             ) : (
               <>
                 <div>
-                  {cart.map((product) => <div className="cart-item" key={product.id}><img src={product.image} alt={product.name} /><div className="cart-item-info"><button className="remove-item" type="button" onClick={() => removeFromCart(product.id)} data-testid={`button-remove-cart-${product.id}`}>حذف</button><strong>{product.brand}</strong><span>{product.name}</span><br /><span>${product.price.toFixed(2)} · الكمية {cartQuantities[product.id] ?? 1}</span><div className="product-card-actions"><button className="preview-link" type="button" onClick={() => addToCart(product)}>+ إضافة</button><button className="preview-link" type="button" onClick={() => removeFromCart(product.id)}>- إزالة</button></div></div></div>)}
+                  {cart.map((product) => {
+                    const quantity = cartQuantities[product.id] ?? 1;
+                    return (
+                      <div className="cart-item" key={product.id}>
+                        <img src={product.image} alt={product.name} />
+                        <div className="cart-item-info">
+                          <button className="remove-item" type="button" onClick={() => {
+                            setCart((current) => current.filter((item) => item.id !== product.id));
+                            setCartQuantities((current) => { const next = { ...current }; delete next[product.id]; return next; });
+                            announce('تم حذف المنتج من السلة');
+                          }} data-testid={`button-remove-cart-${product.id}`}>حذف</button>
+                          <strong>{product.brand}</strong>
+                          <span>{product.name}</span>
+                          <b className="cart-line-total">${(product.price * quantity).toFixed(2)}</b>
+                          <div className="quantity-control" aria-label={`كمية ${product.name}`}>
+                            <button type="button" onClick={() => addToCart(product)} disabled={quantity >= Math.min(product.quantity, 99)} aria-label="زيادة الكمية"><Plus size={14} /></button>
+                            <span>{quantity}</span>
+                            <button type="button" onClick={() => removeFromCart(product.id)} aria-label="إنقاص الكمية"><Minus size={14} /></button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                  <div className="drawer-total"><span>المنتجات المختارة</span><span data-testid="text-cart-total">{cart.reduce((sum, product) => sum + (cartQuantities[product.id] ?? 1), 0)}</span></div>
+                  <div className="cart-summary" aria-label="ملخص السلة">
+                    <div><span>الإجمالي الفرعي</span><strong>${cartSubtotal.toFixed(2)}</strong></div>
+                    <div><span>التوصيل</span><strong>{cartShipping === 0 ? 'مجاني' : `$${cartShipping.toFixed(2)}`}</strong></div>
+                    <div className="cart-summary-total"><span>المجموع</span><strong data-testid="text-cart-total">${cartTotal.toFixed(2)}</strong></div>
+                  </div>
                   <button className="button-dark checkout-button" type="button" onClick={openQuoteForm} data-testid="button-checkout">إتمام الطلب</button>
               </>
             )}
@@ -1178,9 +1319,15 @@ function App() {
              ) : (
                <form className="quote-form checkout-layout" onSubmit={submitQuote}>
                  <div className="checkout-details">
-                   <div className="checkout-heading"><p className="checkout-kicker">CABL · CHECKOUT</p><h3>إتمام الطلب</h3><p className="quote-intro">أدخل بيانات التوصيل ثم اختر طريقة الدفع المناسبة.</p></div>
-                   <div className="checkout-section"><h4>بيانات العميل</h4><div className="quote-form-grid"><label>الاسم الأول<input required minLength={2} maxLength={100} value={quoteForm.firstName} onChange={(event) => updateQuoteField('firstName', event.target.value)} autoComplete="given-name" data-testid="input-order-first-name" /></label><label>اسم العائلة<input required minLength={2} maxLength={100} value={quoteForm.lastName} onChange={(event) => updateQuoteField('lastName', event.target.value)} autoComplete="family-name" data-testid="input-order-last-name" /></label></div><div className="quote-form-grid"><label>البريد الإلكتروني<input required type="email" maxLength={255} value={quoteForm.email} onChange={(event) => updateQuoteField('email', event.target.value)} autoComplete="email" data-testid="input-order-email" /></label><label>رقم الهاتف<input required minLength={5} maxLength={40} value={quoteForm.phoneNumber} onChange={(event) => updateQuoteField('phoneNumber', event.target.value)} autoComplete="tel" data-testid="input-order-phone" /></label></div></div>
-                   <div className="checkout-section"><h4>بيانات التوصيل</h4><label>العنوان<input required minLength={3} maxLength={500} value={quoteForm.addressLine1} onChange={(event) => updateQuoteField('addressLine1', event.target.value)} autoComplete="street-address" data-testid="input-order-address" /></label><div className="quote-form-grid"><label>المدينة<input required minLength={2} maxLength={100} value={quoteForm.city} onChange={(event) => updateQuoteField('city', event.target.value)} autoComplete="address-level2" data-testid="input-order-city" /></label><label>الدولة<input required minLength={2} maxLength={100} value={quoteForm.country} onChange={(event) => updateQuoteField('country', event.target.value)} autoComplete="country-name" data-testid="input-order-country" /></label></div><label>طريقة الشحن<select required value={selectedShippingId ?? ''} onChange={(event) => setShippingId(Number(event.target.value))} data-testid="select-order-shipping">{shippingOptions.map((option) => <option key={option.id} value={option.id}>{option.name}{option.free ? ' · مجاني' : ` · $${option.charge.toFixed(2)}`}</option>)}</select></label></div>
+                    <div className="checkout-heading">
+                      <p className="checkout-kicker">CABL · CHECKOUT</p>
+                      <h3>تأكيد طلبك</h3>
+                      <div className="checkout-steps" aria-label="مراحل إتمام الطلب"><span className="active">1 البيانات</span><span>2 التوصيل</span><span>3 الدفع</span><span>4 تأكيد</span></div>
+                      <p className="quote-intro">أدخل البيانات الضرورية فقط. لا تحتاج إلى إنشاء حساب لإتمام الشراء.</p>
+                      <div className="checkout-trust"><CircleCheck size={15} /> السعر والتوصيل يظهران قبل التأكيد · دعم WhatsApp متاح</div>
+                    </div>
+                    <div className="checkout-section"><h4>بيانات العميل</h4><div className="quote-form-grid"><label>الاسم الأول<input required minLength={2} maxLength={100} value={quoteForm.firstName} onChange={(event) => updateQuoteField('firstName', event.target.value)} autoComplete="given-name" data-testid="input-order-first-name" /></label><label>اسم العائلة<input required minLength={2} maxLength={100} value={quoteForm.lastName} onChange={(event) => updateQuoteField('lastName', event.target.value)} autoComplete="family-name" data-testid="input-order-last-name" /></label></div><div className="quote-form-grid"><label>البريد الإلكتروني<input required type="email" maxLength={255} value={quoteForm.email} onChange={(event) => updateQuoteField('email', event.target.value)} autoComplete="email" inputMode="email" data-testid="input-order-email" /></label><label>رقم الهاتف<input required minLength={9} maxLength={13} pattern="(?:\+967|967)?[0-9]{9}" title="أدخل رقم هاتف يمنيًا مكونًا من 9 أرقام" value={quoteForm.phoneNumber} onChange={(event) => updateQuoteField('phoneNumber', event.target.value)} autoComplete="tel" inputMode="tel" placeholder="771234567" data-testid="input-order-phone" /></label></div></div>
+                    <div className="checkout-section"><h4>بيانات التوصيل</h4><label>العنوان<input required minLength={3} maxLength={500} value={quoteForm.addressLine1} onChange={(event) => updateQuoteField('addressLine1', event.target.value)} autoComplete="street-address" placeholder="الحي، الشارع، أقرب معلم" data-testid="input-order-address" /></label><label>المدينة<input required minLength={2} maxLength={100} value={quoteForm.city} onChange={(event) => updateQuoteField('city', event.target.value)} autoComplete="address-level2" placeholder="صنعاء، عدن، تعز..." data-testid="input-order-city" /></label><label>طريقة الشحن<select required value={selectedShippingId ?? ''} onChange={(event) => setShippingId(Number(event.target.value))} data-testid="select-order-shipping">{shippingOptions.map((option) => <option key={option.id} value={option.id}>{option.name}{option.free ? ' · مجاني' : ` · $${option.charge.toFixed(2)}`}{option.estimatedDays ? ` · ${option.estimatedDays} أيام` : ''}</option>)}</select></label></div>
                    <div className="checkout-section"><h4>طريقة الدفع</h4><label className="payment-select-label"><span>اختر طريقة الدفع</span><select required value={selectedPaymentMethodId ?? ''} onChange={(event) => { setPaymentMethodId(Number(event.target.value)); setPaymentReference(''); }} data-testid="select-payment-method">{paymentMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}</select></label>{selectedPaymentMethod && <div className="payment-instructions" data-testid="payment-instructions"><div className="payment-instructions-title"><span className="payment-method-icon"><PaymentMethodIcon method={selectedPaymentMethod} /></span><strong>{selectedPaymentMethod.name}</strong></div>{selectedPaymentMethod.accountName && <p>اسم الحساب: <b>{selectedPaymentMethod.accountName}</b></p>}{selectedPaymentMethod.accountNumber && <p>رقم الحساب: <b dir="ltr">{selectedPaymentMethod.accountNumber}</b></p>}<p>{selectedPaymentMethod.instructions ?? 'اتبع تعليمات الدفع الظاهرة ثم أكمل الطلب.'}</p>{selectedPaymentMethod.requiresTransactionReference && <label>رقم العملية بعد التحويل<input required value={paymentReference} onChange={(event) => setPaymentReference(event.target.value)} maxLength={255} placeholder="أدخل رقم العملية" data-testid="input-payment-reference" /></label>}</div>}</div>
                    {quoteError && <p className="form-error" role="alert" data-testid="error-quote">{quoteError}</p>}
                    <button className="button-dark checkout-submit-mobile" type="submit" disabled={quoteSubmitting || cart.length === 0 || !selectedPaymentMethodId} data-testid="button-submit-quote">{quoteSubmitting ? 'جارٍ حفظ الطلب...' : selectedPaymentMethod?.requiresTransactionReference ? 'تأكيد التحويل وإرسال الطلب' : 'تأكيد الطلب والدفع عند الاستلام'}</button>
@@ -1210,6 +1357,18 @@ function App() {
             {trackingOrders.length > 0 && <div className="tracking-results"><h3>طلباتك</h3>{trackingOrders.map((order) => <button className="tracking-order" key={order.id} type="button" onClick={() => loadTrackingDetail(order.id)}><span><strong>{order.id}</strong><small>{new Date(order.createdAt).toLocaleDateString('ar-YE')}</small></span><span><strong>${order.total.toFixed(2)}</strong><small>{order.status}</small></span></button>)}</div>}
              {trackingDetail && <div className="quote-success tracking-detail"><strong>{trackingDetail.id}</strong><p>الحالة: {trackingDetail.status}</p><p>الدفع: {trackingDetail.paymentMethodName} · {trackingDetail.paymentStatus === 'cod_pending' ? 'الدفع عند الاستلام' : 'بانتظار مراجعة التحويل'}</p><p>الإجمالي: ${trackingDetail.total.toFixed(2)} · الشحن: ${trackingDetail.shippingCost.toFixed(2)}</p><div>{trackingDetail.items.map((item) => <p key={item.productId}>{item.productName} × {item.quantity}</p>)}</div></div>}
           </section>
+        </div>
+      )}
+      {accountOpen && (
+        <div className="drawer-backdrop" role="presentation" onClick={() => setAccountOpen(false)} data-testid="overlay-account">
+          <aside className="cart-drawer account-drawer" role="dialog" aria-modal="true" aria-label="الحساب" onClick={(event) => event.stopPropagation()} data-testid="drawer-account">
+            <div className="drawer-header"><h2>الحساب</h2><button className="close-button" type="button" onClick={() => setAccountOpen(false)} aria-label="إغلاق الحساب"><X size={16} /></button></div>
+            <div className="account-actions">
+              <button type="button" onClick={openTracking}><ClipboardList size={18} /><span><strong>تتبع طلباتي</strong><small>اعرض حالة الطلب باستخدام بريدك ورقم هاتفك</small></span><ArrowLeft size={15} /></button>
+              <button type="button" onClick={() => { setAccountOpen(false); setWishlistOpen(true); }}><Heart size={18} /><span><strong>المفضلة</strong><small>المنتجات التي حفظتها للعودة إليها لاحقًا</small></span><ArrowLeft size={15} /></button>
+              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer"><MessageCircle size={18} /><span><strong>تواصل مع CABL</strong><small>مساعدة قبل وبعد الشراء عبر WhatsApp</small></span><ArrowLeft size={15} /></a>
+            </div>
+          </aside>
         </div>
       )}
       {isOffline && <div className="offline-badge" role="status" data-testid="status-offline"><WifiOff size={14} /> تعمل دون اتصال · البيانات المحفوظة متاحة</div>}
