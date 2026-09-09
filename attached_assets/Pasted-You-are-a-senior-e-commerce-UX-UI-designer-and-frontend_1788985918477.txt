@@ -1,0 +1,365 @@
+You are a senior e-commerce UX/UI designer and frontend engineer.
+
+Redesign the attached mobile e-commerce screens aggressively. Do NOT make cosmetic changes only. Fix the underlying UX problems and rebuild the layout around fast mobile shopping, strong visual hierarchy, product scanning, and conversion.
+
+The store sells electronics and accessories such as Baseus, Vention, Anker and UGREEN.
+
+PRIMARY GOAL:
+Create a premium, internationally acceptable mobile e-commerce experience that feels simple, fast, trustworthy and easy to scan.
+
+IMPORTANT:
+Do not add unnecessary features.
+Do not make the interface more complicated.
+Do not blindly preserve the current layout.
+Prioritize usability over decoration.
+
+==================================================
+1. PRODUCT LISTING PAGE
+==================================================
+
+Replace the current oversized filter/header area with a compact mobile-first structure.
+
+New hierarchy:
+
+1. Page title: "منتجاتنا"
+2. Small supporting text showing the available brands.
+3. Compact horizontal category filter.
+4. Compact filter/sort controls.
+5. Product count/result context.
+6. Product grid.
+
+Do NOT create a huge block of filters above the products.
+
+The user should reach the first product much faster.
+
+CATEGORY FILTER:
+- Use horizontal scrolling chips/tabs.
+- Active category must be visually obvious.
+- Do not use large outlined rectangular buttons for every filter.
+- Keep the filter area compact.
+- Preserve RTL behavior.
+
+BRAND FILTER:
+- Move brands into a compact filter interaction.
+- Do not display every brand as a large permanent UI element.
+- Use a bottom sheet/modal when appropriate.
+
+SORT:
+- Make sorting a compact control.
+- Example: "ترتيب: الأكثر طلبًا"
+- Do not dedicate a large row to sorting.
+
+==================================================
+2. PRODUCT CARD
+==================================================
+
+Completely optimize the product card for mobile scanning.
+
+Required hierarchy:
+
+IMAGE
+BRAND
+PRODUCT NAME
+PRICE
+AVAILABILITY
+PRIMARY CTA
+
+Rules:
+
+- Reduce unnecessary vertical whitespace.
+- Use a fixed image aspect ratio across every product.
+- Keep product images visually centered.
+- Keep the wishlist button small and subtle.
+- Brand should be secondary, not visually louder than the product name.
+- Product title must have a controlled maximum number of lines.
+- Price must be one of the strongest visual elements.
+- Availability should be compact and secondary.
+- "متوفر" should not consume unnecessary vertical space.
+
+CTA:
+Use ONE dominant primary action:
+
+"أضف إلى السلة"
+
+Do NOT create two equally prominent large buttons:
+"أضف إلى السلة"
+and
+"عرض التفاصيل"
+
+Instead:
+- Image and product title should open the product details.
+- If a details link is required, make it subtle and secondary.
+
+The product grid should allow the user to see substantially more products per screen.
+
+==================================================
+3. MOBILE PRODUCT GRID
+==================================================
+
+Use a clean 2-column RTL grid.
+
+Maintain:
+- consistent card height
+- consistent image area
+- consistent spacing
+- consistent CTA placement
+
+Avoid masonry-style uneven cards.
+
+The grid must feel like a professional commerce catalog, not a gallery.
+
+==================================================
+4. CATEGORY DISCOVERY SECTION
+==================================================
+
+Redesign the "ماذا تبحث؟" section.
+
+Current implementation has excessive empty space and inconsistent cards.
+
+Create a compact category discovery system.
+
+Recommended hierarchy:
+
+"ماذا تبحث؟"
+"اختر نوع المنتج الذي تحتاجه وابدأ التسوق."
+
+Categories should be:
+
+- الشواحن
+- الكيابل
+- الباور بنك
+- السيارة
+- الملحقات
+
+IMPORTANT:
+There is currently a duplicate "الملحقات" category.
+
+The category currently showing 17 products is likely intended to be "الشواحن".
+
+Verify the actual category data before rendering the label.
+
+NEVER show duplicate category names unless they are genuinely different categories.
+
+Category cards:
+- Keep image and label balanced.
+- Increase image utilization.
+- Remove excessive empty space.
+- Keep cards visually consistent with the rest of the website.
+- Use the same border radius, border treatment and spacing system as product cards.
+- Do not create a completely different visual language.
+
+==================================================
+5. CATEGORY ORDER
+==================================================
+
+Use a logical shopping-intent order:
+
+1. الشواحن
+2. الكيابل
+3. الباور بنك
+4. السيارة
+5. الملحقات
+
+However, keep this data-driven if the backend already provides a defined category order.
+
+Do not hardcode incorrect product counts.
+
+==================================================
+6. FLOATING BUTTONS
+==================================================
+
+The current floating WhatsApp and Download buttons visually obstruct the page.
+
+Fix this completely.
+
+Rules:
+
+- Floating actions must NEVER cover product cards, headings, CTAs, or important content.
+- WhatsApp should be the only persistent floating action if it is required.
+- Make it smaller and visually integrated.
+- Move it to a safe bottom position.
+- Respect mobile browser safe areas.
+- Do not allow it to overlap the bottom content.
+- Remove the Download floating button unless there is a real user-facing requirement for it.
+- If Download is required, place it in a non-obstructive location.
+
+==================================================
+7. TYPOGRAPHY
+==================================================
+
+Use a professional Arabic e-commerce typography hierarchy.
+
+Do not make every element bold.
+
+Hierarchy:
+
+H1:
+Strong and distinctive.
+
+Section headings:
+Strong but smaller than H1.
+
+Product name:
+Medium/semibold.
+
+Price:
+Strong and highly readable.
+
+Supporting text:
+Muted.
+
+Metadata:
+Small and subtle.
+
+Avoid excessive font-weight changes.
+
+==================================================
+8. SPACING
+==================================================
+
+Create a strict spacing system.
+
+Do not use random large gaps.
+
+The current design wastes too much vertical space.
+
+Optimize for:
+
+- faster scanning
+- more products visible
+- shorter scroll distance
+- clearer hierarchy
+
+Every large empty area must have a UX reason.
+
+==================================================
+9. COLORS
+==================================================
+
+Keep the existing minimalist neutral visual direction.
+
+Use:
+- warm/off-white background
+- dark typography
+- subtle borders
+- restrained green for positive availability/status
+- brand/product colors only where meaningful
+
+Do not introduce unnecessary colors.
+
+Do not turn the interface into a colorful marketplace.
+
+==================================================
+10. RTL
+==================================================
+
+The entire experience must be genuinely RTL.
+
+Check:
+
+- grid ordering
+- horizontal scrolling
+- filter alignment
+- icons
+- arrows
+- spacing
+- price alignment
+- text truncation
+- modal/bottom-sheet direction
+- buttons
+- navigation
+
+Do not simply apply direction: rtl and assume the UX is correct.
+
+==================================================
+11. RESPONSIVE BEHAVIOR
+==================================================
+
+This redesign is mobile-first.
+
+Optimize specifically for:
+360px
+375px
+390px
+412px
+430px
+
+The layout must remain clean at all these widths.
+
+Do not allow:
+- text clipping
+- button overflow
+- overlapping floating elements
+- inconsistent card heights
+- horizontal page scrolling
+- broken Arabic alignment
+
+==================================================
+12. PERFORMANCE / IMPLEMENTATION
+==================================================
+
+Do not unnecessarily rewrite the backend.
+
+Preserve the existing product/category/brand data structures.
+
+Do not invent new database fields.
+
+Do not hardcode fake product data.
+
+Use the existing data source.
+
+Optimize image rendering:
+- consistent aspect ratio
+- object-fit: contain
+- lazy loading where appropriate
+- prevent layout shift
+
+==================================================
+13. UX PRINCIPLES
+==================================================
+
+Follow these principles strictly:
+
+- Product discovery before filtering complexity.
+- One primary action per product.
+- Visual hierarchy must be obvious within 1 second.
+- Reduce cognitive load.
+- Reduce unnecessary scrolling.
+- Make prices immediately scannable.
+- Make categories immediately understandable.
+- Never cover content with floating UI.
+- Never duplicate labels.
+- Never make secondary actions compete with primary actions.
+- Do not design for visual novelty; design for effortless shopping.
+
+==================================================
+14. FINAL QUALITY CHECK
+==================================================
+
+Before considering the redesign complete, test the page as a real mobile shopper.
+
+Ask:
+
+1. Can I reach the first product quickly?
+2. Can I understand the categories instantly?
+3. Can I scan 4–6 products quickly?
+4. Can I identify the price immediately?
+5. Is "Add to Cart" obviously the primary action?
+6. Can I open product details without a large secondary button?
+7. Are filters compact and understandable?
+8. Does anything overlap the content?
+9. Are category names correct and non-duplicated?
+10. Does the entire page feel like ONE professional e-commerce design system?
+
+If any answer is NO, fix the UI before finishing.
+
+Do not add decorative elements just to make the page look richer.
+
+The final result should feel:
+MINIMAL
+FAST
+PREMIUM
+TRUSTWORTHY
+MOBILE-FIRST
+EASY TO SCAN
+CONVERSION-FOCUSED

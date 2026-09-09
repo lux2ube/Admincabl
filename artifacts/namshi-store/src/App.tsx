@@ -17,6 +17,7 @@ import {
   ShoppingBag,
   Smartphone,
   Sparkles,
+  SlidersHorizontal,
   Truck,
   WifiOff,
   X,
@@ -516,6 +517,7 @@ function App() {
     const initialRoute = readStoreRoute();
     return initialRoute.kind === 'brand' ? initialRoute.slug : null;
   });
+  const [brandFilterOpen, setBrandFilterOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [route, setRoute] = useState<StoreRoute>(() => readStoreRoute());
   const [seo, setSeo] = useState<StoreSeoResponse | null>(null);
@@ -1012,6 +1014,7 @@ function App() {
   };
 
   const chooseBrand = (slug: string | null) => {
+    setBrandFilterOpen(false);
     setSelectedBrandSlug(slug);
     if (slug) {
       if (activeFilter !== 'ALL') {
@@ -1442,7 +1445,7 @@ function App() {
         <section className="section" id="discover" data-testid="section-discover">
           <div className="section-header">
             <div>
-              <span className="eyebrow">{listingH1 ? 'نتائج البحث' : 'الأكثر طلبًا'}</span>
+              <span className="eyebrow">{listingH1 ? 'نتائج البحث' : 'تسوق سريع'}</span>
                 {listingH1 ? <h1>{listingH1}</h1> : <h2>منتجاتنا</h2>}
             </div>
              <div className="discover-meta">
@@ -1457,16 +1460,19 @@ function App() {
                    <button className={`filter-button ${activeFilter === filter.value ? 'active' : ''}`} type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`filter-${filter.value.toLowerCase()}`}>{filter.label}</button>
                  ))}
                </div>
-               <div className="brand-filter-row" role="tablist" aria-label="Product brands">
-                 <span className="filter-group-label">العلامة</span>
-                 <button className={`filter-button ${selectedBrandSlug === null ? 'active' : ''}`} type="button" onClick={() => chooseBrand(null)} data-testid="filter-brand-all">كل العلامات</button>
-                 {brandOptions.map((brand) => (
-                   <button className={`filter-button ${selectedBrandSlug === brand.slug ? 'active' : ''}`} type="button" key={brand.slug} onClick={() => chooseBrand(brand.slug)} data-testid={`filter-brand-${brand.slug}`}>{brand.name}</button>
-                 ))}
+               <div className="listing-controls">
+                 <button className="brand-filter-trigger" type="button" onClick={() => setBrandFilterOpen(true)} aria-haspopup="dialog" data-testid="button-brand-filter">
+                   <SlidersHorizontal size={14} />
+                   <span>العلامة: {selectedBrandSlug ? brandOptions.find((brand) => brand.slug === selectedBrandSlug)?.name ?? selectedBrandSlug : 'الكل'}</span>
+                 </button>
+                 <button className="sort-button" type="button" onClick={() => announce('يتم عرض المنتجات بالترتيب الافتراضي')} data-testid="button-sort">ترتيب العرض <ChevronDown size={13} /></button>
                </div>
             </div>
-             <button className="sort-button" type="button" onClick={() => announce('يتم عرض المنتجات بالترتيب الافتراضي')} data-testid="button-sort">ترتيب العرض <ChevronDown size={13} /></button>
           </div>
+           <div className="listing-context" aria-live="polite" data-testid="listing-context">
+             <span>{visibleProducts.length} منتج متاح</span>
+             {(selectedBrandSlug || activeFilter !== 'ALL') && <span>الفلاتر مفعّلة</span>}
+           </div>
            <div className="product-grid" aria-live="polite">
             {visibleProducts.map((product) => (
               <article className="product-card" key={product.id} data-testid={`card-product-${product.id}`}>
@@ -1668,6 +1674,32 @@ function App() {
           <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لـ Baseus و Vention في اليمن · منتجات Anker و UGREEN متوفرة.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
         </div>
       </footer>
+
+      {brandFilterOpen && (
+        <div className="filter-sheet-backdrop" role="presentation" onClick={() => setBrandFilterOpen(false)} data-testid="overlay-brand-filter">
+          <section className="filter-sheet" role="dialog" aria-modal="true" aria-labelledby="brand-filter-title" onClick={(event) => event.stopPropagation()} data-testid="sheet-brand-filter">
+            <div className="filter-sheet-header">
+              <div>
+                <span className="eyebrow">تصفية المنتجات</span>
+                <h2 id="brand-filter-title">اختر العلامة</h2>
+              </div>
+              <button className="close-button" type="button" onClick={() => setBrandFilterOpen(false)} aria-label="إغلاق فلتر العلامة" data-testid="button-close-brand-filter"><X size={16} /></button>
+            </div>
+            <div className="filter-sheet-options" role="listbox" aria-label="العلامات التجارية">
+              <button className={`sheet-filter-option ${selectedBrandSlug === null ? 'active' : ''}`} type="button" onClick={() => chooseBrand(null)} data-testid="sheet-filter-brand-all">
+                <span>كل العلامات</span>
+                {selectedBrandSlug === null && <CircleCheck size={16} />}
+              </button>
+              {brandOptions.map((brand) => (
+                <button className={`sheet-filter-option ${selectedBrandSlug === brand.slug ? 'active' : ''}`} type="button" key={brand.slug} onClick={() => chooseBrand(brand.slug)} data-testid={`sheet-filter-brand-${brand.slug}`}>
+                  <span>{brand.name}</span>
+                  {selectedBrandSlug === brand.slug && <CircleCheck size={16} />}
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
 
       {wishlistOpen && (
         <div className="drawer-backdrop" role="presentation" onClick={() => setWishlistOpen(false)} data-testid="overlay-wishlist">
