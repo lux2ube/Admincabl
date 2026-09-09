@@ -719,7 +719,6 @@ function App() {
     if (!query.trim()) return [];
     const productSuggestions: SearchSuggestion[] = products
       .filter((product) => matchesProductSearch(product, query))
-      .slice(0, 4)
       .map((product) => ({
         kind: 'product',
         id: product.id,
@@ -728,9 +727,11 @@ function App() {
         slug: product.slug,
         image: product.image,
       }));
+    if (productSuggestions.length > 0) return productSuggestions;
+
     const categorySuggestions: SearchSuggestion[] = categories
       .filter((category) => matchesSearchText(category.name, query))
-      .slice(0, 2)
+      .slice(0, 4)
       .map((category) => ({
         kind: 'category',
         id: category.id,
@@ -742,7 +743,7 @@ function App() {
     const brandSuggestions: SearchSuggestion[] = [...new Map(products
       .filter((product) => product.brandSlug && matchesSearchText(product.brand, query))
       .map((product) => [product.brandSlug, product])).values()]
-      .slice(0, 2)
+      .slice(0, 4)
       .map((product) => ({
         kind: 'brand',
         id: product.brandSlug as string,
@@ -751,7 +752,7 @@ function App() {
         slug: product.brandSlug as string,
         image: product.image,
       }));
-    return [...productSuggestions, ...categorySuggestions, ...brandSuggestions].slice(0, 6);
+    return [...categorySuggestions, ...brandSuggestions];
   }, [categories, formatMoney, products, query]);
 
   const filterOptions = useMemo(() => [
