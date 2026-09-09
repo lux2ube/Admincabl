@@ -791,20 +791,25 @@ function App() {
     }
   }, [categories, route]);
 
-  const navigateTo = (path: string) => {
+  const navigateTo = (path: string, targetId?: string) => {
     const basePath = import.meta.env.BASE_URL.endsWith('/')
       ? import.meta.env.BASE_URL
       : `${import.meta.env.BASE_URL}/`;
     const nextPath = `${basePath}${path.replace(/^\/+/, '')}`;
     window.history.pushState({}, '', nextPath);
     setRoute(readStoreRoute());
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.requestAnimationFrame(() => {
+      if (targetId) {
+        document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
   };
 
   const submitSearch = () => {
     const trimmedQuery = query.trim();
-    navigateTo(trimmedQuery ? `/search?q=${encodeURIComponent(trimmedQuery)}` : '/search');
-    scrollTo('discover');
+    navigateTo(trimmedQuery ? `/search?q=${encodeURIComponent(trimmedQuery)}` : '/search', 'discover');
   };
 
   const categoryIdFor = (...hints: string[]) =>
@@ -983,12 +988,11 @@ function App() {
   const chooseCategory = (filter: string) => {
     setActiveFilter(filter);
     if (filter === 'ALL') {
-      navigateTo('/');
+      navigateTo('/', 'discover');
     } else {
       const category = categories.find((item) => item.id === filter);
-      if (category) navigateTo(`/category/${category.slug}`);
+      if (category) navigateTo(`/category/${category.slug}`, 'discover');
     }
-    scrollTo('discover');
   };
 
   const openQuoteForm = () => {
@@ -1463,7 +1467,7 @@ function App() {
                  <strong>لم نجد منتجات مطابقة</strong>
                  <p>{query.trim() ? `لا توجد نتائج لعبارة «${query.trim()}».` : 'لا توجد منتجات منشورة في هذه الفئة حاليًا.'}</p>
                  <div className="empty-products-actions">
-                   <button className="button-dark" type="button" onClick={() => { setQuery(''); navigateTo('/'); scrollTo('discover'); }} data-testid="button-empty-reset">عرض كل المنتجات</button>
+                   <button className="button-dark" type="button" onClick={() => { setQuery(''); navigateTo('/', 'discover'); }} data-testid="button-empty-reset">عرض كل المنتجات</button>
                    {query.trim() && <button className="preview-link" type="button" onClick={() => { setQuery(''); setSearchOpen(true); }} data-testid="button-empty-new-search">بحث جديد</button>}
                  </div>
                  {brandOptions.length > 0 && (
