@@ -1,4 +1,4 @@
-import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -96,6 +96,7 @@ function readStoreRoute(): StoreRoute {
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 const CACHED_CATALOG_KEY = 'cabl-catalog-v1';
 const PENDING_ORDERS_KEY = 'cabl-pending-orders-v1';
+const FLOATING_POSITIONS_KEY = 'cabl-floating-positions-v1';
 const DEFAULT_CURRENCIES: StoreCurrency[] = [
   { code: 'YER', name: 'ريال يمني', ratePerUsd: 535, isDefault: true },
   { code: 'NYER', name: 'ريال يمني جديد', ratePerUsd: 1572, isDefault: false },
@@ -253,6 +254,10 @@ type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 };
+
+type FloatingToolKey = 'install' | 'whatsapp';
+type FloatingPosition = { left: number; top: number };
+type FloatingPositions = Partial<Record<FloatingToolKey, FloatingPosition>>;
 
 function productAlt(product: Product) {
   return `${product.name} من ${product.brand}، ${product.category?.name ?? 'منتج شحن'} أصلي في اليمن`;
