@@ -1308,6 +1308,55 @@ img { display: block; max-width: 100%; }
   }
 }
 
+.filter-groups {
+  min-width: 0;
+  flex: 1;
+}
+.brand-filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+.filter-group-label {
+  margin-left: 4px;
+  color: var(--muted-ink);
+  font-size: 10px;
+  font-weight: 700;
+}
+.filter-row .filter-button,
+.brand-filter-row .filter-button {
+  margin-left: 0;
+  padding: 7px 10px;
+}
+
+@media (max-width: 767px) {
+  .filter-groups {
+    width: 100%;
+  }
+  .filter-row,
+  .brand-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 7px;
+    overflow: visible;
+  }
+  .filter-row .filter-button,
+  .brand-filter-row .filter-button {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+  .filter-group-label {
+    font-size: 9px;
+  }
+  .sort-button {
+    display: inline-flex;
+    margin-top: 2px;
+  }
+}
+
 /* Commerce-first homepage: show the product and the next action before brand copy. */
 .hero-frame,
 .hero-copy {
