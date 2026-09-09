@@ -1343,7 +1343,16 @@ function App() {
         <section className="hero" aria-label="حملات الإلكترونيات" data-testid="section-hero">
           {heroes.length > 0 ? heroes.map((hero, index) => (
             <article className={`hero-frame ${slide === index ? 'active' : ''}`} key={hero.productId} aria-hidden={slide !== index}>
-              <img src={hero.image} alt={`${hero.title} من CABL`} width="1440" height="620" fetchPriority="high" data-testid={`img-hero-${index}`} />
+              <img
+                src={hero.image}
+                alt={`${hero.title} من CABL`}
+                width="1440"
+                height="620"
+                loading={slide === index ? 'eager' : 'lazy'}
+                fetchPriority={slide === index ? 'high' : 'auto'}
+                decoding="async"
+                data-testid={`img-hero-${index}`}
+              />
               <div className="hero-shade" />
               <div className="hero-copy">
                 <span className="eyebrow">{hero.eyebrow}</span>
