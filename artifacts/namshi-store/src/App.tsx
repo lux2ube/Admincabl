@@ -1393,42 +1393,6 @@ function App() {
           </div>
         </section>
 
-        <section className="section campaign-section" id="campaigns" data-testid="section-campaigns">
-          <div className="section-header">
-            <div>
-              <span className="eyebrow">اختياراتنا</span>
-              <h2>اشحن<br />لحظتك.</h2>
-            </div>
-            <p>منتجات Baseus و Vention و Anker و UGREEN الأصلية بمواصفات واضحة لتختار ما يناسب أجهزتك ويومك.</p>
-          </div>
-          <div className="campaign-grid">
-            <article className="campaign-card">
-              <img src={asset('vention-powerbank-10k.jpg')} alt="باور بانك وشاحن متنقل أصلي في اليمن" width="800" height="1000" loading="lazy" data-testid="img-campaign-season" />
-              <span className="campaign-label"><h3>طاقة<br />أينما ذهبت.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('باور', 'طاقة'))} data-testid="button-campaign-season">تصفح {categories.find((category) => category.id === categoryIdFor('باور', 'طاقة'))?.name ?? 'الفئة'}</button></span>
-            </article>
-            <article className="campaign-card">
-              <img src={asset('vention-charger-70w.jpg')} alt="شاحن سريع 70W أصلي في اليمن" width="800" height="1000" loading="lazy" data-testid="img-campaign-women" />
-              <span className="campaign-label"><h3>حجم صغير،<br />أداء كبير.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('شاحن', 'شواحن'))} data-testid="button-campaign-women">تصفح {categories.find((category) => category.id === categoryIdFor('شاحن', 'شواحن'))?.name ?? 'الفئة'}</button></span>
-            </article>
-            <article className="campaign-card">
-              <img src={asset('vention-adapter-65w.jpg')} alt="شاحن Type-C للسفر مع توصيل داخل اليمن" width="800" height="1000" loading="lazy" data-testid="img-campaign-men" />
-              <span className="campaign-label"><h3>جاهز<br />للسفر.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('سفر'))} data-testid="button-campaign-men">تصفح {categories.find((category) => category.id === categoryIdFor('سفر'))?.name ?? 'الفئة'}</button></span>
-            </article>
-          </div>
-        </section>
-
-        <section className="section about-section" id="about" aria-label="عن CABL" data-testid="section-about">
-          <div className="about-layout">
-            <div>
-              <span className="eyebrow">عن CABL</span>
-              <h2>كابل<br />لليمن.</h2>
-            </div>
-            <div className="about-copy">
-              <p className="about-lead">CABL — الوكيل الحصري لـ Baseus و Vention، مع منتجات Anker للشحن والطاقة داخل اليمن.</p>
-              <p>نوفر لك حلولًا عملية للاستخدام اليومي، مع تجربة شراء واضحة ودعم يساعدك في اختيار المنتج المناسب.</p>
-            </div>
-          </div>
-        </section>
         </>}
 
         <section className="section" id="discover" data-testid="section-discover">
@@ -1499,6 +1463,45 @@ function App() {
              )}
           </div>
         </section>
+
+          {route.kind === 'home' && <>
+          <section className="section campaign-section" id="campaigns" data-testid="section-campaigns">
+            <div className="section-header">
+              <div>
+                <span className="eyebrow">اختياراتنا</span>
+                <h2>اشحن<br />لحظتك.</h2>
+              </div>
+              <p>منتجات Baseus و Vention و Anker و UGREEN الأصلية بمواصفات واضحة لتختار ما يناسب أجهزتك ويومك.</p>
+            </div>
+            <div className="campaign-grid">
+              <article className="campaign-card">
+                <img src={asset('vention-powerbank-10k.jpg')} alt="باور بانك وشاحن متنقل أصلي في اليمن" width="800" height="1000" loading="lazy" data-testid="img-campaign-season" />
+                <span className="campaign-label"><h3>طاقة<br />أينما ذهبت.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('باور', 'طاقة'))} data-testid="button-campaign-season">تصفح {categories.find((category) => category.id === categoryIdFor('باور', 'طاقة'))?.name ?? 'الفئة'}</button></span>
+              </article>
+              <article className="campaign-card">
+                <img src={asset('vention-charger-70w.jpg')} alt="شاحن سريع 70W أصلي في اليمن" width="800" height="1000" loading="lazy" data-testid="img-campaign-women" />
+                <span className="campaign-label"><h3>حجم صغير،<br />أداء كبير.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('شاحن', 'شواحن'))} data-testid="button-campaign-women">تصفح {categories.find((category) => category.id === categoryIdFor('شاحن', 'شواحن'))?.name ?? 'الفئة'}</button></span>
+              </article>
+              <article className="campaign-card">
+                <img src={asset('vention-adapter-65w.jpg')} alt="شاحن Type-C للسفر مع توصيل داخل اليمن" width="800" height="1000" loading="lazy" data-testid="img-campaign-men" />
+                <span className="campaign-label"><h3>جاهز<br />للسفر.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('سفر'))} data-testid="button-campaign-men">تصفح {categories.find((category) => category.id === categoryIdFor('سفر'))?.name ?? 'الفئة'}</button></span>
+              </article>
+            </div>
+          </section>
+
+          <section className="section about-section" id="about" aria-label="عن CABL" data-testid="section-about">
+            <div className="about-layout">
+              <div>
+                <span className="eyebrow">عن CABL</span>
+                <h2>كابل<br />لليمن.</h2>
+              </div>
+              <div className="about-copy">
+                <p className="about-lead">CABL — الوكيل الحصري لـ Baseus و Vention، مع منتجات Anker للشحن والطاقة داخل اليمن.</p>
+                <p>نوفر لك حلولًا عملية للاستخدام اليومي، مع تجربة شراء واضحة ودعم يساعدك في اختيار المنتج المناسب.</p>
+              </div>
+            </div>
+          </section>
+          </>}
 
           <section className="section seo-section" aria-labelledby="seo-heading" data-testid="section-seo-content">
             <div className="section-header">
