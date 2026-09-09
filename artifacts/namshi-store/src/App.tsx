@@ -1753,6 +1753,9 @@ function App() {
           onPointerCancel={(event) => handleFloatingPointerUp('whatsapp', event)}
           onClick={(event) => preventDraggedClick('whatsapp', event)}
         >
+          <p className="whatsapp-hint">
+            {selectedProduct ? 'هل تريد شراء هذا المنتج مباشرة؟ تواصل معنا لتأكيد التفاصيل.' : 'هل تريد مساعدة في اختيار المنتجات المناسبة لك؟ تواصل معنا للشراء المباشر.'}
+          </p>
           <a className="whatsapp-float" href={floatingWhatsAppUrl} target="_blank" rel="noreferrer" aria-label={selectedProduct ? `شراء ${selectedProduct.name} مباشرة عبر WhatsApp` : 'تواصل معنا عبر WhatsApp للمساعدة في اختيار المنتجات'} title={selectedProduct ? 'شراء مباشر عبر WhatsApp' : 'تواصل معنا عبر WhatsApp'} data-testid="button-whatsapp-float">
             <FaWhatsapp size={28} aria-hidden="true" />
             <span className="sr-only">WhatsApp</span>
