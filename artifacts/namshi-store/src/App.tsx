@@ -6,7 +6,6 @@ import {
   ChevronDown,
   CircleCheck,
   ClipboardList,
-  Download,
   Landmark,
   Heart,
   Menu,
@@ -262,11 +261,6 @@ function getProductKeywords(product: Product) {
   return dedupeKeywords(keywords);
 }
 
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-};
-
 type FloatingToolKey = 'whatsapp';
 type FloatingPosition = { left: number; top: number };
 type FloatingPositions = Partial<Record<FloatingToolKey, FloatingPosition>>;
@@ -497,11 +491,6 @@ function App() {
     }
   });
   const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isAppInstalled, setIsAppInstalled] = useState(() => (
-    window.matchMedia('(display-mode: standalone)').matches
-    || Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
-  ));
   const [floatingPositions, setFloatingPositions] = useState<FloatingPositions>(() => readFloatingPositions());
   const floatingDragRef = useRef<{
     key: FloatingToolKey;
@@ -598,24 +587,6 @@ function App() {
     return () => {
       window.removeEventListener('online', updateConnection);
       window.removeEventListener('offline', updateConnection);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
-    };
-    const handleAppInstalled = () => {
-      setIsAppInstalled(true);
-      setInstallPrompt(null);
-      announce('تم تثبيت تطبيق CABL بنجاح');
-    };
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
@@ -908,18 +879,6 @@ function App() {
     if (draggedClickRef.current !== key) return;
     event.preventDefault();
     draggedClickRef.current = null;
-  };
-
-  const installApp = async () => {
-    if (!installPrompt) {
-      announce('افتح قائمة المتصفح واختر إضافة إلى الشاشة الرئيسية');
-      return;
-    }
-    const promptEvent = installPrompt;
-    setInstallPrompt(null);
-    await promptEvent.prompt();
-    const choice = await promptEvent.userChoice;
-    announce(choice.outcome === 'accepted' ? 'جاري تثبيت تطبيق CABL' : 'يمكنك تثبيت التطبيق من قائمة المتصفح لاحقًا');
   };
 
   const flushPendingOrders = async () => {
@@ -1492,7 +1451,14 @@ function App() {
                 </div>
                 <div className="product-details">
                   <div className="product-brand">{product.brand}</div>
-                  <div className="product-name">{product.name}</div>
+                   <a
+                     className="product-name product-name-link"
+                     href={`${import.meta.env.BASE_URL}product/${product.slug}/`}
+                     onClick={(event) => { event.preventDefault(); openProductPreview(product); }}
+                     data-testid={`link-product-name-${product.id}`}
+                   >
+                     {product.name}
+                   </a>
                    <div className="product-price">
                      <strong>{formatMoney(product.price)}</strong>
                      {product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>{formatMoney(product.regularPrice)}</del>}
@@ -1501,8 +1467,7 @@ function App() {
                      {product.quantity > 0 ? <><CircleCheck size={13} /> متوفر</> : 'غير متوفر'}
                    </div>
                    <div className="product-card-actions">
-                      <a className="preview-link" href={`${import.meta.env.BASE_URL}product/${product.slug}/`} onClick={(event) => { event.preventDefault(); openProductPreview(product); }} data-testid={`button-preview-product-${product.id}`}>عرض التفاصيل</a>
-                      <button className="text-link" type="button" disabled={product.quantity <= 0} onClick={() => addToCart(product)} data-testid={`button-add-product-${product.id}`}>{product.quantity > 0 ? 'أضف إلى السلة' : 'غير متوفر'}</button>
+                       <button className="card-add-button" type="button" disabled={product.quantity <= 0} onClick={() => addToCart(product)} data-testid={`button-add-product-${product.id}`}>{product.quantity > 0 ? 'أضف إلى السلة' : 'غير متوفر'}</button>
                    </div>
                 </div>
               </article>
@@ -1832,24 +1797,13 @@ function App() {
       <div
         className={`floating-tools${floatingPositions.whatsapp ? ' is-positioned' : ''}`}
         style={floatingPositions.whatsapp ? { left: floatingPositions.whatsapp.left, top: floatingPositions.whatsapp.top } : undefined}
-        aria-label="مساعدة وتثبيت التطبيق"
+         aria-label="مساعدة عبر WhatsApp"
         onPointerDown={(event) => handleFloatingPointerDown('whatsapp', event)}
         onPointerMove={(event) => handleFloatingPointerMove('whatsapp', event)}
         onPointerUp={(event) => handleFloatingPointerUp('whatsapp', event)}
         onPointerCancel={(event) => handleFloatingPointerUp('whatsapp', event)}
         onClick={(event) => preventDraggedClick('whatsapp', event)}
       >
-        {!isAppInstalled && <button
-          className="install-float"
-          type="button"
-          onClick={(event) => { preventDraggedClick('whatsapp', event); void installApp(); }}
-          aria-label="تثبيت تطبيق CABL"
-          title={installPrompt ? 'تثبيت تطبيق CABL' : 'إضافة CABL إلى الشاشة الرئيسية'}
-          data-testid="button-install-app"
-        >
-          <Download size={21} aria-hidden="true" />
-          <span className="sr-only">تثبيت التطبيق</span>
-        </button>}
         <div
           className="whatsapp-float-wrap"
         >
