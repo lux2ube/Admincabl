@@ -1727,7 +1727,6 @@ function App() {
         </div>
       )}
       {isOffline && <div className="offline-badge" role="status" data-testid="status-offline"><WifiOff size={14} /> تعمل دون اتصال · البيانات المحفوظة متاحة</div>}
-      <div className="floating-tools" aria-label="مساعدة وتثبيت التطبيق">
       <div
         className={`floating-tools${floatingPositions.whatsapp ? ' is-positioned' : ''}`}
         style={floatingPositions.whatsapp ? { left: floatingPositions.whatsapp.left, top: floatingPositions.whatsapp.top } : undefined}
