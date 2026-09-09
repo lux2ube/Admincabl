@@ -1237,7 +1237,7 @@ function App() {
                   data-testid="select-currency"
                 >
                   {availableCurrencies.map((currency) => (
-                    <option key={currency.code} value={currency.code}>{currency.code} · {currency.name}</option>
+                    <option key={currency.code} value={currency.code}>{currency.name} · {currency.code}</option>
                   ))}
                 </select>
                 <small>1 USD = {selectedCurrency.ratePerUsd} {selectedCurrency.code}</small>

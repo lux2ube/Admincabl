@@ -78,7 +78,8 @@ img { display: block; max-width: 100%; }
   white-space: nowrap;
 }
 .currency-switcher select {
-  max-width: 166px;
+  width: 190px;
+  max-width: 190px;
   border: 0;
   border-bottom: 1px solid var(--ink);
   outline: none;
@@ -880,9 +881,9 @@ img { display: block; max-width: 100%; }
 
 @media (max-width: 767px) {
   .header-inner { padding: 14px 17px 12px; }
-  .header-actions { gap: 8px; }
-  .currency-switcher { max-width: 96px; }
-  .currency-switcher select { max-width: 96px; font-size: 10px; }
+  .header-actions { gap: 6px; }
+  .currency-switcher { width: 132px; max-width: 132px; }
+  .currency-switcher select { width: 132px; max-width: 132px; font-size: 10px; }
   .currency-switcher small { display: none; }
   .header-action span { display: none; }
   .header-action svg { width: 19px; height: 19px; }
