@@ -512,6 +512,10 @@ function App() {
   } | null>(null);
   const draggedClickRef = useRef<FloatingToolKey | null>(null);
   const [activeFilter, setActiveFilter] = useState('ALL');
+  const [selectedBrandSlug, setSelectedBrandSlug] = useState<string | null>(() => {
+    const initialRoute = readStoreRoute();
+    return initialRoute.kind === 'brand' ? initialRoute.slug : null;
+  });
   const [searchOpen, setSearchOpen] = useState(false);
   const [route, setRoute] = useState<StoreRoute>(() => readStoreRoute());
   const [seo, setSeo] = useState<StoreSeoResponse | null>(null);
@@ -703,10 +707,11 @@ function App() {
       const matchesFilter = activeFilter === 'ALL' || product.category?.id === activeFilter;
       const matchesCategoryRoute = route.kind !== 'category' || product.category?.slug === route.slug;
       const matchesBrandRoute = route.kind !== 'brand' || product.brandSlug === route.slug;
+      const matchesSelectedBrand = !selectedBrandSlug || product.brandSlug === selectedBrandSlug;
       const matchesQuery = matchesProductSearch(product, query);
-      return matchesFilter && matchesCategoryRoute && matchesBrandRoute && matchesQuery;
+      return matchesFilter && matchesCategoryRoute && matchesBrandRoute && matchesSelectedBrand && matchesQuery;
     });
-  }, [activeFilter, products, query, route]);
+  }, [activeFilter, products, query, route, selectedBrandSlug]);
   const categories = useMemo(() => {
     const categoryMap = new Map<string, { id: string; name: string; slug: string; image: string; count: string }>();
     for (const product of products) {
@@ -778,13 +783,20 @@ function App() {
   useEffect(() => {
     if (route.kind === 'category') {
       const category = categories.find((item) => item.slug === route.slug);
+      setSelectedBrandSlug(null);
       setActiveFilter(category?.id ?? 'ALL');
       setQuery('');
+    } else if (route.kind === 'brand') {
+      setSelectedBrandSlug(route.slug);
+      setActiveFilter('ALL');
+      setQuery('');
     } else if (route.kind === 'search') {
+      setSelectedBrandSlug(null);
       setActiveFilter('ALL');
       setQuery(route.query);
       setSearchOpen(true);
     } else {
+      setSelectedBrandSlug(null);
       setActiveFilter('ALL');
       if (route.kind !== 'home') setQuery('');
       setSearchOpen(false);
@@ -987,6 +999,10 @@ function App() {
 
   const chooseCategory = (filter: string) => {
     setActiveFilter(filter);
+    if (selectedBrandSlug) {
+      scrollTo('discover');
+      return;
+    }
     if (filter === 'ALL') {
       navigateTo('/', 'discover');
     } else {
@@ -996,10 +1012,15 @@ function App() {
   };
 
   const chooseBrand = (slug: string | null) => {
-    setActiveFilter('ALL');
+    setSelectedBrandSlug(slug);
     if (slug) {
+      if (activeFilter !== 'ALL') {
+        scrollTo('discover');
+        return;
+      }
       navigateTo(`/brand/${slug}`, 'discover');
     } else {
+      setActiveFilter('ALL');
       navigateTo('/', 'discover');
     }
   };
@@ -1438,9 +1459,9 @@ function App() {
                </div>
                <div className="brand-filter-row" role="tablist" aria-label="Product brands">
                  <span className="filter-group-label">العلامة</span>
-                 <button className={`filter-button ${route.kind !== 'brand' ? 'active' : ''}`} type="button" onClick={() => chooseBrand(null)} data-testid="filter-brand-all">كل العلامات</button>
+                 <button className={`filter-button ${selectedBrandSlug === null ? 'active' : ''}`} type="button" onClick={() => chooseBrand(null)} data-testid="filter-brand-all">كل العلامات</button>
                  {brandOptions.map((brand) => (
-                   <button className={`filter-button ${route.kind === 'brand' && route.slug === brand.slug ? 'active' : ''}`} type="button" key={brand.slug} onClick={() => chooseBrand(brand.slug)} data-testid={`filter-brand-${brand.slug}`}>{brand.name}</button>
+                   <button className={`filter-button ${selectedBrandSlug === brand.slug ? 'active' : ''}`} type="button" key={brand.slug} onClick={() => chooseBrand(brand.slug)} data-testid={`filter-brand-${brand.slug}`}>{brand.name}</button>
                  ))}
                </div>
             </div>
