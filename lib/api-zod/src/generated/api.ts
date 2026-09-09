@@ -123,6 +123,12 @@ export const GetStoreCatalogResponse = zod.object({
   "instructions": zod.string().nullable(),
   "iconKey": zod.string(),
   "requiresTransactionReference": zod.boolean()
+})),
+  "currencies": zod.array(zod.object({
+  "code": zod.string(),
+  "name": zod.string(),
+  "ratePerUsd": zod.number(),
+  "isDefault": zod.boolean()
 }))
 })
 

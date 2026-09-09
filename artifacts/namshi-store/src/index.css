@@ -67,6 +67,28 @@ img { display: block; max-width: 100%; }
 .cabl-logo-copy strong { font-family: var(--font-display); font-size: clamp(18px, 2vw, 27px); font-weight: 800; letter-spacing: -.04em; line-height: 1; }
 .cabl-logo-copy small { color: var(--muted-ink); font-family: var(--font-sans); font-size: 8px; font-weight: 700; letter-spacing: 0; line-height: 1.2; }
 .header-actions { display: flex; align-items: center; gap: 18px; }
+.currency-switcher {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  color: var(--muted-ink);
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.currency-switcher select {
+  max-width: 166px;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  padding: 1px 0 3px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.currency-switcher small { font-size: 8px; font-weight: 600; }
 .header-action {
   display: inline-flex; position: relative; align-items: center; gap: 6px; border: 0;
   background: transparent; color: var(--ink); padding: 4px; font-size: 11px; font-weight: 700;
@@ -853,6 +875,9 @@ img { display: block; max-width: 100%; }
 @media (max-width: 767px) {
   .header-inner { padding: 14px 17px 12px; }
   .header-actions { gap: 8px; }
+  .currency-switcher { max-width: 96px; }
+  .currency-switcher select { max-width: 96px; font-size: 10px; }
+  .currency-switcher small { display: none; }
   .header-action span { display: none; }
   .header-action svg { width: 19px; height: 19px; }
   .mobile-menu { display: inline-grid; place-items: center; border: 0; background: transparent; padding: 4px; }

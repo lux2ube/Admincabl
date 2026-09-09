@@ -294,6 +294,18 @@ async function seedTable(query: string, values: unknown[], conflict = "DO NOTHIN
 router.post("/admin/seed", async (req, res): Promise<void> => {
   try {
     const counts: Record<string, number> = {};
+    counts.currencies = await seedTable(
+      `INSERT INTO "currencies" ("code","name","rate_per_usd","is_default","active") VALUES
+       ('YER','ريال يمني',535,TRUE,TRUE),
+       ('NYER','ريال يمني جديد',1572,FALSE,TRUE),
+       ('SAR','ريال سعودي',3.83,FALSE,TRUE)
+       ON CONFLICT ("code") DO UPDATE SET
+         "name" = EXCLUDED."name",
+         "rate_per_usd" = EXCLUDED."rate_per_usd",
+         "is_default" = EXCLUDED."is_default",
+         "active" = EXCLUDED."active"`,
+      [],
+    );
     counts.categories = await seedTable(
       `INSERT INTO "categories" ("id", "category_name", "category_description", "image_path", "active") VALUES
        ('10000000-0000-4000-8000-000000000001','باور بانك','حلول طاقة محمولة للاستخدام اليومي','images/vention-powerbank-10k.jpg',TRUE),

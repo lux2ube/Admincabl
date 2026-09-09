@@ -515,7 +515,23 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/StorePaymentMethod"
-      required: [products, shippingOptions, paymentMethods]
+        currencies:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreCurrency"
+      required: [products, shippingOptions, paymentMethods, currencies]
+    StoreCurrency:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        ratePerUsd:
+          type: number
+        isDefault:
+          type: boolean
+      required: [code, name, ratePerUsd, isDefault]
     StoreOrderItemInput:
       type: object
       properties:

@@ -93,10 +93,18 @@ export interface StoreSeoResponse {
   jsonLd: StoreSeoResponseJsonLd;
 }
 
+export interface StoreCurrency {
+  code: string;
+  name: string;
+  ratePerUsd: number;
+  isDefault: boolean;
+}
+
 export interface StoreCatalog {
   products: StoreProduct[];
   shippingOptions: StoreShippingOption[];
   paymentMethods: StorePaymentMethod[];
+  currencies: StoreCurrency[];
 }
 
 export interface StoreOrderItemInput {

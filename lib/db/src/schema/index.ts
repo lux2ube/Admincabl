@@ -20,3 +20,4 @@
 export * from "./sourcing";
 export * from "./catalog";
 export * from "./seo";
+export * from "./currency";

@@ -38,6 +38,7 @@ export * from './quoteRequestInput';
 export * from './quoteRequestItem';
 export * from './quoteRequestStatus';
 export * from './storeCatalog';
+export * from './storeCurrency';
 export * from './storeOrder';
 export * from './storeOrderAddress';
 export * from './storeOrderCustomer';

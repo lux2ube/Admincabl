@@ -36,6 +36,7 @@ import {
   type StorePaymentMethod,
   type StoreProduct,
   type StoreShippingOption,
+  type StoreCurrency,
   type StoreSeoResponse,
   type GetStoreCatalogQueryResult,
 } from '@workspace/api-client-react';
@@ -95,6 +96,11 @@ function readStoreRoute(): StoreRoute {
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 const CACHED_CATALOG_KEY = 'cabl-catalog-v1';
 const PENDING_ORDERS_KEY = 'cabl-pending-orders-v1';
+const DEFAULT_CURRENCIES: StoreCurrency[] = [
+  { code: 'YER', name: 'ريال يمني', ratePerUsd: 535, isDefault: true },
+  { code: 'NYER', name: 'ريال يمني جديد', ratePerUsd: 1572, isDefault: false },
+  { code: 'SAR', name: 'ريال سعودي', ratePerUsd: 3.83, isDefault: false },
+];
 const WHATSAPP_URL = 'https://wa.me/967771106977?text=' + encodeURIComponent('مرحبًا CABL، أريد الاستفسار عن أحد المنتجات.');
 const HOME_TITLE = 'CABL | شاحن جوال أصلي وسريع في اليمن';
 const HOME_DESCRIPTION = 'اشترِ شاحن جوال أصلي وسريع، شاحن Type-C وPD وGaN، شاحن آيفون وسامسونج وباور بانك من CABL مع توصيل داخل اليمن.';
@@ -261,6 +267,15 @@ function readCachedCatalog(): GetStoreCatalogQueryResult | null {
   }
 }
 
+function formatMoneyAmount(amountUsd: number, currency: StoreCurrency) {
+  const decimals = currency.code === 'SAR' ? 2 : 0;
+  const amount = new Intl.NumberFormat('ar-YE', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(amountUsd * currency.ratePerUsd);
+  return `${amount} ${currency.code}`;
+}
+
 function readPendingOrders(): Array<Parameters<typeof createStoreOrder>[0]> {
   try {
     const saved = window.localStorage.getItem(PENDING_ORDERS_KEY);
@@ -298,6 +313,7 @@ function ProductPreview({
   product,
   relatedProducts,
   shippingOption,
+  formatMoney,
   isFavorite,
   onBack,
   onAddToCart,
@@ -307,6 +323,7 @@ function ProductPreview({
   product: Product;
   relatedProducts: Product[];
   shippingOption: StoreShippingOption | null;
+  formatMoney: (amountUsd: number) => string;
   isFavorite: boolean;
   onBack: () => void;
   onAddToCart: (product: Product) => void;
@@ -334,15 +351,15 @@ function ProductPreview({
            </span>
           <h1>{product.name}</h1>
            <div className="product-preview-price">
-             <strong>${product.price.toFixed(2)}</strong>
-             {product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>${product.regularPrice.toFixed(2)}</del>}
+              <strong>{formatMoney(product.price)}</strong>
+              {product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>{formatMoney(product.regularPrice)}</del>}
            </div>
           <p className="product-preview-description">{product.description || product.color}. حل عملي للشحن اليومي، المكتب، والسفر داخل اليمن.</p>
           <div className="product-spec-list">
             <div><span>العلامة</span><strong>{product.brand}</strong></div>
             <div><span>الفئة</span><strong>{product.category?.name ?? '—'}</strong></div>
              <div><span>التوفر</span><strong className={product.quantity > 0 ? 'stock-available' : 'stock-unavailable'}>{product.quantity > 0 ? `متوفر · ${product.quantity} قطعة` : 'غير متوفر حاليًا'}</strong></div>
-             <div><span>التوصيل</span><strong>{shippingOption ? `${shippingOption.free ? 'مجاني' : `$${shippingOption.charge.toFixed(2)}`} · ${shippingOption.estimatedDays ? `${shippingOption.estimatedDays} أيام تقريبًا` : 'يحدد عند تأكيد العنوان'}` : 'يحدد عند تأكيد العنوان'}</strong></div>
+              <div><span>التوصيل</span><strong>{shippingOption ? `${shippingOption.free ? 'مجاني' : formatMoney(shippingOption.charge)} · ${shippingOption.estimatedDays ? `${shippingOption.estimatedDays} أيام تقريبًا` : 'يحدد عند تأكيد العنوان'}` : 'يحدد عند تأكيد العنوان'}</strong></div>
             {product.sku && <div><span>SKU</span><strong>{product.sku}</strong></div>}
             {product.warranty && <div><span>الضمان</span><strong>{product.warranty}</strong></div>}
              {product.note && <div><span>ملاحظة</span><strong>{product.note}</strong></div>}
@@ -372,7 +389,7 @@ function ProductPreview({
          </div>
       </section>
        <div className="product-sticky-cta" aria-label={`إضافة ${product.name} إلى السلة`}>
-         <div><span>السعر</span><strong>${product.price.toFixed(2)}</strong></div>
+          <div><span>السعر</span><strong>{formatMoney(product.price)}</strong></div>
          <button className="button-dark" type="button" disabled={product.quantity <= 0} onClick={() => onAddToCart(product)} data-testid={`button-sticky-add-${product.id}`}>
            {product.quantity > 0 ? 'أضف إلى السلة' : 'غير متوفر'}
          </button>
@@ -395,7 +412,7 @@ function ProductPreview({
                 <div>
                   <span>{relatedProduct.brand}</span>
                   <h3>{relatedProduct.name}</h3>
-                  <strong>${relatedProduct.price.toFixed(2)}</strong>
+                  <strong>{formatMoney(relatedProduct.price)}</strong>
                 </div>
               </article>
             ))}
@@ -409,6 +426,13 @@ function ProductPreview({
 function App() {
   const [catalog, setCatalog] = useState<GetStoreCatalogQueryResult | null>(() => readCachedCatalog());
   const [catalogLoading, setCatalogLoading] = useState(true);
+  const [currencyCode, setCurrencyCode] = useState(() => {
+    try {
+      return window.localStorage.getItem('cabl-currency') ?? 'YER';
+    } catch {
+      return 'YER';
+    }
+  });
   const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isAppInstalled, setIsAppInstalled] = useState(() => (
@@ -548,6 +572,21 @@ function App() {
     window.localStorage.setItem('cabl-favorites', JSON.stringify(favorites));
   }, [favorites]);
 
+  const availableCurrencies = catalog?.currencies?.length ? catalog.currencies : DEFAULT_CURRENCIES;
+  const selectedCurrency = availableCurrencies.find((currency) => currency.code === currencyCode)
+    ?? availableCurrencies.find((currency) => currency.isDefault)
+    ?? DEFAULT_CURRENCIES[0];
+  const formatMoney = useCallback((amountUsd: number) => formatMoneyAmount(amountUsd, selectedCurrency), [selectedCurrency]);
+
+  useEffect(() => {
+    if (selectedCurrency.code !== currencyCode) setCurrencyCode(selectedCurrency.code);
+    try {
+      window.localStorage.setItem('cabl-currency', selectedCurrency.code);
+    } catch {
+      // Currency selection remains active for the current visit if storage is unavailable.
+    }
+  }, [currencyCode, selectedCurrency]);
+
   useEffect(() => {
     const syncRouteFromUrl = () => setRoute(readStoreRoute());
     window.addEventListener('popstate', syncRouteFromUrl);
@@ -627,7 +666,7 @@ function App() {
         kind: 'product',
         id: product.id,
         title: product.name,
-        subtitle: `${product.brand} · $${product.price.toFixed(2)}`,
+        subtitle: `${product.brand} · ${formatMoney(product.price)}`,
         slug: product.slug,
         image: product.image,
       }));
@@ -655,7 +694,7 @@ function App() {
         image: product.image,
       }));
     return [...productSuggestions, ...categorySuggestions, ...brandSuggestions].slice(0, 6);
-  }, [categories, products, query]);
+  }, [categories, formatMoney, products, query]);
 
   const filterOptions = useMemo(() => [
     { value: 'ALL', label: 'كل المنتجات' },
@@ -1072,6 +1111,20 @@ function App() {
               <CablLogo />
             </button>
             <div className="header-actions">
+              <label className="currency-switcher">
+                <span>العملة</span>
+                <select
+                  value={selectedCurrency.code}
+                  onChange={(event) => setCurrencyCode(event.target.value)}
+                  aria-label="اختر العملة"
+                  data-testid="select-currency"
+                >
+                  {availableCurrencies.map((currency) => (
+                    <option key={currency.code} value={currency.code}>{currency.code} · {currency.name}</option>
+                  ))}
+                </select>
+                <small>1 USD = {selectedCurrency.ratePerUsd} {selectedCurrency.code}</small>
+              </label>
               <button className="header-action" type="button" onClick={() => setSearchOpen((current) => !current)} aria-label="بحث" data-testid="button-search">
                 <Search /><span>بحث</span>
               </button>
@@ -1152,6 +1205,7 @@ function App() {
             product={products.find((product) => product.id === selectedProductId) ?? products[0]}
             relatedProducts={relatedProducts}
             shippingOption={selectedShippingOption}
+            formatMoney={formatMoney}
             isFavorite={selectedProductId !== null && favorites.includes(selectedProductId)}
             onBack={closeProductPreview}
             onAddToCart={addToCart}
@@ -1297,8 +1351,8 @@ function App() {
                   <div className="product-brand">{product.brand}</div>
                   <div className="product-name">{product.name}</div>
                    <div className="product-price">
-                     <strong>${product.price.toFixed(2)}</strong>
-                     {product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>${product.regularPrice.toFixed(2)}</del>}
+                     <strong>{formatMoney(product.price)}</strong>
+                     {product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>{formatMoney(product.regularPrice)}</del>}
                    </div>
                    <div className={`product-stock ${product.quantity > 0 ? 'available' : 'unavailable'}`}>
                      {product.quantity > 0 ? <><CircleCheck size={13} /> متوفر</> : 'غير متوفر'}
@@ -1447,7 +1501,7 @@ function App() {
                 {favoriteProducts.map((product) => (
                   <div className="cart-item" key={product.id}>
                     <img src={product.image} alt={product.name} />
-                    <div className="cart-item-info"><button className="remove-item" type="button" onClick={() => toggleFavorite(product.id)} data-testid={`button-remove-wishlist-${product.id}`}>إزالة</button><strong>{product.brand}</strong><span>{product.name}</span><br /><span>${product.price.toFixed(2)}</span></div>
+                    <div className="cart-item-info"><button className="remove-item" type="button" onClick={() => toggleFavorite(product.id)} data-testid={`button-remove-wishlist-${product.id}`}>إزالة</button><strong>{product.brand}</strong><span>{product.name}</span><br /><span>{formatMoney(product.price)}</span></div>
                   </div>
                 ))}
                 <button className="button-dark checkout-button" type="button" onClick={openQuoteForm} data-testid="button-quote-wishlist">إتمام الطلب</button>
@@ -1478,7 +1532,7 @@ function App() {
                           }} data-testid={`button-remove-cart-${product.id}`}>حذف</button>
                           <strong>{product.brand}</strong>
                           <span>{product.name}</span>
-                          <b className="cart-line-total">${(product.price * quantity).toFixed(2)}</b>
+                           <b className="cart-line-total">{formatMoney(product.price * quantity)}</b>
                           <div className="quantity-control" aria-label={`كمية ${product.name}`}>
                             <button type="button" onClick={() => addToCart(product)} disabled={quantity >= Math.min(product.quantity, 99)} aria-label="زيادة الكمية"><Plus size={14} /></button>
                             <span>{quantity}</span>
@@ -1490,9 +1544,9 @@ function App() {
                   })}
                 </div>
                   <div className="cart-summary" aria-label="ملخص السلة">
-                    <div><span>الإجمالي الفرعي</span><strong>${cartSubtotal.toFixed(2)}</strong></div>
-                    <div><span>التوصيل</span><strong>{cartShipping === 0 ? 'مجاني' : `$${cartShipping.toFixed(2)}`}</strong></div>
-                    <div className="cart-summary-total"><span>المجموع</span><strong data-testid="text-cart-total">${cartTotal.toFixed(2)}</strong></div>
+                    <div><span>الإجمالي الفرعي</span><strong>{formatMoney(cartSubtotal)}</strong></div>
+                    <div><span>التوصيل</span><strong>{cartShipping === 0 ? 'مجاني' : formatMoney(cartShipping)}</strong></div>
+                    <div className="cart-summary-total"><span>المجموع</span><strong data-testid="text-cart-total">{formatMoney(cartTotal)}</strong></div>
                   </div>
                   <button className="button-dark checkout-button" type="button" onClick={openQuoteForm} data-testid="button-checkout">إتمام الطلب</button>
               </>
@@ -1519,15 +1573,15 @@ function App() {
                       <div className="checkout-trust"><CircleCheck size={15} /> السعر والتوصيل يظهران قبل التأكيد · دعم WhatsApp متاح</div>
                     </div>
                     <div className="checkout-section"><h4>بيانات العميل</h4><div className="quote-form-grid"><label>الاسم الأول<input required minLength={2} maxLength={100} value={quoteForm.firstName} onChange={(event) => updateQuoteField('firstName', event.target.value)} autoComplete="given-name" data-testid="input-order-first-name" /></label><label>اسم العائلة<input required minLength={2} maxLength={100} value={quoteForm.lastName} onChange={(event) => updateQuoteField('lastName', event.target.value)} autoComplete="family-name" data-testid="input-order-last-name" /></label></div><div className="quote-form-grid"><label>البريد الإلكتروني<input required type="email" maxLength={255} value={quoteForm.email} onChange={(event) => updateQuoteField('email', event.target.value)} autoComplete="email" inputMode="email" data-testid="input-order-email" /></label><label>رقم الهاتف<input required minLength={9} maxLength={13} pattern="(?:\+967|967)?[0-9]{9}" title="أدخل رقم هاتف يمنيًا مكونًا من 9 أرقام" value={quoteForm.phoneNumber} onChange={(event) => updateQuoteField('phoneNumber', event.target.value)} autoComplete="tel" inputMode="tel" placeholder="771234567" data-testid="input-order-phone" /></label></div></div>
-                    <div className="checkout-section"><h4>بيانات التوصيل</h4><label>العنوان<input required minLength={3} maxLength={500} value={quoteForm.addressLine1} onChange={(event) => updateQuoteField('addressLine1', event.target.value)} autoComplete="street-address" placeholder="الحي، الشارع، أقرب معلم" data-testid="input-order-address" /></label><label>المدينة<input required minLength={2} maxLength={100} value={quoteForm.city} onChange={(event) => updateQuoteField('city', event.target.value)} autoComplete="address-level2" placeholder="صنعاء، عدن، تعز..." data-testid="input-order-city" /></label><label>طريقة الشحن<select required value={selectedShippingId ?? ''} onChange={(event) => setShippingId(Number(event.target.value))} data-testid="select-order-shipping">{shippingOptions.map((option) => <option key={option.id} value={option.id}>{option.name}{option.free ? ' · مجاني' : ` · $${option.charge.toFixed(2)}`}{option.estimatedDays ? ` · ${option.estimatedDays} أيام` : ''}</option>)}</select></label></div>
+                    <div className="checkout-section"><h4>بيانات التوصيل</h4><label>العنوان<input required minLength={3} maxLength={500} value={quoteForm.addressLine1} onChange={(event) => updateQuoteField('addressLine1', event.target.value)} autoComplete="street-address" placeholder="الحي، الشارع، أقرب معلم" data-testid="input-order-address" /></label><label>المدينة<input required minLength={2} maxLength={100} value={quoteForm.city} onChange={(event) => updateQuoteField('city', event.target.value)} autoComplete="address-level2" placeholder="صنعاء، عدن، تعز..." data-testid="input-order-city" /></label><label>طريقة الشحن<select required value={selectedShippingId ?? ''} onChange={(event) => setShippingId(Number(event.target.value))} data-testid="select-order-shipping">{shippingOptions.map((option) => <option key={option.id} value={option.id}>{option.name}{option.free ? ' · مجاني' : ` · ${formatMoney(option.charge)}`}{option.estimatedDays ? ` · ${option.estimatedDays} أيام` : ''}</option>)}</select></label></div>
                    <div className="checkout-section"><h4>طريقة الدفع</h4><label className="payment-select-label"><span>اختر طريقة الدفع</span><select required value={selectedPaymentMethodId ?? ''} onChange={(event) => { setPaymentMethodId(Number(event.target.value)); setPaymentReference(''); }} data-testid="select-payment-method">{paymentMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}</select></label>{selectedPaymentMethod && <div className="payment-instructions" data-testid="payment-instructions"><div className="payment-instructions-title"><span className="payment-method-icon"><PaymentMethodIcon method={selectedPaymentMethod} /></span><strong>{selectedPaymentMethod.name}</strong></div>{selectedPaymentMethod.accountName && <p>اسم الحساب: <b>{selectedPaymentMethod.accountName}</b></p>}{selectedPaymentMethod.accountNumber && <p>رقم الحساب: <b dir="ltr">{selectedPaymentMethod.accountNumber}</b></p>}<p>{selectedPaymentMethod.instructions ?? 'اتبع تعليمات الدفع الظاهرة ثم أكمل الطلب.'}</p>{selectedPaymentMethod.requiresTransactionReference && <label>رقم العملية بعد التحويل<input required value={paymentReference} onChange={(event) => setPaymentReference(event.target.value)} maxLength={255} placeholder="أدخل رقم العملية" data-testid="input-payment-reference" /></label>}</div>}</div>
                    {quoteError && <p className="form-error" role="alert" data-testid="error-quote">{quoteError}</p>}
                    <button className="button-dark checkout-submit-mobile" type="submit" disabled={quoteSubmitting || cart.length === 0 || !selectedPaymentMethodId} data-testid="button-submit-quote">{quoteSubmitting ? 'جارٍ حفظ الطلب...' : selectedPaymentMethod?.requiresTransactionReference ? 'تأكيد التحويل وإرسال الطلب' : 'تأكيد الطلب والدفع عند الاستلام'}</button>
                  </div>
                  <aside className="checkout-summary" aria-label="ملخص الطلب">
                    <div className="summary-heading"><p className="checkout-kicker">ORDER SUMMARY</p><h3>ملخص الطلب</h3></div>
-                   <div className="summary-items">{cart.length === 0 ? <p className="summary-empty">السلة فارغة</p> : cart.map((product) => <div className="summary-item" key={product.id}><img src={product.image} alt="" /><div><strong>{product.name}</strong><span>${product.price.toFixed(2)} · الكمية {cartQuantities[product.id] ?? 1}</span></div><button type="button" onClick={() => removeFromCart(product.id)} aria-label={`حذف ${product.name}`} data-testid={`button-remove-summary-${product.id}`}><X size={14} /></button></div>)}</div>
-                   <div className="summary-totals"><div><span>الإجمالي الفرعي</span><b>${cartSubtotal.toFixed(2)}</b></div><div><span>رسوم الشحن</span><b>{cartShipping === 0 ? 'مجاني' : `$${cartShipping.toFixed(2)}`}</b></div><div className="summary-total"><strong>الإجمالي</strong><strong>${cartTotal.toFixed(2)}</strong></div></div>
+                   <div className="summary-items">{cart.length === 0 ? <p className="summary-empty">السلة فارغة</p> : cart.map((product) => <div className="summary-item" key={product.id}><img src={product.image} alt="" /><div><strong>{product.name}</strong><span>{formatMoney(product.price)} · الكمية {cartQuantities[product.id] ?? 1}</span></div><button type="button" onClick={() => removeFromCart(product.id)} aria-label={`حذف ${product.name}`} data-testid={`button-remove-summary-${product.id}`}><X size={14} /></button></div>)}</div>
+                   <div className="summary-totals"><div><span>الإجمالي الفرعي</span><b>{formatMoney(cartSubtotal)}</b></div><div><span>رسوم الشحن</span><b>{cartShipping === 0 ? 'مجاني' : formatMoney(cartShipping)}</b></div><div className="summary-total"><strong>الإجمالي</strong><strong>{formatMoney(cartTotal)}</strong></div></div>
                    <button className="button-dark checkout-submit" type="submit" disabled={quoteSubmitting || cart.length === 0 || !selectedPaymentMethodId} data-testid="button-submit-quote-summary">{quoteSubmitting ? 'جارٍ حفظ الطلب...' : 'تأكيد الطلب'}</button>
                  </aside>
                </form>
@@ -1546,8 +1600,8 @@ function App() {
               {trackingError && <p className="form-error" role="alert" data-testid="error-tracking">{trackingError}</p>}
               <button className="button-dark checkout-button" type="submit" disabled={trackingLoading} data-testid="button-submit-tracking">{trackingLoading ? 'جارٍ البحث...' : 'عرض الطلبات'}</button>
             </form>
-            {trackingOrders.length > 0 && <div className="tracking-results"><h3>طلباتك</h3>{trackingOrders.map((order) => <button className="tracking-order" key={order.id} type="button" onClick={() => loadTrackingDetail(order.id)}><span><strong>{order.id}</strong><small>{new Date(order.createdAt).toLocaleDateString('ar-YE')}</small></span><span><strong>${order.total.toFixed(2)}</strong><small>{order.status}</small></span></button>)}</div>}
-             {trackingDetail && <div className="quote-success tracking-detail"><strong>{trackingDetail.id}</strong><p>الحالة: {trackingDetail.status}</p><p>الدفع: {trackingDetail.paymentMethodName} · {trackingDetail.paymentStatus === 'cod_pending' ? 'الدفع عند الاستلام' : 'بانتظار مراجعة التحويل'}</p><p>الإجمالي: ${trackingDetail.total.toFixed(2)} · الشحن: ${trackingDetail.shippingCost.toFixed(2)}</p><div>{trackingDetail.items.map((item) => <p key={item.productId}>{item.productName} × {item.quantity}</p>)}</div></div>}
+            {trackingOrders.length > 0 && <div className="tracking-results"><h3>طلباتك</h3>{trackingOrders.map((order) => <button className="tracking-order" key={order.id} type="button" onClick={() => loadTrackingDetail(order.id)}><span><strong>{order.id}</strong><small>{new Date(order.createdAt).toLocaleDateString('ar-YE')}</small></span><span><strong>{formatMoney(order.total)}</strong><small>{order.status}</small></span></button>)}</div>}
+             {trackingDetail && <div className="quote-success tracking-detail"><strong>{trackingDetail.id}</strong><p>الحالة: {trackingDetail.status}</p><p>الدفع: {trackingDetail.paymentMethodName} · {trackingDetail.paymentStatus === 'cod_pending' ? 'الدفع عند الاستلام' : 'بانتظار مراجعة التحويل'}</p><p>الإجمالي: {formatMoney(trackingDetail.total)} · الشحن: {formatMoney(trackingDetail.shippingCost)}</p><div>{trackingDetail.items.map((item) => <p key={item.productId}>{item.productName} × {item.quantity}</p>)}</div></div>}
           </section>
         </div>
       )}

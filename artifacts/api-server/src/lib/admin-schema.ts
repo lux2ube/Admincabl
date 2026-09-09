@@ -57,6 +57,15 @@ const relation = (
 
 const tables: AdminTable[] = [
   {
+    key: "currencies", label: "العملات", group: "النظام", primaryKey: "id",
+    columns: [
+      serialId(), column("code", "رمز العملة", "text", { nullable: false }), column("name", "اسم العملة", "text", { nullable: false }),
+      column("rate_per_usd", "الوحدات مقابل الدولار", "number", { nullable: false }), column("is_default", "العملة الافتراضية", "boolean", { nullable: false }),
+      column("active", "نشطة", "boolean", { nullable: false }), created(), updated(),
+    ],
+    relations: [],
+  },
+  {
     key: "products", label: "المنتجات", group: "الكتالوج", primaryKey: "id",
     columns: [
       id(), column("brand", "العلامة التجارية", "text", { nullable: false }), column("product_name", "اسم المنتج", "text", { nullable: false }), column("SKU", "SKU", "text", { nullable: false }),

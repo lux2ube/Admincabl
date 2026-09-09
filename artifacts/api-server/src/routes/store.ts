@@ -203,11 +203,29 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
       iconKey: method.icon_key,
       requiresTransactionReference: method.requires_transaction_reference,
     }));
+    const currenciesResult = await pool.query<{
+      code: string;
+      name: string;
+      rate_per_usd: string | number;
+      is_default: boolean;
+    }>(
+      `SELECT "code", "name", "rate_per_usd", "is_default"
+       FROM "currencies"
+       WHERE "active" = TRUE
+       ORDER BY "is_default" DESC, "id" ASC`,
+    );
+    const currencies = currenciesResult.rows.map((currency) => ({
+      code: currency.code,
+      name: currency.name,
+      ratePerUsd: asNumber(currency.rate_per_usd),
+      isDefault: currency.is_default,
+    }));
 
     const response = GetStoreCatalogResponse.parse({
       products: [...productMap.values()],
       shippingOptions,
       paymentMethods,
+      currencies,
     });
     res.json(response);
   } catch (error) {
