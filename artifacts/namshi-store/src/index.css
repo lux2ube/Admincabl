@@ -505,37 +505,32 @@ img { display: block; max-width: 100%; }
 .campaign-card img { filter: saturate(.9); }
 .category-tile img,
 .campaign-card img {
-  filter: saturate(.88) contrast(1.06) brightness(.9);
+  filter: saturate(.92) contrast(1.02);
 }
 .category-tile::after {
-  background: linear-gradient(180deg, rgba(10, 10, 10, .04) 20%, rgba(10, 10, 10, .18) 42%, rgba(10, 10, 10, .9) 100%);
+  background: linear-gradient(180deg, transparent 40%, rgba(10, 10, 10, .72) 100%);
 }
 .category-info {
-  left: 18px;
-  right: 18px;
-  bottom: 16px;
-  border-right: 4px solid var(--lime);
-  background: rgba(10, 10, 10, .78);
-  padding: 12px 14px 11px;
+  right: 19px;
+  bottom: 17px;
+  padding: 0;
   color: #fff;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, .35);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .5);
 }
 .category-info h3 { color: #fff; }
 .category-info span { color: rgba(255, 255, 255, .86); }
 .campaign-card::after {
-  background: linear-gradient(180deg, rgba(10, 10, 10, .08) 18%, rgba(10, 10, 10, .3) 42%, rgba(10, 10, 10, .92) 100%);
+  background: linear-gradient(180deg, transparent 36%, rgba(10, 10, 10, .78) 100%);
 }
 .campaign-label {
-  left: 18px;
-  right: 18px;
-  bottom: 16px;
-  border-right: 4px solid var(--lime);
-  background: rgba(10, 10, 10, .78);
-  padding: 12px 14px 11px;
+  left: 22px;
+  right: 22px;
+  bottom: 20px;
+  padding: 0;
   color: #fff;
 }
 .campaign-label h3 { color: #fff; }
-.campaign-label button { color: var(--lime); }
+.campaign-label button { color: #fff; }
 .campaign-section {
   background: #eeece5;
 }
