@@ -94,6 +94,20 @@ const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 const CACHED_CATALOG_KEY = 'cabl-catalog-v1';
 const PENDING_ORDERS_KEY = 'cabl-pending-orders-v1';
 const FLOATING_POSITIONS_KEY = 'cabl-floating-positions-v3';
+const compactCategoryLabel = (name: string) => {
+  if (/شاحن/.test(name)) return 'الشواحن';
+  if (/كابل|كيبل|وصلة/.test(name)) return 'الكيابل';
+  if (/باور|طاقة|بطاري/.test(name)) return 'الباور بنك';
+  if (/سيار|سفر/.test(name)) return 'السيارة';
+  return 'الملحقات';
+};
+const categoryRank = (name: string) => {
+  if (/شاحن/.test(name)) return 0;
+  if (/كابل|كيبل|وصلة/.test(name)) return 1;
+  if (/باور|طاقة|بطاري/.test(name)) return 2;
+  if (/سيار|سفر/.test(name)) return 3;
+  return 4;
+};
 const DEFAULT_CURRENCIES: StoreCurrency[] = [
   { code: 'YER', name: 'ريال يمني', ratePerUsd: 535, isDefault: true },
   { code: 'NYER', name: 'ريال يمني جديد', ratePerUsd: 1572, isDefault: false },
@@ -497,7 +511,6 @@ function App() {
     moved: boolean;
   } | null>(null);
   const draggedClickRef = useRef<FloatingToolKey | null>(null);
-  const [slide, setSlide] = useState(0);
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [searchOpen, setSearchOpen] = useState(false);
   const [route, setRoute] = useState<StoreRoute>(() => readStoreRoute());
@@ -615,12 +628,6 @@ function App() {
   }, [catalog]);
 
   useEffect(() => {
-    const heroCount = Math.min(catalog?.products.length ?? 1, 3);
-    const timer = window.setInterval(() => setSlide((current) => (current + 1) % Math.max(heroCount, 1)), 6500);
-    return () => window.clearInterval(timer);
-  }, [catalog?.products.length]);
-
-  useEffect(() => {
     if (!toast) return undefined;
     const timer = window.setTimeout(() => setToast(''), 2600);
     return () => window.clearTimeout(timer);
@@ -714,6 +721,9 @@ function App() {
     }
     return [...categoryMap.values()];
   }, [products]);
+  const displayCategories = useMemo(() => (
+    [...categories].sort((a, b) => categoryRank(a.name) - categoryRank(b.name)).slice(0, 4)
+  ), [categories]);
 
   const searchSuggestions = useMemo(() => {
     if (!query.trim()) return [];
@@ -757,7 +767,7 @@ function App() {
 
   const filterOptions = useMemo(() => [
     { value: 'ALL', label: 'كل المنتجات' },
-    ...categories.map((category) => ({ value: category.id, label: category.name })),
+    ...categories.map((category) => ({ value: category.id, label: compactCategoryLabel(category.name) })),
   ], [categories]);
 
   const brandOptions = useMemo(() => [...new Map(products
@@ -1259,7 +1269,7 @@ function App() {
 
           <nav className="desktop-nav" aria-label="التنقل الرئيسي" data-testid="nav-main">
             {filterOptions.slice(1).map((filter) => <button type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`nav-category-${filter.value}`}>{filter.label}</button>)}
-            <button type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-brands">Baseus و Vention و Anker و UGREEN</button>
+            <button type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-brands">العلامات الأصلية</button>
             <button type="button" onClick={() => scrollTo('about')} data-testid="nav-about">عن CABL</button>
             <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="nav-sale">تسوق الآن</button>
           </nav>
@@ -1341,31 +1351,27 @@ function App() {
         ) : (
         <>
         {route.kind === 'home' && <>
-        <section className="hero" aria-label="حملات الإلكترونيات" data-testid="section-hero">
-          {heroes.length > 0 ? heroes.map((hero, index) => (
-            <article className={`hero-frame ${slide === index ? 'active' : ''}`} key={hero.productId} aria-hidden={slide !== index}>
+        <section className="hero" aria-label="منتجات الشحن والطاقة" data-testid="section-hero">
+          {heroes.length > 0 ? (
+            <article className="hero-frame active">
               <img
-                src={hero.image}
-                alt={`${hero.title} من CABL`}
+                src={heroes[0].image}
+                alt="منتجات شحن وطاقة أصلية من CABL"
                 width="1440"
                 height="620"
-                loading={slide === index ? 'eager' : 'lazy'}
-                fetchPriority={slide === index ? 'high' : 'auto'}
+                fetchPriority="high"
                 decoding="async"
-                data-testid={`img-hero-${index}`}
+                data-testid="img-hero"
               />
               <div className="hero-shade" />
               <div className="hero-copy">
-                <span className="eyebrow">{hero.eyebrow}</span>
-                {route.kind === 'home' ? <h1>{hero.title}</h1> : <h2>{hero.title}</h2>}
-                <p>{hero.body}</p>
-                <button className="button-light" type="button" onClick={() => {
-                  setActiveFilter(hero.categoryId);
-                  openProductPreview(products.find((product) => product.id === hero.productId)!);
-                }} data-testid={`button-hero-${index}`}>{hero.action}</button>
+                <span className="eyebrow">منتجات أصلية · توصيل داخل اليمن</span>
+                <h1>طاقة لخطوتك<br />القادمة.</h1>
+                <p>شواحن، كيابل وباور بانك من Baseus وVention وAnker وUGREEN.</p>
+                <button className="button-light" type="button" onClick={() => scrollTo('discover')} data-testid="button-hero-shop">تسوق الآن <ArrowLeft size={14} /></button>
               </div>
             </article>
-          )) : (
+          ) : (
             <div className="hero-frame active">
               <div className="hero-copy">
                 <span className="eyebrow">{catalogLoading ? 'جاري تحميل الكتالوج' : 'الكتالوج غير متاح'}</span>
@@ -1374,37 +1380,23 @@ function App() {
               </div>
             </div>
           )}
-          {heroes.length > 0 && <div className="hero-controls" data-testid="controls-hero">
-            <button className="hero-arrow" type="button" aria-label="Previous product" onClick={() => setSlide((current) => (current - 1 + heroes.length) % heroes.length)} data-testid="button-hero-previous"><ArrowLeft size={17} /></button>
-            <div className="hero-dots">
-              {heroes.map((hero, index) => (
-                <button className={`hero-dot ${slide === index ? 'active' : ''}`} type="button" key={hero.productId} aria-label={`Show product ${index + 1}`} onClick={() => setSlide(index)} data-testid={`button-hero-dot-${index}`} />
-              ))}
-            </div>
-            <button className="hero-arrow" type="button" aria-label="Next product" onClick={() => setSlide((current) => (current + 1) % heroes.length)} data-testid="button-hero-next"><ArrowRight size={17} /></button>
-          </div>}
         </section>
-
-         <section className="brand-announcement" aria-label="وكالة Baseus" data-testid="section-brand-announcement">
-           <div><span className="eyebrow">شراكة رسمية</span><h2>Baseus<br />في اليمن.</h2></div>
-           <p><strong>CABL هو الوكيل الحصري لعلامة Baseus في اليمن.</strong><br />اكتشف الشواحن والكابلات والبطاريات المحمولة الأصلية، مع توصيل داخل اليمن ودعم محلي.</p>
-         </section>
 
         <section className="section" id="categories" data-testid="section-categories">
           <div className="section-header">
             <div>
-              <span className="eyebrow">ابدأ من هنا</span>
-              <h2>طاقة لخطوتك<br />القادمة.</h2>
+              <span className="eyebrow">تسوق حسب الفئة</span>
+              <h2>ماذا تبحث؟</h2>
             </div>
-             <p>خمس فئات من منتجات الشحن والطاقة للاستخدام اليومي، المكتب، والسيارة.</p>
+             <p>اختر نوع المنتج الذي تحتاجه وابدأ التسوق.</p>
           </div>
           <div className="category-grid">
-            {categories.map((category) => (
+            {displayCategories.map((category) => (
               <a className="category-tile" href={`${import.meta.env.BASE_URL}category/${category.slug}/`} key={category.id} onClick={(event) => { event.preventDefault(); chooseCategory(category.id); }} data-testid={`card-category-${category.id}`}>
                 <img src={category.image} alt={`${category.name} شواحن ومنتجات في اليمن`} width="600" height="600" loading="lazy" data-testid={`img-category-${category.id}`} />
                 <span className="category-info">
-                  <h3>{category.name}</h3>
-                  <span>{category.count} <ChevronDown size={11} /></span>
+                  <h3>{compactCategoryLabel(category.name)}</h3>
+                  <span>{category.count}</span>
                 </span>
               </a>
             ))}
@@ -1416,10 +1408,13 @@ function App() {
         <section className="section" id="discover" data-testid="section-discover">
           <div className="section-header">
             <div>
-              <span className="eyebrow">مختارة لرفك</span>
-                {listingH1 ? <h1>{listingH1}</h1> : <h2>Baseus و Vention و Anker و UGREEN<br />لك.</h2>}
+              <span className="eyebrow">{listingH1 ? 'نتائج البحث' : 'الأكثر طلبًا'}</span>
+                {listingH1 ? <h1>{listingH1}</h1> : <h2>منتجاتنا</h2>}
             </div>
-             <button className="text-link" type="button" onClick={() => chooseCategory('ALL')} data-testid="button-view-all">عرض كل المنتجات</button>
+             <div className="discover-meta">
+               {!listingH1 && <span>Baseus · Vention · Anker · UGREEN</span>}
+               <button className="text-link" type="button" onClick={() => chooseCategory('ALL')} data-testid="button-view-all">عرض الكل</button>
+             </div>
           </div>
           <div className="product-toolbar">
             <div className="filter-row" role="tablist" aria-label="Product categories">
@@ -1427,7 +1422,7 @@ function App() {
                 <button className={`filter-button ${activeFilter === filter.value ? 'active' : ''}`} type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`filter-${filter.value.toLowerCase()}`}>{filter.label}</button>
               ))}
             </div>
-            <button className="sort-button" type="button" onClick={() => announce('يتم عرض أحدث المنتجات')} data-testid="button-sort">الأحدث <ChevronDown size={13} /></button>
+             <button className="sort-button" type="button" onClick={() => announce('يتم عرض المنتجات بالترتيب الافتراضي')} data-testid="button-sort">ترتيب العرض <ChevronDown size={13} /></button>
           </div>
            <div className="product-grid" aria-live="polite">
             {visibleProducts.map((product) => (
@@ -1483,6 +1478,17 @@ function App() {
         </section>
 
           {route.kind === 'home' && <>
+           <section className="trust-strip" aria-label="لماذا CABL" data-testid="section-trust">
+             <div>
+               <span className="eyebrow">لماذا CABL؟</span>
+               <h2>شراء واضح.<br />دعم محلي.</h2>
+             </div>
+             <div className="trust-points">
+               <span>✓ منتجات أصلية</span>
+               <span>✓ توصيل داخل اليمن</span>
+               <span>✓ دعم قبل وبعد الشراء</span>
+             </div>
+           </section>
           <section className="section campaign-section" id="campaigns" data-testid="section-campaigns">
             <div className="section-header">
               <div>
