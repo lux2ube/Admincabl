@@ -291,6 +291,24 @@ function readPendingOrders(): Array<Parameters<typeof createStoreOrder>[0]> {
   }
 }
 
+function readFloatingPositions(): FloatingPositions {
+  try {
+    const saved = window.localStorage.getItem(FLOATING_POSITIONS_KEY);
+    const parsed = saved ? JSON.parse(saved) as FloatingPositions : {};
+    if (!parsed || typeof parsed !== 'object') return {};
+    return Object.fromEntries(
+      (Object.entries(parsed) as Array<[FloatingToolKey, unknown]>).filter(([, value]) => (
+        value
+        && typeof value === 'object'
+        && typeof (value as FloatingPosition).left === 'number'
+        && typeof (value as FloatingPosition).top === 'number'
+      )),
+    ) as FloatingPositions;
+  } catch {
+    return {};
+  }
+}
+
 function PaymentMethodIcon({ method }: { method: StorePaymentMethod }) {
   if (method.iconKey === 'bank') return <Landmark size={22} />;
   if (method.iconKey === 'smartphone') return <Smartphone size={22} />;
@@ -444,6 +462,16 @@ function App() {
     window.matchMedia('(display-mode: standalone)').matches
     || Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
   ));
+  const [floatingPositions, setFloatingPositions] = useState<FloatingPositions>(() => readFloatingPositions());
+  const floatingDragRef = useRef<{
+    key: FloatingToolKey;
+    startX: number;
+    startY: number;
+    initialLeft: number;
+    initialTop: number;
+    moved: boolean;
+  } | null>(null);
+  const draggedClickRef = useRef<FloatingToolKey | null>(null);
   const [slide, setSlide] = useState(0);
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -770,6 +798,62 @@ function App() {
   };
 
   const announce = (message: string) => setToast(message);
+
+  const persistFloatingPosition = (key: FloatingToolKey, position: FloatingPosition) => {
+    setFloatingPositions((current) => {
+      const nextPositions = { ...current, [key]: position };
+      try {
+        window.localStorage.setItem(FLOATING_POSITIONS_KEY, JSON.stringify(nextPositions));
+      } catch {
+        // The controls remain movable even when storage is unavailable.
+      }
+      return nextPositions;
+    });
+  };
+
+  const handleFloatingPointerDown = (key: FloatingToolKey, event: React.PointerEvent<HTMLElement>) => {
+    if (event.button !== 0) return;
+    const element = event.currentTarget;
+    const rect = element.getBoundingClientRect();
+    floatingDragRef.current = {
+      key,
+      startX: event.clientX,
+      startY: event.clientY,
+      initialLeft: rect.left,
+      initialTop: rect.top,
+      moved: false,
+    };
+    element.setPointerCapture(event.pointerId);
+  };
+
+  const handleFloatingPointerMove = (key: FloatingToolKey, event: React.PointerEvent<HTMLElement>) => {
+    const drag = floatingDragRef.current;
+    if (!drag || drag.key !== key) return;
+    const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
+    if (distance > 5) drag.moved = true;
+    if (!drag.moved) return;
+    const element = event.currentTarget;
+    const rect = element.getBoundingClientRect();
+    const nextLeft = Math.max(8, Math.min(window.innerWidth - rect.width - 8, drag.initialLeft + event.clientX - drag.startX));
+    const nextTop = Math.max(8, Math.min(window.innerHeight - rect.height - 8, drag.initialTop + event.clientY - drag.startY));
+    persistFloatingPosition(key, { left: nextLeft, top: nextTop });
+  };
+
+  const handleFloatingPointerUp = (key: FloatingToolKey, event: React.PointerEvent<HTMLElement>) => {
+    const drag = floatingDragRef.current;
+    if (!drag || drag.key !== key) return;
+    if (drag.moved) draggedClickRef.current = key;
+    floatingDragRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  const preventDraggedClick = (key: FloatingToolKey, event: React.MouseEvent<HTMLElement>) => {
+    if (draggedClickRef.current !== key) return;
+    event.preventDefault();
+    draggedClickRef.current = null;
+  };
 
   const installApp = async () => {
     if (!installPrompt) {
@@ -1624,8 +1708,31 @@ function App() {
       )}
       {isOffline && <div className="offline-badge" role="status" data-testid="status-offline"><WifiOff size={14} /> تعمل دون اتصال · البيانات المحفوظة متاحة</div>}
       <div className="floating-tools" aria-label="مساعدة وتثبيت التطبيق">
-        {!isAppInstalled && <button className="install-float" type="button" onClick={installApp} aria-label="تثبيت تطبيق CABL" data-testid="button-install-app"><Download size={18} /><span>تثبيت التطبيق</span></button>}
-        <div className="whatsapp-float-wrap">
+        {!isAppInstalled && <button
+          className={`floating-item install-float${floatingPositions.install ? ' is-positioned' : ''}`}
+          type="button"
+          style={floatingPositions.install ? { left: floatingPositions.install.left, top: floatingPositions.install.top } : undefined}
+          onPointerDown={(event) => handleFloatingPointerDown('install', event)}
+          onPointerMove={(event) => handleFloatingPointerMove('install', event)}
+          onPointerUp={(event) => handleFloatingPointerUp('install', event)}
+          onPointerCancel={(event) => handleFloatingPointerUp('install', event)}
+          onClick={(event) => { preventDraggedClick('install', event); void installApp(); }}
+          aria-label="تثبيت تطبيق CABL"
+          title={installPrompt ? 'تثبيت تطبيق CABL' : 'إضافة CABL إلى الشاشة الرئيسية'}
+          data-testid="button-install-app"
+        >
+          <Download size={21} aria-hidden="true" />
+          <span className="sr-only">تثبيت التطبيق</span>
+        </button>}
+        <div
+          className={`floating-item whatsapp-float-wrap${floatingPositions.whatsapp ? ' is-positioned' : ''}`}
+          style={floatingPositions.whatsapp ? { left: floatingPositions.whatsapp.left, top: floatingPositions.whatsapp.top } : undefined}
+          onPointerDown={(event) => handleFloatingPointerDown('whatsapp', event)}
+          onPointerMove={(event) => handleFloatingPointerMove('whatsapp', event)}
+          onPointerUp={(event) => handleFloatingPointerUp('whatsapp', event)}
+          onPointerCancel={(event) => handleFloatingPointerUp('whatsapp', event)}
+          onClick={(event) => preventDraggedClick('whatsapp', event)}
+        >
           <p className="whatsapp-hint">هل تريد مساعدة في اختيار المنتجات المناسبة لك؟</p>
           <a className="whatsapp-float" href={WHATSAPP_URL} target="_blank" rel="noreferrer" aria-label="تواصل معنا عبر WhatsApp للمساعدة في اختيار المنتجات" data-testid="button-whatsapp-float">
             <MessageCircle size={25} fill="currentColor" />

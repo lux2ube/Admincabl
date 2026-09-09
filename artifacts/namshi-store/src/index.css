@@ -365,14 +365,18 @@ img { display: block; max-width: 100%; }
 .tracking-detail { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 18px; }
 .toast-message { position: fixed; right: 22px; bottom: 22px; z-index: 80; background: var(--ink); color: var(--paper); padding: 13px 17px; font-size: 12px; animation: toast-in .25s ease both; }
 .offline-badge { position: fixed; top: 76px; left: 50%; z-index: 65; display: inline-flex; align-items: center; gap: 7px; transform: translateX(-50%); border: 1px solid var(--line); border-radius: 999px; background: var(--paper); color: var(--muted-ink); padding: 8px 13px; box-shadow: 0 8px 25px rgba(21,21,21,.08); font-size: 11px; white-space: nowrap; }
-.floating-tools { position: fixed; right: 22px; bottom: 22px; left: 22px; z-index: 75; display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; pointer-events: none; }
+.floating-tools { position: fixed; inset: 0; z-index: 75; pointer-events: none; }
 .floating-tools > * { pointer-events: auto; }
-.install-float { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; background: var(--ink); color: var(--paper); padding: 13px 17px; box-shadow: 0 10px 25px rgba(21,21,21,.2); font-size: 12px; font-weight: 800; direction: rtl; transition: transform .2s ease, box-shadow .2s ease; }
+.floating-item { position: absolute; user-select: none; touch-action: none; cursor: grab; }
+.floating-item:active { cursor: grabbing; }
+.floating-item.is-positioned { right: auto; bottom: auto; }
+.install-float { left: 22px; bottom: 22px; display: inline-grid; place-items: center; width: 48px; height: 48px; border: 0; border-radius: 50%; background: var(--ink); color: var(--paper); padding: 0; box-shadow: 0 10px 25px rgba(21,21,21,.2); transition: transform .2s ease, box-shadow .2s ease; }
 .install-float:hover { color: var(--paper); transform: translateY(-3px); box-shadow: 0 14px 30px rgba(21,21,21,.3); }
-.whatsapp-float-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.whatsapp-float-wrap { right: 22px; bottom: 22px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
 .whatsapp-hint { max-width: 245px; margin: 0; border: 1px solid rgba(37, 211, 102, .22); border-radius: 14px 14px 3px 14px; background: var(--paper); color: var(--ink); padding: 9px 12px; box-shadow: 0 8px 24px rgba(21,21,21,.12); font-size: 11px; font-weight: 700; line-height: 1.55; }
 .whatsapp-float { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; background: #25d366; color: #fff; padding: 13px 17px; box-shadow: 0 10px 25px rgba(37,211,102,.28); font-size: 12px; font-weight: 800; direction: ltr; transition: transform .2s ease, box-shadow .2s ease; }
 .whatsapp-float:hover { color: #fff; transform: translateY(-3px); box-shadow: 0 14px 30px rgba(37,211,102,.38); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 @keyframes hero-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -1163,7 +1167,8 @@ img { display: block; max-width: 100%; }
   .mobile-bottom-nav button:active,
   .mobile-bottom-nav button:focus-visible { color: var(--ink); }
   .mobile-bottom-nav svg { stroke-width: 1.7; }
-  .floating-tools { right: 17px; bottom: calc(82px + env(safe-area-inset-bottom)); left: 17px; gap: 10px; }
+  .install-float { left: 17px; bottom: calc(82px + env(safe-area-inset-bottom)); }
+  .whatsapp-float-wrap { right: 17px; bottom: calc(82px + env(safe-area-inset-bottom)); }
   .whatsapp-hint { max-width: min(220px, 58vw); padding: 8px 10px; font-size: 10px; }
   .product-page-shell .floating-tools { display: none; }
   .product-card-actions { flex-direction: column-reverse; }
