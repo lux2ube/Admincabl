@@ -93,7 +93,7 @@ function readStoreRoute(): StoreRoute {
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 const CACHED_CATALOG_KEY = 'cabl-catalog-v1';
 const PENDING_ORDERS_KEY = 'cabl-pending-orders-v1';
-const FLOATING_POSITIONS_KEY = 'cabl-floating-positions-v1';
+const FLOATING_POSITIONS_KEY = 'cabl-floating-positions-v2';
 const DEFAULT_CURRENCIES: StoreCurrency[] = [
   { code: 'YER', name: 'ريال يمني', ratePerUsd: 535, isDefault: true },
   { code: 'NYER', name: 'ريال يمني جديد', ratePerUsd: 1572, isDefault: false },
@@ -252,7 +252,7 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 };
 
-type FloatingToolKey = 'install' | 'whatsapp';
+type FloatingToolKey = 'whatsapp';
 type FloatingPosition = { left: number; top: number };
 type FloatingPositions = Partial<Record<FloatingToolKey, FloatingPosition>>;
 
@@ -1728,15 +1728,20 @@ function App() {
       )}
       {isOffline && <div className="offline-badge" role="status" data-testid="status-offline"><WifiOff size={14} /> تعمل دون اتصال · البيانات المحفوظة متاحة</div>}
       <div className="floating-tools" aria-label="مساعدة وتثبيت التطبيق">
+      <div
+        className={`floating-tools${floatingPositions.whatsapp ? ' is-positioned' : ''}`}
+        style={floatingPositions.whatsapp ? { left: floatingPositions.whatsapp.left, top: floatingPositions.whatsapp.top } : undefined}
+        aria-label="مساعدة وتثبيت التطبيق"
+        onPointerDown={(event) => handleFloatingPointerDown('whatsapp', event)}
+        onPointerMove={(event) => handleFloatingPointerMove('whatsapp', event)}
+        onPointerUp={(event) => handleFloatingPointerUp('whatsapp', event)}
+        onPointerCancel={(event) => handleFloatingPointerUp('whatsapp', event)}
+        onClick={(event) => preventDraggedClick('whatsapp', event)}
+      >
         {!isAppInstalled && <button
-          className={`floating-item install-float${floatingPositions.install ? ' is-positioned' : ''}`}
+          className="install-float"
           type="button"
-          style={floatingPositions.install ? { left: floatingPositions.install.left, top: floatingPositions.install.top } : undefined}
-          onPointerDown={(event) => handleFloatingPointerDown('install', event)}
-          onPointerMove={(event) => handleFloatingPointerMove('install', event)}
-          onPointerUp={(event) => handleFloatingPointerUp('install', event)}
-          onPointerCancel={(event) => handleFloatingPointerUp('install', event)}
-          onClick={(event) => { preventDraggedClick('install', event); void installApp(); }}
+          onClick={(event) => { preventDraggedClick('whatsapp', event); void installApp(); }}
           aria-label="تثبيت تطبيق CABL"
           title={installPrompt ? 'تثبيت تطبيق CABL' : 'إضافة CABL إلى الشاشة الرئيسية'}
           data-testid="button-install-app"
@@ -1745,18 +1750,12 @@ function App() {
           <span className="sr-only">تثبيت التطبيق</span>
         </button>}
         <div
-          className={`floating-item whatsapp-float-wrap${floatingPositions.whatsapp ? ' is-positioned' : ''}`}
-          style={floatingPositions.whatsapp ? { left: floatingPositions.whatsapp.left, top: floatingPositions.whatsapp.top } : undefined}
-          onPointerDown={(event) => handleFloatingPointerDown('whatsapp', event)}
-          onPointerMove={(event) => handleFloatingPointerMove('whatsapp', event)}
-          onPointerUp={(event) => handleFloatingPointerUp('whatsapp', event)}
-          onPointerCancel={(event) => handleFloatingPointerUp('whatsapp', event)}
-          onClick={(event) => preventDraggedClick('whatsapp', event)}
+          className="whatsapp-float-wrap"
         >
           <p className="whatsapp-hint">
             {selectedProduct ? 'هل تريد شراء هذا المنتج مباشرة؟ تواصل معنا لتأكيد التفاصيل.' : 'هل تريد مساعدة في اختيار المنتجات المناسبة لك؟ تواصل معنا للشراء المباشر.'}
           </p>
-          <a className="whatsapp-float" href={floatingWhatsAppUrl} target="_blank" rel="noreferrer" aria-label={selectedProduct ? `شراء ${selectedProduct.name} مباشرة عبر WhatsApp` : 'تواصل معنا عبر WhatsApp للمساعدة في اختيار المنتجات'} title={selectedProduct ? 'شراء مباشر عبر WhatsApp' : 'تواصل معنا عبر WhatsApp'} data-testid="button-whatsapp-float">
+          <a className="whatsapp-float" href={floatingWhatsAppUrl} target="_blank" rel="noreferrer" onClick={(event) => preventDraggedClick('whatsapp', event)} aria-label={selectedProduct ? `شراء ${selectedProduct.name} مباشرة عبر WhatsApp` : 'تواصل معنا عبر WhatsApp للمساعدة في اختيار المنتجات'} title={selectedProduct ? 'شراء مباشر عبر WhatsApp' : 'تواصل معنا عبر WhatsApp'} data-testid="button-whatsapp-float">
             <FaWhatsapp size={28} aria-hidden="true" />
             <span className="sr-only">WhatsApp</span>
           </a>

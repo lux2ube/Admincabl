@@ -365,14 +365,12 @@ img { display: block; max-width: 100%; }
 .tracking-detail { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 18px; }
 .toast-message { position: fixed; right: 22px; bottom: 22px; z-index: 80; background: var(--ink); color: var(--paper); padding: 13px 17px; font-size: 12px; animation: toast-in .25s ease both; }
 .offline-badge { position: fixed; top: 76px; left: 50%; z-index: 65; display: inline-flex; align-items: center; gap: 7px; transform: translateX(-50%); border: 1px solid var(--line); border-radius: 999px; background: var(--paper); color: var(--muted-ink); padding: 8px 13px; box-shadow: 0 8px 25px rgba(21,21,21,.08); font-size: 11px; white-space: nowrap; }
-.floating-tools { position: fixed; inset: 0; z-index: 75; pointer-events: none; }
-.floating-tools > * { pointer-events: auto; }
-.floating-item { position: absolute; user-select: none; touch-action: none; cursor: grab; }
-.floating-item:active { cursor: grabbing; }
-.floating-item.is-positioned { right: auto; bottom: auto; }
-.install-float { left: calc(50% - 52px); bottom: 22px; display: inline-grid; place-items: center; width: 48px; height: 48px; border: 0; border-radius: 50%; background: var(--ink); color: var(--paper); padding: 0; box-shadow: 0 10px 25px rgba(21,21,21,.2); transition: transform .2s ease, box-shadow .2s ease; }
+.floating-tools { position: fixed; left: 50%; bottom: 22px; z-index: 75; display: flex; align-items: center; gap: 8px; transform: translateX(-50%); user-select: none; touch-action: none; cursor: grab; }
+.floating-tools.is-positioned { left: auto; bottom: auto; transform: none; }
+.floating-tools:active { cursor: grabbing; }
+.install-float { display: inline-grid; place-items: center; width: 48px; height: 48px; border: 0; border-radius: 50%; background: var(--ink); color: var(--paper); padding: 0; box-shadow: 0 10px 25px rgba(21,21,21,.2); transition: transform .2s ease, box-shadow .2s ease; }
 .install-float:hover { color: var(--paper); transform: translateY(-3px); box-shadow: 0 14px 30px rgba(21,21,21,.3); }
-.whatsapp-float-wrap { left: calc(50% + 4px); right: auto; bottom: 22px; display: flex; flex-direction: column; align-items: center; width: 48px; gap: 0; }
+.whatsapp-float-wrap { position: relative; display: flex; flex: 0 0 48px; flex-direction: column; align-items: center; width: 48px; height: 48px; }
 .whatsapp-hint { position: absolute; right: 0; bottom: 60px; width: max-content; max-width: min(245px, calc(100vw - 32px)); margin: 0; border: 1px solid rgba(37, 211, 102, .22); border-radius: 14px 14px 3px 14px; background: var(--paper); color: var(--ink); padding: 9px 12px; box-shadow: 0 8px 24px rgba(21,21,21,.12); font-size: 11px; font-weight: 700; line-height: 1.55; text-align: right; }
 .whatsapp-float { display: inline-grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #25d366; color: #fff; padding: 0; box-shadow: 0 10px 25px rgba(37,211,102,.28); transition: transform .2s ease, box-shadow .2s ease; }
 .whatsapp-float:hover { color: #fff; transform: translateY(-3px); box-shadow: 0 14px 30px rgba(37,211,102,.38); }
@@ -1137,10 +1135,8 @@ img { display: block; max-width: 100%; }
 .account-actions small { margin-top: 4px; color: var(--muted-ink); font-size: 10px; line-height: 1.6; }
 
 @media (max-width: 767px) {
-  .install-float { left: calc(50% - 52px); bottom: calc(22px + env(safe-area-inset-bottom)); }
-  .whatsapp-float-wrap { left: calc(50% + 4px); right: auto; bottom: calc(22px + env(safe-area-inset-bottom)); }
-  .product-page-shell .install-float { bottom: calc(84px + env(safe-area-inset-bottom)); }
-  .product-page-shell .whatsapp-float-wrap { bottom: calc(84px + env(safe-area-inset-bottom)); }
+  .floating-tools { bottom: calc(22px + env(safe-area-inset-bottom)); }
+  .product-page-shell .floating-tools { bottom: calc(84px + env(safe-area-inset-bottom)); }
   .whatsapp-hint { right: 0; max-width: min(245px, calc(100vw - 32px)); padding: 8px 10px; font-size: 10px; }
   .product-card-actions { flex-direction: column-reverse; }
   .product-card-actions .text-link,
