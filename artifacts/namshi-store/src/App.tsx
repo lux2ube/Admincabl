@@ -299,7 +299,7 @@ function formatMoneyAmount(amountUsd: number, currency: StoreCurrency) {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   }).format(amountUsd * currency.ratePerUsd);
-  return `${amount} ${currency.code}`;
+  return `${amount} ${currency.name}`;
 }
 
 function readPendingOrders(): Array<Parameters<typeof createStoreOrder>[0]> {
@@ -1237,10 +1237,10 @@ function App() {
                   data-testid="select-currency"
                 >
                   {availableCurrencies.map((currency) => (
-                    <option key={currency.code} value={currency.code}>{currency.name} · {currency.code}</option>
+                    <option key={currency.code} value={currency.code}>{currency.name}</option>
                   ))}
                 </select>
-                <small>1 USD = {selectedCurrency.ratePerUsd} {selectedCurrency.code}</small>
+                <small>1 USD = {selectedCurrency.ratePerUsd} {selectedCurrency.name}</small>
               </label>
               <button className="header-action" type="button" onClick={() => setSearchOpen((current) => !current)} aria-label="بحث" data-testid="button-search">
                 <Search /><span>بحث</span>
