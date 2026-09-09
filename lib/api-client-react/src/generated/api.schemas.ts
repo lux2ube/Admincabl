@@ -35,11 +35,15 @@ export interface StorePaymentMethod {
 export type StoreProductCategory = {
   id: string;
   name: string;
+  slug: string;
 } | null;
 
 export interface StoreProduct {
   id: string;
+  slug: string;
   brand: string;
+  /** @nullable */
+  brandSlug: string | null;
   productName: string;
   sku: string;
   regularPrice: number;
@@ -56,6 +60,37 @@ export interface StoreProduct {
   category: StoreProductCategory;
   images: string[];
   shippingOptions: StoreShippingOption[];
+}
+
+export interface StoreSeoBreadcrumb {
+  name: string;
+  path: string;
+}
+
+export type StoreSeoResponseEntityType = typeof StoreSeoResponseEntityType[keyof typeof StoreSeoResponseEntityType];
+
+
+export const StoreSeoResponseEntityType = {
+  home: 'home',
+  product: 'product',
+  category: 'category',
+  brand: 'brand',
+  guide: 'guide',
+} as const;
+
+export type StoreSeoResponseJsonLd = { [key: string]: unknown };
+
+export interface StoreSeoResponse {
+  entityType: StoreSeoResponseEntityType;
+  /** @nullable */
+  slug: string | null;
+  title: string;
+  h1: string;
+  description: string;
+  canonicalPath: string;
+  indexable: boolean;
+  breadcrumbs: StoreSeoBreadcrumb[];
+  jsonLd: StoreSeoResponseJsonLd;
 }
 
 export interface StoreCatalog {
@@ -359,6 +394,26 @@ export interface AdminSeedResult {
   inserted: number;
   tables: AdminSeedResultTables;
 }
+
+export type GetStoreSeoParams = {
+type: GetStoreSeoType;
+/**
+ * @maxLength 180
+ * @pattern ^[a-z0-9-]+$
+ */
+slug?: string;
+};
+
+export type GetStoreSeoType = typeof GetStoreSeoType[keyof typeof GetStoreSeoType];
+
+
+export const GetStoreSeoType = {
+  home: 'home',
+  product: 'product',
+  category: 'category',
+  brand: 'brand',
+  guide: 'guide',
+} as const;
 
 export type ListStoreOrdersParams = {
 /**

@@ -3,6 +3,8 @@ import {
   CreateStoreOrderBody,
   CreateStoreOrderResponse,
   GetStoreCatalogResponse,
+  GetStoreSeoQueryParams,
+  GetStoreSeoResponse,
   GetStoreOrderParams,
   GetStoreOrderQueryParams,
   GetStoreOrderResponse,
@@ -10,14 +12,26 @@ import {
   ListStoreOrdersResponse,
 } from "@workspace/api-zod";
 import { pool } from "@workspace/db";
+import {
+  buildBrandSeo,
+  buildCategorySeo,
+  buildGuideSeo,
+  buildHomeSeo,
+  buildProductSeo,
+  productSlug,
+  slugify,
+} from "../lib/store-seo";
 
 const router: IRouter = Router();
 
 type ProductRow = {
   id: string;
   brand: string;
+  canonical_brand: string | null;
+  brand_slug: string | null;
   product_name: string;
   SKU: string;
+  product_slug: string | null;
   regular_price: string | number;
   discount_price: string | number | null;
   quantity: number;
@@ -26,6 +40,7 @@ type ProductRow = {
   product_note: string | null;
   category_id: string | null;
   category_name: string | null;
+  category_slug: string | null;
   image_path: string | null;
   shipping_id: number | null;
   shipping_name: string | null;
@@ -58,8 +73,11 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
       SELECT
         p."id",
         p."brand",
+        b."brand_name" AS "canonical_brand",
+        b."slug" AS "brand_slug",
         p."product_name",
         p."SKU",
+        p."slug" AS "product_slug",
         p."regular_price",
         p."discount_price",
         p."quantity",
@@ -68,6 +86,7 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
         p."product_note",
         c."id" AS "category_id",
         c."category_name" AS "category_name",
+        c."slug" AS "category_slug",
         g."image_path",
         s."id" AS "shipping_id",
         s."name" AS "shipping_name",
@@ -75,6 +94,7 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
         ps."free" AS "shipping_free",
         ps."estimated_days"
       FROM "products" p
+      LEFT JOIN "brands" b ON b."id" = p."brand_id"
       LEFT JOIN "product_categories" pc ON pc."product_id" = p."id"
       LEFT JOIN "categories" c ON c."id" = pc."category_id" AND c."active" = TRUE
       LEFT JOIN "galleries" g ON g."product_id" = p."id"
@@ -86,7 +106,9 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
 
     const productMap = new Map<string, {
       id: string;
+      slug: string;
       brand: string;
+      brandSlug: string;
       productName: string;
       sku: string;
       regularPrice: number;
@@ -95,7 +117,7 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
       shortDescription: string | null;
       productDescription: string | null;
       productNote: string | null;
-      category: { id: string; name: string } | null;
+      category: { id: string; name: string; slug: string } | null;
       images: string[];
       shippingOptions: Array<{ id: number; name: string; charge: number; free: boolean; estimatedDays: number | null }>;
     }>();
@@ -103,7 +125,9 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
     for (const row of result.rows) {
       const existing = productMap.get(row.id) ?? {
         id: row.id,
-        brand: row.brand,
+        slug: productSlug(row.product_name, row.SKU, row.product_slug),
+        brand: row.canonical_brand ?? row.brand,
+        brandSlug: row.brand_slug ?? slugify(row.canonical_brand ?? row.brand),
         productName: row.product_name,
         sku: row.SKU,
         regularPrice: asNumber(row.regular_price),
@@ -112,7 +136,9 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
         shortDescription: row.short_description,
         productDescription: row.product_description,
         productNote: row.product_note,
-        category: row.category_id && row.category_name ? { id: row.category_id, name: row.category_name } : null,
+        category: row.category_id && row.category_name
+          ? { id: row.category_id, name: row.category_name, slug: row.category_slug ?? slugify(row.category_name) }
+          : null,
         images: [],
         shippingOptions: [],
       };
@@ -187,6 +213,203 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
   } catch (error) {
     req.log.error({ err: error }, "Failed to load store catalog");
     res.status(500).json({ error: "تعذر تحميل كتالوج المتجر" });
+  }
+});
+
+router.get("/store/seo", async (req, res): Promise<void> => {
+  const parsed = GetStoreSeoQueryParams.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ error: "يرجى تحديد نوع صفحة SEO والـ slug الصحيح" });
+    return;
+  }
+
+  const { type, slug } = parsed.data;
+  if (type !== "home" && !slug) {
+    res.status(400).json({ error: "هذه الصفحة تحتاج إلى slug" });
+    return;
+  }
+
+  try {
+    if (type === "home") {
+      res.json(GetStoreSeoResponse.parse(buildHomeSeo()));
+      return;
+    }
+
+    if (type === "product") {
+      const result = await pool.query<{
+        slug: string;
+        brand: string;
+        brand_slug: string | null;
+        product_name: string;
+        SKU: string;
+        regular_price: string | number;
+        discount_price: string | number | null;
+        quantity: number;
+        short_description: string | null;
+        product_description: string | null;
+        image_path: string | null;
+        category_name: string | null;
+        category_slug: string | null;
+      }>(
+        `SELECT p."slug", COALESCE(b."brand_name", p."brand") AS "brand", b."slug" AS "brand_slug",
+                p."product_name", p."SKU", p."regular_price", p."discount_price", p."quantity",
+                p."short_description", p."product_description", g."image_path",
+                c."category_name", c."slug" AS "category_slug"
+         FROM "products" p
+         LEFT JOIN "brands" b ON b."id" = p."brand_id"
+         LEFT JOIN LATERAL (
+           SELECT c1."category_name", c1."slug"
+           FROM "product_categories" pc1
+           JOIN "categories" c1 ON c1."id" = pc1."category_id" AND c1."active" = TRUE
+           WHERE pc1."product_id" = p."id"
+           ORDER BY c1."parent_id" NULLS FIRST, c1."category_name"
+           LIMIT 1
+         ) c ON TRUE
+         LEFT JOIN LATERAL (
+           SELECT g1."image_path"
+           FROM "galleries" g1
+           WHERE g1."product_id" = p."id"
+           ORDER BY g1."thumbail" DESC, g1."display_order" ASC
+           LIMIT 1
+         ) g ON TRUE
+         WHERE p."published" = TRUE AND p."slug" = $1
+         LIMIT 1`,
+        [slug],
+      );
+      const product = result.rows[0];
+      if (!product) {
+        res.status(404).json({ error: "المنتج غير موجود" });
+        return;
+      }
+      const brand = product.brand;
+      const seo = buildProductSeo({
+        slug: product.slug,
+        brand,
+        brandSlug: product.brand_slug ?? slugify(brand),
+        productName: product.product_name,
+        sku: product.SKU,
+        regularPrice: asNumber(product.regular_price),
+        discountPrice: product.discount_price === null ? null : asNumber(product.discount_price),
+        quantity: product.quantity,
+        shortDescription: product.short_description,
+        productDescription: product.product_description,
+        image: product.image_path,
+        categoryName: product.category_name,
+        categorySlug: product.category_slug ?? (product.category_name ? slugify(product.category_name) : null),
+      });
+      res.json(GetStoreSeoResponse.parse(seo));
+      return;
+    }
+
+    if (type === "category") {
+      const result = await pool.query<{
+        slug: string;
+        category_name: string;
+        category_description: string | null;
+        seo_description: string | null;
+        seo_title: string | null;
+        meta_description: string | null;
+        image_path: string | null;
+        seo_indexable: boolean;
+      }>(
+        `SELECT "slug", "category_name", "category_description", "seo_description", "seo_title",
+                "meta_description", "image_path", "seo_indexable"
+         FROM "categories"
+         WHERE "slug" = $1 AND "active" = TRUE
+         LIMIT 1`,
+        [slug],
+      );
+      const category = result.rows[0];
+      if (!category) {
+        res.status(404).json({ error: "التصنيف غير موجود" });
+        return;
+      }
+      res.json(GetStoreSeoResponse.parse(buildCategorySeo({
+        slug: category.slug,
+        name: category.category_name,
+        description: category.category_description,
+        seoDescription: category.seo_description,
+        seoTitle: category.seo_title,
+        metaDescription: category.meta_description,
+        imagePath: category.image_path,
+        indexable: category.seo_indexable,
+      })));
+      return;
+    }
+
+    if (type === "brand") {
+      const result = await pool.query<{
+        slug: string;
+        brand_name: string;
+        description: string | null;
+        seo_description: string | null;
+        seo_title: string | null;
+        meta_description: string | null;
+        image_path: string | null;
+        seo_indexable: boolean;
+      }>(
+        `SELECT "slug", "brand_name", "description", "seo_description", "seo_title",
+                "meta_description", "image_path", "seo_indexable"
+         FROM "brands"
+         WHERE "slug" = $1
+         LIMIT 1`,
+        [slug],
+      );
+      const brand = result.rows[0];
+      if (!brand) {
+        res.status(404).json({ error: "العلامة التجارية غير موجودة" });
+        return;
+      }
+      res.json(GetStoreSeoResponse.parse(buildBrandSeo({
+        slug: brand.slug,
+        name: brand.brand_name,
+        description: brand.description,
+        seoDescription: brand.seo_description,
+        seoTitle: brand.seo_title,
+        metaDescription: brand.meta_description,
+        imagePath: brand.image_path,
+        indexable: brand.seo_indexable,
+      })));
+      return;
+    }
+
+    const result = await pool.query<{
+      slug: string;
+      title: string;
+      h1: string;
+      meta_description: string;
+      description: string | null;
+      content: string;
+      image_path: string | null;
+      canonical_path: string | null;
+      seo_indexable: boolean;
+    }>(
+      `SELECT "slug", "title", "h1", "meta_description", "description", "content",
+              "image_path", "canonical_path", "seo_indexable"
+       FROM "seo_guides"
+       WHERE "slug" = $1 AND "published" = TRUE
+       LIMIT 1`,
+      [slug],
+    );
+    const guide = result.rows[0];
+    if (!guide) {
+      res.status(404).json({ error: "الدليل غير موجود" });
+      return;
+    }
+    res.json(GetStoreSeoResponse.parse(buildGuideSeo({
+      slug: guide.slug,
+      title: guide.title,
+      h1: guide.h1,
+      metaDescription: guide.meta_description,
+      description: guide.description,
+      content: guide.content,
+      imagePath: guide.image_path,
+      canonicalPath: guide.canonical_path,
+      indexable: guide.seo_indexable,
+    })));
+  } catch (error) {
+    req.log.error({ err: error, type, slug }, "Failed to generate store SEO metadata");
+    res.status(500).json({ error: "تعذر توليد بيانات SEO" });
   }
 });
 

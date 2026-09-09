@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import {
   createStoreOrder,
+  getStoreSeo,
   getStoreOrder,
   listStoreOrders,
   subscribeNewsletter,
@@ -35,12 +36,15 @@ import {
   type StorePaymentMethod,
   type StoreProduct,
   type StoreShippingOption,
+  type StoreSeoResponse,
   type GetStoreCatalogQueryResult,
 } from '@workspace/api-client-react';
 
 type Product = {
   id: string;
+  slug: string;
   brand: string;
+  brandSlug: string | null;
   name: string;
   regularPrice: number;
   discountPrice: number | null;
@@ -48,7 +52,7 @@ type Product = {
   color: string;
   description: string;
   note?: string | null;
-  category: { id: string; name: string } | null;
+  category: { id: string; name: string; slug: string } | null;
   image: string;
   sku: string;
   warranty?: string;
@@ -56,6 +60,28 @@ type Product = {
   quantity: number;
   shippingOptions: StoreShippingOption[];
 };
+
+type StoreRoute =
+  | { kind: 'home' }
+  | { kind: 'product'; slug: string }
+  | { kind: 'category'; slug: string }
+  | { kind: 'brand'; slug: string }
+  | { kind: 'search'; query: string };
+
+function readStoreRoute(): StoreRoute {
+  const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '');
+  const pathname = window.location.pathname.startsWith(basePath)
+    ? window.location.pathname.slice(basePath.length)
+    : window.location.pathname;
+  const path = pathname.replace(/^\/+|\/+$/g, '');
+  const segments = path.split('/').filter(Boolean);
+  const slug = segments[1];
+  if (segments[0] === 'product' && slug) return { kind: 'product', slug };
+  if (segments[0] === 'category' && slug) return { kind: 'category', slug };
+  if (segments[0] === 'brand' && slug) return { kind: 'brand', slug };
+  if (segments[0] === 'search') return { kind: 'search', query: new URLSearchParams(window.location.search).get('q') ?? '' };
+  return { kind: 'home' };
+}
 
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 const CACHED_CATALOG_KEY = 'cabl-catalog-v1';
@@ -282,7 +308,15 @@ function ProductPreview({
           <img src={product.image} alt={productAlt(product)} width="900" height="980" data-testid={`img-product-preview-${product.id}`} />
         </div>
         <div className="product-preview-copy">
-          <span className="eyebrow">{product.brand} · {product.category?.name ?? '—'}</span>
+           <span className="eyebrow">
+             {product.brandSlug
+               ? <a href={`${import.meta.env.BASE_URL}brand/${product.brandSlug}/`}>{product.brand}</a>
+               : product.brand}
+             {' · '}
+             {product.category?.slug
+               ? <a href={`${import.meta.env.BASE_URL}category/${product.category.slug}/`}>{product.category.name}</a>
+               : product.category?.name ?? '—'}
+           </span>
           <h1>{product.name}</h1>
            <div className="product-preview-price">
              <strong>${product.price.toFixed(2)}</strong>
@@ -363,10 +397,11 @@ function App() {
   const [slide, setSlide] = useState(0);
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [searchOpen, setSearchOpen] = useState(false);
-  const [query, setQuery] = useState('');
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(() => {
-    const match = window.location.hash.match(/^#product-([a-zA-Z0-9-]+)$/);
-    return match ? match[1] : null;
+  const [route, setRoute] = useState<StoreRoute>(() => readStoreRoute());
+  const [seo, setSeo] = useState<StoreSeoResponse | null>(null);
+  const [query, setQuery] = useState(() => {
+    const initialRoute = readStoreRoute();
+    return initialRoute.kind === 'search' ? initialRoute.query : '';
   });
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
@@ -493,21 +528,18 @@ function App() {
   }, [favorites]);
 
   useEffect(() => {
-    const syncProductFromUrl = () => {
-      const match = window.location.hash.match(/^#product-([a-zA-Z0-9-]+)$/);
-      setSelectedProductId(match ? match[1] : null);
-    };
-    window.addEventListener('popstate', syncProductFromUrl);
-    window.addEventListener('hashchange', syncProductFromUrl);
+    const syncRouteFromUrl = () => setRoute(readStoreRoute());
+    window.addEventListener('popstate', syncRouteFromUrl);
     return () => {
-      window.removeEventListener('popstate', syncProductFromUrl);
-      window.removeEventListener('hashchange', syncProductFromUrl);
+      window.removeEventListener('popstate', syncRouteFromUrl);
     };
   }, []);
 
   const products = useMemo<Product[]>(() => (catalog?.products ?? []).map((product: StoreProduct) => ({
     id: product.id,
+    slug: product.slug,
     brand: product.brand,
+    brandSlug: product.brandSlug,
     name: product.productName,
     regularPrice: product.regularPrice,
     discountPrice: product.discountPrice,
@@ -544,22 +576,25 @@ function App() {
   const visibleProducts = useMemo(() => {
     return products.filter((product) => {
       const matchesFilter = activeFilter === 'ALL' || product.category?.id === activeFilter;
+      const matchesCategoryRoute = route.kind !== 'category' || product.category?.slug === route.slug;
+      const matchesBrandRoute = route.kind !== 'brand' || product.brandSlug === route.slug;
       const matchesQuery = matchesProductSearch(product, query);
-      return matchesFilter && matchesQuery;
+      return matchesFilter && matchesCategoryRoute && matchesBrandRoute && matchesQuery;
     });
-  }, [activeFilter, products, query]);
+  }, [activeFilter, products, query, route]);
   const searchSuggestions = useMemo(() => {
     if (!query.trim()) return [];
     return products.filter((product) => matchesProductSearch(product, query)).slice(0, 5);
   }, [products, query]);
 
   const categories = useMemo(() => {
-    const categoryMap = new Map<string, { id: string; name: string; image: string; count: string }>();
+    const categoryMap = new Map<string, { id: string; name: string; slug: string; image: string; count: string }>();
     for (const product of products) {
       if (!product.category || categoryMap.has(product.category.id)) continue;
       categoryMap.set(product.category.id, {
         id: product.category.id,
         name: product.category.name,
+        slug: product.category.slug,
         image: product.image,
         count: `${products.filter((item) => item.category?.id === product.category?.id).length} منتجات`,
       });
@@ -572,8 +607,48 @@ function App() {
     ...categories.map((category) => ({ value: category.id, label: category.name })),
   ], [categories]);
 
+  useEffect(() => {
+    if (route.kind === 'category') {
+      const category = categories.find((item) => item.slug === route.slug);
+      setActiveFilter(category?.id ?? 'ALL');
+      setQuery('');
+    } else if (route.kind === 'search') {
+      setActiveFilter('ALL');
+      setQuery(route.query);
+      setSearchOpen(true);
+    } else {
+      setActiveFilter('ALL');
+      if (route.kind !== 'home') setQuery('');
+      setSearchOpen(false);
+    }
+  }, [categories, route]);
+
+  const navigateTo = (path: string) => {
+    const basePath = import.meta.env.BASE_URL.endsWith('/')
+      ? import.meta.env.BASE_URL
+      : `${import.meta.env.BASE_URL}/`;
+    const nextPath = `${basePath}${path.replace(/^\/+/, '')}`;
+    window.history.pushState({}, '', nextPath);
+    setRoute(readStoreRoute());
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const submitSearch = () => {
+    const trimmedQuery = query.trim();
+    navigateTo(trimmedQuery ? `/search?q=${encodeURIComponent(trimmedQuery)}` : '/search');
+    scrollTo('discover');
+  };
+
   const categoryIdFor = (...hints: string[]) =>
     categories.find((category) => hints.some((hint) => category.name.includes(hint)))?.id ?? 'ALL';
+
+  const listingH1 = route.kind === 'category'
+    ? seo?.h1 ?? categories.find((category) => category.slug === route.slug)?.name ?? 'منتجات CABL'
+    : route.kind === 'brand'
+      ? seo?.h1 ?? `منتجات ${products.find((product) => product.brandSlug === route.slug)?.brand ?? route.slug}`
+      : route.kind === 'search'
+        ? seo?.h1 ?? `نتائج البحث عن «${query}»`
+        : null;
 
   const heroes = useMemo(() => products.slice(0, 3).map((product) => ({
     productId: product.id,
@@ -641,15 +716,11 @@ function App() {
   }, []);
 
   const openProductPreview = (product: Product) => {
-    window.history.pushState({ productId: product.id }, '', `#product-${product.id}`);
-    setSelectedProductId(product.id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigateTo(`/product/${product.slug}`);
   };
 
   const closeProductPreview = () => {
-    window.history.pushState({}, '', `${window.location.pathname}${window.location.search}`);
-    setSelectedProductId(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigateTo('/');
   };
 
   const toggleFavorite = (id: string) => {
@@ -687,6 +758,12 @@ function App() {
 
   const chooseCategory = (filter: string) => {
     setActiveFilter(filter);
+    if (filter === 'ALL') {
+      navigateTo('/');
+    } else {
+      const category = categories.find((item) => item.id === filter);
+      if (category) navigateTo(`/category/${category.slug}`);
+    }
     scrollTo('discover');
   };
 
@@ -785,9 +862,10 @@ function App() {
   };
 
   const favoriteProducts = products.filter((product) => favorites.includes(product.id));
-  const selectedProduct = selectedProductId === null
-    ? null
-    : products.find((product) => product.id === selectedProductId) ?? null;
+  const selectedProduct = route.kind === 'product'
+    ? products.find((product) => product.slug === route.slug) ?? null
+    : null;
+  const selectedProductId = selectedProduct?.id ?? null;
   const relatedProducts = useMemo(() => {
     if (!selectedProduct) return [];
     const selectedKind = productKind(selectedProduct);
@@ -807,13 +885,34 @@ function App() {
   }, [products, selectedProduct]);
 
   useEffect(() => {
-    const title = selectedProduct
-      ? `${selectedProduct.name} | ${selectedProduct.brand} | CABL اليمن`
-      : HOME_TITLE;
-    const description = selectedProduct
-      ? `${selectedProduct.name} من ${selectedProduct.brand} — ${selectedProduct.description || selectedProduct.category?.name || 'منتج شحن'} مع توصيل داخل اليمن. كلمات البحث: ${getProductKeywords(selectedProduct).slice(0, 8).join('، ')}.`
-      : HOME_DESCRIPTION;
-    document.title = title;
+    const seoParams = route.kind === 'product' || route.kind === 'category' || route.kind === 'brand'
+      ? { type: route.kind, slug: route.slug }
+      : { type: 'home' as const };
+    let active = true;
+    void getStoreSeo(seoParams).then((nextSeo) => {
+      if (active) setSeo(nextSeo);
+    }).catch(() => {
+      if (active) setSeo(null);
+    });
+    return () => {
+      active = false;
+    };
+  }, [route]);
+
+  useEffect(() => {
+    if (!seo) return;
+    const pageSeo: StoreSeoResponse = route.kind === 'search'
+      ? {
+        ...seo,
+        title: query.trim() ? `نتائج البحث عن ${query.trim()} | CABL` : 'البحث في متجر CABL',
+        h1: query.trim() ? `نتائج البحث عن «${query.trim()}»` : 'البحث في متجر CABL',
+        description: 'نتائج البحث داخل كتالوج CABL. صفحات البحث والفلاتر غير قابلة للفهرسة.',
+        canonicalPath: '/search',
+        indexable: false,
+        breadcrumbs: [{ name: 'الرئيسية', path: '/' }, { name: 'البحث', path: '/search' }],
+      }
+      : seo;
+    document.title = pageSeo.title;
     const setMeta = (selector: string, attribute: 'name' | 'property', content: string) => {
       let element = document.head.querySelector<HTMLMetaElement>(selector);
       if (!element) {
@@ -823,15 +922,23 @@ function App() {
       }
       element.setAttribute('content', content);
     };
-    setMeta('meta[name="description"]', 'name', description);
-    setMeta('meta[property="og:title"]', 'property', title);
-    setMeta('meta[property="og:description"]', 'property', description);
-    setMeta('meta[name="twitter:title"]', 'name', title);
-    setMeta('meta[name="twitter:description"]', 'name', description);
+    setMeta('meta[name="description"]', 'name', pageSeo.description);
+    setMeta('meta[name="robots"]', 'name', pageSeo.indexable ? 'index, follow' : 'noindex, follow');
+    setMeta('meta[property="og:title"]', 'property', pageSeo.title);
+    setMeta('meta[property="og:description"]', 'property', pageSeo.description);
+    setMeta('meta[property="og:url"]', 'property', new URL(pageSeo.canonicalPath, window.location.origin).href);
+    setMeta('meta[property="og:type"]', 'property', pageSeo.entityType === 'product' ? 'product' : 'website');
+    setMeta('meta[name="twitter:title"]', 'name', pageSeo.title);
+    setMeta('meta[name="twitter:description"]', 'name', pageSeo.description);
     setMeta('meta[name="keywords"]', 'name', selectedProduct ? getProductKeywords(selectedProduct).join(', ') : GLOBAL_SEARCH_KEYWORDS.join(', '));
-    const canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-    canonical?.setAttribute('href', `${window.location.origin}${window.location.pathname}`);
-  }, [selectedProduct]);
+    const canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]') ?? document.head.appendChild(document.createElement('link'));
+    canonical.rel = 'canonical';
+    canonical.href = new URL(pageSeo.canonicalPath, window.location.origin).href;
+    const jsonLd = document.head.querySelector<HTMLScriptElement>('#cabl-seo-jsonld') ?? document.head.appendChild(document.createElement('script'));
+    jsonLd.id = 'cabl-seo-jsonld';
+    jsonLd.type = 'application/ld+json';
+    jsonLd.textContent = JSON.stringify(pageSeo.jsonLd);
+  }, [query, route, seo, selectedProduct]);
 
   const closeQuoteForm = () => {
     setQuoteOpen(false);
@@ -945,7 +1052,7 @@ function App() {
                   aria-label="ابحث عن منتج أو SKU أو مواصفة"
                 data-testid="input-search"
               />
-               <button className="search-submit" type="button" onClick={() => scrollTo('discover')} aria-label="تنفيذ البحث" data-testid="button-submit-search">
+               <button className="search-submit" type="button" onClick={submitSearch} aria-label="تنفيذ البحث" data-testid="button-submit-search">
                 <Search size={18} />
               </button>
               {query && (
@@ -985,6 +1092,7 @@ function App() {
           />
         ) : (
         <>
+        {route.kind === 'home' && <>
         <section className="hero" aria-label="حملات الإلكترونيات" data-testid="section-hero">
           {heroes.length > 0 ? heroes.map((hero, index) => (
             <article className={`hero-frame ${slide === index ? 'active' : ''}`} key={hero.productId} aria-hidden={slide !== index}>
@@ -992,7 +1100,7 @@ function App() {
               <div className="hero-shade" />
               <div className="hero-copy">
                 <span className="eyebrow">{hero.eyebrow}</span>
-                <h1>{hero.title}</h1>
+                {route.kind === 'home' ? <h1>{hero.title}</h1> : <h2>{hero.title}</h2>}
                 <p>{hero.body}</p>
                 <button className="button-light" type="button" onClick={() => {
                   setActiveFilter(hero.categoryId);
@@ -1035,13 +1143,13 @@ function App() {
           </div>
           <div className="category-grid">
             {categories.map((category) => (
-              <button className="category-tile" type="button" key={category.id} onClick={() => chooseCategory(category.id)} data-testid={`card-category-${category.id}`}>
+              <a className="category-tile" href={`${import.meta.env.BASE_URL}category/${category.slug}/`} key={category.id} onClick={(event) => { event.preventDefault(); chooseCategory(category.id); }} data-testid={`card-category-${category.id}`}>
                 <img src={category.image} alt={`${category.name} شواحن ومنتجات في اليمن`} width="600" height="600" loading="lazy" data-testid={`img-category-${category.id}`} />
                 <span className="category-info">
                   <h3>{category.name}</h3>
                   <span>{category.count} <ChevronDown size={11} /></span>
                 </span>
-              </button>
+              </a>
             ))}
           </div>
         </section>
@@ -1082,19 +1190,20 @@ function App() {
             </div>
           </div>
         </section>
+        </>}
 
         <section className="section" id="discover" data-testid="section-discover">
           <div className="section-header">
             <div>
               <span className="eyebrow">مختارة لرفك</span>
-                <h2>Baseus و Vention و Anker و UGREEN<br />لك.</h2>
+                {listingH1 ? <h1>{listingH1}</h1> : <h2>Baseus و Vention و Anker و UGREEN<br />لك.</h2>}
             </div>
-            <button className="text-link" type="button" onClick={() => { setActiveFilter('ALL'); setQuery(''); }} data-testid="button-view-all">عرض كل المنتجات</button>
+             <button className="text-link" type="button" onClick={() => chooseCategory('ALL')} data-testid="button-view-all">عرض كل المنتجات</button>
           </div>
           <div className="product-toolbar">
             <div className="filter-row" role="tablist" aria-label="Product categories">
               {filterOptions.map((filter) => (
-                <button className={`filter-button ${activeFilter === filter.value ? 'active' : ''}`} type="button" key={filter.value} onClick={() => setActiveFilter(filter.value)} data-testid={`filter-${filter.value.toLowerCase()}`}>{filter.label}</button>
+                <button className={`filter-button ${activeFilter === filter.value ? 'active' : ''}`} type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`filter-${filter.value.toLowerCase()}`}>{filter.label}</button>
               ))}
             </div>
             <button className="sort-button" type="button" onClick={() => announce('يتم عرض أحدث المنتجات')} data-testid="button-sort">الأحدث <ChevronDown size={13} /></button>
@@ -1104,13 +1213,13 @@ function App() {
               <article className="product-card" key={product.id} data-testid={`card-product-${product.id}`}>
                 <div className="product-image">
                   <img src={product.image} alt={productAlt(product)} width="800" height="1000" loading="lazy" data-testid={`img-product-${product.id}`} />
-                   <button
+                     <a
                      className="image-open-button"
-                     type="button"
-                     onClick={() => openProductPreview(product)}
+                      href={`${import.meta.env.BASE_URL}product/${product.slug}/`}
+                      onClick={(event) => { event.preventDefault(); openProductPreview(product); }}
                      aria-label={`عرض ${product.name}`}
                      data-testid={`button-open-product-${product.id}`}
-                   />
+                    />
                   <button className={`wish-button ${favorites.includes(product.id) ? 'active' : ''}`} type="button" onClick={() => toggleFavorite(product.id)} aria-label={`Save ${product.name}`} data-testid={`button-favorite-${product.id}`}>
                     <Heart size={15} fill={favorites.includes(product.id) ? 'currentColor' : 'none'} />
                   </button>
@@ -1127,7 +1236,7 @@ function App() {
                      {product.quantity > 0 ? <><CircleCheck size={13} /> متوفر</> : 'غير متوفر'}
                    </div>
                    <div className="product-card-actions">
-                     <button className="preview-link" type="button" onClick={() => openProductPreview(product)} data-testid={`button-preview-product-${product.id}`}>عرض التفاصيل</button>
+                      <a className="preview-link" href={`${import.meta.env.BASE_URL}product/${product.slug}/`} onClick={(event) => { event.preventDefault(); openProductPreview(product); }} data-testid={`button-preview-product-${product.id}`}>عرض التفاصيل</a>
                       <button className="text-link" type="button" disabled={product.quantity <= 0} onClick={() => addToCart(product)} data-testid={`button-add-product-${product.id}`}>{product.quantity > 0 ? 'أضف إلى السلة' : 'غير متوفر'}</button>
                    </div>
                 </div>
@@ -1221,7 +1330,7 @@ function App() {
       </main>
 
       <nav className="mobile-bottom-nav" aria-label="تنقل سريع" data-testid="mobile-bottom-nav">
-        <button type="button" onClick={() => { setSelectedProductId(null); scrollTo('top'); }} data-testid="bottom-nav-home"><Home size={19} /><span>الرئيسية</span></button>
+        <button type="button" onClick={() => { navigateTo('/'); scrollTo('top'); }} data-testid="bottom-nav-home"><Home size={19} /><span>الرئيسية</span></button>
         <button type="button" onClick={() => scrollTo('categories')} data-testid="bottom-nav-categories"><Grid2X2 size={19} /><span>التصنيفات</span></button>
         <button type="button" onClick={() => setCartOpen(true)} data-testid="bottom-nav-cart"><ShoppingBag size={19} /><span>السلة{cartItemCount > 0 ? ` · ${cartItemCount}` : ''}</span></button>
         <button type="button" onClick={openTracking} data-testid="bottom-nav-orders"><ClipboardList size={19} /><span>طلباتي</span></button>

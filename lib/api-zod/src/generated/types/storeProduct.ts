@@ -10,7 +10,10 @@ import type { StoreShippingOption } from './storeShippingOption';
 
 export interface StoreProduct {
   id: string;
+  slug: string;
   brand: string;
+  /** @nullable */
+  brandSlug: string | null;
   productName: string;
   sku: string;
   regularPrice: number;

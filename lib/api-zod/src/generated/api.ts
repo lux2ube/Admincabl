@@ -82,7 +82,9 @@ export const SubscribeNewsletterResponse = zod.object({
 export const GetStoreCatalogResponse = zod.object({
   "products": zod.array(zod.object({
   "id": zod.string(),
+  "slug": zod.string(),
   "brand": zod.string(),
+  "brandSlug": zod.string().nullable(),
   "productName": zod.string(),
   "sku": zod.string(),
   "regularPrice": zod.number(),
@@ -93,7 +95,8 @@ export const GetStoreCatalogResponse = zod.object({
   "productNote": zod.string().nullable(),
   "category": zod.object({
   "id": zod.string(),
-  "name": zod.string()
+  "name": zod.string(),
+  "slug": zod.string()
 }).nullable(),
   "images": zod.array(zod.string()),
   "shippingOptions": zod.array(zod.object({
@@ -121,6 +124,36 @@ export const GetStoreCatalogResponse = zod.object({
   "iconKey": zod.string(),
   "requiresTransactionReference": zod.boolean()
 }))
+})
+
+
+/**
+ * @summary Get generated SEO metadata for a public CABL route
+ */
+export const getStoreSeoQuerySlugMax = 180;
+
+
+export const getStoreSeoQuerySlugRegExp = new RegExp('^[a-z0-9-]+$');
+
+
+export const GetStoreSeoQueryParams = zod.object({
+  "type": zod.enum(['home', 'product', 'category', 'brand', 'guide']),
+  "slug": zod.coerce.string().max(getStoreSeoQuerySlugMax).regex(getStoreSeoQuerySlugRegExp).optional()
+})
+
+export const GetStoreSeoResponse = zod.object({
+  "entityType": zod.enum(['home', 'product', 'category', 'brand', 'guide']),
+  "slug": zod.string().nullable(),
+  "title": zod.string(),
+  "h1": zod.string(),
+  "description": zod.string(),
+  "canonicalPath": zod.string(),
+  "indexable": zod.boolean(),
+  "breadcrumbs": zod.array(zod.object({
+  "name": zod.string(),
+  "path": zod.string()
+})),
+  "jsonLd": zod.record(zod.string(), zod.unknown())
 })
 
 

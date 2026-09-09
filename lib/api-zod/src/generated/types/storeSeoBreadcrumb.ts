@@ -6,11 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-/**
- * @nullable
- */
-export type StoreProductCategory = {
-  id: string;
+export interface StoreSeoBreadcrumb {
   name: string;
-  slug: string;
-} | null;
+  path: string;
+}

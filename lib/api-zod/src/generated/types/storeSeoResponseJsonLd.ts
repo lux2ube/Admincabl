@@ -6,11 +6,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-/**
- * @nullable
- */
-export type StoreProductCategory = {
-  id: string;
-  name: string;
-  slug: string;
-} | null;
+export type StoreSeoResponseJsonLd = { [key: string]: unknown };

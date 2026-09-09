@@ -28,6 +28,7 @@ import type {
   AdminSeedResult,
   ErrorResponse,
   GetStoreOrderParams,
+  GetStoreSeoParams,
   HealthStatus,
   ListAdminRowsParams,
   ListStoreOrdersParams,
@@ -38,7 +39,8 @@ import type {
   StoreCatalog,
   StoreOrder,
   StoreOrderInput,
-  StoreOrders
+  StoreOrders,
+  StoreSeoResponse
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -353,6 +355,90 @@ export function useGetStoreCatalog<TData = Awaited<ReturnType<typeof getStoreCat
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetStoreCatalogQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetStoreSeoUrl = (params: GetStoreSeoParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/store/seo?${stringifiedParams}` : `/api/store/seo`
+}
+
+/**
+ * @summary Get generated SEO metadata for a public CABL route
+ */
+export const getStoreSeo = async (params: GetStoreSeoParams, options?: Parameters<typeof customFetch>[1]): Promise<StoreSeoResponse> => {
+
+  return customFetch<StoreSeoResponse>(getGetStoreSeoUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStoreSeoQueryKey = (params?: GetStoreSeoParams,) => {
+    return [
+    `/api/store/seo`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetStoreSeoQueryOptions = <TData = Awaited<ReturnType<typeof getStoreSeo>>, TError = ErrorType<ErrorResponse>>(params: GetStoreSeoParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreSeo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStoreSeoQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStoreSeo>>> = ({ signal }) => getStoreSeo(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStoreSeo>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStoreSeoQueryResult = NonNullable<Awaited<ReturnType<typeof getStoreSeo>>>
+export type GetStoreSeoQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get generated SEO metadata for a public CABL route
+ */
+
+export function useGetStoreSeo<TData = Awaited<ReturnType<typeof getStoreSeo>>, TError = ErrorType<ErrorResponse>>(
+ params: GetStoreSeoParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreSeo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStoreSeoQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
