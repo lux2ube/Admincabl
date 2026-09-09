@@ -1271,6 +1271,14 @@ function App() {
             </nav>
           )}
 
+          {route.kind === 'home' && !selectedProduct && !searchOpen && (
+            <button className="quick-search-trigger" type="button" onClick={() => setSearchOpen(true)} data-testid="button-quick-search">
+              <Search size={17} aria-hidden="true" />
+              <span>ابحث عن منتج أو مواصفة</span>
+              <ArrowLeft size={14} aria-hidden="true" />
+            </button>
+          )}
+
           {searchOpen && (
             <div className="search-panel" data-testid="panel-search">
               <input
