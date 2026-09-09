@@ -2,3 +2,4 @@
 - [API validation version](api-validation-version.md) — check Orval-generated Zod helpers against the workspace's installed Zod version.
 - [Static SEO routes](static-seo-routes.md) — clean directory SEO pages need static-file precedence over SPA fallbacks in dev and production.
 - [PWA cache in Vite development](vite-pwa-dev-cache.md) — never let the production service worker cache Vite source or optimized dependency modules.
+- [SEO schema normalization](seo-schema-normalization.md) — use canonical brand relationships and stable slugs while preserving legacy catalog compatibility.

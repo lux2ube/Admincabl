@@ -60,6 +60,7 @@ const tables: AdminTable[] = [
     key: "products", label: "المنتجات", group: "الكتالوج", primaryKey: "id",
     columns: [
       id(), column("brand", "العلامة التجارية", "text", { nullable: false }), column("product_name", "اسم المنتج", "text", { nullable: false }), column("SKU", "SKU", "text", { nullable: false }),
+      column("brand_id", "مرجع العلامة", "uuid", { references: "brands.id" }), column("slug", "الرابط المختصر", "text"),
       column("regular_price", "السعر الأساسي", "number", { nullable: false }), column("discount_price", "سعر الخصم", "number"),
       column("quantity", "الكمية", "number", { nullable: false }), column("short_description", "الوصف المختصر", "text"),
       column("product_description", "وصف المنتج", "text"), column("product_weight", "الوزن", "number"),
@@ -67,6 +68,7 @@ const tables: AdminTable[] = [
     ],
     relations: [
       relation("id", "product_categories", "product_id", "has_many", "تصنيفات المنتج"),
+      relation("brand_id", "brands", "id", "belongs_to", "العلامة التجارية"),
       relation("id", "product_tags", "product_id", "has_many", "وسوم المنتج"),
       relation("id", "product_attributes", "product_id", "has_many", "خصائص المنتج"),
       relation("id", "variants", "product_id", "has_many", "المتغيرات"),
@@ -79,13 +81,46 @@ const tables: AdminTable[] = [
     key: "categories", label: "التصنيفات", group: "الكتالوج", primaryKey: "id",
     columns: [
       id(), column("parent_id", "التصنيف الأب", "uuid", { references: "categories.id" }), column("category_name", "اسم التصنيف", "text", { nullable: false }),
-      column("category_description", "الوصف", "text"), column("icon", "الأيقونة", "text"), column("image_path", "مسار الصورة", "text"),
+      column("slug", "الرابط المختصر", "text"), column("category_description", "الوصف", "text"), column("icon", "الأيقونة", "text"), column("image_path", "مسار الصورة", "text"),
+      column("seo_title", "عنوان SEO", "text"), column("meta_description", "وصف محركات البحث", "text"), column("seo_description", "وصف SEO", "text"),
+      column("seo_indexable", "قابل للفهرسة", "boolean", { nullable: false }),
       column("active", "نشط", "boolean", { nullable: false }), created(), updated(),
     ],
     relations: [
       relation("parent_id", "categories", "id", "parent", "التصنيف الأب"),
       relation("id", "product_categories", "category_id", "has_many", "منتجات التصنيف"),
     ],
+  },
+  {
+    key: "brands", label: "العلامات التجارية", group: "الكتالوج", primaryKey: "id",
+    columns: [
+      id(), column("brand_name", "اسم العلامة", "text", { nullable: false }), column("slug", "الرابط المختصر", "text", { nullable: false }),
+      column("description", "الوصف", "text"), column("image_path", "الصورة", "text"),
+      column("seo_title", "عنوان SEO", "text"), column("meta_description", "وصف محركات البحث", "text"), column("seo_description", "وصف SEO", "text"),
+      column("seo_indexable", "قابل للفهرسة", "boolean", { nullable: false }), created(), updated(),
+    ],
+    relations: [
+      relation("id", "products", "brand_id", "has_many", "منتجات العلامة"),
+    ],
+  },
+  {
+    key: "seo_guides", label: "أدلة الشراء", group: "المحتوى", primaryKey: "id",
+    columns: [
+      id(), column("slug", "الرابط المختصر", "text", { nullable: false }), column("title", "عنوان الصفحة", "text", { nullable: false }),
+      column("h1", "العنوان الرئيسي", "text", { nullable: false }), column("meta_description", "وصف محركات البحث", "text", { nullable: false }),
+      column("description", "المقدمة", "text"), column("content", "المحتوى", "text", { nullable: false }), column("image_path", "الصورة", "text"),
+      column("canonical_path", "المسار الأساسي", "text"), column("seo_indexable", "قابل للفهرسة", "boolean", { nullable: false }),
+      column("published", "منشور", "boolean", { nullable: false }), column("published_at", "تاريخ النشر", "date"), created(), updated(),
+    ],
+    relations: [],
+  },
+  {
+    key: "seo_redirects", label: "تحويلات SEO", group: "المحتوى", primaryKey: "id",
+    columns: [
+      id(), column("from_path", "المسار القديم", "text", { nullable: false }), column("to_path", "المسار الجديد", "text", { nullable: false }),
+      column("status_code", "رمز التحويل", "number", { nullable: false }), column("active", "نشط", "boolean", { nullable: false }), created(), updated(),
+    ],
+    relations: [],
   },
   {
     key: "tags", label: "الوسوم", group: "الكتالوج", primaryKey: "id",

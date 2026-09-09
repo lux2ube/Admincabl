@@ -11,9 +11,11 @@ import {
   smallint,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { brandsTable } from "./seo";
 
 export const tagsTable = pgTable("tags", {
   id: serial("id").primaryKey(),
@@ -29,21 +31,28 @@ export const categoriesTable = pgTable("categories", {
   id: uuid("id").defaultRandom().primaryKey(),
   parentId: uuid("parent_id"),
   categoryName: varchar("category_name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 160 }),
   categoryDescription: text("category_description"),
   icon: text("icon"),
   imagePath: text("image_path"),
+  seoTitle: varchar("seo_title", { length: 255 }),
+  metaDescription: varchar("meta_description", { length: 320 }),
+  seoDescription: text("seo_description"),
+  seoIndexable: boolean("seo_indexable").notNull().default(true),
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   createdBy: uuid("created_by"),
   updatedBy: uuid("updated_by"),
-});
+}, (table) => [uniqueIndex("categories_slug_unique").on(table.slug)]);
 
 export const productsTable = pgTable("products", {
   id: uuid("id").defaultRandom().primaryKey(),
   brand: varchar("brand", { length: 100 }).notNull().default("Vention"),
+  brandId: uuid("brand_id").references(() => brandsTable.id),
   productName: varchar("product_name", { length: 255 }).notNull(),
   sku: varchar("SKU", { length: 255 }).notNull().unique(),
+  slug: varchar("slug", { length: 180 }),
   regularPrice: numeric("regular_price", { precision: 12, scale: 2 }).notNull(),
   discountPrice: numeric("discount_price", { precision: 12, scale: 2 }),
   quantity: integer("quantity").notNull().default(0),
@@ -54,7 +63,7 @@ export const productsTable = pgTable("products", {
   published: boolean("published").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [uniqueIndex("products_slug_unique").on(table.slug)]);
 
 export const productTagsTable = pgTable(
   "product_tags",
@@ -355,4 +364,7 @@ export type CatalogTableName =
   | "customers"
   | "customer_addresses"
   | "notifications"
-  | "slideshows";
+  | "slideshows"
+  | "brands"
+  | "seo_guides"
+  | "seo_redirects";
