@@ -103,6 +103,9 @@ img { display: block; max-width: 100%; }
 .nav-highlight { color: #b13227; }
 .mobile-menu { display: none; }
 .search-panel { margin-top: 14px; position: relative; }
+.quick-search-trigger {
+  display: none;
+}
 .search-panel input {
   width: 100%; border: 0; border-bottom: 1px solid var(--ink); background: transparent;
    outline: none; padding: 10px 0 10px 34px; font-size: 15px;
@@ -923,8 +926,8 @@ img { display: block; max-width: 100%; }
    .cabl-logo-mark { width: 30px; }
    .cabl-logo-copy strong { font-size: 17px; }
    .cabl-logo-copy small { display: none; }
-  .hero-frame, .hero-copy { min-height: 535px; }
-  .hero-copy { padding: 50px 25px 85px; justify-content: end; }
+  .hero-frame, .hero-copy { min-height: 455px; }
+  .hero-copy { padding: 42px 25px 68px; justify-content: end; }
   .hero-copy h1 { max-width: 350px; font-size: clamp(53px, 16vw, 76px); }
   .hero-copy p { margin: 17px 0 23px; font-size: 12px; }
   .hero-controls { left: 20px; bottom: 20px; }
@@ -934,13 +937,58 @@ img { display: block; max-width: 100%; }
   .brand-announcement p { margin-top: 15px; font-size: 12px; }
   .section-header { display: block; margin-bottom: 15px; }
   .section-header h2 { font-size: 30px; margin-bottom: 9px; }
+  .quick-search-trigger {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    margin-top: 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--warm);
+    color: var(--muted-ink);
+    padding: 11px 13px;
+    text-align: right;
+    font-size: 11px;
+  }
+  .quick-search-trigger span { flex: 1; }
+  .quick-search-trigger svg:last-child { color: var(--ink); }
   .seo-grid, .seo-faq { grid-template-columns: 1fr; }
   .seo-section { padding-top: 45px; padding-bottom: 45px; }
-  .category-grid { grid-template-columns: 1fr 1fr; gap: 7px; }
-  .category-tile, .category-tile:nth-child(2), .category-tile:nth-child(3) { min-height: 180px; }
-  .category-tile:first-child { grid-column: 1 / -1; min-height: 250px; }
-  .category-info { right: 13px; bottom: 12px; }
-  .category-info h3 { font-size: 20px; }
+  .category-grid {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    margin-left: -17px;
+    margin-right: -17px;
+    padding: 0 17px 3px;
+    scrollbar-width: none;
+  }
+  .category-grid::-webkit-scrollbar { display: none; }
+  .category-tile,
+  .category-tile:nth-child(2),
+  .category-tile:nth-child(3),
+  .category-tile:first-child {
+    flex: 0 0 86px;
+    min-height: 82px;
+    height: 82px;
+    border-radius: 6px;
+    background: var(--warm);
+  }
+  .category-tile img { opacity: .55; filter: saturate(.7) contrast(1.04); }
+  .category-tile::after { background: linear-gradient(180deg, rgba(10, 10, 10, .12), rgba(10, 10, 10, .72)); }
+  .category-info {
+    right: 5px;
+    bottom: 8px;
+    left: 5px;
+    text-align: center;
+  }
+  .category-info h3 {
+    margin-bottom: 2px;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+  .category-info span { font-size: 8px; }
   .campaign-section { padding-left: 17px; padding-right: 17px; }
   .campaign-grid { grid-template-columns: 1fr 1fr; gap: 7px; min-height: 0; }
   .campaign-card:first-child { grid-column: 1 / -1; min-height: 290px; }
@@ -962,8 +1010,26 @@ img { display: block; max-width: 100%; }
   .product-details { padding-top: 8px; }
   .product-name { min-height: 36px; margin-top: 4px; margin-bottom: 5px; line-height: 1.45; }
   .product-name { font-size: 12px; }
-  .product-card-actions { display: block; }
-  .product-card-actions .text-link { display: block; margin-top: 9px; }
+  .product-card-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .product-card-actions .text-link,
+  .product-card-actions .preview-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-height: 33px;
+    margin-top: 0;
+    padding-right: 6px;
+    padding-left: 6px;
+    font-size: 9px;
+  }
+  .product-card-actions .text-link { flex: 1; }
   .product-preview { padding-top: 38px; }
   .product-preview-layout { display: block; margin-top: 27px; }
   .product-preview-image { aspect-ratio: 1 / 1.05; }
