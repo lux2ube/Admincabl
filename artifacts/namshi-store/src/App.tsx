@@ -722,7 +722,7 @@ function App() {
     return [...categoryMap.values()];
   }, [products]);
   const displayCategories = useMemo(() => (
-    [...categories].sort((a, b) => categoryRank(a.name) - categoryRank(b.name)).slice(0, 4)
+    [...categories].sort((a, b) => categoryRank(a.name) - categoryRank(b.name))
   ), [categories]);
 
   const searchSuggestions = useMemo(() => {
@@ -992,6 +992,15 @@ function App() {
     } else {
       const category = categories.find((item) => item.id === filter);
       if (category) navigateTo(`/category/${category.slug}`, 'discover');
+    }
+  };
+
+  const chooseBrand = (slug: string | null) => {
+    setActiveFilter('ALL');
+    if (slug) {
+      navigateTo(`/brand/${slug}`, 'discover');
+    } else {
+      navigateTo('/', 'discover');
     }
   };
 
@@ -1421,10 +1430,19 @@ function App() {
              </div>
           </div>
           <div className="product-toolbar">
-            <div className="filter-row" role="tablist" aria-label="Product categories">
-              {filterOptions.map((filter) => (
-                <button className={`filter-button ${activeFilter === filter.value ? 'active' : ''}`} type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`filter-${filter.value.toLowerCase()}`}>{filter.label}</button>
-              ))}
+             <div className="filter-groups">
+               <div className="filter-row" role="tablist" aria-label="Product categories">
+                 {filterOptions.map((filter) => (
+                   <button className={`filter-button ${activeFilter === filter.value ? 'active' : ''}`} type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`filter-${filter.value.toLowerCase()}`}>{filter.label}</button>
+                 ))}
+               </div>
+               <div className="brand-filter-row" role="tablist" aria-label="Product brands">
+                 <span className="filter-group-label">العلامة</span>
+                 <button className={`filter-button ${route.kind !== 'brand' ? 'active' : ''}`} type="button" onClick={() => chooseBrand(null)} data-testid="filter-brand-all">كل العلامات</button>
+                 {brandOptions.map((brand) => (
+                   <button className={`filter-button ${route.kind === 'brand' && route.slug === brand.slug ? 'active' : ''}`} type="button" key={brand.slug} onClick={() => chooseBrand(brand.slug)} data-testid={`filter-brand-${brand.slug}`}>{brand.name}</button>
+                 ))}
+               </div>
             </div>
              <button className="sort-button" type="button" onClick={() => announce('يتم عرض المنتجات بالترتيب الافتراضي')} data-testid="button-sort">ترتيب العرض <ChevronDown size={13} /></button>
           </div>
