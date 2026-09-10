@@ -417,7 +417,7 @@ function ProductPreview({
           <div className="product-spec-list">
             <div><span>العلامة</span><strong>{product.brand}</strong></div>
             <div><span>الفئة</span><strong>{product.category?.name ?? '—'}</strong></div>
-             <div><span>التوفر</span><strong className={product.quantity > 0 ? 'stock-available' : 'stock-unavailable'}>{product.quantity > 0 ? `متوفر · ${product.quantity} قطعة` : 'غير متوفر حاليًا'}</strong></div>
+              <div><span>التوفر</span><strong className={product.quantity > 0 ? 'stock-available' : 'stock-unavailable'}>{product.quantity > 0 ? `متوفر الآن · ${product.quantity} قطعة` : 'غير متوفر حاليًا'}</strong></div>
               <div><span>التوصيل</span><strong>{shippingSummary}</strong></div>
             {product.sku && <div><span>SKU</span><strong>{product.sku}</strong></div>}
             {product.warranty && <div><span>الضمان</span><strong>{product.warranty}</strong></div>}
@@ -1269,14 +1269,14 @@ function App() {
             {filterOptions.slice(1).map((filter) => <button type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`nav-category-${filter.value}`}>{filter.label}</button>)}
             <button type="button" onClick={() => chooseCategory('ALL')} data-testid="nav-brands">العلامات الأصلية</button>
             <button type="button" onClick={() => scrollTo('about')} data-testid="nav-about">عن CABL</button>
-            <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="nav-sale">تسوق الآن</button>
+            <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="nav-sale">اختر ما يناسبك</button>
           </nav>
 
           {mobileMenuOpen && (
             <nav className="mobile-nav" aria-label="تنقل الهاتف" data-testid="nav-mobile">
               {filterOptions.slice(1).map((filter) => <button type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`mobile-nav-category-${filter.value}`}>{filter.label}</button>)}
               <button type="button" onClick={() => scrollTo('about')} data-testid="mobile-nav-about">عن CABL</button>
-              <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="mobile-nav-quote">تسوق الآن</button>
+              <button className="nav-highlight" type="button" onClick={() => scrollTo('discover')} data-testid="mobile-nav-quote">اختر ما يناسبك</button>
             </nav>
           )}
 
@@ -1690,8 +1690,8 @@ function App() {
       )}
       {cartOpen && (
         <div className="drawer-backdrop" role="presentation" onClick={() => setCartOpen(false)} data-testid="overlay-cart">
-            <aside className="cart-drawer" role="dialog" aria-modal="true" aria-label="قائمة طلب عرض السعر" onClick={(event) => event.stopPropagation()} data-testid="drawer-cart">
-            <div className="drawer-header"><h2>السلة <span>({cart.length})</span></h2><button className="close-button" type="button" onClick={() => setCartOpen(false)} aria-label="إغلاق السلة" data-testid="button-close-cart"><X size={16} /></button></div>
+            <aside className="cart-drawer" role="dialog" aria-modal="true" aria-label="راجع طلبك قبل الدفع" onClick={(event) => event.stopPropagation()} data-testid="drawer-cart">
+            <div className="drawer-header"><h2>راجع طلبك قبل الدفع <span>({cart.length})</span></h2><button className="close-button" type="button" onClick={() => setCartOpen(false)} aria-label="إغلاق السلة" data-testid="button-close-cart"><X size={16} /></button></div>
             {cart.length === 0 ? (
               <div className="cart-empty"><div><ShoppingBag size={29} strokeWidth={1.2} /><p>أضف المنتجات التي تريد شراءها.</p><button className="button-dark" type="button" onClick={() => { setCartOpen(false); scrollTo('discover'); }} data-testid="button-start-shopping">تصفح المنتجات</button></div></div>
             ) : (
@@ -1737,15 +1737,15 @@ function App() {
           <section className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title" onClick={(event) => event.stopPropagation()} data-testid="modal-quote">
             <div className="drawer-header"><h2 id="quote-title">إتمام الطلب</h2><button className="close-button" type="button" onClick={closeQuoteForm} aria-label="إغلاق النموذج" data-testid="button-close-quote"><X size={16} /></button></div>
             {quoteSubmitted ? (
-                <div className="quote-success" data-testid="status-quote-submitted">
-                  {lastOrder ? <><strong>تم حفظ طلبك بنجاح.</strong><p>رقم الطلب: <strong>{lastOrder.id}</strong></p><p>طريقة الدفع: {lastOrder.paymentMethodName}. حالة الدفع: {lastOrder.paymentStatus === 'cod_pending' ? 'الدفع عند الاستلام' : 'بانتظار مراجعة التحويل'}</p><p>الحالة الحالية: {lastOrder.status}. يمكنك متابعة الشحن من زر تتبع الطلب.</p><div className="product-card-actions"><button className="button-dark" type="button" onClick={openTracking} data-testid="button-track-created-order">تتبع الطلب</button><button className="preview-link" type="button" onClick={closeQuoteForm} data-testid="button-finish-quote">حسنًا</button></div></> : <><strong>تم حفظ طلبك على الجهاز.</strong><p>لا يوجد اتصال حاليًا. سيُرسل الطلب تلقائيًا إلى CABL عند عودة الإنترنت.</p><button className="button-dark" type="button" onClick={closeQuoteForm} data-testid="button-finish-offline-order">حسنًا</button></>}
+              <div className="quote-success" data-testid="status-quote-submitted">
+                  {lastOrder ? <><strong>تم تأكيد طلبك.</strong><p>رقم الطلب: <strong>{lastOrder.id}</strong></p><p>طريقة الدفع: {lastOrder.paymentMethodName}. حالة الدفع: {lastOrder.paymentStatus === 'cod_pending' ? 'الدفع عند الاستلام' : 'بانتظار مراجعة التحويل'}</p><p>الحالة الحالية: {lastOrder.status}. يمكنك متابعة الشحن من زر تتبع الطلب.</p><div className="product-card-actions"><button className="button-dark" type="button" onClick={openTracking} data-testid="button-track-created-order">تتبع الطلب</button><button className="preview-link" type="button" onClick={closeQuoteForm} data-testid="button-finish-quote">حسنًا</button></div></> : <><strong>تم حفظ طلبك على الجهاز.</strong><p>لا يوجد اتصال حاليًا. سيُرسل الطلب تلقائيًا إلى CABL عند عودة الإنترنت.</p><button className="button-dark" type="button" onClick={closeQuoteForm} data-testid="button-finish-offline-order">حسنًا</button></>}
                 </div>
              ) : (
                <form className="quote-form checkout-layout" onSubmit={submitQuote}>
                  <div className="checkout-details">
                     <div className="checkout-heading">
                       <p className="checkout-kicker">CABL · CHECKOUT</p>
-                      <h3>تأكيد طلبك</h3>
+                       <h3>أكمل طلبك</h3>
                       <div className="checkout-steps" aria-label="مراحل إتمام الطلب"><span className="active">1 البيانات</span><span>2 التوصيل</span><span>3 الدفع</span><span>4 تأكيد</span></div>
                       <p className="quote-intro">أدخل البيانات الضرورية فقط. لا تحتاج إلى إنشاء حساب لإتمام الشراء.</p>
                       <div className="checkout-trust"><CircleCheck size={15} /> السعر والتوصيل يظهران قبل التأكيد · دعم WhatsApp متاح</div>

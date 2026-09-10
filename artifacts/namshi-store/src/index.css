@@ -1954,4 +1954,9 @@ img { display: block; max-width: 100%; }
 @media (max-width: 767px) {
   .product-preview-price span { font-size: 9px; }
   .product-fit-prompt { margin-top: 15px; font-size: 12px; }
+  .cart-drawer .drawer-header h2 {
+    max-width: calc(100% - 42px);
+    font-size: 19px;
+    line-height: 1.4;
+  }
 }
