@@ -1315,22 +1315,20 @@ function CablBrandPage({
         brandNames={brandNames}
       />
       <main>
-        <section className="cabl-brand-hero">
-          <div className="cv-container cabl-brand-hero-inner">
-            <div className="cabl-brand-hero-copy">
-              <span className="cabl-brand-badge"><Sparkles size={13} /> علامة {brandName}</span>
-              <h1>منتجات {brandName}<br /><span>في CABL</span></h1>
-              <p>{page.description}</p>
-              <div className="cabl-brand-hero-actions">
-                <button type="button" className="cabl-brand-primary" onClick={() => window.document.getElementById('brand-products')?.scrollIntoView({ behavior: 'smooth' })}>منتجات مختارة <ArrowDownIcon /></button>
-                <button type="button" className="cabl-brand-secondary" onClick={() => window.document.getElementById('brand-categories')?.scrollIntoView({ behavior: 'smooth' })}>اختر قسمًا <ArrowLeft size={16} /></button>
-              </div>
-            </div>
-            {products[0] && <div className="cabl-brand-hero-product">
-              <span className="cabl-brand-hero-product-label">متوفر في كتالوج CABL</span>
-              <img src={products[0].image} alt={productAlt(products[0])} />
-            </div>}
-          </div>
+        <section className="cabl-route-hero cv-container">
+          <nav className="cabl-breadcrumbs" aria-label="مسار التنقل">
+            <a href={`${import.meta.env.BASE_URL}`} onClick={(event) => { event.preventDefault(); onGoHome(); }}>الرئيسية</a>
+            <span>/</span>
+            <span>{page.h1}</span>
+          </nav>
+          <span className="cabl-route-eyebrow">علامة {brandName}</span>
+          <h1>{page.h1}</h1>
+          <p>{page.description}</p>
+        </section>
+        <section className="cabl-route-points cv-container" aria-label="نقاط مهمة">
+          <div><CircleCheck size={18} /><span>منتجات {brandName} من كتالوج CABL</span></div>
+          <div><CircleCheck size={18} /><span>مواصفات وأسعار واضحة قبل الشراء</span></div>
+          <div><CircleCheck size={18} /><span>شحن ودفع يظهران قبل تأكيد الطلب</span></div>
         </section>
         <section className="cabl-brand-categories" id="brand-categories">
           <div className="cv-container">
