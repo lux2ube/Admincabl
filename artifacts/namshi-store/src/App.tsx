@@ -362,6 +362,349 @@ function CablLogo({ className = '', showTagline = true }: { className?: string; 
   );
 }
 
+const cairoAsset = (filename: string) => `${import.meta.env.BASE_URL}images/cairovolt/${filename}`;
+const cairoVideo = (filename: string) => `${import.meta.env.BASE_URL}videos/cairovolt/${filename}`;
+
+type CairoVoltHomeProps = {
+  products: Product[];
+  featuredProducts: Product[];
+  formatMoney: (amountUsd: number) => string;
+  favorites: string[];
+  cartItemCount: number;
+  onAddToCart: (product: Product) => void;
+  onToggleFavorite: (id: string) => void;
+  onOpenProduct: (product: Product) => void;
+  onOpenCart: () => void;
+  onOpenWishlist: () => void;
+  onOpenSearch: () => void;
+  onGoHome: () => void;
+  searchOpen: boolean;
+  query: string;
+  onQueryChange: (value: string) => void;
+  onSubmitSearch: () => void;
+  searchSuggestions: SearchSuggestion[];
+  onSelectSuggestion: (suggestion: SearchSuggestion) => void;
+  mobileMenuOpen: boolean;
+  onToggleMobileMenu: () => void;
+  onScroll: (id: string) => void;
+  onSelectCategoryByHint: (...hints: string[]) => void;
+  onSelectCategory: (value: string) => void;
+  filterOptions: Array<{ value: string; label: string }>;
+  activeFilter: string;
+  email: string;
+  onEmailChange: (value: string) => void;
+  subscribed: boolean;
+  newsletterSubmitting: boolean;
+  newsletterError: string;
+  onSubmitEmail: (event: FormEvent<HTMLFormElement>) => void;
+  onOpenTracking: () => void;
+  onOpenQuote: () => void;
+};
+
+function CairoVoltHome({
+  products,
+  featuredProducts,
+  formatMoney,
+  favorites,
+  cartItemCount,
+  onAddToCart,
+  onToggleFavorite,
+  onOpenProduct,
+  onOpenCart,
+  onOpenWishlist,
+  onOpenSearch,
+  onGoHome,
+  searchOpen,
+  query,
+  onQueryChange,
+  onSubmitSearch,
+  searchSuggestions,
+  onSelectSuggestion,
+  mobileMenuOpen,
+  onToggleMobileMenu,
+  onScroll,
+  onSelectCategoryByHint,
+  onSelectCategory,
+  filterOptions,
+  activeFilter,
+  email,
+  onEmailChange,
+  subscribed,
+  newsletterSubmitting,
+  newsletterError,
+  onSubmitEmail,
+  onOpenTracking,
+  onOpenQuote,
+}: CairoVoltHomeProps) {
+  const needs = [
+    {
+      title: 'صوت على مزاجك',
+      body: 'ايربودز، هيدفون وسبيكرات لكل لحظة.',
+      image: 'soundcore-liberty-5-tws-earbuds-cutout-cairovolt-1e9b8521.png',
+      hint: 'سماعة',
+    },
+    {
+      title: 'طاقة تكمّل اليوم',
+      body: 'باور بانك للسفر واليوم الطويل.',
+      image: 'anker-zolo-a110d-power-bank-cutout-cairovolt-ea83402d.png',
+      hint: 'باور',
+    },
+    {
+      title: 'شحن أسرع وأأمن',
+      body: 'GaN وPD لقدرة تناسب جهازك.',
+      image: 'anker-nano-45w-smart-display-charger-cutout-cairovolt-a1111cb1.png',
+      hint: 'شاحن',
+    },
+    {
+      title: 'الكابل الصح لجهازك',
+      body: 'USB-C وLightning بقدرات واضحة.',
+      image: 'anker-a8050-usb-c-cable-cutout-cairovolt-353ff8ec.png',
+      hint: 'كابل',
+    },
+    {
+      title: 'عربيتك أذكى',
+      body: 'حوامل وشواحن ثابتة على الطريق.',
+      image: 'anker-a2216-magnetic-car-charger-cutout-cairovolt-ef76b31b.png',
+      hint: 'سيار',
+    },
+  ];
+  const families = [
+    {
+      title: 'ساوندكور من انكر',
+      body: 'اسمع كل تفصيلة.',
+      detail: 'من سماعة للمواصلات، لهيدفون يساعدك تركز، لسبيكر يغيّر جو المكان — اختار الصوت على حسب اللحظة.',
+      image: 'joyroom-3-in-1-wireless-charging-station-cutout-cairovolt-268bad6d.png',
+      button: 'استكشف عالم ساوندكور',
+      hint: 'سماعة',
+      className: 'soundcore',
+    },
+    {
+      title: 'انكر',
+      body: 'طاقة تثق فيها.',
+      detail: 'باور بانك، شواحن وكابلات لقدرة واضحة من غير حيرة.',
+      image: 'anker-zolo-a110d-power-bank-cutout-cairovolt-ea83402d.png',
+      button: 'تسوق انكر',
+      hint: 'انكر',
+      className: 'anker',
+    },
+    {
+      title: 'Joyroom',
+      body: 'ذكاء في كل جنيه.',
+      detail: 'مواصفات مفيدة وسعر عملي للاستخدام اليومي.',
+      image: 'anker-a8050-usb-c-cable-cutout-cairovolt-353ff8ec.png',
+      button: 'تسوق Joyroom',
+      hint: 'جوي',
+      className: 'joyroom',
+    },
+    {
+      title: 'JBL',
+      body: 'صوت له تاريخ من 1946.',
+      detail: 'سبيكرات وهيدفون وايربودز وبازوكا حفلات — من علامة Harman العالمية، بمواصفات معلنة لكل موديل.',
+      image: 'jbl-charge-5-portable-speaker-cutout-cairovolt-42b20303.png',
+      button: 'تسوق JBL',
+      hint: 'JBL',
+      className: 'jbl',
+    },
+  ];
+  const cardCopy = [
+    ['اختيار مميز', 'انكر', 'انكر زولو 20,000', '1,730', '1,959', '12%', 'anker-zolo-a110e-20000mah-power-bank-builtin-cable-dual-output-cairovolt-480-353d5fd3.webp'],
+    ['الأكثر مبيعاً', 'ساوندكور', 'ساوندكور R50i NC', '1,199', '1,440', '17%', 'anker-soundcore-r50i-nc-earbud-anc-driver-detail-closeup-480-509a8f8b.webp'],
+    ['جديد', 'ساوندكور', 'ساوندكور P30i', '1,199', '1,440', '17%', 'soundcore-p30i-earbuds-main-view-cairovolt-480-bc523a0c.webp'],
+    ['اختيار مميز', 'انكر', 'شاحن انكر نانو 45 واط', '790', '949', '17%', 'anker-nano-45w-package-box-contents-specifications-480-0e765f84.webp'],
+    ['الفلاجشيب', 'انكر', 'انكر برايم 25,000 — 165 واط', '3,950', '4,750', '17%', 'anker-prime-a1695-25000mah-165w-power-bank-premium-cairovolt-480-22da426a.webp'],
+    ['ساوندكور', 'ساوندكور', 'ساوندكور K20i', '750', '849', '12%', 'anker-soundcore-k20i-wireless-earbuds-charging-case-cairovolt-480-d20e8934.webp'],
+    ['قيمة ممتازة', 'جوي روم', 'جوي روم T03S Pro ANC', '664', '799', '17%', 'joyroom-joyroom-t03s-pro-earbuds-egypt-cairo-9-480-d7c3c333.webp'],
+    ['ساوندكور', 'ساوندكور', 'سبيكر ساوندكور Flare 2', '2,999', '3,569', '16%', 'anker-soundcore-flare-2-ipx7-waterproof-pool-outdoor-480-777b83c9.webp'],
+    ['اختيار اقتصادي', 'جوي روم', 'شاحن جوي روم USB-C 20 واط', '236', '290', '19%', 'joyroom-joyroom-20w-usb-c-charger-egypt-cairo-1-480-24f631ca.webp'],
+  ] as const;
+  const cards = featuredProducts.slice(0, cardCopy.length);
+
+  return (
+    <div className="cv-site" dir="rtl">
+      <div className="cv-utility">
+        <div className="cv-container cv-utility-inner">
+          <span>ضمان كايرو فولت مكتوب</span>
+          <span>توصيل داخل مصر</span>
+          <a href="tel:01558245974"><Smartphone size={13} /> 01558245974</a>
+          <button type="button" onClick={() => onScroll('cv-footer')}>English</button>
+        </div>
+      </div>
+      <header className="cv-header">
+        <div className="cv-container cv-header-inner">
+          <button className="cv-logo-button" type="button" onClick={onGoHome} aria-label="العودة إلى الصفحة الرئيسية">
+            <img src={cairoAsset('cairovolt_logo-8fcc534f.webp')} alt="CairoVolt" />
+          </button>
+          <nav className={`cv-nav ${mobileMenuOpen ? 'is-open' : ''}`} aria-label="التنقل الرئيسي">
+            <button type="button" onClick={() => onSelectCategoryByHint('انكر')}>انكر <ChevronDown size={13} /></button>
+            <button type="button" onClick={() => onSelectCategoryByHint('جوي', 'Joyroom')}>جوي روم <ChevronDown size={13} /></button>
+            <button type="button" onClick={() => onSelectCategoryByHint('JBL')}>JBL <ChevronDown size={13} /></button>
+            <button type="button" onClick={() => onSelectCategoryByHint('باور')}>باور بانك</button>
+            <button type="button" onClick={() => onSelectCategoryByHint('شاحن')}>شواحن</button>
+            <button type="button" onClick={() => onScroll('cv-footer')}>المدونة</button>
+          </nav>
+          <div className="cv-header-actions">
+            <button type="button" onClick={onOpenSearch} aria-label="البحث"><Search size={22} /></button>
+            <button type="button" onClick={onOpenCart} aria-label="السلة" className="cv-cart-button"><ShoppingBag size={22} />{cartItemCount > 0 && <b>{cartItemCount}</b>}</button>
+            <button type="button" onClick={onToggleMobileMenu} className="cv-menu-button" aria-label="القائمة">{mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}</button>
+          </div>
+        </div>
+        {searchOpen && (
+          <div className="cv-search-panel cv-container">
+            <form onSubmit={(event) => { event.preventDefault(); onSubmitSearch(); }}>
+              <Search size={18} />
+              <input autoFocus value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder="ابحث عن منتج أو مواصفة" aria-label="البحث عن منتج" />
+              <button type="submit">بحث</button>
+            </form>
+            {query && <div className="cv-search-results">
+              <span>{searchSuggestions.length} نتيجة</span>
+              {searchSuggestions.slice(0, 5).map((suggestion) => <button type="button" key={`${suggestion.kind}-${suggestion.id}`} onClick={() => onSelectSuggestion(suggestion)}><strong>{suggestion.title}</strong><small>{suggestion.subtitle}</small><ArrowLeft size={14} /></button>)}
+            </div>}
+          </div>
+        )}
+      </header>
+
+      <main>
+        <section className="cv-hero">
+          <video autoPlay muted loop playsInline poster={cairoAsset('cairovolt-hero-poster-c3c783e4.webp')} src={cairoVideo('cairovolt-hero-209cdb1c.mp4')} />
+          <div className="cv-hero-shade" />
+          <div className="cv-hero-copy cv-container">
+            <h1>شحن ذكي يعرف جهازك،<br /><span>ويحميه كل لحظة.</span></h1>
+            <p>انكر نانو 45 واط · شاشة ذكية تعرض حالة الشحن لحظيًا</p>
+            <div className="cv-hero-price"><strong>1,250 <small>ج.م</small></strong><del>1,550 ج.م</del><b>خصم 19%</b></div>
+            <button className="cv-dark-button" type="button" onClick={() => onScroll('cv-products')}>اشترِ الآن <ArrowLeft size={16} /></button>
+          </div>
+        </section>
+
+        <section className="cv-trust cv-container" aria-label="مزايا المتجر">
+          <div><CircleCheck size={22} /><strong>سجل ضمان كايرو فولت</strong><span>راجع سيريال كرت الضمان الصادر من كايرو فولت</span></div>
+          <div><Truck size={22} /><strong>توصيل داخل مصر</strong><span>تُؤكد أهلية العنوان مع الطلب</span></div>
+          <div><Banknote size={22} /><strong>ادفع عند الاستلام</strong><span>متاح للطلبات المؤهلة</span></div>
+          <div><ShieldCheck size={22} /><strong>ضمان كايرو فولت واضح حسب المنتج</strong><span>من غير وعود عامة مبهمة</span></div>
+        </section>
+
+        <section className="cv-section cv-needs" id="cv-needs">
+          <div className="cv-container">
+            <div className="cv-section-heading"><div><span>ابدأ من احتياجك</span><h2>مش لازم تحفظ أرقام الموديلات.</h2></div><p>قسمنا المتجر حسب المشكلة اللي عايز تحلها، عشان توصل للاختيار المناسب بأقل مجهود.</p></div>
+            <div className="cv-needs-grid">
+              {needs.map((item) => <button type="button" className="cv-need-card" key={item.title} onClick={() => onSelectCategoryByHint(item.hint)}><div><h3>{item.title}</h3><p>{item.body}</p><span>اكتشف الخيارات <ArrowLeft size={15} /></span></div><img src={cairoAsset(item.image)} alt={item.title} /></button>)}
+            </div>
+          </div>
+        </section>
+
+        <section className="cv-section cv-products" id="cv-products">
+          <div className="cv-container">
+            <div className="cv-section-heading"><div><span>اختيارات مميزة من الكتالوج</span><h2>ابدأ من اختيارات واضحة ومتنوعة</h2></div><p>مزيج مختار من انكر وساوندكور وجوي روم — بأسعار مطابقة للكتالوج وإضافة سريعة للسلة.</p></div>
+            <div className="cv-product-tabs">
+              <button className={activeFilter === 'ALL' ? 'active' : ''} type="button" onClick={() => onSelectCategory('ALL')}>كل الاختيارات</button>
+              <button type="button" onClick={() => onSelectCategoryByHint('سماعة')}>صوتيات</button>
+              <button type="button" onClick={() => onSelectCategoryByHint('باور')}>باور بانك</button>
+              <button type="button" onClick={() => onSelectCategoryByHint('شاحن')}>شحن</button>
+            </div>
+            <div className="cv-product-grid">
+              {cards.map((product, index) => {
+                const copy = cardCopy[index];
+                return <article className="cv-product-card" key={product.id}>
+                  <div className="cv-product-image" role="button" tabIndex={0} onClick={() => onOpenProduct(product)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onOpenProduct(product); }} aria-label={`فتح ${copy[2]}`}>
+                    <img src={cairoAsset(copy[6])} alt={copy[2]} loading="lazy" />
+                    <span>{copy[0]}</span>
+                    <button type="button" className={`cv-wish ${favorites.includes(product.id) ? 'active' : ''}`} onClick={(event) => { event.stopPropagation(); onToggleFavorite(product.id); }} aria-label="إضافة للمفضلة"><Heart size={16} fill={favorites.includes(product.id) ? 'currentColor' : 'none'} /></button>
+                  </div>
+                  <div className="cv-product-copy"><small>{copy[1]}</small><button type="button" onClick={() => onOpenProduct(product)}><strong>{copy[2]}</strong><span>افتح الصفحة للمواصفات والضمان <ArrowLeft size={14} /></span></button><div className="cv-price"><strong>{copy[3]} <small>ج.م</small></strong><del>{copy[4]} ج.م</del><b>خصم {copy[5]}</b></div><button className="cv-add-button" type="button" disabled={product.quantity <= 0} onClick={() => onAddToCart(product)}>إضافة سريعة</button></div>
+                </article>;
+              })}
+            </div>
+            {cards.length === 0 && <p className="cv-empty">المنتجات قيد التحميل...</p>}
+          </div>
+        </section>
+
+        <section className="cv-section cv-families">
+          <div className="cv-container">
+            <div className="cv-section-heading"><div><span>اختار الشخصية اللي شبه يومك</span><h2>أربع عائلات. كل واحدة بتحل حاجة مختلفة.</h2></div></div>
+            <div className="cv-family-grid">
+              {families.map((family) => <article className={`cv-family-card ${family.className}`} key={family.title}><div><h3>{family.title}</h3><strong>{family.body}</strong><p>{family.detail}</p><button type="button" onClick={() => onSelectCategoryByHint(family.hint)}>{family.button} <ArrowLeft size={15} /></button></div><img src={cairoAsset(family.image)} alt={family.title} /></article>)}
+            </div>
+          </div>
+        </section>
+
+        <section className="cv-awards">
+          <div className="cv-container"><h2>العلامات التي نوفّرها حاصلة على اعتمادات وجوائز عالمية</h2><div>{['apple-mfi-1b032938.png', 'hi-res-audio-9ba396d9.png', 'qi2-certified-f628e9b4.png', 'tuv-rheinland-b8cee8e7.png', 'ces-innovation-9b26d863.png', 'if-world-design-b131be7d.png', 'chargerlab-golden-2025-c91edc9c.png', 'ce-fcc-rohs-a8de02ea.png'].map((image) => <img key={image} src={cairoAsset(image)} alt="" loading="lazy" />)}</div></div>
+        </section>
+
+        <section className="cv-section cv-newsletter" id="cv-newsletter">
+          <div className="cv-container"><div><span>خلّي الطاقة مستمرة.</span><h2>كل جديد في مكان واحد.</h2></div><div><p>اشترك ليصلك الجديد والعروض والتحديثات من كايرو فولت.</p>{subscribed ? <strong>تمت إضافتك إلى القائمة.</strong> : <form onSubmit={onSubmitEmail}><input type="email" required value={email} onChange={(event) => onEmailChange(event.target.value)} placeholder="بريدك الإلكتروني" aria-label="بريدك الإلكتروني" /><button type="submit" disabled={newsletterSubmitting}>اشترك الآن <ArrowLeft size={15} /></button></form>}{newsletterError && <small className="cv-error">{newsletterError}</small>}</div></div>
+        </section>
+      </main>
+
+      <footer className="cv-footer" id="cv-footer">
+        <div className="cv-container">
+          <div className="cv-footer-grid">
+            <div className="cv-footer-brand"><img src={cairoAsset('cairovolt_logo-8fcc534f.webp')} alt="CairoVolt" /><p>كايرو فولت متجر إلكتروني مصري مستقل لمنتجات انكر وساوندكور وJBL وجوي روم الأصلية — أسعار واضحة، فاتورة مع كل طلب، وضمان متجر مكتوب.</p><a href="tel:01558245974">01558245974</a><a href="mailto:info@cairovolt.com">info@cairovolt.com</a></div>
+            <div><h3>تسوق حسب الفئة</h3><button type="button" onClick={() => onSelectCategoryByHint('باور')}>باور بانك</button><button type="button" onClick={() => onSelectCategoryByHint('شاحن')}>شواحن</button><button type="button" onClick={() => onSelectCategoryByHint('سماعة')}>سماعات بلوتوث</button><button type="button" onClick={() => onSelectCategoryByHint('كابل')}>كابلات شحن</button></div>
+            <div><h3>خدمة العملاء</h3><button type="button" onClick={onOpenTracking}>تحقق من سجل الضمان</button><button type="button" onClick={onOpenQuote}>تواصل معنا</button><button type="button" onClick={() => onScroll('cv-trust')}>سياسة الشحن</button><button type="button" onClick={() => onScroll('cv-products')}>الأسئلة الشائعة</button></div>
+            <div><h3>مركز المواصفات</h3><button type="button" onClick={onOpenSearch}>مصادر خارجية للمراجعة</button><button type="button" onClick={() => onScroll('cv-products')}>افتح صفحة المنتج</button><button type="button" onClick={onOpenWishlist}>المفضلة</button><button type="button" onClick={onOpenCart}>السلة ({cartItemCount})</button></div>
+          </div>
+          <div className="cv-footer-bottom"><span>© 2026 كايرو فولت. جميع الحقوق محفوظة.</span><span>سياسة الخصوصية · الشروط والأحكام</span></div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+type CairoVoltProductHeaderProps = {
+  cartItemCount: number;
+  onOpenCart: () => void;
+  onGoHome: () => void;
+  onOpenSearch: () => void;
+  mobileMenuOpen: boolean;
+  onToggleMobileMenu: () => void;
+  onScroll: (id: string) => void;
+  onSelectCategoryByHint: (...hints: string[]) => void;
+};
+
+function CairoVoltProductHeader({
+  cartItemCount,
+  onOpenCart,
+  onGoHome,
+  onOpenSearch,
+  mobileMenuOpen,
+  onToggleMobileMenu,
+  onScroll,
+  onSelectCategoryByHint,
+}: CairoVoltProductHeaderProps) {
+  return (
+    <div className="cv-site cv-product-header" dir="rtl">
+      <div className="cv-utility">
+        <div className="cv-container cv-utility-inner">
+          <span>ضمان كايرو فولت مكتوب</span>
+          <span>توصيل داخل مصر</span>
+          <a href="tel:01558245974"><Smartphone size={13} /> 01558245974</a>
+          <button type="button" onClick={() => onScroll('top')}>English</button>
+        </div>
+      </div>
+      <header className="cv-header">
+        <div className="cv-container cv-header-inner">
+          <button className="cv-logo-button" type="button" onClick={onGoHome} aria-label="العودة إلى الصفحة الرئيسية">
+            <img src={cairoAsset('cairovolt_logo-8fcc534f.webp')} alt="CairoVolt" />
+          </button>
+          <nav className={`cv-nav ${mobileMenuOpen ? 'is-open' : ''}`} aria-label="التنقل الرئيسي">
+            <button type="button" onClick={() => onSelectCategoryByHint('انكر')}>انكر <ChevronDown size={13} /></button>
+            <button type="button" onClick={() => onSelectCategoryByHint('جوي', 'Joyroom')}>جوي روم <ChevronDown size={13} /></button>
+            <button type="button" onClick={() => onSelectCategoryByHint('JBL')}>JBL <ChevronDown size={13} /></button>
+            <button type="button" onClick={() => onSelectCategoryByHint('باور')}>باور بانك</button>
+            <button type="button" onClick={() => onSelectCategoryByHint('شاحن')}>شواحن</button>
+            <button type="button" onClick={() => onScroll('top')}>المدونة</button>
+          </nav>
+          <div className="cv-header-actions">
+            <button type="button" onClick={onOpenSearch} aria-label="البحث"><Search size={22} /></button>
+            <button type="button" onClick={onOpenCart} aria-label="السلة" className="cv-cart-button"><ShoppingBag size={22} />{cartItemCount > 0 && <b>{cartItemCount}</b>}</button>
+            <button type="button" onClick={onToggleMobileMenu} className="cv-menu-button" aria-label="القائمة">{mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}</button>
+          </div>
+        </div>
+      </header>
+    </div>
+  );
+}
+
 function ProductPreview({
   product,
   relatedProducts,
@@ -802,6 +1145,15 @@ function App() {
   const categoryIdFor = (...hints: string[]) =>
     categories.find((category) => hints.some((hint) => category.name.includes(hint)))?.id ?? 'ALL';
 
+  const selectCairoCategory = (...hints: string[]) => {
+    const brand = brandOptions.find((item) => hints.some((hint) => item.name.includes(hint)));
+    if (brand) {
+      chooseBrand(brand.slug);
+      return;
+    }
+    chooseCategory(categoryIdFor(...hints));
+  };
+
   const listingH1 = route.kind === 'category'
     ? seo?.h1 ?? categories.find((category) => category.slug === route.slug)?.name ?? 'منتجات CABL'
     : route.kind === 'brand'
@@ -1221,6 +1573,17 @@ function App() {
 
   return (
     <div className={`site-shell ${selectedProduct ? 'product-page-shell' : ''}`}>
+      {selectedProduct ? <div className="legacy-catalog-shell cv-product-layout">
+      <CairoVoltProductHeader
+        cartItemCount={cartItemCount}
+        onOpenCart={() => setCartOpen(true)}
+        onGoHome={() => navigateTo('/')}
+        onOpenSearch={() => navigateTo('/')}
+        mobileMenuOpen={mobileMenuOpen}
+        onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)}
+        onScroll={scrollTo}
+        onSelectCategoryByHint={selectCairoCategory}
+      />
       <header className="main-header" data-testid="header-storefront">
         <div className="header-inner">
           <div className="header-row">
@@ -1641,6 +2004,51 @@ function App() {
           <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لـ Baseus و Vention في اليمن · منتجات Anker و UGREEN متوفرة.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
         </div>
       </footer>
+      </div> : (
+        <CairoVoltHome
+          products={products}
+          featuredProducts={visibleProducts}
+          formatMoney={formatMoney}
+          favorites={favorites}
+          cartItemCount={cartItemCount}
+          onAddToCart={addToCart}
+          onToggleFavorite={toggleFavorite}
+          onOpenProduct={openProductPreview}
+          onOpenCart={() => setCartOpen(true)}
+          onOpenWishlist={() => setWishlistOpen(true)}
+          onOpenSearch={() => setSearchOpen(true)}
+          onGoHome={() => navigateTo('/')}
+          searchOpen={searchOpen}
+          query={query}
+          onQueryChange={setQuery}
+          onSubmitSearch={submitSearch}
+          searchSuggestions={searchSuggestions}
+          onSelectSuggestion={(suggestion) => {
+            setSearchOpen(false);
+            if (suggestion.kind === 'product') {
+              const product = products.find((item) => item.id === suggestion.id);
+              if (product) openProductPreview(product);
+            } else {
+              navigateTo(`/${suggestion.kind}/${suggestion.slug}`);
+            }
+          }}
+          mobileMenuOpen={mobileMenuOpen}
+          onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)}
+          onScroll={scrollTo}
+          onSelectCategoryByHint={selectCairoCategory}
+          onSelectCategory={chooseCategory}
+          filterOptions={filterOptions}
+          activeFilter={activeFilter}
+          email={email}
+          onEmailChange={setEmail}
+          subscribed={subscribed}
+          newsletterSubmitting={newsletterSubmitting}
+          newsletterError={newsletterError}
+          onSubmitEmail={submitEmail}
+          onOpenTracking={openTracking}
+          onOpenQuote={openQuoteForm}
+        />
+      )}
 
       {brandFilterOpen && (
         <div className="filter-sheet-backdrop" role="presentation" onClick={() => setBrandFilterOpen(false)} data-testid="overlay-brand-filter">
