@@ -1962,15 +1962,15 @@ img { display: block; max-width: 100%; }
 }
 
 .cv-site {
-  --cv-blue: #2459e8;
-  --cv-deep: #0d172b;
-  --cv-ink: #17233a;
-  --cv-muted: #667085;
-  --cv-soft: #f5f7fb;
-  --cv-line: #e6eaf2;
-  background: #fff;
+  --cv-blue: var(--cobalt);
+  --cv-deep: var(--ink);
+  --cv-ink: var(--ink);
+  --cv-muted: var(--muted-ink);
+  --cv-soft: var(--paper);
+  --cv-line: var(--line);
+  background: var(--paper);
   color: var(--cv-ink);
-  font-family: var(--font-body), "Arial", sans-serif;
+  font-family: var(--font-sans), "IBM Plex Sans Arabic", Arial, sans-serif;
   line-height: 1.5;
   overflow: hidden;
 }
@@ -1981,17 +1981,19 @@ img { display: block; max-width: 100%; }
 .cv-container { width: min(1200px, calc(100% - 48px)); margin: 0 auto; }
 .cv-utility {
   min-height: 31px;
-  background: linear-gradient(90deg, #2355e5, #4334e8);
+  background: var(--ink);
   color: #fff;
   font-size: 11px;
 }
 .cv-utility-inner { display: flex; align-items: center; justify-content: flex-start; gap: 27px; min-height: 31px; }
 .cv-utility a, .cv-utility button { display: inline-flex; align-items: center; gap: 5px; border: 0; color: inherit; background: transparent; text-decoration: none; }
 .cv-utility button { margin-right: auto; border-radius: 4px; background: rgba(255,255,255,.2); padding: 2px 10px; font-size: 10px; }
-.cv-header { position: relative; z-index: 10; background: #fff; border-bottom: 1px solid #edf0f5; }
+.cv-header { position: relative; z-index: 10; background: var(--paper); border-bottom: 1px solid var(--line); }
 .cv-header-inner { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 69px; }
 .cv-logo-button { justify-self: end; border: 0; background: transparent; padding: 0; }
 .cv-logo-button img { width: 102px; height: auto; }
+.cv-logo-button .cabl-logo { color: var(--ink); }
+.cv-logo-button .cabl-logo-copy strong { font-family: var(--font-display); }
 .cv-nav { display: flex; align-items: center; justify-content: center; gap: 30px; }
 .cv-nav button { display: inline-flex; align-items: center; gap: 4px; border: 0; background: transparent; color: #101828; font-size: 13px; transition: color .2s ease; }
 .cv-nav button:hover { color: var(--cv-blue); }
@@ -2094,6 +2096,8 @@ img { display: block; max-width: 100%; }
 .cv-footer { background: var(--cv-deep); color: #fff; padding: 58px 0 20px; }
 .cv-footer-grid { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); gap: 35px; padding-bottom: 44px; }
 .cv-footer-brand img { width: 112px; margin-bottom: 17px; filter: brightness(0) invert(1); }
+.cv-footer-brand .cabl-logo { margin-bottom: 17px; color: #fff; }
+.cv-footer-brand .cabl-logo-copy small { color: #bdb9ad; }
 .cv-footer-brand p { max-width: 280px; margin: 0 0 16px; color: #aeb9ce; font-size: 11px; line-height: 1.9; }
 .cv-footer-brand a { display: block; width: fit-content; margin-top: 5px; color: #fff; font-size: 11px; text-decoration: none; }
 .cv-footer-grid > div:not(.cv-footer-brand) { display: grid; align-content: start; gap: 10px; }
@@ -2263,7 +2267,7 @@ img { display: block; max-width: 100%; }
   .cv-product-layout .product-spec-list div { padding: 9px; }
 }
 
-/* Apply the CairoVolt visual language to every commerce surface, not only home. */
+/* Apply the CABL visual language to every commerce surface, not only home. */
 .cairo-store-shell .drawer-backdrop,
 .cairo-store-shell .modal-backdrop {
   background: rgba(13, 23, 43, .58);
@@ -2279,7 +2283,7 @@ img { display: block; max-width: 100%; }
   color: var(--cv-ink);
   padding: 25px;
   box-shadow: -18px 0 45px rgba(13, 23, 43, .18);
-  font-family: var(--font-body), "Arial", sans-serif;
+  font-family: var(--font-sans), "IBM Plex Sans Arabic", Arial, sans-serif;
 }
 .cairo-store-shell .drawer-header {
   border-bottom-color: var(--cv-line);
@@ -2341,7 +2345,7 @@ img { display: block; max-width: 100%; }
   background: #fff;
   color: var(--cv-ink);
   box-shadow: 0 25px 80px rgba(13, 23, 43, .22);
-  font-family: var(--font-body), "Arial", sans-serif;
+  font-family: var(--font-sans), "IBM Plex Sans Arabic", Arial, sans-serif;
 }
 .cairo-store-shell .quote-form input,
 .cairo-store-shell .quote-form textarea,
@@ -2353,7 +2357,7 @@ img { display: block; max-width: 100%; }
 }
 .cairo-store-shell .quote-form input:focus,
 .cairo-store-shell .quote-form textarea:focus,
-.cairo-store-shell .quote-form select:focus { border-color: var(--cv-blue); box-shadow: 0 0 0 3px rgba(36, 89, 232, .1); }
+.cairo-store-shell .quote-form select:focus { border-color: var(--cv-blue); box-shadow: 0 0 0 3px rgba(23, 72, 189, .1); }
 .cairo-store-shell .checkout-heading,
 .cairo-store-shell .checkout-section,
 .cairo-store-shell .summary-heading,
@@ -2402,6 +2406,12 @@ img { display: block; max-width: 100%; }
 
 .checkout-mobile-brandbar {
   display: none;
+}
+.checkout-mobile-brandbar .cabl-logo {
+  color: var(--ink);
+}
+.checkout-mobile-brandbar .cabl-logo-copy strong {
+  font-family: var(--font-display);
 }
 .checkout-coupon {
   display: flex;
@@ -2532,9 +2542,8 @@ img { display: block; max-width: 100%; }
     font-size: 16px;
     font-weight: 800;
   }
-  .cairo-store-shell .checkout-mobile-brandbar img {
+  .cairo-store-shell .checkout-mobile-brandbar .cabl-logo {
     width: 104px;
-    height: auto;
     margin-left: auto;
   }
   .cairo-store-shell .quote-modal > .drawer-header {

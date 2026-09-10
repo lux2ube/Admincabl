@@ -113,9 +113,9 @@ const DEFAULT_CURRENCIES: StoreCurrency[] = [
   { code: 'NYER', name: 'ريال يمني جديد', ratePerUsd: 1572, isDefault: false },
   { code: 'SAR', name: 'ريال سعودي', ratePerUsd: 3.83, isDefault: false },
 ];
-const WHATSAPP_URL = 'https://wa.me/967771106977?text=' + encodeURIComponent('مرحبًا CairoVolt، أريد مساعدة في اختيار المنتجات المناسبة لي.');
-const HOME_TITLE = 'CairoVolt | منتجات الشحن والطاقة الأصلية';
-const HOME_DESCRIPTION = 'تسوق منتجات الشحن والطاقة والإكسسوارات من كتالوج CairoVolt، مع أسعار ومخزون وخيارات شحن مأخوذة من المتجر.';
+const WHATSAPP_URL = 'https://wa.me/967771106977?text=' + encodeURIComponent('مرحبًا CABL، أريد مساعدة في اختيار المنتجات المناسبة لي.');
+const HOME_TITLE = 'CABL | منتجات الشحن والطاقة الأصلية';
+const HOME_DESCRIPTION = 'تسوق منتجات الشحن والطاقة والإكسسوارات من كتالوج CABL، مع أسعار ومخزون وخيارات شحن مأخوذة من المتجر.';
 const GLOBAL_SEARCH_KEYWORDS = [
   'شواحن', 'شاحن جوال', 'شاحن تلفون', 'شواحن تلفونات', 'شاحن سريع', 'شاحن أصلي', 'شاحن سامسونج', 'Samsung',
   'شاحن آيفون', 'iPhone', 'شاحن تايب سي', 'Type-C', 'شاحن يو إس بي', 'USB', 'شاحن 20 واط', 'شاحن 25 واط',
@@ -131,7 +131,7 @@ const GLOBAL_SEARCH_KEYWORDS = [
   'وصلات يوقرين', 'انكر', 'Anker', 'منتجات انكر', 'شواحن انكر', 'وصلات انكر', 'شواحن أصلية', 'وصلات أصلية',
   'اكسسوارات جوال أصلية', 'شراء شاحن', 'شراء وصلة', 'شراء خازن', 'متجر شواحن', 'متجر اكسسوارات جوال',
   'متجر إلكترونيات', 'شواحن ومنتجات أصلية', 'شواحن ووصلات', 'اكسسوارات جوال',
-  'CairoVolt',
+  'CABL',
 ];
 
 const dedupeKeywords = (keywords: string[]) => [...new Set(keywords.filter(Boolean))];
@@ -217,7 +217,7 @@ function getProductKeywords(product: Product) {
     product.category?.name ?? '',
     product.sku,
     product.color,
-    'CairoVolt',
+    'CABL',
     'منتجات أصلية',
     'متجر إلكترونيات',
   ];
@@ -279,7 +279,7 @@ function buildProductWhatsAppUrl(
     ? `${shippingOption.free ? 'مجاني' : formatMoney(shippingOption.charge)} · ${shippingOption.estimatedDays ? `${shippingOption.estimatedDays} أيام تقريبًا` : 'يحدد عند تأكيد العنوان'}`
     : 'يحدد عند تأكيد العنوان';
   const message = [
-    'مرحبًا CairoVolt، أريد شراء هذا المنتج مباشرة عبر WhatsApp.',
+    'مرحبًا CABL، أريد شراء هذا المنتج مباشرة عبر WhatsApp.',
     '',
     `المنتج: ${product.name}`,
     `العلامة: ${product.brand}`,
@@ -506,7 +506,7 @@ function CairoVoltHome({
       <header className="cv-header">
         <div className="cv-container cv-header-inner">
           <button className="cv-logo-button" type="button" onClick={onGoHome} aria-label="العودة إلى الصفحة الرئيسية">
-            <img src={cairoAsset('cairovolt_logo-8fcc534f.webp')} alt="CairoVolt" />
+            <CablLogo showTagline={false} />
           </button>
           <nav className={`cv-nav ${mobileMenuOpen ? 'is-open' : ''}`} aria-label="التنقل الرئيسي">
             {brandNames.slice(0, 3).map((brand) => <button type="button" key={brand} onClick={() => onSelectCategoryByHint(brand)}>{brand} <ChevronDown size={13} /></button>)}
@@ -610,7 +610,7 @@ function CairoVoltHome({
       <footer className="cv-footer" id="cv-footer">
         <div className="cv-container">
           <div className="cv-footer-grid">
-             <div className="cv-footer-brand"><img src={cairoAsset('cairovolt_logo-8fcc534f.webp')} alt="CairoVolt" /><p>متجر CairoVolt لمنتجات الشحن والطاقة من {brandNames.join(' و ') || 'العلامات المتاحة'} — أسعار واضحة ومواصفات مرتبطة بالكتالوج.</p><button type="button" onClick={onOpenQuote}>تواصل مع خدمة العملاء</button></div>
+             <div className="cv-footer-brand"><CablLogo showTagline={false} /><p>متجر CABL لمنتجات الشحن والطاقة من {brandNames.join(' و ') || 'العلامات المتاحة'} — أسعار واضحة ومواصفات مرتبطة بالكتالوج.</p><button type="button" onClick={onOpenQuote}>تواصل مع خدمة العملاء</button></div>
             <div><h3>تسوق حسب الفئة</h3><button type="button" onClick={() => onSelectCategoryByHint('باور')}>باور بانك</button><button type="button" onClick={() => onSelectCategoryByHint('شاحن')}>شواحن</button><button type="button" onClick={() => onSelectCategoryByHint('سماعة')}>سماعات بلوتوث</button><button type="button" onClick={() => onSelectCategoryByHint('كابل')}>كابلات شحن</button></div>
             <div><h3>خدمة العملاء</h3><button type="button" onClick={onOpenTracking}>تحقق من سجل الضمان</button><button type="button" onClick={onOpenQuote}>تواصل معنا</button><button type="button" onClick={() => onScroll('cv-trust')}>سياسة الشحن</button><button type="button" onClick={() => onScroll('cv-products')}>الأسئلة الشائعة</button></div>
             <div><h3>مركز المواصفات</h3><button type="button" onClick={onOpenSearch}>مصادر خارجية للمراجعة</button><button type="button" onClick={() => onScroll('cv-products')}>افتح صفحة المنتج</button><button type="button" onClick={onOpenWishlist}>المفضلة</button><button type="button" onClick={onOpenCart}>السلة ({cartItemCount})</button></div>
@@ -660,7 +660,7 @@ function CairoVoltProductHeader({
       <header className="cv-header">
         <div className="cv-container cv-header-inner">
           <button className="cv-logo-button" type="button" onClick={onGoHome} aria-label="العودة إلى الصفحة الرئيسية">
-            <img src={cairoAsset('cairovolt_logo-8fcc534f.webp')} alt="CairoVolt" />
+            <CablLogo showTagline={false} />
           </button>
           <nav className={`cv-nav ${mobileMenuOpen ? 'is-open' : ''}`} aria-label="التنقل الرئيسي">
             {brandNames.slice(0, 3).map((brand) => <button type="button" key={brand} onClick={() => onSelectCategoryByHint(brand)}>{brand} <ChevronDown size={13} /></button>)}
@@ -969,7 +969,7 @@ function App() {
     discountPrice: product.discountPrice,
     price: product.discountPrice ?? product.regularPrice,
     color: product.shortDescription ?? product.productDescription ?? `منتج أصلي من ${product.brand}`,
-    description: product.productDescription ?? product.shortDescription ?? `منتج أصلي من ${product.brand} متوفر في متجر CairoVolt.`,
+    description: product.productDescription ?? product.shortDescription ?? `منتج أصلي من ${product.brand} متوفر في متجر CABL.`,
     note: product.productNote,
     category: product.category,
     image: product.images[0]
@@ -1468,9 +1468,9 @@ function App() {
     const pageSeo: StoreSeoResponse = route.kind === 'search'
       ? {
         ...seo,
-        title: query.trim() ? `نتائج البحث عن ${query.trim()} | CairoVolt` : 'البحث في متجر CairoVolt',
+        title: query.trim() ? `نتائج البحث عن ${query.trim()} | CABL` : 'البحث في متجر CABL',
         h1: query.trim() ? `نتائج البحث عن «${query.trim()}»` : 'البحث في متجر CABL',
-        description: 'نتائج البحث داخل كتالوج CairoVolt. صفحات البحث والفلاتر غير قابلة للفهرسة.',
+        description: 'نتائج البحث داخل كتالوج CABL. صفحات البحث والفلاتر غير قابلة للفهرسة.',
         canonicalPath: '/search',
         indexable: false,
         breadcrumbs: [{ name: 'الرئيسية', path: '/' }, { name: 'البحث', path: '/search' }],
@@ -2144,7 +2144,7 @@ function App() {
               <span>EN</span>
               <button type="button" onClick={() => { closeQuoteForm(); setCartOpen(true); }} aria-label="فتح السلة"><ShoppingBag size={21} /></button>
               <button type="button" onClick={() => { closeQuoteForm(); setSearchOpen(true); }} aria-label="فتح البحث"><Search size={22} /></button>
-              <img src={cairoAsset('cairovolt_logo-8fcc534f.webp')} alt="CairoVolt" />
+              <CablLogo showTagline={false} />
             </div>
             <div className="drawer-header"><h2 id="quote-title">إتمام الطلب</h2><button className="close-button" type="button" onClick={closeQuoteForm} aria-label="إغلاق النموذج" data-testid="button-close-quote"><X size={16} /></button></div>
             {quoteSubmitted ? (
@@ -2204,7 +2204,7 @@ function App() {
             <div className="account-actions">
               <button type="button" onClick={openTracking}><ClipboardList size={18} /><span><strong>تتبع طلباتي</strong><small>اعرض حالة الطلب باستخدام بريدك ورقم هاتفك</small></span><ArrowLeft size={15} /></button>
               <button type="button" onClick={() => { setAccountOpen(false); setWishlistOpen(true); }}><Heart size={18} /><span><strong>المفضلة</strong><small>المنتجات التي حفظتها للعودة إليها لاحقًا</small></span><ArrowLeft size={15} /></button>
-              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer"><FaWhatsapp size={18} /><span><strong>تواصل مع CairoVolt</strong><small>مساعدة قبل وبعد الشراء عبر WhatsApp</small></span><ArrowLeft size={15} /></a>
+              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer"><FaWhatsapp size={18} /><span><strong>تواصل مع CABL</strong><small>مساعدة قبل وبعد الشراء عبر WhatsApp</small></span><ArrowLeft size={15} /></a>
             </div>
           </aside>
         </div>
