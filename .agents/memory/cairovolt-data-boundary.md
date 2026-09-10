@@ -7,4 +7,4 @@ Reference-site visuals are presentation assets only. Product names, prices, disc
 
 **Why:** This preserves the user's data ownership and prevents reference-site prices, availability, or checkout promises from leaking into live commerce behavior.
 
-**How to apply:** Keep CairoVolt branding and local visual assets in the web artifact, but make product cards, hero price data, product details, cart totals, checkout validation, and order tracking read from the database/API.
+**How to apply:** Keep CairoVolt branding and local visual assets in the web artifact, but make product cards, hero price data, product details, cart totals, checkout validation, and order tracking read from the database/API. Do not invent reference-site governorates, prices, shipping thresholds, payment promises, or contact settings when the current schema does not provide them; show a generic database-backed option or add an explicit settings model first.

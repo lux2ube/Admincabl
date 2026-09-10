@@ -855,10 +855,13 @@ function App() {
   const [paymentMethodId, setPaymentMethodId] = useState<number | null>(null);
   const [paymentReference, setPaymentReference] = useState('');
   const [quoteForm, setQuoteForm] = useState({
+    fullName: '',
     firstName: '',
     lastName: '',
     email: '',
     phoneNumber: '',
+    whatsappNumber: '',
+    couponCode: '',
     addressLine1: '',
     city: '',
     country: 'اليمن',
@@ -1343,16 +1346,21 @@ function App() {
       return;
     }
 
+    const nameParts = quoteForm.fullName.trim().split(/\s+/).filter(Boolean);
+    const firstName = nameParts[0] ?? quoteForm.firstName.trim();
+    const lastName = nameParts.slice(1).join(' ') || quoteForm.lastName.trim() || 'عميل';
+    const normalizedPhone = quoteForm.phoneNumber.trim();
+    const orderEmail = quoteForm.email.trim() || `${normalizedPhone.replace(/[^\d+]/g, '') || 'customer'}@orders.cairovolt.local`;
     const orderPayload: Parameters<typeof createStoreOrder>[0] = {
         customer: {
-          firstName: quoteForm.firstName.trim(),
-          lastName: quoteForm.lastName.trim(),
-          email: quoteForm.email.trim(),
-          phoneNumber: quoteForm.phoneNumber.trim(),
+          firstName,
+          lastName,
+          email: orderEmail,
+          phoneNumber: normalizedPhone,
         },
         address: {
           addressLine1: quoteForm.addressLine1.trim(),
-          addressLine2: null,
+          addressLine2: quoteForm.whatsappNumber.trim() ? `واتساب: ${quoteForm.whatsappNumber.trim()}` : null,
           postalCode: null,
           country: quoteForm.country.trim(),
           city: quoteForm.city.trim(),
@@ -1362,7 +1370,7 @@ function App() {
         shippingId: selectedShippingId,
         paymentMethodId: selectedPaymentMethodId,
         paymentReference: selectedPaymentMethod?.requiresTransactionReference ? paymentReference.trim() || null : null,
-        couponCode: null,
+        couponCode: quoteForm.couponCode.trim() || null,
     };
 
     if (!navigator.onLine) {
@@ -2082,8 +2090,8 @@ function App() {
       )}
       {cartOpen && (
         <div className="drawer-backdrop" role="presentation" onClick={() => setCartOpen(false)} data-testid="overlay-cart">
-            <aside className="cart-drawer" role="dialog" aria-modal="true" aria-label="راجع طلبك قبل الدفع" onClick={(event) => event.stopPropagation()} data-testid="drawer-cart">
-            <div className="drawer-header"><h2>راجع طلبك قبل الدفع <span>({cart.length})</span></h2><button className="close-button" type="button" onClick={() => setCartOpen(false)} aria-label="إغلاق السلة" data-testid="button-close-cart"><X size={16} /></button></div>
+            <aside className="cart-drawer" role="dialog" aria-modal="true" aria-label="سلة المشتريات" onClick={(event) => event.stopPropagation()} data-testid="drawer-cart">
+            <div className="drawer-header"><h2>سلة المشتريات <span>({cartItemCount})</span></h2><button className="close-button" type="button" onClick={() => setCartOpen(false)} aria-label="إغلاق السلة" data-testid="button-close-cart"><X size={16} /></button></div>
             {cart.length === 0 ? (
               <div className="cart-empty"><div><ShoppingBag size={29} strokeWidth={1.2} /><p>أضف المنتجات التي تريد شراءها.</p><button className="button-dark" type="button" onClick={() => { setCartOpen(false); scrollTo('discover'); }} data-testid="button-start-shopping">تصفح المنتجات</button></div></div>
             ) : (
@@ -2113,6 +2121,10 @@ function App() {
                     );
                   })}
                 </div>
+                <div className="cart-shipping-progress" aria-live="polite">
+                  <span>{shippingOptions.some((option) => option.free) ? 'اختر الشحن المجاني إذا كان متاحًا لطلبك' : 'تظهر تكلفة الشحن حسب الخيار المحدد'}</span>
+                  <i><b /></i>
+                </div>
                   <div className="cart-summary" aria-label="ملخص السلة">
                     <div><span>الإجمالي الفرعي</span><strong>{formatMoney(cartSubtotal)}</strong></div>
                     <div><span>التوصيل</span><strong>{cartShipping === 0 ? 'مجاني' : formatMoney(cartShipping)}</strong></div>
@@ -2127,6 +2139,13 @@ function App() {
       {quoteOpen && (
         <div className="modal-backdrop" role="presentation" onClick={closeQuoteForm} data-testid="overlay-quote">
           <section className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title" onClick={(event) => event.stopPropagation()} data-testid="modal-quote">
+            <div className="checkout-mobile-brandbar" aria-label="ترويسة إتمام الطلب">
+              <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} aria-label="فتح القائمة"><Menu size={22} /></button>
+              <span>EN</span>
+              <button type="button" onClick={() => { closeQuoteForm(); setCartOpen(true); }} aria-label="فتح السلة"><ShoppingBag size={21} /></button>
+              <button type="button" onClick={() => { closeQuoteForm(); setSearchOpen(true); }} aria-label="فتح البحث"><Search size={22} /></button>
+              <img src={cairoAsset('cairovolt_logo-8fcc534f.webp')} alt="CairoVolt" />
+            </div>
             <div className="drawer-header"><h2 id="quote-title">إتمام الطلب</h2><button className="close-button" type="button" onClick={closeQuoteForm} aria-label="إغلاق النموذج" data-testid="button-close-quote"><X size={16} /></button></div>
             {quoteSubmitted ? (
               <div className="quote-success" data-testid="status-quote-submitted">
@@ -2142,15 +2161,18 @@ function App() {
                       <p className="quote-intro">أدخل البيانات الضرورية فقط. لا تحتاج إلى إنشاء حساب لإتمام الشراء.</p>
                       <div className="checkout-trust"><CircleCheck size={15} /> السعر والتوصيل يظهران قبل التأكيد · دعم WhatsApp متاح</div>
                     </div>
-                    <div className="checkout-section"><h4>بيانات العميل</h4><div className="quote-form-grid"><label>الاسم الأول<input required minLength={2} maxLength={100} value={quoteForm.firstName} onChange={(event) => updateQuoteField('firstName', event.target.value)} autoComplete="given-name" data-testid="input-order-first-name" /></label><label>اسم العائلة<input required minLength={2} maxLength={100} value={quoteForm.lastName} onChange={(event) => updateQuoteField('lastName', event.target.value)} autoComplete="family-name" data-testid="input-order-last-name" /></label></div><div className="quote-form-grid"><label>البريد الإلكتروني<input required type="email" maxLength={255} value={quoteForm.email} onChange={(event) => updateQuoteField('email', event.target.value)} autoComplete="email" inputMode="email" data-testid="input-order-email" /></label><label>رقم الهاتف<input required minLength={9} maxLength={13} pattern="(?:\+967|967)?[0-9]{9}" title="أدخل رقم هاتف يمنيًا مكونًا من 9 أرقام" value={quoteForm.phoneNumber} onChange={(event) => updateQuoteField('phoneNumber', event.target.value)} autoComplete="tel" inputMode="tel" placeholder="771234567" data-testid="input-order-phone" /></label></div></div>
-                    <div className="checkout-section"><h4>بيانات التوصيل</h4><label>العنوان<input required minLength={3} maxLength={500} value={quoteForm.addressLine1} onChange={(event) => updateQuoteField('addressLine1', event.target.value)} autoComplete="street-address" placeholder="الحي، الشارع، أقرب معلم" data-testid="input-order-address" /></label><label>المدينة<input required minLength={2} maxLength={100} value={quoteForm.city} onChange={(event) => updateQuoteField('city', event.target.value)} autoComplete="address-level2" placeholder="صنعاء، عدن، تعز..." data-testid="input-order-city" /></label><label>طريقة الشحن<select required value={selectedShippingId ?? ''} onChange={(event) => setShippingId(Number(event.target.value))} data-testid="select-order-shipping">{shippingOptions.map((option) => <option key={option.id} value={option.id}>{option.name}{option.free ? ' · مجاني' : ` · ${formatMoney(option.charge)}`}{option.estimatedDays ? ` · ${option.estimatedDays} أيام` : ''}</option>)}</select></label></div>
-                   <div className="checkout-section"><h4>طريقة الدفع</h4><label className="payment-select-label"><span>اختر طريقة الدفع</span><select required value={selectedPaymentMethodId ?? ''} onChange={(event) => { setPaymentMethodId(Number(event.target.value)); setPaymentReference(''); }} data-testid="select-payment-method">{paymentMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}</select></label>{selectedPaymentMethod && <div className="payment-instructions" data-testid="payment-instructions"><div className="payment-instructions-title"><span className="payment-method-icon"><PaymentMethodIcon method={selectedPaymentMethod} /></span><strong>{selectedPaymentMethod.name}</strong></div>{selectedPaymentMethod.accountName && <p>اسم الحساب: <b>{selectedPaymentMethod.accountName}</b></p>}{selectedPaymentMethod.accountNumber && <p>رقم الحساب: <b dir="ltr">{selectedPaymentMethod.accountNumber}</b></p>}<p>{selectedPaymentMethod.instructions ?? 'اتبع تعليمات الدفع الظاهرة ثم أكمل الطلب.'}</p>{selectedPaymentMethod.requiresTransactionReference && <label>رقم العملية بعد التحويل<input required value={paymentReference} onChange={(event) => setPaymentReference(event.target.value)} maxLength={255} placeholder="أدخل رقم العملية" data-testid="input-payment-reference" /></label>}</div>}</div>
+                     <div className="checkout-section"><h4>معلومات الشحن</h4><label>الاسم بالكامل<input required minLength={2} maxLength={200} value={quoteForm.fullName} onChange={(event) => updateQuoteField('fullName', event.target.value)} autoComplete="name" placeholder="أحمد محمد" data-testid="input-order-full-name" /></label><label>رقم الهاتف<input required minLength={5} maxLength={40} value={quoteForm.phoneNumber} onChange={(event) => updateQuoteField('phoneNumber', event.target.value)} autoComplete="tel" inputMode="tel" placeholder="01xxxxxxxxx" data-testid="input-order-phone" /></label><label>رقم الواتساب <span>(اختياري)</span><input maxLength={40} value={quoteForm.whatsappNumber} onChange={(event) => updateQuoteField('whatsappNumber', event.target.value)} autoComplete="tel" inputMode="tel" placeholder="فارغ إذا كان نفس رقم الهاتف" data-testid="input-order-whatsapp" /></label><label>البريد الإلكتروني <span>(اختياري)</span><input type="email" maxLength={255} value={quoteForm.email} onChange={(event) => updateQuoteField('email', event.target.value)} autoComplete="email" inputMode="email" placeholder="لإرسال تأكيد الطلب" data-testid="input-order-email" /></label><label>المحافظة / المدينة<input required minLength={2} maxLength={100} value={quoteForm.city} onChange={(event) => updateQuoteField('city', event.target.value)} autoComplete="address-level2" placeholder="اكتب المحافظة أو المدينة" data-testid="input-order-city" /></label><label>العنوان<textarea required minLength={3} maxLength={500} value={quoteForm.addressLine1} onChange={(event) => updateQuoteField('addressLine1', event.target.value)} autoComplete="street-address" placeholder="الشارع، المبنى، علامة مميزة" data-testid="input-order-address" /></label></div>
+                     <div className="checkout-section checkout-payment-section"><h4>طريقة الدفع</h4><label className="payment-select-label"><span>اختر طريقة الدفع</span><select required value={selectedPaymentMethodId ?? ''} onChange={(event) => { setPaymentMethodId(Number(event.target.value)); setPaymentReference(''); }} data-testid="select-payment-method">{paymentMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}</select></label>{selectedPaymentMethod && <div className="payment-instructions" data-testid="payment-instructions"><div className="payment-instructions-title"><span className="payment-method-icon"><PaymentMethodIcon method={selectedPaymentMethod} /></span><strong>{selectedPaymentMethod.name}</strong></div>{selectedPaymentMethod.accountName && <p>اسم الحساب: <b>{selectedPaymentMethod.accountName}</b></p>}{selectedPaymentMethod.accountNumber && <p>رقم الحساب: <b dir="ltr">{selectedPaymentMethod.accountNumber}</b></p>}<p>{selectedPaymentMethod.instructions ?? 'اتبع تعليمات الدفع الظاهرة ثم أكمل الطلب.'}</p>{selectedPaymentMethod.requiresTransactionReference && <label>رقم العملية بعد التحويل<input required value={paymentReference} onChange={(event) => setPaymentReference(event.target.value)} maxLength={255} placeholder="أدخل رقم العملية" data-testid="input-payment-reference" /></label>}</div>}</div>
                    {quoteError && <p className="form-error" role="alert" data-testid="error-quote">{quoteError}</p>}
-                   <button className="button-dark checkout-submit-mobile" type="submit" disabled={quoteSubmitting || cart.length === 0 || !selectedPaymentMethodId} data-testid="button-submit-quote">{quoteSubmitting ? 'جارٍ حفظ الطلب...' : selectedPaymentMethod?.requiresTransactionReference ? 'تأكيد التحويل وإرسال الطلب' : 'تأكيد الطلب والدفع عند الاستلام'}</button>
+                    <div className="checkout-benefits"><span>الدفع عند الاستلام</span><span>استبدال واسترجاع خلال 14 يومًا</span><span>ضمان المنتج حسب العلامة</span></div>
+                    <button className="button-dark checkout-submit-mobile" type="submit" disabled={quoteSubmitting || cart.length === 0 || !selectedPaymentMethodId} data-testid="button-submit-quote">{quoteSubmitting ? 'جارٍ حفظ الطلب...' : selectedPaymentMethod?.requiresTransactionReference ? 'تأكيد التحويل وإرسال الطلب' : 'تأكيد الطلب (الدفع عند الاستلام)'}</button>
                  </div>
                  <aside className="checkout-summary" aria-label="ملخص الطلب">
                    <div className="summary-heading"><p className="checkout-kicker">ORDER SUMMARY</p><h3>ملخص الطلب</h3></div>
                    <div className="summary-items">{cart.length === 0 ? <p className="summary-empty">السلة فارغة</p> : cart.map((product) => <div className="summary-item" key={product.id}><img src={product.image} alt="" /><div><strong>{product.name}</strong><span>{formatMoney(product.price)} · الكمية {cartQuantities[product.id] ?? 1}</span></div><button type="button" onClick={() => removeFromCart(product.id)} aria-label={`حذف ${product.name}`} data-testid={`button-remove-summary-${product.id}`}><X size={14} /></button></div>)}</div>
+                    <div className="checkout-coupon"><input value={quoteForm.couponCode} onChange={(event) => updateQuoteField('couponCode', event.target.value)} placeholder="كود خصم إن وجد" aria-label="كود الخصم" data-testid="input-coupon-code" /><button type="button" onClick={() => announce(quoteForm.couponCode.trim() ? 'سيتم تطبيق الكود عند تأكيد الطلب' : 'أدخل كود الخصم أولًا')} data-testid="button-apply-coupon">تطبيق</button></div>
+                    <label className="checkout-shipping-selector"><span>الشحن</span><select required value={selectedShippingId ?? ''} onChange={(event) => setShippingId(Number(event.target.value))} data-testid="select-order-shipping">{shippingOptions.map((option) => <option key={option.id} value={option.id}>{option.name}{option.free ? ' · مجاني' : ` · ${formatMoney(option.charge)}`}{option.estimatedDays ? ` · ${option.estimatedDays} أيام` : ''}</option>)}</select></label>
+                    <div className="shipping-eligibility">{shippingOptions.some((option) => option.free) ? 'تتوفر خيارات شحن مجاني حسب الطلب والعنوان' : 'تُحسب تكلفة الشحن حسب الخيار المحدد'}</div>
                    <div className="summary-totals"><div><span>الإجمالي الفرعي</span><b>{formatMoney(cartSubtotal)}</b></div><div><span>رسوم الشحن</span><b>{cartShipping === 0 ? 'مجاني' : formatMoney(cartShipping)}</b></div><div className="summary-total"><strong>الإجمالي</strong><strong>{formatMoney(cartTotal)}</strong></div></div>
                    <button className="button-dark checkout-submit" type="submit" disabled={quoteSubmitting || cart.length === 0 || !selectedPaymentMethodId} data-testid="button-submit-quote-summary">{quoteSubmitting ? 'جارٍ حفظ الطلب...' : 'تأكيد الطلب'}</button>
                  </aside>
