@@ -2262,3 +2262,140 @@ img { display: block; max-width: 100%; }
   .cv-product-layout .product-spec-list { gap: 8px; }
   .cv-product-layout .product-spec-list div { padding: 9px; }
 }
+
+/* Apply the CairoVolt visual language to every commerce surface, not only home. */
+.cairo-store-shell .drawer-backdrop,
+.cairo-store-shell .modal-backdrop {
+  background: rgba(13, 23, 43, .58);
+  backdrop-filter: blur(5px);
+}
+.cairo-store-shell .cart-drawer {
+  left: auto;
+  right: 0;
+  width: min(470px, 100%);
+  min-height: 100%;
+  border-radius: 18px 0 0 18px;
+  background: #fff;
+  color: var(--cv-ink);
+  padding: 25px;
+  box-shadow: -18px 0 45px rgba(13, 23, 43, .18);
+  font-family: var(--font-body), "Arial", sans-serif;
+}
+.cairo-store-shell .drawer-header {
+  border-bottom-color: var(--cv-line);
+  padding-bottom: 16px;
+}
+.cairo-store-shell .drawer-header h2 {
+  color: var(--cv-ink);
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: -.055em;
+}
+.cairo-store-shell .close-button {
+  border-color: var(--cv-line);
+  border-radius: 50%;
+  color: var(--cv-muted);
+}
+.cairo-store-shell .cart-empty svg,
+.cairo-store-shell .account-actions svg { color: var(--cv-blue); }
+.cairo-store-shell .cart-empty p,
+.cairo-store-shell .cart-item-info span,
+.cairo-store-shell .remove-item { color: var(--cv-muted); }
+.cairo-store-shell .cart-item { border-bottom-color: var(--cv-line); }
+.cairo-store-shell .cart-item img,
+.cairo-store-shell .summary-item img {
+  border-radius: 8px;
+  background: var(--cv-soft);
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.cairo-store-shell .cart-item-info strong { color: var(--cv-ink); }
+.cairo-store-shell .cart-line-total,
+.cairo-store-shell .cart-summary-total strong:last-child { color: var(--cv-blue); }
+.cairo-store-shell .quantity-control {
+  border-color: var(--cv-line);
+  border-radius: 999px;
+  background: var(--cv-soft);
+}
+.cairo-store-shell .quantity-control button { color: var(--cv-blue); }
+.cairo-store-shell .cart-summary,
+.cairo-store-shell .summary-totals .summary-total { border-color: var(--cv-line); }
+.cairo-store-shell .cart-summary > div,
+.cairo-store-shell .summary-totals > div { color: var(--cv-muted); }
+.cairo-store-shell .button-dark,
+.cairo-store-shell .checkout-button,
+.cairo-store-shell .checkout-submit,
+.cairo-store-shell .checkout-submit-mobile {
+  border: 0;
+  border-radius: 6px;
+  background: var(--cv-deep);
+  color: #fff;
+}
+.cairo-store-shell .button-dark:hover,
+.cairo-store-shell .checkout-button:hover,
+.cairo-store-shell .checkout-submit:hover,
+.cairo-store-shell .checkout-submit-mobile:hover { background: var(--cv-blue); }
+.cairo-store-shell .quote-modal {
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--cv-ink);
+  box-shadow: 0 25px 80px rgba(13, 23, 43, .22);
+  font-family: var(--font-body), "Arial", sans-serif;
+}
+.cairo-store-shell .quote-form input,
+.cairo-store-shell .quote-form textarea,
+.cairo-store-shell .quote-form select {
+  border-color: var(--cv-line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--cv-ink);
+}
+.cairo-store-shell .quote-form input:focus,
+.cairo-store-shell .quote-form textarea:focus,
+.cairo-store-shell .quote-form select:focus { border-color: var(--cv-blue); box-shadow: 0 0 0 3px rgba(36, 89, 232, .1); }
+.cairo-store-shell .checkout-heading,
+.cairo-store-shell .checkout-section,
+.cairo-store-shell .summary-heading,
+.cairo-store-shell .summary-item,
+.cairo-store-shell .checkout-summary { border-color: var(--cv-line); }
+.cairo-store-shell .checkout-heading h3,
+.cairo-store-shell .summary-heading h3,
+.cairo-store-shell .checkout-section h4 { color: var(--cv-ink); }
+.cairo-store-shell .checkout-kicker { color: var(--cv-blue); }
+.cairo-store-shell .checkout-steps .active { color: var(--cv-blue); }
+.cairo-store-shell .checkout-trust { color: #20845b; }
+.cairo-store-shell .payment-method-icon { border-radius: 8px; background: var(--cv-blue); color: #fff; }
+.cairo-store-shell .payment-instructions { border-color: var(--cv-line); border-radius: 8px; background: var(--cv-soft); }
+.cairo-store-shell .quote-success strong { color: var(--cv-blue); }
+.cairo-store-shell .tracking-results,
+.cairo-store-shell .tracking-detail { border-color: var(--cv-line); }
+.cairo-store-shell .tracking-order { border-bottom-color: var(--cv-line); }
+.cairo-store-shell .tracking-order strong { color: var(--cv-ink); }
+.cairo-store-shell .tracking-order small { color: var(--cv-muted); }
+.cairo-store-shell .account-actions button,
+.cairo-store-shell .account-actions a { border-bottom-color: var(--cv-line); color: var(--cv-ink); }
+.cairo-store-shell .account-actions small { color: var(--cv-muted); }
+.cairo-store-shell .offline-badge {
+  top: 84px;
+  border-color: #c9d7fa;
+  background: #eef3ff;
+  color: var(--cv-blue);
+}
+.cairo-store-shell .toast-message {
+  right: 22px;
+  left: auto;
+  border-right: 4px solid var(--cv-blue);
+  border-radius: 7px;
+  background: var(--cv-deep);
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(13, 23, 43, .2);
+}
+.cairo-store-shell .floating-tools { right: 16px; left: auto; }
+.cairo-store-shell .whatsapp-float { background: #20c778; }
+
+@media (max-width: 700px) {
+  .cairo-store-shell .cart-drawer { width: 100%; border-radius: 16px 16px 0 0; }
+  .cairo-store-shell .quote-modal { max-height: calc(100dvh - 20px); border-radius: 14px; padding: 20px; }
+  .cairo-store-shell .toast-message { right: 16px; left: 16px; max-width: none; }
+}

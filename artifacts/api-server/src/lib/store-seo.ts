@@ -65,8 +65,8 @@ type GuideSeoInput = {
   indexable: boolean;
 };
 
-const HOME_TITLE = "CABL | شواحن وكابلات أصلية في اليمن";
-const HOME_DESCRIPTION = "اشترِ شواحن وكابلات وباور بانك وإكسسوارات أصلية من Baseus وAnker وUGREEN وVention مع توصيل داخل اليمن.";
+const HOME_TITLE = "CairoVolt | منتجات الشحن والطاقة الأصلية";
+const HOME_DESCRIPTION = "تسوق منتجات الشحن والطاقة والإكسسوارات من كتالوج CairoVolt، مع أسعار ومخزون وخيارات شحن مأخوذة من المتجر.";
 
 const arabicLetters = new Map([
   ["ا", "a"], ["ب", "b"], ["ت", "t"], ["ث", "th"], ["ج", "j"], ["ح", "h"], ["خ", "kh"],
@@ -99,7 +99,7 @@ function productDisplayName(brand: string, productName: string) {
 function productDescription(input: ProductSeoInput, displayName: string) {
   return input.shortDescription
     || input.productDescription
-    || `${displayName} أصلي من CABL مع توصيل داخل اليمن.`;
+    || `${displayName} أصلي من CairoVolt مع خيارات الشحن المتاحة في المتجر.`;
 }
 
 function breadcrumbs(items: Breadcrumb[]) {
@@ -122,14 +122,14 @@ export function buildHomeSeo(): SeoResponse {
         {
           "@type": "Organization",
           "@id": "/#organization",
-          name: "CABL",
+          name: "CairoVolt",
           url: "/",
-          description: "متجر إلكترونيات وشواحن وكابلات أصلية داخل اليمن.",
+          description: "متجر إلكترونيات ومنتجات شحن وطاقة أصلية.",
         },
         {
           "@type": "WebSite",
           "@id": "/#website",
-          name: "CABL",
+          name: "CairoVolt",
           url: "/",
           inLanguage: "ar-YE",
           publisher: { "@id": "/#organization" },
@@ -137,9 +137,9 @@ export function buildHomeSeo(): SeoResponse {
         {
           "@type": "Store",
           "@id": "/#store",
-          name: "CABL شواحن وكابلات في اليمن",
+          name: "CairoVolt منتجات الشحن والطاقة",
           url: "/",
-          areaServed: "YE",
+          areaServed: "الإقليم المحدد في إعدادات المتجر",
           brand: ["Baseus", "Vention", "Anker", "UGREEN"],
         },
       ],
@@ -158,7 +158,7 @@ export function buildProductSeo(input: ProductSeoInput): SeoResponse {
   return {
     entityType: "product",
     slug: input.slug,
-    title: `${displayName} | ${categoryName} | CABL`,
+    title: `${displayName} | ${categoryName} | CairoVolt`,
     h1: input.productName,
     description,
     canonicalPath,
@@ -194,12 +194,12 @@ export function buildCategorySeo(input: CategorySeoInput): SeoResponse {
   const description = input.metaDescription
     || input.seoDescription
     || input.description
-    || `${input.name} الأصلية مع توصيل داخل اليمن.`;
+    || `${input.name} الأصلية مع خيارات الشحن المتاحة في CairoVolt.`;
 
   return {
     entityType: "category",
     slug: input.slug,
-    title: input.seoTitle || `${input.name} أصلية في اليمن | CABL`,
+    title: input.seoTitle || `${input.name} الأصلية | CairoVolt`,
     h1: input.name,
     description,
     canonicalPath,
@@ -221,12 +221,12 @@ export function buildBrandSeo(input: BrandSeoInput): SeoResponse {
   const description = input.metaDescription
     || input.seoDescription
     || input.description
-    || `منتجات ${input.name} الأصلية مع توصيل داخل اليمن.`;
+    || `منتجات ${input.name} الأصلية مع خيارات الشحن المتاحة في CairoVolt.`;
 
   return {
     entityType: "brand",
     slug: input.slug,
-    title: input.seoTitle || `منتجات ${input.name} الأصلية في اليمن | CABL`,
+    title: input.seoTitle || `منتجات ${input.name} الأصلية | CairoVolt`,
     h1: `منتجات ${input.name}`,
     description,
     canonicalPath,
@@ -264,7 +264,7 @@ export function buildGuideSeo(input: GuideSeoInput): SeoResponse {
       articleBody: input.content,
       url: canonicalPath,
       ...(input.imagePath ? { image: [input.imagePath] } : {}),
-      publisher: { "@type": "Organization", name: "CABL", url: "/" },
+       publisher: { "@type": "Organization", name: "CairoVolt", url: "/" },
     },
   };
 }
