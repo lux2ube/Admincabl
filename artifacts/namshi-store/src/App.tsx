@@ -408,10 +408,12 @@ function ProductPreview({
            </span>
           <h1>{product.name}</h1>
            <div className="product-preview-price">
+               <span>السعر النهائي</span>
               <strong>{formatMoney(product.price)}</strong>
               {product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>{formatMoney(product.regularPrice)}</del>}
            </div>
-          <p className="product-preview-description">{product.description || product.color}. حل عملي للشحن اليومي، المكتب، والسفر داخل اليمن.</p>
+           <p className="product-fit-prompt">هل يناسب جهازك؟</p>
+           <p className="product-preview-description">{product.description || product.color}. راجع القدرة والمنفذ والتفاصيل الظاهرة قبل الإضافة إلى السلة.</p>
           <div className="product-spec-list">
             <div><span>العلامة</span><strong>{product.brand}</strong></div>
             <div><span>الفئة</span><strong>{product.category?.name ?? '—'}</strong></div>
@@ -422,7 +424,7 @@ function ProductPreview({
              {product.note && <div><span>ملاحظة</span><strong>{product.note}</strong></div>}
           </div>
           <div className="product-preview-actions">
-             <button className="button-dark" type="button" disabled={product.quantity <= 0} onClick={() => onAddToCart(product)} data-testid={`button-preview-add-${product.id}`}>{product.quantity > 0 ? 'أضف إلى السلة' : 'غير متوفر'}</button>
+              <button className="button-dark" type="button" disabled={product.quantity <= 0} onClick={() => onAddToCart(product)} data-testid={`button-preview-add-${product.id}`}>{product.quantity > 0 ? 'أضف للسلة' : 'غير متوفر'}</button>
             <button className={`preview-wish ${isFavorite ? 'active' : ''}`} type="button" onClick={() => onToggleFavorite(product.id)} data-testid={`button-preview-favorite-${product.id}`}>
               <Heart size={17} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'في المفضلة' : 'حفظ للمفضلة'}
             </button>
@@ -434,8 +436,8 @@ function ProductPreview({
           </div>
         </div>
       </div>
-       <section className="product-seo-section" aria-labelledby="product-information-heading">
-         <span className="eyebrow">معلومات المنتج</span>
+         <section className="product-seo-section" aria-labelledby="product-information-heading">
+          <span className="eyebrow">أهم ما تحتاج معرفته قبل الشراء</span>
          <h2 id="product-information-heading">قبل شراء {product.name}</h2>
          <p>{product.description || product.color}. راجع العلامة والفئة والتوفر وطريقة التوصيل الظاهرة أعلاه، ثم اختر الكمية المناسبة قبل إضافة المنتج إلى السلة.</p>
          <div className="product-information-grid">
@@ -446,9 +448,9 @@ function ProductPreview({
          </div>
       </section>
        <div className="product-sticky-cta" aria-label={`إضافة ${product.name} إلى السلة`}>
-          <div><span>السعر</span><strong>{formatMoney(product.price)}</strong></div>
+           <div><span>السعر النهائي</span><strong>{formatMoney(product.price)}</strong></div>
          <button className="button-dark" type="button" disabled={product.quantity <= 0} onClick={() => onAddToCart(product)} data-testid={`button-sticky-add-${product.id}`}>
-           {product.quantity > 0 ? 'أضف إلى السلة' : 'غير متوفر'}
+            {product.quantity > 0 ? 'أضف للسلة' : 'غير متوفر'}
          </button>
        </div>
       {relatedProducts.length > 0 && (
@@ -1361,10 +1363,10 @@ function App() {
               />
               <div className="hero-shade" />
               <div className="hero-copy">
-                <span className="eyebrow">منتجات أصلية · توصيل داخل اليمن</span>
-                <h1>طاقة لخطوتك<br />القادمة.</h1>
-                <p>شواحن، كيابل وباور بانك من Baseus وVention وAnker وUGREEN.</p>
-                <button className="button-light" type="button" onClick={() => scrollTo('discover')} data-testid="button-hero-shop">تسوق الآن <ArrowLeft size={14} /></button>
+                 <span className="eyebrow">منتجات أصلية بمواصفات واضحة · توصيل داخل اليمن</span>
+                 <h1>اختر الشاحن المناسب<br />لجهازك.</h1>
+                 <p>شواحن وكيابل وباور بانك من Baseus وVention وAnker وUGREEN، لتقارن وتختار بثقة.</p>
+                 <button className="button-light" type="button" onClick={() => scrollTo('discover')} data-testid="button-hero-shop">اختر ما يناسبك <ArrowLeft size={14} /></button>
               </div>
             </article>
           ) : (
@@ -1382,9 +1384,9 @@ function App() {
           <div className="section-header">
             <div>
               <span className="eyebrow">تسوق حسب الفئة</span>
-              <h2>ماذا تبحث؟</h2>
+              <h2>تسوق حسب احتياجك</h2>
             </div>
-             <p>اختر نوع المنتج الذي تحتاجه وابدأ التسوق.</p>
+              <p>محتار أي منتج يناسبك؟ اختر جهازك أولًا.</p>
           </div>
           <div className="category-grid">
             {displayCategories.map((category) => (
@@ -1405,11 +1407,11 @@ function App() {
           <div className="section-header">
             <div>
               <span className="eyebrow">{listingH1 ? 'نتائج البحث' : 'تسوق سريع'}</span>
-                {listingH1 ? <h1>{listingH1}</h1> : <h2>منتجاتنا</h2>}
+                {listingH1 ? <h1>{listingH1}</h1> : <h2>تسوق حسب احتياجك</h2>}
             </div>
              <div className="discover-meta">
                {!listingH1 && <span>Baseus · Vention · Anker · UGREEN</span>}
-               <button className="text-link" type="button" onClick={() => chooseCategory('ALL')} data-testid="button-view-all">عرض الكل</button>
+                <button className="text-link" type="button" onClick={() => chooseCategory('ALL')} data-testid="button-view-all">كل المنتجات</button>
              </div>
           </div>
           <div className="product-toolbar">
@@ -1464,10 +1466,10 @@ function App() {
                      {product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>{formatMoney(product.regularPrice)}</del>}
                    </div>
                    <div className={`product-stock ${product.quantity > 0 ? 'available' : 'unavailable'}`}>
-                     {product.quantity > 0 ? <><CircleCheck size={13} /> متوفر</> : 'غير متوفر'}
+                      {product.quantity > 0 ? <><CircleCheck size={13} /> متوفر الآن</> : 'غير متوفر حاليًا'}
                    </div>
                    <div className="product-card-actions">
-                       <button className="card-add-button" type="button" disabled={product.quantity <= 0} onClick={() => addToCart(product)} data-testid={`button-add-product-${product.id}`}>{product.quantity > 0 ? 'أضف إلى السلة' : 'غير متوفر'}</button>
+                        <button className="card-add-button" type="button" disabled={product.quantity <= 0} onClick={() => addToCart(product)} data-testid={`button-add-product-${product.id}`}>{product.quantity > 0 ? 'أضف للسلة' : 'غير متوفر حاليًا'}</button>
                    </div>
                 </div>
               </article>
@@ -1492,33 +1494,33 @@ function App() {
         </section>
 
           {route.kind === 'home' && <>
-           <section className="trust-strip" aria-label="لماذا CABL" data-testid="section-trust">
+            <section className="trust-strip" aria-label="لماذا يختار العملاء CABL؟" data-testid="section-trust">
              <div>
-               <span className="eyebrow">لماذا CABL؟</span>
-               <h2>شراء واضح.<br />دعم محلي.</h2>
+                <span className="eyebrow">لماذا يختار العملاء CABL؟</span>
+                <h2>شراء واضح.<br />قرار أسهل.</h2>
              </div>
              <div className="trust-points">
-               <span>✓ منتجات أصلية</span>
+                <span>✓ مواصفات واضحة من علامات موثوقة</span>
                <span>✓ توصيل داخل اليمن</span>
-               <span>✓ دعم قبل وبعد الشراء</span>
+                <span>✓ دعم يساعدك قبل الشراء</span>
              </div>
            </section>
           <section className="section campaign-section" id="campaigns" data-testid="section-campaigns">
             <div className="section-header">
               <div>
-                <span className="eyebrow">اختياراتنا</span>
-                <h2>اشحن<br />لحظتك.</h2>
+                <span className="eyebrow">اختيارات تساعدك</span>
+                <h2>اشحن أسرع،<br />واختر بثقة.</h2>
               </div>
               <p>منتجات Baseus و Vention و Anker و UGREEN الأصلية بمواصفات واضحة لتختار ما يناسب أجهزتك ويومك.</p>
             </div>
             <div className="campaign-grid">
               <article className="campaign-card">
                 <img src={asset('vention-powerbank-10k.jpg')} alt="باور بانك وشاحن متنقل أصلي في اليمن" width="800" height="1000" loading="lazy" data-testid="img-campaign-season" />
-                <span className="campaign-label"><h3>طاقة<br />أينما ذهبت.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('باور', 'طاقة'))} data-testid="button-campaign-season">تصفح {categories.find((category) => category.id === categoryIdFor('باور', 'طاقة'))?.name ?? 'الفئة'}</button></span>
+                 <span className="campaign-label"><h3>طاقة<br />معك أينما ذهبت.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('باور', 'طاقة'))} data-testid="button-campaign-season">شاهد التفاصيل</button></span>
               </article>
               <article className="campaign-card">
                 <img src={asset('vention-charger-70w.jpg')} alt="شاحن سريع 70W أصلي في اليمن" width="800" height="1000" loading="lazy" data-testid="img-campaign-women" />
-                <span className="campaign-label"><h3>حجم صغير،<br />أداء كبير.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('شاحن', 'شواحن'))} data-testid="button-campaign-women">تصفح {categories.find((category) => category.id === categoryIdFor('شاحن', 'شواحن'))?.name ?? 'الفئة'}</button></span>
+                 <span className="campaign-label"><h3>أداء قوي بحجم<br />يناسبك.</h3><button type="button" onClick={() => chooseCategory(categoryIdFor('شاحن', 'شواحن'))} data-testid="button-campaign-women">شاهد التفاصيل</button></span>
               </article>
               <article className="campaign-card">
                 <img src={asset('vention-adapter-65w.jpg')} alt="شاحن Type-C للسفر مع توصيل داخل اليمن" width="800" height="1000" loading="lazy" data-testid="img-campaign-men" />

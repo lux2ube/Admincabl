@@ -1937,3 +1937,21 @@ img { display: block; max-width: 100%; }
   .cabl-logo-copy strong { font-size: 16px; }
   .mobile-menu { padding: 3px; }
 }
+
+.product-preview-price span {
+  color: var(--muted-ink);
+  font-size: 10px;
+  font-weight: 600;
+}
+.product-fit-prompt {
+  margin: 18px 0 0;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+.product-fit-prompt + .product-preview-description { margin-top: 6px; }
+
+@media (max-width: 767px) {
+  .product-preview-price span { font-size: 9px; }
+  .product-fit-prompt { margin-top: 15px; font-size: 12px; }
+}
