@@ -794,7 +794,7 @@ function CairoVoltHome({
             <div><h3>خدمة العملاء</h3><button type="button" onClick={onOpenTracking}>تحقق من سجل الضمان</button><button type="button" onClick={onOpenQuote}>تواصل معنا</button><button type="button" onClick={() => onScroll('cv-trust')}>سياسة الشحن</button><button type="button" onClick={() => onScroll('cv-products')}>الأسئلة الشائعة</button></div>
             <div><h3>مركز المواصفات</h3><button type="button" onClick={onOpenSearch}>مصادر خارجية للمراجعة</button><button type="button" onClick={() => onScroll('cv-products')}>افتح صفحة المنتج</button><button type="button" onClick={onOpenWishlist}>المفضلة</button><button type="button" onClick={onOpenCart}>السلة ({cartItemCount})</button></div>
           </div>
-          <div className="cv-footer-bottom"><span>© 2026 كايرو فولت. جميع الحقوق محفوظة.</span><span>سياسة الخصوصية · الشروط والأحكام</span></div>
+          <div className="cv-footer-bottom"><span>© 2026 CABL. جميع الحقوق محفوظة.</span><span>سياسة الخصوصية · الشروط والأحكام</span></div>
         </div>
       </footer>
     </div>
@@ -1093,6 +1093,208 @@ function CablLandingPage({
   );
 }
 
+const BRAND_CATEGORY_CARDS = [
+  {
+    key: 'power-banks',
+    eyebrow: 'باور بانك',
+    title: 'طاقة تكمل يومك',
+    description: 'سعات عملية للشحن أثناء العمل والسفر والتنقل.',
+  },
+  {
+    key: 'chargers',
+    eyebrow: 'شواحن الحائط',
+    title: 'شحن أسرع، بحجم أصغر',
+    description: 'شواحن USB-C وPD وGaN لأجهزتك اليومية.',
+  },
+  {
+    key: 'cables',
+    eyebrow: 'كابلات',
+    title: 'كابل يعيش مع استخدامك',
+    description: 'وصلات للشحن ونقل البيانات مع مواصفات واضحة.',
+  },
+  {
+    key: 'car-accessories',
+    eyebrow: 'شواحن السيارة',
+    title: 'ثبات وشحن في كل مشوار',
+    description: 'حلول شحن مناسبة للسيارة والرحلات.',
+  },
+  {
+    key: 'wireless-chargers',
+    eyebrow: 'شحن لاسلكي',
+    title: 'طاقة بلا فوضى',
+    description: 'حلول لاسلكية للأجهزة المتوافقة.',
+  },
+] as const;
+
+function CablBrandPage({
+  page,
+  products,
+  formatMoney,
+  cartItemCount,
+  favorites,
+  onAddToCart,
+  onToggleFavorite,
+  onOpenProduct,
+  onOpenCart,
+  onGoHome,
+  onOpenSearch,
+  mobileMenuOpen,
+  onToggleMobileMenu,
+  onSelectCategoryByHint,
+  deliveryLabel,
+  brandNames,
+  onNavigate,
+}: {
+  page: LandingPage;
+  products: Product[];
+  formatMoney: (amountUsd: number) => string;
+  cartItemCount: number;
+  favorites: string[];
+  onAddToCart: (product: Product) => void;
+  onToggleFavorite: (id: string) => void;
+  onOpenProduct: (product: Product) => void;
+  onOpenCart: () => void;
+  onGoHome: () => void;
+  onOpenSearch: () => void;
+  mobileMenuOpen: boolean;
+  onToggleMobileMenu: () => void;
+  onSelectCategoryByHint: (...hints: string[]) => void;
+  deliveryLabel: string;
+  brandNames: string[];
+  onNavigate: (path: string) => void;
+}) {
+  const brandName = BRAND_PATHS[page.path] ?? page.h1.replace('منتجات ', '');
+  const familyProducts = useMemo(() => BRAND_CATEGORY_CARDS.map((card) => ({
+    card,
+    product: products.find((product) => {
+      const hints = CATEGORY_PATH_HINTS[card.key] ?? [];
+      const text = normalizeSearch(`${product.name} ${product.category?.name ?? ''} ${product.description}`);
+      return hints.some((hint) => text.includes(normalizeSearch(hint)));
+    }) ?? products[0] ?? null,
+  })), [products]);
+  const featuredProducts = products.slice(0, 10);
+  return (
+    <div className="cv-site cabl-brand-site" dir="rtl">
+      <CairoVoltProductHeader
+        cartItemCount={cartItemCount}
+        onOpenCart={onOpenCart}
+        onGoHome={onGoHome}
+        onOpenSearch={onOpenSearch}
+        mobileMenuOpen={mobileMenuOpen}
+        onToggleMobileMenu={onToggleMobileMenu}
+        onScroll={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        onSelectCategoryByHint={onSelectCategoryByHint}
+        deliveryLabel={deliveryLabel}
+        brandNames={brandNames}
+      />
+      <main>
+        <section className="cabl-brand-hero">
+          <div className="cv-container cabl-brand-hero-inner">
+            <div className="cabl-brand-hero-copy">
+              <span className="cabl-brand-badge"><Sparkles size={13} /> علامة {brandName}</span>
+              <h1>منتجات {brandName}<br /><span>في CABL</span></h1>
+              <p>{page.description}</p>
+              <div className="cabl-brand-hero-actions">
+                <button type="button" className="cabl-brand-primary" onClick={() => window.document.getElementById('brand-products')?.scrollIntoView({ behavior: 'smooth' })}>منتجات مختارة <ArrowDownIcon /></button>
+                <button type="button" className="cabl-brand-secondary" onClick={() => window.document.getElementById('brand-categories')?.scrollIntoView({ behavior: 'smooth' })}>اختر قسمًا <ArrowLeft size={16} /></button>
+              </div>
+            </div>
+            {products[0] && <div className="cabl-brand-hero-product">
+              <span className="cabl-brand-hero-product-label">متوفر في كتالوج CABL</span>
+              <img src={products[0].image} alt={productAlt(products[0])} />
+            </div>}
+          </div>
+        </section>
+        <section className="cabl-brand-categories" id="brand-categories">
+          <div className="cv-container">
+            <div className="cabl-brand-section-heading">
+              <div>
+                <span>تسوق حسب الفئة</span>
+                <h2>اختر قسم {brandName} المناسب لجهازك</h2>
+              </div>
+              <p>نظمنا منتجات {brandName} حسب الاستخدام حتى تصل للاختيار المناسب بسرعة.</p>
+            </div>
+            <div className="cabl-brand-category-row">
+              {familyProducts.map(({ card, product }) => (
+                <article className="cabl-brand-category-card" key={card.key}>
+                  <div className="cabl-brand-category-copy">
+                    <small>{card.eyebrow}</small>
+                    <h3>{card.title}</h3>
+                    <p>{card.description}</p>
+                    <button type="button" onClick={() => onNavigate(`/${page.path}/${card.key}`)}>تصفح {card.eyebrow} <ArrowLeft size={14} /></button>
+                  </div>
+                  {product && <img src={product.image} alt={productAlt(product)} loading="lazy" />}
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section className="cv-section cv-products cabl-brand-products" id="brand-products">
+          <div className="cv-container">
+            <div className="cabl-brand-section-heading">
+              <div>
+                <span>من كتالوج CABL</span>
+                <h2>مختارات من {brandName}</h2>
+              </div>
+              <p>المنتجات والأسعار والمخزون والصور هنا مأخوذة من قاعدة بيانات المتجر الحالية.</p>
+            </div>
+            {featuredProducts.length > 0 ? (
+              <div className="cabl-brand-product-row">
+                {featuredProducts.map((product, index) => (
+                  <article className="cv-product-card" key={product.id}>
+                    <div className="cv-product-image" role="button" tabIndex={0} onClick={() => onOpenProduct(product)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onOpenProduct(product); }} aria-label={`فتح ${product.name}`}>
+                      <img src={product.image} alt={productAlt(product)} loading="lazy" />
+                      <span>{index < 3 ? 'اختيار CABL' : product.quantity > 0 ? 'متوفر الآن' : 'غير متوفر'}</span>
+                      <button type="button" className={`cv-wish ${favorites.includes(product.id) ? 'active' : ''}`} onClick={(event) => { event.stopPropagation(); onToggleFavorite(product.id); }} aria-label="إضافة للمفضلة"><Heart size={16} fill={favorites.includes(product.id) ? 'currentColor' : 'none'} /></button>
+                    </div>
+                    <div className="cv-product-copy">
+                      <small>{product.brand}</small>
+                      <button type="button" onClick={() => onOpenProduct(product)}><strong>{product.name}</strong><span>افتح المواصفات <ArrowLeft size={14} /></span></button>
+                      <div className="cv-price"><strong>{formatMoney(product.price)}</strong>{product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>{formatMoney(product.regularPrice)}</del>}</div>
+                      <button className="cv-add-button" type="button" disabled={product.quantity <= 0} onClick={() => onAddToCart(product)}>إضافة للسلة</button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : <p className="cv-empty">لا توجد منتجات لهذه العلامة حاليًا.</p>}
+          </div>
+        </section>
+        <section className="cabl-brand-guide">
+          <div className="cv-container">
+            <span>دليل CABL</span>
+            <h2>كيف تختار من منتجات {brandName}؟</h2>
+            <p>ابدأ بالجهاز الذي تريد شحنه، ثم قارن المنفذ والقدرة والسعة والتوافق. تظهر مواصفات المنتج وسعره وتوفره من كتالوج CABL قبل إضافة المنتج إلى السلة.</p>
+            <div className="cabl-brand-guide-steps">
+              <div><CircleCheck size={18} /><strong>حدد جهازك</strong><small>هاتف، لابتوب، سيارة أو جهاز صوتي.</small></div>
+              <div><CircleCheck size={18} /><strong>قارن الموديلات</strong><small>راجع المنافذ والقدرة والسعة والصورة.</small></div>
+              <div><CircleCheck size={18} /><strong>راجع تفاصيل الطلب</strong><small>تأكد من الشحن والسعر قبل التأكيد.</small></div>
+            </div>
+          </div>
+        </section>
+        <section className="cabl-brand-faq cv-container">
+          <span>مساعدة CABL</span>
+          <h2>الأسئلة الشائعة عن {brandName}</h2>
+          <div className="cabl-brand-faq-grid">
+            {[
+              ['هل المنتجات أصلية؟', 'يعرض CABL المنتجات الموجودة في كتالوجه مع العلامة والمواصفات والضمان المتاح لكل منتج.'],
+              ['كيف أختار المنتج المناسب؟', 'افتح صفحة المنتج لمراجعة المنفذ والقدرة والسعة والتوافق قبل الإضافة إلى السلة.'],
+              ['هل تختلف الأسعار حسب العملة؟', 'تظل حسابات المتجر بالدولار، وتظهر لك قيمة العرض حسب العملة ومعدل التحويل النشط في المتجر.'],
+              ['كيف أعرف تكلفة الشحن؟', 'تظهر خيارات الشحن المتاحة من قاعدة بيانات المتجر قبل تأكيد الطلب.'],
+            ].map(([question, answer]) => <details key={question}><summary>{question}<Plus size={16} /></summary><p>{answer}</p></details>)}
+          </div>
+        </section>
+      </main>
+      <footer className="cv-footer">
+        <div className="cv-container cv-footer-bottom"><span>© 2026 CABL. جميع الحقوق محفوظة.</span><button type="button" onClick={onGoHome}>العودة للرئيسية</button></div>
+      </footer>
+    </div>
+  );
+}
+
+function ArrowDownIcon() {
+  return <ArrowRight size={16} />;
+}
+
 function App() {
   const [catalog, setCatalog] = useState<GetStoreCatalogQueryResult | null>(() => readCachedCatalog());
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -1290,6 +1492,7 @@ function App() {
   const cartTotal = cartSubtotal + cartShipping;
   const cartItemCount = cart.reduce((sum, product) => sum + (cartQuantities[product.id] ?? 1), 0);
   const landingPage = route.kind === 'landing' ? resolveLandingPage(route.path) : null;
+  const brandPage = route.kind === 'landing' && landingPage && Boolean(BRAND_PATHS[route.path]) ? landingPage : null;
 
   useEffect(() => {
     if (paymentMethods.length > 0 && paymentMethodId === null) {
@@ -1773,7 +1976,7 @@ function App() {
     if (!seo && route.kind !== 'landing') return;
     const pageSeo: StoreSeoResponse | null = route.kind === 'landing' && landingPage
       ? {
-        entityType: landingPage.path.startsWith('guides/') ? 'guide' : 'category',
+        entityType: brandPage ? 'brand' : landingPage.path.startsWith('guides/') ? 'guide' : 'category',
         slug: landingPage.path,
         title: landingPage.title,
         h1: landingPage.h1,
@@ -1783,7 +1986,7 @@ function App() {
         breadcrumbs: [{ name: 'الرئيسية', path: '/' }, { name: landingPage.h1, path: `/${landingPage.path}` }],
         jsonLd: {
           '@context': 'https://schema.org',
-          '@type': landingPage.path.startsWith('guides/') ? 'Article' : 'CollectionPage',
+          '@type': brandPage ? 'Brand' : landingPage.path.startsWith('guides/') ? 'Article' : 'CollectionPage',
           name: landingPage.title,
           description: landingPage.description,
           url: `/${landingPage.path}`,
@@ -2318,7 +2521,27 @@ function App() {
           <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لـ Baseus و Vention في اليمن · منتجات Anker و UGREEN متوفرة.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
         </div>
       </footer>
-       </div> : landingPage ? (
+       </div> : brandPage ? (
+         <CablBrandPage
+           page={brandPage}
+           products={landingProducts}
+           formatMoney={formatMoney}
+           cartItemCount={cartItemCount}
+           favorites={favorites}
+           onAddToCart={addToCart}
+           onToggleFavorite={toggleFavorite}
+           onOpenProduct={openProductPreview}
+           onOpenCart={() => setCartOpen(true)}
+           onGoHome={() => navigateTo('/')}
+           onOpenSearch={() => navigateTo('/search')}
+           mobileMenuOpen={mobileMenuOpen}
+           onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)}
+           onSelectCategoryByHint={selectCairoCategory}
+           deliveryLabel={deliveryLabel}
+           brandNames={brandNames}
+           onNavigate={(path) => navigateTo(path, 'brand-products')}
+         />
+       ) : landingPage ? (
          <CablLandingPage
            page={landingPage}
            products={landingProducts}

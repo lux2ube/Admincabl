@@ -2439,6 +2439,304 @@ img { display: block; max-width: 100%; }
   background: transparent;
   color: inherit;
 }
+.cabl-brand-site {
+  min-height: 100dvh;
+  background: #f7f8fb;
+}
+.cabl-brand-hero {
+  position: relative;
+  overflow: hidden;
+  background-color: #2e61df;
+  background-image:
+    linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px),
+    linear-gradient(120deg, #2766f2, #3157c7);
+  background-size: 32px 32px, 32px 32px, 100% 100%;
+  color: #fff;
+}
+.cabl-brand-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr);
+  min-height: 305px;
+  align-items: center;
+  gap: 30px;
+}
+.cabl-brand-hero-copy { padding: 42px 0; }
+.cabl-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 999px;
+  background: rgba(255,255,255,.12);
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.cabl-brand-hero h1 {
+  margin: 14px 0 9px;
+  font-family: var(--font-display);
+  font-size: clamp(34px, 4.2vw, 58px);
+  line-height: 1.12;
+  letter-spacing: -.055em;
+}
+.cabl-brand-hero h1 span { color: rgba(255,255,255,.75); }
+.cabl-brand-hero-copy > p {
+  max-width: 610px;
+  margin: 0;
+  color: rgba(255,255,255,.78);
+  font-size: 13px;
+  line-height: 1.9;
+}
+.cabl-brand-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 20px;
+}
+.cabl-brand-hero-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 11px 18px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.cabl-brand-primary { border: 1px solid #fff; background: #fff; color: #1d3f9e; }
+.cabl-brand-secondary { border: 1px solid rgba(255,255,255,.45); background: transparent; color: #fff; }
+.cabl-brand-hero-product {
+  position: relative;
+  align-self: stretch;
+  min-height: 260px;
+}
+.cabl-brand-hero-product img {
+  position: absolute;
+  right: 8%;
+  bottom: -20px;
+  width: min(390px, 100%);
+  height: 285px;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 20px rgba(16,24,40,.2));
+}
+.cabl-brand-hero-product-label {
+  position: absolute;
+  z-index: 1;
+  right: 5%;
+  top: 34px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.18);
+  padding: 5px 10px;
+  color: #fff;
+  font-size: 10px;
+}
+.cabl-brand-categories {
+  background: #f3f5f8;
+  padding: 54px 0 42px;
+}
+.cabl-brand-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 35px;
+  margin-bottom: 24px;
+}
+.cabl-brand-section-heading > div > span,
+.cabl-brand-guide > .cv-container > span,
+.cabl-brand-faq > span {
+  color: var(--cv-blue);
+  font-size: 12px;
+  font-weight: 800;
+}
+.cabl-brand-section-heading h2 {
+  max-width: 680px;
+  margin: 5px 0 0;
+  color: var(--cv-ink);
+  font-family: var(--font-display);
+  font-size: clamp(27px, 3.3vw, 43px);
+  line-height: 1.2;
+  letter-spacing: -.055em;
+}
+.cabl-brand-section-heading > p {
+  max-width: 360px;
+  margin: 0;
+  color: var(--cv-muted);
+  font-size: 12px;
+  line-height: 1.9;
+}
+.cabl-brand-category-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(225px, 1fr));
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px 0 12px;
+  scrollbar-color: #8992a5 transparent;
+  scrollbar-width: thin;
+}
+.cabl-brand-category-card {
+  position: relative;
+  display: flex;
+  min-height: 288px;
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid rgba(38,60,100,.08);
+  border-radius: 17px;
+  padding: 22px 18px 9px;
+  background: #dcecff;
+}
+.cabl-brand-category-card:nth-child(2) { background: #e9eaff; }
+.cabl-brand-category-card:nth-child(3) { background: #f8eee2; }
+.cabl-brand-category-card:nth-child(4) { background: #e1f3ec; }
+.cabl-brand-category-card:nth-child(5) { background: #eee9ff; }
+.cabl-brand-category-copy { position: relative; z-index: 1; }
+.cabl-brand-category-copy small {
+  color: var(--cv-blue);
+  font-size: 10px;
+  font-weight: 800;
+}
+.cabl-brand-category-copy h3 {
+  margin: 9px 0 4px;
+  color: var(--cv-ink);
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.25;
+}
+.cabl-brand-category-copy p {
+  max-width: 180px;
+  min-height: 42px;
+  margin: 0;
+  color: var(--cv-muted);
+  font-size: 10px;
+  line-height: 1.75;
+}
+.cabl-brand-category-copy button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 13px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,.85);
+  padding: 9px 12px;
+  color: var(--cv-ink);
+  font-size: 10px;
+  font-weight: 800;
+  box-shadow: 0 5px 10px rgba(20,45,90,.07);
+}
+.cabl-brand-category-card > img {
+  align-self: center;
+  width: 88%;
+  height: 125px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.cabl-brand-products { background: #fff; }
+.cabl-brand-product-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(210px, 1fr));
+  gap: 16px;
+  overflow-x: auto;
+  padding: 2px 0 14px;
+  scrollbar-color: #8992a5 transparent;
+  scrollbar-width: thin;
+}
+.cabl-brand-product-row .cv-product-card { min-width: 210px; }
+.cabl-brand-guide {
+  padding: 64px 0;
+  background: linear-gradient(116deg, #111e3a, #172f65);
+  color: #fff;
+}
+.cabl-brand-guide > .cv-container > span { color: #88aaff; }
+.cabl-brand-guide h2 {
+  margin: 8px 0 12px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(27px, 4vw, 43px);
+  letter-spacing: -.05em;
+}
+.cabl-brand-guide p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(255,255,255,.72);
+  font-size: 13px;
+  line-height: 2;
+}
+.cabl-brand-guide-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 30px;
+}
+.cabl-brand-guide-steps > div {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  column-gap: 9px;
+  border-top: 1px solid rgba(255,255,255,.2);
+  padding-top: 15px;
+}
+.cabl-brand-guide-steps svg { grid-row: span 2; color: #8db0ff; }
+.cabl-brand-guide-steps strong { font-size: 13px; }
+.cabl-brand-guide-steps small { margin-top: 5px; color: rgba(255,255,255,.62); font-size: 10px; line-height: 1.7; }
+.cabl-brand-faq {
+  padding-top: 65px;
+  padding-bottom: 75px;
+}
+.cabl-brand-faq h2 {
+  margin: 8px 0 24px;
+  color: var(--cv-ink);
+  font-family: var(--font-display);
+  font-size: clamp(27px, 3.4vw, 42px);
+  letter-spacing: -.05em;
+}
+.cabl-brand-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 11px 15px;
+}
+.cabl-brand-faq details {
+  border-bottom: 1px solid var(--cv-line);
+  padding: 13px 0;
+}
+.cabl-brand-faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  color: var(--cv-ink);
+  font-size: 13px;
+  font-weight: 800;
+  list-style: none;
+}
+.cabl-brand-faq summary::-webkit-details-marker { display: none; }
+.cabl-brand-faq summary svg { color: var(--cv-blue); transition: transform .2s ease; }
+.cabl-brand-faq details[open] summary svg { transform: rotate(45deg); }
+.cabl-brand-faq details p {
+  margin: 10px 0 0;
+  color: var(--cv-muted);
+  font-size: 11px;
+  line-height: 1.9;
+}
+@media (max-width: 700px) {
+  .cabl-brand-hero-inner { display: block; min-height: 0; }
+  .cabl-brand-hero-copy { padding: 35px 0 10px; }
+  .cabl-brand-hero h1 { font-size: 39px; }
+  .cabl-brand-hero-copy > p { max-width: 320px; font-size: 12px; }
+  .cabl-brand-hero-product { min-height: 190px; }
+  .cabl-brand-hero-product img { right: 12%; bottom: -14px; width: 76%; height: 210px; }
+  .cabl-brand-hero-product-label { top: 10px; right: 9%; }
+  .cabl-brand-categories { padding: 38px 0 28px; }
+  .cabl-brand-section-heading { display: block; margin-bottom: 18px; }
+  .cabl-brand-section-heading > p { margin-top: 10px; }
+  .cabl-brand-section-heading h2 { font-size: 30px; }
+  .cabl-brand-category-row { grid-template-columns: repeat(5, 78vw); margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+  .cabl-brand-category-card { min-height: 260px; }
+  .cabl-brand-product-row { grid-template-columns: repeat(5, 67vw); margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+  .cabl-brand-guide { padding: 45px 0; }
+  .cabl-brand-guide-steps { grid-template-columns: 1fr; gap: 18px; }
+  .cabl-brand-faq { padding-top: 45px; padding-bottom: 52px; }
+  .cabl-brand-faq-grid { grid-template-columns: 1fr; }
+}
 @media (max-width: 700px) {
   .cabl-route-hero { padding-top: 36px; padding-bottom: 30px; }
   .cabl-breadcrumbs { margin-bottom: 25px; }
