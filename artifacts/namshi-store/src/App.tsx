@@ -506,18 +506,9 @@ function CairoVoltHome({
       className: 'jbl',
     },
   ];
-  const cardCopy = [
-    ['اختيار مميز', 'انكر', 'انكر زولو 20,000', '1,730', '1,959', '12%', 'anker-zolo-a110e-20000mah-power-bank-builtin-cable-dual-output-cairovolt-480-353d5fd3.webp'],
-    ['الأكثر مبيعاً', 'ساوندكور', 'ساوندكور R50i NC', '1,199', '1,440', '17%', 'anker-soundcore-r50i-nc-earbud-anc-driver-detail-closeup-480-509a8f8b.webp'],
-    ['جديد', 'ساوندكور', 'ساوندكور P30i', '1,199', '1,440', '17%', 'soundcore-p30i-earbuds-main-view-cairovolt-480-bc523a0c.webp'],
-    ['اختيار مميز', 'انكر', 'شاحن انكر نانو 45 واط', '790', '949', '17%', 'anker-nano-45w-package-box-contents-specifications-480-0e765f84.webp'],
-    ['الفلاجشيب', 'انكر', 'انكر برايم 25,000 — 165 واط', '3,950', '4,750', '17%', 'anker-prime-a1695-25000mah-165w-power-bank-premium-cairovolt-480-22da426a.webp'],
-    ['ساوندكور', 'ساوندكور', 'ساوندكور K20i', '750', '849', '12%', 'anker-soundcore-k20i-wireless-earbuds-charging-case-cairovolt-480-d20e8934.webp'],
-    ['قيمة ممتازة', 'جوي روم', 'جوي روم T03S Pro ANC', '664', '799', '17%', 'joyroom-joyroom-t03s-pro-earbuds-egypt-cairo-9-480-d7c3c333.webp'],
-    ['ساوندكور', 'ساوندكور', 'سبيكر ساوندكور Flare 2', '2,999', '3,569', '16%', 'anker-soundcore-flare-2-ipx7-waterproof-pool-outdoor-480-777b83c9.webp'],
-    ['اختيار اقتصادي', 'جوي روم', 'شاحن جوي روم USB-C 20 واط', '236', '290', '19%', 'joyroom-joyroom-20w-usb-c-charger-egypt-cairo-1-480-24f631ca.webp'],
-  ] as const;
-  const cards = featuredProducts.slice(0, cardCopy.length);
+  const cardLabels = ['اختيار مميز', 'الأكثر مبيعاً', 'جديد', 'اختيار مميز', 'الفلاجشيب', 'قيمة ممتازة'];
+  const cards = featuredProducts.slice(0, 9);
+  const heroProduct = featuredProducts[0] ?? products[0];
 
   return (
     <div className="cv-site" dir="rtl">
@@ -569,8 +560,8 @@ function CairoVoltHome({
           <div className="cv-hero-shade" />
           <div className="cv-hero-copy cv-container">
             <h1>شحن ذكي يعرف جهازك،<br /><span>ويحميه كل لحظة.</span></h1>
-            <p>انكر نانو 45 واط · شاشة ذكية تعرض حالة الشحن لحظيًا</p>
-            <div className="cv-hero-price"><strong>1,250 <small>ج.م</small></strong><del>1,550 ج.م</del><b>خصم 19%</b></div>
+             <p>{heroProduct ? `${heroProduct.brand} · ${heroProduct.name}` : 'منتجات أصلية للشحن والطاقة'}</p>
+             {heroProduct && <div className="cv-hero-price"><strong>{formatMoney(heroProduct.price)}</strong>{heroProduct.discountPrice !== null && heroProduct.discountPrice < heroProduct.regularPrice && <del>{formatMoney(heroProduct.regularPrice)}</del>}{heroProduct.discountPrice !== null && heroProduct.discountPrice < heroProduct.regularPrice && <b>خصم</b>}</div>}
             <button className="cv-dark-button" type="button" onClick={() => onScroll('cv-products')}>اشترِ الآن <ArrowLeft size={16} /></button>
           </div>
         </section>
@@ -601,15 +592,15 @@ function CairoVoltHome({
               <button type="button" onClick={() => onSelectCategoryByHint('شاحن')}>شحن</button>
             </div>
             <div className="cv-product-grid">
-              {cards.map((product, index) => {
-                const copy = cardCopy[index];
+               {cards.map((product, index) => {
+                 const label = cardLabels[index] ?? (product.quantity > 0 ? 'متوفر الآن' : 'غير متوفر');
                 return <article className="cv-product-card" key={product.id}>
-                  <div className="cv-product-image" role="button" tabIndex={0} onClick={() => onOpenProduct(product)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onOpenProduct(product); }} aria-label={`فتح ${copy[2]}`}>
-                    <img src={cairoAsset(copy[6])} alt={copy[2]} loading="lazy" />
-                    <span>{copy[0]}</span>
+                   <div className="cv-product-image" role="button" tabIndex={0} onClick={() => onOpenProduct(product)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onOpenProduct(product); }} aria-label={`فتح ${product.name}`}>
+                     <img src={product.image} alt={productAlt(product)} loading="lazy" />
+                     <span>{label}</span>
                     <button type="button" className={`cv-wish ${favorites.includes(product.id) ? 'active' : ''}`} onClick={(event) => { event.stopPropagation(); onToggleFavorite(product.id); }} aria-label="إضافة للمفضلة"><Heart size={16} fill={favorites.includes(product.id) ? 'currentColor' : 'none'} /></button>
                   </div>
-                  <div className="cv-product-copy"><small>{copy[1]}</small><button type="button" onClick={() => onOpenProduct(product)}><strong>{copy[2]}</strong><span>افتح الصفحة للمواصفات والضمان <ArrowLeft size={14} /></span></button><div className="cv-price"><strong>{copy[3]} <small>ج.م</small></strong><del>{copy[4]} ج.م</del><b>خصم {copy[5]}</b></div><button className="cv-add-button" type="button" disabled={product.quantity <= 0} onClick={() => onAddToCart(product)}>إضافة سريعة</button></div>
+                   <div className="cv-product-copy"><small>{product.brand}</small><button type="button" onClick={() => onOpenProduct(product)}><strong>{product.name}</strong><span>افتح الصفحة للمواصفات والضمان <ArrowLeft size={14} /></span></button><div className="cv-price"><strong>{formatMoney(product.price)}</strong>{product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>{formatMoney(product.regularPrice)}</del>}{product.discountPrice !== null && product.discountPrice < product.regularPrice && <b>خصم</b>}</div><button className="cv-add-button" type="button" disabled={product.quantity <= 0} onClick={() => onAddToCart(product)}>إضافة سريعة</button></div>
                 </article>;
               })}
             </div>

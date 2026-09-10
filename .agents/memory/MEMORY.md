@@ -4,3 +4,4 @@
 - [PWA cache in Vite development](vite-pwa-dev-cache.md) — never let the production service worker cache Vite source or optimized dependency modules.
 - [SEO schema normalization](seo-schema-normalization.md) — use canonical brand relationships and stable slugs while preserving legacy catalog compatibility.
 - [Currency display model](currency-display-model.md) — keep catalog and order calculations in USD; convert only presentation values using active database rates.
+- [CairoVolt data boundary](cairovolt-data-boundary.md) — keep reference-site presentation assets local, but source all commerce data from the project database.
