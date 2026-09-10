@@ -61,9 +61,10 @@ type Product = {
 
 type StoreRoute =
   | { kind: 'home' }
-  | { kind: 'product'; slug: string }
+  | { kind: 'product'; slug: string; brandSlug?: string; categorySlug?: string }
   | { kind: 'category'; slug: string }
   | { kind: 'brand'; slug: string }
+  | { kind: 'landing'; path: string }
   | { kind: 'search'; query: string };
 
 type SearchSuggestion = {
@@ -74,6 +75,180 @@ type SearchSuggestion = {
   slug: string;
   image?: string;
 };
+
+type LandingPage = {
+  path: string;
+  eyebrow: string;
+  title: string;
+  h1: string;
+  description: string;
+  categoryKey?: string;
+  hints?: string[];
+  brandSlug?: string;
+};
+
+const CATEGORY_PATH_HINTS: Record<string, string[]> = {
+  chargers: ['شاحن', 'شواحن'],
+  cables: ['كابل', 'كيبل', 'وصلة', 'سلك'],
+  'power-banks': ['باور', 'خازن', 'طاقة', 'بطاري'],
+  'wireless-chargers': ['لاسلكي', 'وايرلس', 'Wireless', 'MagSafe'],
+  'car-accessories': ['سيار', 'سيارة', 'حامل'],
+  'hubs-adapters': ['محور', 'هَب', 'Hub', 'محول', 'محوّل'],
+};
+const CATEGORY_PATH_LABELS: Record<string, string> = {
+  chargers: 'الشواحن',
+  cables: 'الكابلات',
+  'power-banks': 'الباور بانك',
+  'wireless-chargers': 'الشواحن اللاسلكية',
+  'car-accessories': 'إكسسوارات السيارات',
+  'hubs-adapters': 'المحاور والمحوّلات',
+};
+
+const BRAND_PATHS: Record<string, string> = {
+  baseus: 'Baseus',
+  vention: 'Vention',
+  anker: 'Anker',
+  ugreen: 'UGREEN',
+};
+
+const STATIC_LANDING_PAGES: Record<string, LandingPage> = {
+  'chargers/fast-chargers': {
+    path: 'chargers/fast-chargers', eyebrow: 'شواحن · 20W إلى 100W', title: 'شواحن سريعة أصلية في اليمن | CABL',
+    h1: 'شواحن سريعة أصلية', description: 'قارن شواحن PD وGaN السريعة من Baseus وVention وAnker وUGREEN، مع أسعار ومخزون من كتالوج CABL.',
+    categoryKey: 'chargers', hints: ['سريع', 'PD', 'GaN', 'واط'],
+  },
+  'chargers/gan-chargers': {
+    path: 'chargers/gan-chargers', eyebrow: 'تقنية GaN', title: 'شواحن GaN أصلية في اليمن | CABL',
+    h1: 'شواحن GaN صغيرة وقوية', description: 'اكتشف شواحن GaN بقدرات متعددة ومنافذ USB-C للشحن السريع داخل اليمن.',
+    categoryKey: 'chargers', hints: ['GaN', 'جان'],
+  },
+  'chargers/type-c-chargers': {
+    path: 'chargers/type-c-chargers', eyebrow: 'USB-C · PD', title: 'شواحن Type-C وUSB-C في اليمن | CABL',
+    h1: 'شواحن Type-C وUSB-C', description: 'تصفح شواحن USB-C وPD المتوافقة مع الهواتف والأجهزة الحديثة من العلامات المتوفرة في CABL.',
+    categoryKey: 'chargers', hints: ['Type-C', 'USB-C', 'تايب سي'],
+  },
+  'cables/usb-c': {
+    path: 'cables/usb-c', eyebrow: 'وصلات USB-C', title: 'كابلات USB-C أصلية في اليمن | CABL',
+    h1: 'كابلات USB-C أصلية', description: 'اختر كابل USB-C مناسبًا للشحن ونقل البيانات من العلامات الأصلية في كتالوج CABL.',
+    categoryKey: 'cables', hints: ['USB-C', 'Type-C', 'تايب سي'],
+  },
+  'cables/100w-cables': {
+    path: 'cables/100w-cables', eyebrow: 'قدرة 100W', title: 'كابلات 100W للشحن السريع | CABL',
+    h1: 'كابلات 100W للشحن السريع', description: 'قارن كابلات 100W وUSB-C المناسبة لشواحن PD والأجهزة المتوافقة.',
+    categoryKey: 'cables', hints: ['100W', '100 واط'],
+  },
+  'power-banks/10000mah': {
+    path: 'power-banks/10000mah', eyebrow: '10,000mAh', title: 'باور بانك 10000mAh في اليمن | CABL',
+    h1: 'باور بانك 10000mAh', description: 'تصفح خازنات الشحن المحمولة بسعة 10000mAh من العلامات المتوفرة في CABL.',
+    categoryKey: 'power-banks', hints: ['10000', '10,000'],
+  },
+  'power-banks/20000mah': {
+    path: 'power-banks/20000mah', eyebrow: '20,000mAh', title: 'باور بانك 20000mAh في اليمن | CABL',
+    h1: 'باور بانك 20000mAh', description: 'اختر باور بانك 20000mAh بقدرة ومنافذ مناسبة للسفر والاستخدام الطويل.',
+    categoryKey: 'power-banks', hints: ['20000', '20,000'],
+  },
+  'guides/charger-buying-guide': {
+    path: 'guides/charger-buying-guide', eyebrow: 'دليل CABL', title: 'دليل شراء الشاحن المناسب | CABL',
+    h1: 'كيف تختار الشاحن المناسب؟', description: 'دليل عملي لفهم القدرة والـUSB-C وPD وGaN قبل شراء شاحن جوال في اليمن.',
+    hints: ['شاحن', 'PD', 'GaN'],
+  },
+  'guides/cable-buying-guide': {
+    path: 'guides/cable-buying-guide', eyebrow: 'دليل CABL', title: 'دليل شراء كابل الشحن | CABL',
+    h1: 'كيف تختار كابل الشحن؟', description: 'تعرف على الفرق بين USB-C وLightning وقدرات 60W و100W قبل شراء الكابل.',
+    hints: ['كابل', 'كيبل', 'وصلة'],
+  },
+  'guides/power-bank-buying-guide': {
+    path: 'guides/power-bank-buying-guide', eyebrow: 'دليل CABL', title: 'دليل شراء الباور بانك | CABL',
+    h1: 'كيف تختار الباور بانك؟', description: 'قارن السعة والمخارج والقدرة والحجم لاختيار خازن شحن عملي.',
+    hints: ['باور', 'خازن', 'طاقة'],
+  },
+  'guides/usb-c-guide': {
+    path: 'guides/usb-c-guide', eyebrow: 'دليل CABL', title: 'دليل USB-C وType-C | CABL',
+    h1: 'دليل USB-C وType-C', description: 'افهم المنافذ والكابلات والقدرات المختلفة قبل اختيار منتج USB-C.',
+    hints: ['USB-C', 'Type-C', 'تايب سي'],
+  },
+  'compare/baseus-vs-vention': {
+    path: 'compare/baseus-vs-vention', eyebrow: 'مقارنة CABL', title: 'Baseus ضد Vention: أيهما تختار؟ | CABL',
+    h1: 'Baseus ضد Vention', description: 'قارن المنتجات المتاحة من Baseus وVention حسب الفئة والسعر والمواصفات.',
+  },
+  'compare/baseus-vs-ugreen': {
+    path: 'compare/baseus-vs-ugreen', eyebrow: 'مقارنة CABL', title: 'Baseus ضد UGREEN: مقارنة المنتجات | CABL',
+    h1: 'Baseus ضد UGREEN', description: 'مقارنة عملية بين منتجات Baseus وUGREEN المتوفرة في كتالوج CABL.',
+  },
+  'compare/anker-vs-ugreen': {
+    path: 'compare/anker-vs-ugreen', eyebrow: 'مقارنة CABL', title: 'Anker ضد UGREEN: مقارنة الشحن | CABL',
+    h1: 'Anker ضد UGREEN', description: 'قارن حلول الشحن والطاقة من Anker وUGREEN قبل الشراء.',
+  },
+  blog: { path: 'blog', eyebrow: 'مدونة CABL', title: 'مدونة الشحن والطاقة | CABL', h1: 'مقالات الشحن والطاقة', description: 'أدلة ونصائح CABL لاختيار الشواحن والكابلات والباور بانك.' },
+  'blog/chargers': { path: 'blog/chargers', eyebrow: 'مدونة CABL', title: 'مقالات الشواحن | CABL', h1: 'مقالات الشواحن', description: 'نصائح لاختيار الشاحن المناسب وفهم PD وGaN والقدرة.' , categoryKey: 'chargers' },
+  'blog/cables': { path: 'blog/cables', eyebrow: 'مدونة CABL', title: 'مقالات الكابلات | CABL', h1: 'مقالات الكابلات', description: 'دليل CABL للكابلات وUSB-C وLightning والقدرات المختلفة.', categoryKey: 'cables' },
+  'blog/power-banks': { path: 'blog/power-banks', eyebrow: 'مدونة CABL', title: 'مقالات الباور بانك | CABL', h1: 'مقالات الباور بانك', description: 'كل ما تحتاج معرفته عن السعة والقدرة والمخارج.', categoryKey: 'power-banks' },
+  'blog/baseus': { path: 'blog/baseus', eyebrow: 'مدونة CABL', title: 'مقالات Baseus | CABL', h1: 'مقالات Baseus', description: 'أدلة ومراجعات اختيار منتجات Baseus.', brandSlug: 'baseus' },
+  'blog/vention': { path: 'blog/vention', eyebrow: 'مدونة CABL', title: 'مقالات Vention | CABL', h1: 'مقالات Vention', description: 'أدلة ومراجعات اختيار منتجات Vention.', brandSlug: 'vention' },
+  yemen: { path: 'yemen', eyebrow: 'CABL في اليمن', title: 'شراء شواحن وإكسسوارات في اليمن | CABL', h1: 'CABL في اليمن', description: 'تسوق منتجات الشحن والطاقة الأصلية مع خيارات توصيل داخل اليمن.', hints: ['شاحن', 'كابل', 'باور'] },
+  sanaa: { path: 'sanaa', eyebrow: 'توصيل CABL', title: 'شواحن وتوصيل إلى صنعاء | CABL', h1: 'CABL في صنعاء', description: 'تصفح منتجات CABL وتعرف على خيارات التوصيل المتاحة إلى صنعاء.', hints: ['شاحن', 'كابل', 'باور'] },
+  aden: { path: 'aden', eyebrow: 'توصيل CABL', title: 'شواحن وتوصيل إلى عدن | CABL', h1: 'CABL في عدن', description: 'تصفح منتجات CABL وتعرف على خيارات التوصيل المتاحة إلى عدن.', hints: ['شاحن', 'كابل', 'باور'] },
+  taiz: { path: 'taiz', eyebrow: 'توصيل CABL', title: 'شواحن وتوصيل إلى تعز | CABL', h1: 'CABL في تعز', description: 'تصفح منتجات CABL وتعرف على خيارات التوصيل المتاحة إلى تعز.', hints: ['شاحن', 'كابل', 'باور'] },
+  ibb: { path: 'ibb', eyebrow: 'توصيل CABL', title: 'شواحن وتوصيل إلى إب | CABL', h1: 'CABL في إب', description: 'تصفح منتجات CABL وتعرف على خيارات التوصيل المتاحة إلى إب.', hints: ['شاحن', 'كابل', 'باور'] },
+  hodeidah: { path: 'hodeidah', eyebrow: 'توصيل CABL', title: 'شواحن وتوصيل إلى الحديدة | CABL', h1: 'CABL في الحديدة', description: 'تصفح منتجات CABL وتعرف على خيارات التوصيل المتاحة إلى الحديدة.', hints: ['شاحن', 'كابل', 'باور'] },
+  hadramout: { path: 'hadramout', eyebrow: 'توصيل CABL', title: 'شواحن وتوصيل إلى حضرموت | CABL', h1: 'CABL في حضرموت', description: 'تصفح منتجات CABL وتعرف على خيارات التوصيل المتاحة إلى حضرموت.', hints: ['شاحن', 'كابل', 'باور'] },
+  marib: { path: 'marib', eyebrow: 'توصيل CABL', title: 'شواحن وتوصيل إلى مأرب | CABL', h1: 'CABL في مأرب', description: 'تصفح منتجات CABL وتعرف على خيارات التوصيل المتاحة إلى مأرب.', hints: ['شاحن', 'كابل', 'باور'] },
+  about: { path: 'about', eyebrow: 'الثقة أولًا', title: 'عن CABL | متجر الشحن والطاقة في اليمن', h1: 'عن CABL', description: 'تعرف على CABL ومهمتنا في توفير منتجات شحن وطاقة أصلية وواضحة المواصفات.' },
+  contact: { path: 'contact', eyebrow: 'خدمة العملاء', title: 'تواصل مع CABL | خدمة العملاء', h1: 'تواصل معنا', description: 'تواصل مع فريق CABL قبل الشراء أو بعده عبر قنوات الدعم المتاحة.' },
+  warranty: { path: 'warranty', eyebrow: 'الثقة أولًا', title: 'الضمان | CABL', h1: 'ضمان المنتجات', description: 'تعرف على معلومات الضمان الظاهرة في صفحات منتجات CABL.' },
+  shipping: { path: 'shipping', eyebrow: 'الخدمة', title: 'الشحن والتوصيل | CABL', h1: 'الشحن والتوصيل', description: 'تعرف على خيارات الشحن ومدته وتكلفته قبل تأكيد طلبك.' },
+  returns: { path: 'returns', eyebrow: 'خدمة العملاء', title: 'الاستبدال والاسترجاع | CABL', h1: 'الاستبدال والاسترجاع', description: 'راجع سياسة الاستبدال والاسترجاع قبل إتمام الشراء من CABL.' },
+  faq: { path: 'faq', eyebrow: 'مساعدة CABL', title: 'الأسئلة الشائعة | CABL', h1: 'الأسئلة الشائعة', description: 'إجابات عن المنتجات والطلب والدفع والشحن في CABL.' },
+  authenticity: { path: 'authenticity', eyebrow: 'الثقة أولًا', title: 'أصالة المنتجات | CABL', h1: 'أصالة المنتجات', description: 'تعرف على طريقة مراجعة العلامة والمواصفات والضمان قبل شراء المنتج.' },
+};
+
+function resolveLandingPage(path: string): LandingPage | null {
+  const staticPage = STATIC_LANDING_PAGES[path];
+  if (staticPage) return staticPage;
+  const segments = path.split('/').filter(Boolean);
+  const [first, second] = segments;
+  if (segments.length === 1 && CATEGORY_PATH_HINTS[first]) {
+    const label = CATEGORY_PATH_LABELS[first] ?? first.replaceAll('-', ' ');
+    return {
+      path, eyebrow: 'تسوق حسب الفئة', title: `${label} الأصلية | CABL`,
+      h1: first === 'power-banks' ? 'باور بانك وطاقة محمولة' : `منتجات ${label}`,
+      description: 'تصفح المنتجات المتوفرة في هذه الفئة من كتالوج CABL، مع الأسعار والمخزون وخيارات الشحن الحالية.',
+      categoryKey: first,
+    };
+  }
+  if (segments.length === 1 && BRAND_PATHS[first]) {
+    return {
+      path, eyebrow: `علامة ${BRAND_PATHS[first]}`, title: `منتجات ${BRAND_PATHS[first]} الأصلية | CABL`,
+      h1: `منتجات ${BRAND_PATHS[first]}`, description: `تصفح منتجات ${BRAND_PATHS[first]} الأصلية المتاحة حاليًا في كتالوج CABL.`,
+      brandSlug: first,
+    };
+  }
+  if (segments.length === 2 && BRAND_PATHS[first] && CATEGORY_PATH_HINTS[second]) {
+    const categoryLabel = CATEGORY_PATH_LABELS[second] ?? second.replaceAll('-', ' ');
+    return {
+      path, eyebrow: `${BRAND_PATHS[first]} · ${categoryLabel}`, title: `${BRAND_PATHS[first]} ${categoryLabel} | CABL`,
+      h1: `${BRAND_PATHS[first]} · ${categoryLabel}`,
+      description: `تصفح منتجات ${BRAND_PATHS[first]} ضمن فئة ${categoryLabel} من كتالوج CABL.`,
+      brandSlug: first, categoryKey: second,
+    };
+  }
+  if (first === 'blog' && segments.length === 2) {
+    return { path, eyebrow: 'مدونة CABL', title: `${second.replaceAll('-', ' ')} | CABL`, h1: second.replaceAll('-', ' '), description: 'مقال من مدونة CABL عن الشحن والطاقة والملحقات.' };
+  }
+  return null;
+}
+
+function categoryRoutePath(category: { name: string; slug: string }) {
+  const match = Object.entries(CATEGORY_PATH_HINTS).find(([, hints]) => hints.some((hint) => category.name.includes(hint) || category.slug.includes(hint.toLowerCase())));
+  return match?.[0] ?? category.slug;
+}
+
+function productRoutePath(product: Pick<Product, 'slug' | 'brandSlug' | 'category'>) {
+  if (product.brandSlug && product.category?.slug) {
+    return `/${product.brandSlug}/${categoryRoutePath(product.category)}/${product.slug}`;
+  }
+  return `/product/${product.slug}`;
+}
 
 function readStoreRoute(): StoreRoute {
   const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '');
@@ -87,6 +262,10 @@ function readStoreRoute(): StoreRoute {
   if (segments[0] === 'category' && slug) return { kind: 'category', slug };
   if (segments[0] === 'brand' && slug) return { kind: 'brand', slug };
   if (segments[0] === 'search') return { kind: 'search', query: new URLSearchParams(window.location.search).get('q') ?? '' };
+  if (segments.length === 3 && segments[0] && segments[1] && segments[2]) {
+    return { kind: 'product', brandSlug: segments[0], categorySlug: segments[1], slug: segments[2] };
+  }
+  if (resolveLandingPage(path)) return { kind: 'landing', path };
   return { kind: 'home' };
 }
 
@@ -716,11 +895,11 @@ function ProductPreview({
         <div className="product-preview-copy">
            <span className="eyebrow">
              {product.brandSlug
-               ? <a href={`${import.meta.env.BASE_URL}brand/${product.brandSlug}/`}>{product.brand}</a>
+                ? <a href={`${import.meta.env.BASE_URL}${product.brandSlug}/`}>{product.brand}</a>
                : product.brand}
              {' · '}
              {product.category?.slug
-               ? <a href={`${import.meta.env.BASE_URL}category/${product.category.slug}/`}>{product.category.name}</a>
+                ? <a href={`${import.meta.env.BASE_URL}${categoryRoutePath(product.category)}/`}>{product.category.name}</a>
                : product.category?.name ?? '—'}
            </span>
           <h1>{product.name}</h1>
@@ -796,6 +975,121 @@ function ProductPreview({
         </section>
       )}
     </section>
+  );
+}
+
+function CablLandingPage({
+  page,
+  products,
+  formatMoney,
+  cartItemCount,
+  favorites,
+  onAddToCart,
+  onToggleFavorite,
+  onOpenProduct,
+  onOpenCart,
+  onGoHome,
+  onOpenSearch,
+  mobileMenuOpen,
+  onToggleMobileMenu,
+  onSelectCategoryByHint,
+  deliveryLabel,
+  brandNames,
+  onNavigate,
+}: {
+  page: LandingPage;
+  products: Product[];
+  formatMoney: (amountUsd: number) => string;
+  cartItemCount: number;
+  favorites: string[];
+  onAddToCart: (product: Product) => void;
+  onToggleFavorite: (id: string) => void;
+  onOpenProduct: (product: Product) => void;
+  onOpenCart: () => void;
+  onGoHome: () => void;
+  onOpenSearch: () => void;
+  mobileMenuOpen: boolean;
+  onToggleMobileMenu: () => void;
+  onSelectCategoryByHint: (...hints: string[]) => void;
+  deliveryLabel: string;
+  brandNames: string[];
+  onNavigate: (path: string) => void;
+}) {
+  const guideCopy = page.path.startsWith('guides/')
+    ? ['افحص قدرة جهازك أولًا', 'قارن المنفذ والقدرة والكابل معًا', 'راجع التوافق والضمان قبل الطلب']
+    : page.path.startsWith('compare/')
+      ? ['العلامة والمواصفات', 'القدرة والمنافذ', 'السعر والتوفر الحالي']
+      : ['مواصفات واضحة من الكتالوج', 'أسعار محولة حسب العملة المختارة', 'خيارات شحن ودفع تظهر قبل التأكيد'];
+  return (
+    <div className="cv-site cabl-route-site" dir="rtl">
+      <CairoVoltProductHeader
+        cartItemCount={cartItemCount}
+        onOpenCart={onOpenCart}
+        onGoHome={onGoHome}
+        onOpenSearch={onOpenSearch}
+        mobileMenuOpen={mobileMenuOpen}
+        onToggleMobileMenu={onToggleMobileMenu}
+        onScroll={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        onSelectCategoryByHint={onSelectCategoryByHint}
+        deliveryLabel={deliveryLabel}
+        brandNames={brandNames}
+      />
+      <main>
+        <section className="cabl-route-hero cv-container">
+          <nav className="cabl-breadcrumbs" aria-label="مسار التنقل">
+            <a href={`${import.meta.env.BASE_URL}`} onClick={(event) => { event.preventDefault(); onGoHome(); }}>الرئيسية</a>
+            <span>/</span>
+            <span>{page.h1}</span>
+          </nav>
+          <span className="cabl-route-eyebrow">{page.eyebrow}</span>
+          <h1>{page.h1}</h1>
+          <p>{page.description}</p>
+        </section>
+        <section className="cabl-route-points cv-container" aria-label="نقاط مهمة">
+          {guideCopy.map((item) => <div key={item}><CircleCheck size={18} /><span>{item}</span></div>)}
+        </section>
+        <section className="cv-section cv-products cabl-route-products" id="cabl-route-products">
+          <div className="cv-container">
+            <div className="cv-section-heading">
+              <div><span>من كتالوج CABL</span><h2>منتجات متاحة الآن</h2></div>
+              <p>الأسعار والمخزون والصور مأخوذة من قاعدة بيانات المتجر الحالية.</p>
+            </div>
+            {products.length > 0 ? (
+              <div className="cv-product-grid">
+                {products.slice(0, 12).map((product, index) => (
+                  <article className="cv-product-card" key={product.id}>
+                    <div className="cv-product-image" role="button" tabIndex={0} onClick={() => onOpenProduct(product)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onOpenProduct(product); }} aria-label={`فتح ${product.name}`}>
+                      <img src={product.image} alt={productAlt(product)} loading="lazy" />
+                      <span>{index < 3 ? 'اختيار CABL' : product.quantity > 0 ? 'متوفر الآن' : 'غير متوفر'}</span>
+                      <button type="button" className={`cv-wish ${favorites.includes(product.id) ? 'active' : ''}`} onClick={(event) => { event.stopPropagation(); onToggleFavorite(product.id); }} aria-label="إضافة للمفضلة"><Heart size={16} fill={favorites.includes(product.id) ? 'currentColor' : 'none'} /></button>
+                    </div>
+                    <div className="cv-product-copy">
+                      <small>{product.brand}</small>
+                      <button type="button" onClick={() => onOpenProduct(product)}><strong>{product.name}</strong><span>افتح المواصفات <ArrowLeft size={14} /></span></button>
+                      <div className="cv-price"><strong>{formatMoney(product.price)}</strong>{product.discountPrice !== null && product.discountPrice < product.regularPrice && <del>{formatMoney(product.regularPrice)}</del>}</div>
+                      <button className="cv-add-button" type="button" disabled={product.quantity <= 0} onClick={() => onAddToCart(product)}>إضافة للسلة</button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : <p className="cv-empty">لا توجد منتجات مطابقة حاليًا. جرّب فئة أخرى من الكتالوج.</p>}
+          </div>
+        </section>
+        <section className="cabl-route-info cv-container">
+          <h2>اختيار أوضح قبل الشراء</h2>
+          <p>{page.description} راجع المواصفات والتوفر وطريقة الشحن في صفحة المنتج قبل إضافة المنتج إلى السلة.</p>
+          <div className="cabl-route-links">
+            <button type="button" onClick={() => onNavigate('chargers')}>الشواحن</button>
+            <button type="button" onClick={() => onNavigate('cables')}>الكابلات</button>
+            <button type="button" onClick={() => onNavigate('power-banks')}>الباور بانك</button>
+            <button type="button" onClick={() => onNavigate('contact')}>تواصل مع CABL</button>
+          </div>
+        </section>
+      </main>
+      <footer className="cv-footer">
+        <div className="cv-container cv-footer-bottom"><span>© 2026 CABL. جميع الحقوق محفوظة.</span><button type="button" onClick={onGoHome}>العودة للرئيسية</button></div>
+      </footer>
+    </div>
   );
 }
 
@@ -995,6 +1289,7 @@ function App() {
   const cartShipping = selectedShippingOption?.free ? 0 : selectedShippingOption?.charge ?? 0;
   const cartTotal = cartSubtotal + cartShipping;
   const cartItemCount = cart.reduce((sum, product) => sum + (cartQuantities[product.id] ?? 1), 0);
+  const landingPage = route.kind === 'landing' ? resolveLandingPage(route.path) : null;
 
   useEffect(() => {
     if (paymentMethods.length > 0 && paymentMethodId === null) {
@@ -1012,6 +1307,17 @@ function App() {
       return matchesFilter && matchesCategoryRoute && matchesBrandRoute && matchesSelectedBrand && matchesQuery;
     });
   }, [activeFilter, products, query, route, selectedBrandSlug]);
+  const landingProducts = useMemo(() => {
+    if (!landingPage) return [];
+    const categoryHints = landingPage.categoryKey ? CATEGORY_PATH_HINTS[landingPage.categoryKey] ?? [] : [];
+    const hints = [...categoryHints, ...(landingPage.hints ?? [])];
+    return products.filter((product) => {
+      const productText = normalizeSearch(`${product.name} ${product.brand} ${product.category?.name ?? ''} ${product.description}`);
+      const matchesBrand = !landingPage.brandSlug || product.brandSlug === landingPage.brandSlug;
+      const matchesHints = hints.length === 0 || hints.some((hint) => productText.includes(normalizeSearch(hint)));
+      return matchesBrand && matchesHints;
+    });
+  }, [landingPage, products]);
   const categories = useMemo(() => {
     const categoryMap = new Map<string, { id: string; name: string; slug: string; image: string; count: string }>();
     for (const product of products) {
@@ -1254,7 +1560,7 @@ function App() {
   }, []);
 
   const openProductPreview = (product: Product) => {
-    navigateTo(`/product/${product.slug}`);
+    navigateTo(productRoutePath(product));
   };
 
   const closeProductPreview = () => {
@@ -1304,7 +1610,7 @@ function App() {
       navigateTo('/', 'discover');
     } else {
       const category = categories.find((item) => item.id === filter);
-      if (category) navigateTo(`/category/${category.slug}`, 'discover');
+      if (category) navigateTo(`/${categoryRoutePath(category)}`, 'discover');
     }
   };
 
@@ -1316,7 +1622,7 @@ function App() {
         scrollTo('discover');
         return;
       }
-      navigateTo(`/brand/${slug}`, 'discover');
+      navigateTo(`/${slug}`, 'discover');
     } else {
       setActiveFilter('ALL');
       navigateTo('/', 'discover');
@@ -1464,8 +1770,26 @@ function App() {
   }, [route]);
 
   useEffect(() => {
-    if (!seo) return;
-    const pageSeo: StoreSeoResponse = route.kind === 'search'
+    if (!seo && route.kind !== 'landing') return;
+    const pageSeo: StoreSeoResponse | null = route.kind === 'landing' && landingPage
+      ? {
+        entityType: landingPage.path.startsWith('guides/') ? 'guide' : 'category',
+        slug: landingPage.path,
+        title: landingPage.title,
+        h1: landingPage.h1,
+        description: landingPage.description,
+        canonicalPath: `/${landingPage.path}`,
+        indexable: true,
+        breadcrumbs: [{ name: 'الرئيسية', path: '/' }, { name: landingPage.h1, path: `/${landingPage.path}` }],
+        jsonLd: {
+          '@context': 'https://schema.org',
+          '@type': landingPage.path.startsWith('guides/') ? 'Article' : 'CollectionPage',
+          name: landingPage.title,
+          description: landingPage.description,
+          url: `/${landingPage.path}`,
+        },
+      }
+      : route.kind === 'search' && seo
       ? {
         ...seo,
         title: query.trim() ? `نتائج البحث عن ${query.trim()} | CABL` : 'البحث في متجر CABL',
@@ -1476,6 +1800,7 @@ function App() {
         breadcrumbs: [{ name: 'الرئيسية', path: '/' }, { name: 'البحث', path: '/search' }],
       }
       : seo;
+    if (!pageSeo) return;
     document.title = pageSeo.title;
     const setMeta = (selector: string, attribute: 'name' | 'property', content: string) => {
       let element = document.head.querySelector<HTMLMetaElement>(selector);
@@ -1502,7 +1827,7 @@ function App() {
     jsonLd.id = 'cabl-seo-jsonld';
     jsonLd.type = 'application/ld+json';
     jsonLd.textContent = JSON.stringify(pageSeo.jsonLd);
-  }, [query, route, seo, selectedProduct]);
+  }, [landingPage?.path, query, route, seo, selectedProduct]);
 
   const closeQuoteForm = () => {
     setQuoteOpen(false);
@@ -1742,7 +2067,7 @@ function App() {
           </div>
           <div className="category-grid">
             {displayCategories.map((category) => (
-              <a className="category-tile" href={`${import.meta.env.BASE_URL}category/${category.slug}/`} key={category.id} onClick={(event) => { event.preventDefault(); chooseCategory(category.id); }} data-testid={`card-category-${category.id}`}>
+              <a className="category-tile" href={`${import.meta.env.BASE_URL}${categoryRoutePath(category)}/`} key={category.id} onClick={(event) => { event.preventDefault(); chooseCategory(category.id); }} data-testid={`card-category-${category.id}`}>
                 <img src={category.image} alt={`${category.name} شواحن ومنتجات في اليمن`} width="600" height="600" loading="lazy" data-testid={`img-category-${category.id}`} />
                 <span className="category-info">
                   <h3>{compactCategoryLabel(category.name)}</h3>
@@ -1837,7 +2162,7 @@ function App() {
                  {brandOptions.length > 0 && (
                    <div className="empty-products-links" aria-label="تصفح العلامات التجارية">
                      <span>أو تصفح علامة:</span>
-                     {brandOptions.slice(0, 4).map((brand) => <button type="button" key={brand.slug} onClick={() => navigateTo(`/brand/${brand.slug}`)}>{brand.name}</button>)}
+                     {brandOptions.slice(0, 4).map((brand) => <button type="button" key={brand.slug} onClick={() => navigateTo(`/${brand.slug}`)}>{brand.name}</button>)}
                    </div>
                  )}
                </div>
@@ -1993,7 +2318,27 @@ function App() {
           <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لـ Baseus و Vention في اليمن · منتجات Anker و UGREEN متوفرة.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
         </div>
       </footer>
-      </div> : (
+       </div> : landingPage ? (
+         <CablLandingPage
+           page={landingPage}
+           products={landingProducts}
+           formatMoney={formatMoney}
+           cartItemCount={cartItemCount}
+           favorites={favorites}
+           onAddToCart={addToCart}
+           onToggleFavorite={toggleFavorite}
+           onOpenProduct={openProductPreview}
+           onOpenCart={() => setCartOpen(true)}
+           onGoHome={() => navigateTo('/')}
+           onOpenSearch={() => navigateTo('/search')}
+           mobileMenuOpen={mobileMenuOpen}
+           onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)}
+           onSelectCategoryByHint={selectCairoCategory}
+           deliveryLabel={deliveryLabel}
+           brandNames={brandNames}
+           onNavigate={(path) => navigateTo(path, 'cabl-route-products')}
+         />
+       ) : (
         <CairoVoltHome
           products={products}
           featuredProducts={visibleProducts}
@@ -2018,7 +2363,7 @@ function App() {
               const product = products.find((item) => item.id === suggestion.id);
               if (product) openProductPreview(product);
             } else {
-              navigateTo(`/${suggestion.kind}/${suggestion.slug}`);
+              navigateTo(suggestion.kind === 'brand' ? `/${suggestion.slug}` : `/${categoryRoutePath({ name: suggestion.title, slug: suggestion.slug })}`);
             }
           }}
           mobileMenuOpen={mobileMenuOpen}

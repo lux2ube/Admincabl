@@ -2339,6 +2339,114 @@ img { display: block; max-width: 100%; }
 .cairo-store-shell .checkout-button:hover,
 .cairo-store-shell .checkout-submit:hover,
 .cairo-store-shell .checkout-submit-mobile:hover { background: var(--cv-blue); }
+.cabl-route-site {
+  min-height: 100dvh;
+  background: var(--paper);
+}
+.cabl-route-hero {
+  padding-top: 70px;
+  padding-bottom: 48px;
+}
+.cabl-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 36px;
+  color: var(--muted-ink);
+  font-size: 11px;
+}
+.cabl-breadcrumbs a:hover { color: var(--cobalt); }
+.cabl-route-eyebrow {
+  display: inline-block;
+  color: var(--cobalt);
+  font-size: 13px;
+  font-weight: 800;
+}
+.cabl-route-hero h1 {
+  max-width: 760px;
+  margin: 8px 0 16px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5vw, 66px);
+  line-height: 1.25;
+  letter-spacing: -.055em;
+}
+.cabl-route-hero > p {
+  max-width: 690px;
+  margin: 0;
+  color: var(--muted-ink);
+  font-size: 15px;
+  line-height: 2;
+}
+.cabl-route-points {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding-bottom: 48px;
+}
+.cabl-route-points > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 62px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  padding: 14px 16px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+.cabl-route-points svg { flex: 0 0 auto; color: var(--cobalt); }
+.cabl-route-products { border-top: 1px solid var(--line); }
+.cabl-route-info {
+  padding-top: 58px;
+  padding-bottom: 70px;
+}
+.cabl-route-info h2 {
+  margin: 0 0 12px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(25px, 3vw, 38px);
+}
+.cabl-route-info p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--muted-ink);
+  line-height: 2;
+}
+.cabl-route-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 23px;
+}
+.cabl-route-links button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  padding: 9px 16px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.cabl-route-links button:hover {
+  border-color: var(--cobalt);
+  color: var(--cobalt);
+}
+.cabl-route-site .cv-footer-bottom button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+@media (max-width: 700px) {
+  .cabl-route-hero { padding-top: 36px; padding-bottom: 30px; }
+  .cabl-breadcrumbs { margin-bottom: 25px; }
+  .cabl-route-hero h1 { font-size: 34px; }
+  .cabl-route-hero > p { font-size: 13px; }
+  .cabl-route-points { grid-template-columns: 1fr; padding-bottom: 30px; }
+  .cabl-route-info { padding-top: 38px; padding-bottom: 45px; }
+}
 .cairo-store-shell .quote-modal {
   border: 0;
   border-radius: 16px;

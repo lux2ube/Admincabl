@@ -65,8 +65,24 @@ type GuideSeoInput = {
   indexable: boolean;
 };
 
-const HOME_TITLE = "CairoVolt | منتجات الشحن والطاقة الأصلية";
-const HOME_DESCRIPTION = "تسوق منتجات الشحن والطاقة والإكسسوارات من كتالوج CairoVolt، مع أسعار ومخزون وخيارات شحن مأخوذة من المتجر.";
+const HOME_TITLE = "CABL | منتجات الشحن والطاقة الأصلية";
+const HOME_DESCRIPTION = "تسوق منتجات الشحن والطاقة والإكسسوارات من كتالوج CABL، مع أسعار ومخزون وخيارات شحن مأخوذة من المتجر.";
+
+const categoryPublicPaths: Record<string, string> = {
+  chargers: "chargers",
+  "charging-cables": "cables",
+  cables: "cables",
+  "power-banks": "power-banks",
+  "wireless-chargers": "wireless-chargers",
+  "car-chargers": "car-accessories",
+  "car-accessories": "car-accessories",
+  "phone-accessories": "hubs-adapters",
+  "hubs-adapters": "hubs-adapters",
+};
+
+function publicCategoryPath(slug: string | null) {
+  return slug ? `/${categoryPublicPaths[slug] ?? slug}` : "/categories/";
+}
 
 const arabicLetters = new Map([
   ["ا", "a"], ["ب", "b"], ["ت", "t"], ["ث", "th"], ["ج", "j"], ["ح", "h"], ["خ", "kh"],
@@ -99,7 +115,7 @@ function productDisplayName(brand: string, productName: string) {
 function productDescription(input: ProductSeoInput, displayName: string) {
   return input.shortDescription
     || input.productDescription
-    || `${displayName} أصلي من CairoVolt مع خيارات الشحن المتاحة في المتجر.`;
+    || `${displayName} أصلي من CABL مع خيارات الشحن المتاحة في المتجر.`;
 }
 
 function breadcrumbs(items: Breadcrumb[]) {
@@ -122,14 +138,14 @@ export function buildHomeSeo(): SeoResponse {
         {
           "@type": "Organization",
           "@id": "/#organization",
-          name: "CairoVolt",
+      name: "CABL",
           url: "/",
           description: "متجر إلكترونيات ومنتجات شحن وطاقة أصلية.",
         },
         {
           "@type": "WebSite",
           "@id": "/#website",
-          name: "CairoVolt",
+          name: "CABL",
           url: "/",
           inLanguage: "ar-YE",
           publisher: { "@id": "/#organization" },
@@ -137,7 +153,7 @@ export function buildHomeSeo(): SeoResponse {
         {
           "@type": "Store",
           "@id": "/#store",
-          name: "CairoVolt منتجات الشحن والطاقة",
+          name: "CABL منتجات الشحن والطاقة",
           url: "/",
           areaServed: "الإقليم المحدد في إعدادات المتجر",
           brand: ["Baseus", "Vention", "Anker", "UGREEN"],
@@ -150,15 +166,17 @@ export function buildHomeSeo(): SeoResponse {
 export function buildProductSeo(input: ProductSeoInput): SeoResponse {
   const displayName = productDisplayName(input.brand, input.productName);
   const description = productDescription(input, displayName);
-  const canonicalPath = `/product/${input.slug}`;
-  const categoryPath = input.categorySlug ? `/category/${input.categorySlug}` : "/categories/";
+  const canonicalPath = input.brandSlug && input.categorySlug
+    ? `/${input.brandSlug}/${categoryPublicPaths[input.categorySlug] ?? input.categorySlug}/${input.slug}`
+    : `/product/${input.slug}`;
+  const categoryPath = publicCategoryPath(input.categorySlug);
   const categoryName = input.categoryName || "المنتجات";
   const price = input.discountPrice ?? input.regularPrice;
 
   return {
     entityType: "product",
     slug: input.slug,
-    title: `${displayName} | ${categoryName} | CairoVolt`,
+    title: `${displayName} | ${categoryName} | CABL`,
     h1: input.productName,
     description,
     canonicalPath,
@@ -175,7 +193,7 @@ export function buildProductSeo(input: ProductSeoInput): SeoResponse {
       sku: input.sku,
       url: canonicalPath,
       ...(input.image ? { image: [input.image] } : {}),
-      brand: { "@type": "Brand", name: input.brand, url: `/brand/${input.brandSlug}` },
+       brand: { "@type": "Brand", name: input.brand, url: `/${input.brandSlug}` },
       offers: {
         "@type": "Offer",
         url: canonicalPath,
@@ -190,16 +208,16 @@ export function buildProductSeo(input: ProductSeoInput): SeoResponse {
 }
 
 export function buildCategorySeo(input: CategorySeoInput): SeoResponse {
-  const canonicalPath = `/category/${input.slug}`;
+  const canonicalPath = publicCategoryPath(input.slug);
   const description = input.metaDescription
     || input.seoDescription
     || input.description
-    || `${input.name} الأصلية مع خيارات الشحن المتاحة في CairoVolt.`;
+    || `${input.name} الأصلية مع خيارات الشحن المتاحة في CABL.`;
 
   return {
     entityType: "category",
     slug: input.slug,
-    title: input.seoTitle || `${input.name} الأصلية | CairoVolt`,
+    title: input.seoTitle || `${input.name} الأصلية | CABL`,
     h1: input.name,
     description,
     canonicalPath,
@@ -217,16 +235,16 @@ export function buildCategorySeo(input: CategorySeoInput): SeoResponse {
 }
 
 export function buildBrandSeo(input: BrandSeoInput): SeoResponse {
-  const canonicalPath = `/brand/${input.slug}`;
+  const canonicalPath = `/${input.slug}`;
   const description = input.metaDescription
     || input.seoDescription
     || input.description
-    || `منتجات ${input.name} الأصلية مع خيارات الشحن المتاحة في CairoVolt.`;
+    || `منتجات ${input.name} الأصلية مع خيارات الشحن المتاحة في CABL.`;
 
   return {
     entityType: "brand",
     slug: input.slug,
-    title: input.seoTitle || `منتجات ${input.name} الأصلية | CairoVolt`,
+    title: input.seoTitle || `منتجات ${input.name} الأصلية | CABL`,
     h1: `منتجات ${input.name}`,
     description,
     canonicalPath,
@@ -264,7 +282,7 @@ export function buildGuideSeo(input: GuideSeoInput): SeoResponse {
       articleBody: input.content,
       url: canonicalPath,
       ...(input.imagePath ? { image: [input.imagePath] } : {}),
-       publisher: { "@type": "Organization", name: "CairoVolt", url: "/" },
+       publisher: { "@type": "Organization", name: "CABL", url: "/" },
     },
   };
 }

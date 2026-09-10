@@ -332,7 +332,93 @@ function renderPage(page) {
 </html>`;
 }
 
-for (const page of [...pages, ...powerPages]) {
+const cleanRouteSlugs = [
+  'cables', 'car-accessories', 'hubs-adapters',
+  'chargers/fast-chargers', 'chargers/gan-chargers', 'chargers/type-c-chargers',
+  'cables/usb-c', 'cables/100w-cables', 'power-banks/10000mah', 'power-banks/20000mah',
+  'baseus', 'vention', 'anker', 'ugreen',
+  'baseus/chargers', 'baseus/cables', 'baseus/power-banks',
+  'baseus/wireless-chargers', 'baseus/car-accessories', 'baseus/hubs-adapters',
+  'vention/chargers', 'vention/cables', 'vention/power-banks',
+  'vention/wireless-chargers', 'vention/car-accessories', 'vention/hubs-adapters',
+  'anker/chargers', 'anker/cables', 'anker/power-banks',
+  'anker/wireless-chargers', 'anker/car-accessories', 'anker/hubs-adapters',
+  'ugreen/chargers', 'ugreen/cables', 'ugreen/power-banks',
+  'ugreen/wireless-chargers', 'ugreen/car-accessories', 'ugreen/hubs-adapters',
+  'guides/charger-buying-guide', 'guides/cable-buying-guide', 'guides/power-bank-buying-guide', 'guides/usb-c-guide',
+  'compare/baseus-vs-vention', 'compare/baseus-vs-ugreen', 'compare/anker-vs-ugreen',
+  'blog', 'blog/chargers', 'blog/cables', 'blog/power-banks', 'blog/baseus', 'blog/vention',
+  'yemen', 'sanaa', 'aden', 'taiz', 'ibb', 'hodeidah', 'hadramout', 'marib',
+  'about', 'contact', 'warranty', 'shipping', 'returns', 'faq', 'authenticity',
+];
+
+const cleanRouteLabels = {
+  cables: 'الكابلات',
+  'car-accessories': 'إكسسوارات السيارات',
+  'hubs-adapters': 'المحاور والمحوّلات',
+  'chargers/fast-chargers': 'الشواحن السريعة',
+  'chargers/gan-chargers': 'شواحن GaN',
+  'chargers/type-c-chargers': 'شواحن Type-C',
+  'cables/usb-c': 'كابلات USB-C',
+  'cables/100w-cables': 'كابلات 100W',
+  'power-banks/10000mah': 'باور بانك 10000mAh',
+  'power-banks/20000mah': 'باور بانك 20000mAh',
+  'baseus': 'منتجات Baseus',
+  'vention': 'منتجات Vention',
+  'anker': 'منتجات Anker',
+  'ugreen': 'منتجات UGREEN',
+  'guides/charger-buying-guide': 'دليل شراء الشاحن',
+  'guides/cable-buying-guide': 'دليل شراء كابل الشحن',
+  'guides/power-bank-buying-guide': 'دليل شراء الباور بانك',
+  'guides/usb-c-guide': 'دليل USB-C وType-C',
+  'compare/baseus-vs-vention': 'Baseus ضد Vention',
+  'compare/baseus-vs-ugreen': 'Baseus ضد UGREEN',
+  'compare/anker-vs-ugreen': 'Anker ضد UGREEN',
+  blog: 'مدونة CABL',
+  'blog/chargers': 'مقالات الشواحن',
+  'blog/cables': 'مقالات الكابلات',
+  'blog/power-banks': 'مقالات الباور بانك',
+  'blog/baseus': 'مقالات Baseus',
+  'blog/vention': 'مقالات Vention',
+  yemen: 'CABL في اليمن',
+  sanaa: 'CABL في صنعاء',
+  aden: 'CABL في عدن',
+  taiz: 'CABL في تعز',
+  ibb: 'CABL في إب',
+  hodeidah: 'CABL في الحديدة',
+  hadramout: 'CABL في حضرموت',
+  marib: 'CABL في مأرب',
+  about: 'عن CABL',
+  contact: 'تواصل مع CABL',
+  warranty: 'ضمان المنتجات',
+  shipping: 'الشحن والتوصيل',
+  returns: 'الاستبدال والاسترجاع',
+  faq: 'الأسئلة الشائعة',
+  authenticity: 'أصالة المنتجات',
+};
+
+const cleanRoutePages = cleanRouteSlugs.map((slug) => {
+  const label = cleanRouteLabels[slug] || slug
+    .split('/')
+    .at(-1)
+    .replaceAll('-', ' ')
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+  const title = `${label} | CABL`;
+  return {
+    slug,
+    title,
+    description: `تصفح ${label} من كتالوج CABL، مع مواصفات واضحة وأسعار ومخزون وخيارات توصيل داخل اليمن.`,
+    h1: label,
+    eyebrow: 'CABL · دليل التسوق',
+    intro: `تعرّف على ${label} واختر المنتجات المناسبة من كتالوج CABL قبل إتمام الطلب.`,
+    keywords: `${label}, CABL, شواحن, كابلات, باور بانك, اليمن`,
+    products: ['منتجات أصلية من كتالوج CABL', 'خيارات شحن وطاقة متوفرة حاليًا', 'مواصفات واضحة قبل الشراء'],
+    image: '../images/vention-charger-65w.jpg',
+    related: [['chargers/', 'الشواحن'], ['cables/', 'الكابلات'], ['power-banks/', 'الباور بانك']],
+  };
+});
+
+for (const page of [...pages, ...powerPages, ...cleanRoutePages]) {
   const outputDir = path.join(publicDir, page.slug);
   fs.mkdirSync(outputDir, { recursive: true });
   fs.writeFileSync(path.join(outputDir, 'index.html'), renderPage(page));
