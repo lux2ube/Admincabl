@@ -10,10 +10,14 @@
 html { background: var(--paper); }
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans Arabic", Arial, sans-serif; }
 a { color: inherit; text-decoration: none; }
-.seo-header { min-height: 82px; display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 16px max(5vw, 22px); border-bottom: 1px solid var(--line); background: rgba(247,246,242,.96); }
-.seo-logo img { display: block; width: 145px; height: auto; }
+.seo-utility { display: flex; justify-content: space-between; gap: 18px; padding: 7px max(5vw, 22px); background: #151515; color: #fff; font-size: 10px; }
+.seo-header { min-height: 70px; display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 12px max(5vw, 22px); border-bottom: 1px solid var(--line); background: rgba(247,246,242,.96); }
+.seo-logo { display: inline-flex; align-items: center; gap: 8px; font-family: "Noto Kufi Arabic", sans-serif; font-size: 23px; font-weight: 800; }
+.seo-logo img { display: block; width: 38px; height: 24px; object-fit: contain; }
 .seo-header nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 22px; color: var(--muted); font-size: 12px; font-weight: 700; }
 .seo-header nav a:hover, .seo-related a:hover { color: #5f7700; }
+.seo-header-actions { display: flex; align-items: center; gap: 14px; font-size: 12px; font-weight: 800; }
+.seo-header-actions a:first-child { font-size: 24px; line-height: 1; }
 .seo-cta, .seo-button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0 17px; background: var(--ink); color: var(--paper); font-size: 11px; font-weight: 800; }
 .seo-hero { max-width: 1320px; min-height: 540px; margin: 0 auto; padding: 75px 5vw; display: grid; grid-template-columns: 1fr minmax(330px, .85fr); align-items: center; gap: 60px; }
 .seo-breadcrumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 28px; color: var(--muted); font-size: 11px; font-weight: 700; }
@@ -40,10 +44,14 @@ h2 { margin: 0 0 28px; font-size: clamp(27px, 4vw, 47px); line-height: 1.3; lett
 .seo-related h2 { font-size: 25px; margin-bottom: 18px; }
 .seo-related nav { display: flex; flex-wrap: wrap; gap: 9px; }
 .seo-related a { padding: 11px 15px; border: 1px solid var(--line); font-size: 12px; font-weight: 700; }
-.seo-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 25px 5vw; background: var(--ink); color: var(--paper); font-size: 11px; }
-.seo-footer a:first-child { font-size: 20px; font-weight: 800; }
+.seo-footer { display: grid; grid-template-columns: 1.5fr 2fr auto; align-items: center; gap: 28px; padding: 35px 5vw; background: var(--ink); color: var(--paper); font-size: 11px; }
+.seo-footer > div { display: grid; gap: 8px; }
+.seo-footer > div strong { font-size: 20px; }
+.seo-footer nav { display: flex; flex-wrap: wrap; gap: 15px; }
+.seo-footer a { color: var(--paper); }
 .seo-footer span { color: #aaa8a1; }
 @media (max-width: 720px) {
+  .seo-utility { gap: 8px; font-size: 8px; }
   .seo-header { align-items: flex-start; flex-wrap: wrap; }
   .seo-header nav { order: 3; width: 100%; justify-content: flex-start; gap: 14px; }
   .seo-header nav a { font-size: 11px; }
@@ -52,5 +60,5 @@ h2 { margin: 0 0 28px; font-size: clamp(27px, 4vw, 47px); line-height: 1.3; lett
   .seo-hero > img { max-height: 300px; }
   .seo-product-grid, .seo-guide { grid-template-columns: 1fr; }
   .seo-content { padding-top: 48px; padding-bottom: 48px; }
-  .seo-footer { align-items: flex-start; flex-direction: column; }
+  .seo-footer { grid-template-columns: 1fr; align-items: flex-start; }
 }

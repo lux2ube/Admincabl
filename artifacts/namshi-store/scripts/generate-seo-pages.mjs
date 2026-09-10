@@ -308,15 +308,16 @@ function renderPage(page) {
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
   </head>
   <body>
+    <div class="seo-utility"><span>ضمان المتجر حسب المنتج</span><span>توصيل داخل اليمن</span><span>خدمة العملاء</span><span>English</span></div>
     <header class="seo-header">
-      <a class="seo-logo" href="${rootPrefix}"><img src="${rootPrefix}cabl-logo.svg" alt="CABL متجر شواحن في اليمن" /></a>
+      <a class="seo-logo" href="${rootPrefix}"><img src="${rootPrefix}cabl-logo.svg" alt="CABL متجر شواحن في اليمن" /><strong>CABL</strong></a>
       <nav aria-label="التنقل">
         <a href="${rootPrefix}chargers/">الشواحن</a>
         <a href="${rootPrefix}fast-chargers/">الشواحن السريعة</a>
         <a href="${rootPrefix}type-c-chargers/">Type-C</a>
         <a href="${rootPrefix}delivery/yemen/">التوصيل</a>
       </nav>
-      <a class="seo-cta" href="${rootPrefix}#discover">تصفح المنتجات</a>
+      <div class="seo-header-actions"><a href="${rootPrefix}search">⌕</a><a href="${rootPrefix}#discover">السلة</a></div>
     </header>
     <main>
       <section class="seo-hero">
@@ -353,8 +354,8 @@ function renderPage(page) {
       </section>
     </main>
     <footer class="seo-footer">
-      <a href="${rootPrefix}">CABL</a>
-      <span>شواحن ومنتجات شحن أصلية مع توصيل داخل اليمن.</span>
+      <div><strong>CABL</strong><span>منتجات الشحن والطاقة مع توصيل داخل اليمن.</span></div>
+      <nav><a href="${rootPrefix}about/">عن CABL</a><a href="${rootPrefix}shipping/">الشحن والتوصيل</a><a href="${rootPrefix}faq/">الأسئلة الشائعة</a><a href="${rootPrefix}blog/">المدونة</a></nav>
       <a href="https://wa.me/967771106977" rel="noopener noreferrer">تواصل عبر WhatsApp</a>
     </footer>
     <script>

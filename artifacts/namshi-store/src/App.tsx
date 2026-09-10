@@ -680,45 +680,18 @@ function CairoVoltHome({
 
   return (
     <div className="cv-site" dir="rtl">
-      <div className="cv-utility">
-        <div className="cv-container cv-utility-inner">
-          <span>ضمان المتجر حسب المنتج</span>
-          <span>{deliveryLabel}</span>
-          <button type="button" onClick={onOpenQuote}><Smartphone size={13} /> خدمة العملاء</button>
-          <button type="button" onClick={() => onScroll('cv-footer')}>English</button>
-        </div>
-      </div>
-      <header className="cv-header">
-        <div className="cv-container cv-header-inner">
-          <button className="cv-logo-button" type="button" onClick={onGoHome} aria-label="العودة إلى الصفحة الرئيسية">
-            <CablLogo showTagline={false} />
-          </button>
-          <nav className={`cv-nav ${mobileMenuOpen ? 'is-open' : ''}`} aria-label="التنقل الرئيسي">
-            {brandNames.slice(0, 3).map((brand) => <button type="button" key={brand} onClick={() => onSelectCategoryByHint(brand)}>{brand} <ChevronDown size={13} /></button>)}
-            <button type="button" onClick={() => onSelectCategoryByHint('باور')}>باور بانك</button>
-            <button type="button" onClick={() => onSelectCategoryByHint('شاحن')}>شواحن</button>
-            <button type="button" onClick={() => onScroll('cv-footer')}>المدونة</button>
-          </nav>
-          <div className="cv-header-actions">
-            <button type="button" onClick={onOpenSearch} aria-label="البحث"><Search size={22} /></button>
-            <button type="button" onClick={onOpenCart} aria-label="السلة" className="cv-cart-button"><ShoppingBag size={22} />{cartItemCount > 0 && <b>{cartItemCount}</b>}</button>
-            <button type="button" onClick={onToggleMobileMenu} className="cv-menu-button" aria-label="القائمة">{mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}</button>
-          </div>
-        </div>
-        {searchOpen && (
-          <div className="cv-search-panel cv-container">
-            <form onSubmit={(event) => { event.preventDefault(); onSubmitSearch(); }}>
-              <Search size={18} />
-              <input autoFocus value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder="ابحث عن منتج أو مواصفة" aria-label="البحث عن منتج" />
-              <button type="submit">بحث</button>
-            </form>
-            {query && <div className="cv-search-results">
-              <span>{searchSuggestions.length} نتيجة</span>
-              {searchSuggestions.slice(0, 5).map((suggestion) => <button type="button" key={`${suggestion.kind}-${suggestion.id}`} onClick={() => onSelectSuggestion(suggestion)}><strong>{suggestion.title}</strong><small>{suggestion.subtitle}</small><ArrowLeft size={14} /></button>)}
-            </div>}
-          </div>
-        )}
-      </header>
+      <CairoVoltProductHeader
+        cartItemCount={cartItemCount}
+        onOpenCart={onOpenCart}
+        onGoHome={onGoHome}
+        onOpenSearch={onOpenSearch}
+        mobileMenuOpen={mobileMenuOpen}
+        onToggleMobileMenu={onToggleMobileMenu}
+        onScroll={onScroll}
+        onSelectCategoryByHint={onSelectCategoryByHint}
+        deliveryLabel={deliveryLabel}
+        brandNames={brandNames}
+      />
 
       <main>
         <section className="cv-hero">
@@ -792,17 +765,7 @@ function CairoVoltHome({
         </section>
       </main>
 
-      <footer className="cv-footer" id="cv-footer">
-        <div className="cv-container">
-          <div className="cv-footer-grid">
-             <div className="cv-footer-brand"><CablLogo showTagline={false} /><p>متجر CABL لمنتجات الشحن والطاقة من {brandNames.join(' و ') || 'العلامات المتاحة'} — أسعار واضحة ومواصفات مرتبطة بالكتالوج.</p><button type="button" onClick={onOpenQuote}>تواصل مع خدمة العملاء</button></div>
-            <div><h3>تسوق حسب الفئة</h3><button type="button" onClick={() => onSelectCategoryByHint('باور')}>باور بانك</button><button type="button" onClick={() => onSelectCategoryByHint('شاحن')}>شواحن</button><button type="button" onClick={() => onSelectCategoryByHint('سماعة')}>سماعات بلوتوث</button><button type="button" onClick={() => onSelectCategoryByHint('كابل')}>كابلات شحن</button></div>
-            <div><h3>خدمة العملاء</h3><button type="button" onClick={onOpenTracking}>تحقق من سجل الضمان</button><button type="button" onClick={onOpenQuote}>تواصل معنا</button><button type="button" onClick={() => onScroll('cv-trust')}>سياسة الشحن</button><button type="button" onClick={() => onScroll('cv-products')}>الأسئلة الشائعة</button></div>
-            <div><h3>مركز المواصفات</h3><button type="button" onClick={onOpenSearch}>مصادر خارجية للمراجعة</button><button type="button" onClick={() => onScroll('cv-products')}>افتح صفحة المنتج</button><button type="button" onClick={onOpenWishlist}>المفضلة</button><button type="button" onClick={onOpenCart}>السلة ({cartItemCount})</button></div>
-          </div>
-          <div className="cv-footer-bottom"><span>© 2026 CABL. جميع الحقوق محفوظة.</span><span>سياسة الخصوصية · الشروط والأحكام</span></div>
-        </div>
-      </footer>
+      <CablSiteFooter onGoHome={onGoHome} />
     </div>
   );
 }
@@ -833,7 +796,7 @@ function CairoVoltProductHeader({
   brandNames,
 }: CairoVoltProductHeaderProps) {
   return (
-    <div className="cv-site cv-product-header" dir="rtl">
+    <>
       <div className="cv-utility">
         <div className="cv-container cv-utility-inner">
           <span>ضمان المتجر حسب المنتج</span>
@@ -860,7 +823,49 @@ function CairoVoltProductHeader({
           </div>
         </div>
       </header>
-    </div>
+    </>
+  );
+}
+
+function CablSiteFooter({ onGoHome }: { onGoHome: () => void }) {
+  const base = import.meta.env.BASE_URL;
+  return (
+    <footer className="cv-footer" id="cv-footer" data-testid="footer-storefront">
+      <div className="cv-container">
+        <div className="cv-footer-grid">
+          <div className="cv-footer-brand">
+            <button type="button" onClick={onGoHome} aria-label="العودة إلى الصفحة الرئيسية"><CablLogo showTagline={false} /></button>
+            <p>متجر CABL لمنتجات الشحن والطاقة من العلامات المتاحة — أسعار واضحة ومواصفات مرتبطة بالكتالوج.</p>
+            <a href={`${base}contact/`}>تواصل مع خدمة العملاء</a>
+          </div>
+          <div>
+            <h3>تسوق حسب الفئة</h3>
+            <a href={`${base}chargers/`}>الشواحن</a>
+            <a href={`${base}cables/`}>الكابلات</a>
+            <a href={`${base}power-banks/`}>الباور بانك</a>
+            <a href={`${base}wireless-chargers/`}>الشحن اللاسلكي</a>
+          </div>
+          <div>
+            <h3>خدمة العملاء</h3>
+            <a href={`${base}about/`}>عن CABL</a>
+            <a href={`${base}shipping/`}>الشحن والتوصيل</a>
+            <a href={`${base}warranty/`}>الضمان</a>
+            <a href={`${base}faq/`}>الأسئلة الشائعة</a>
+          </div>
+          <div>
+            <h3>مركز المواصفات</h3>
+            <a href={`${base}search`}>البحث في المنتجات</a>
+            <a href={`${base}compare/baseus-vs-vention/`}>المقارنات</a>
+            <a href={`${base}guides/charger-buying-guide/`}>أدلة الشراء</a>
+            <a href={`${base}blog/`}>المدونة</a>
+          </div>
+        </div>
+        <div className="cv-footer-bottom">
+          <span>© 2026 CABL. جميع الحقوق محفوظة.</span>
+          <span>سياسة الخصوصية · الشروط والأحكام</span>
+        </div>
+      </div>
+    </footer>
   );
 }
 
@@ -1210,9 +1215,7 @@ function CablLandingPage({
           </div>
         </section>
       </main>
-      <footer className="cv-footer">
-        <div className="cv-container cv-footer-bottom"><span>© 2026 CABL. جميع الحقوق محفوظة.</span><button type="button" onClick={onGoHome}>العودة للرئيسية</button></div>
-      </footer>
+      <CablSiteFooter onGoHome={onGoHome} />
     </div>
   );
 }
@@ -1408,9 +1411,7 @@ function CablBrandPage({
           </div>
         </section>
       </main>
-      <footer className="cv-footer">
-        <div className="cv-container cv-footer-bottom"><span>© 2026 CABL. جميع الحقوق محفوظة.</span><button type="button" onClick={onGoHome}>العودة للرئيسية</button></div>
-      </footer>
+      <CablSiteFooter onGoHome={onGoHome} />
     </div>
   );
 }
@@ -2226,7 +2227,7 @@ function App() {
         cartItemCount={cartItemCount}
         onOpenCart={() => setCartOpen(true)}
         onGoHome={() => navigateTo('/')}
-        onOpenSearch={() => navigateTo('/')}
+        onOpenSearch={() => navigateTo('/search')}
         mobileMenuOpen={mobileMenuOpen}
         onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)}
         onScroll={scrollTo}
@@ -2639,21 +2640,7 @@ function App() {
         )}
       </main>
 
-      <footer className="footer" data-testid="footer-storefront">
-        <div className="footer-inner">
-          <div className="footer-top">
-            <div className="footer-brand" lang="ar" dir="rtl">
-              <CablLogo className="cabl-logo-footer" />
-              <p>منتجات Baseus و Vention و Anker و UGREEN الأصلية للشحن والطاقة، متوفرة للشراء داخل اليمن.</p>
-            </div>
-            <div className="footer-col"><h4>تصفح</h4>{filterOptions.slice(1).map((filter) => <button type="button" key={filter.value} onClick={() => chooseCategory(filter.value)} data-testid={`footer-category-${filter.value}`}>{filter.label}</button>)}</div>
-            <div className="footer-col"><h4>المتجر</h4><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-shortlist">كل المنتجات</button><button type="button" onClick={() => setCartOpen(true)} data-testid="footer-moq">السلة</button><button type="button" onClick={() => setWishlistOpen(true)} data-testid="footer-pricing">المفضلة</button></div>
-            <div className="footer-col"><h4>خدمة العملاء</h4><button type="button" onClick={() => scrollTo('about')} data-testid="footer-about">عن CABL</button><button type="button" onClick={() => scrollTo('services')} data-testid="footer-delivery">الشحن والتوصيل</button><button type="button" onClick={() => scrollTo('discover')} data-testid="footer-help">مواصفات المنتجات</button><button type="button" onClick={openTracking} data-testid="footer-track-order">تتبع طلبك</button><button type="button" onClick={openQuoteForm} data-testid="footer-contact">إتمام الطلب</button></div>
-            <div className="footer-col"><h4>تابعنا</h4><button type="button" onClick={() => announce('تم نسخ رابط Instagram')} data-testid="footer-instagram">Instagram</button><button type="button" onClick={() => announce('تم نسخ رابط TikTok')} data-testid="footer-tiktok">TikTok</button><button type="button" onClick={() => announce('تم نسخ رابط WhatsApp')} data-testid="footer-whatsapp">WhatsApp</button></div>
-          </div>
-          <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لـ Baseus و Vention في اليمن · منتجات Anker و UGREEN متوفرة.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
-        </div>
-      </footer>
+      <CablSiteFooter onGoHome={() => navigateTo('/')} />
         </div> : searchPage ? (
           <CablLandingPage
             page={searchPage}
@@ -2726,7 +2713,7 @@ function App() {
           onOpenProduct={openProductPreview}
           onOpenCart={() => setCartOpen(true)}
           onOpenWishlist={() => setWishlistOpen(true)}
-          onOpenSearch={() => setSearchOpen(true)}
+           onOpenSearch={() => navigateTo('/search')}
           onGoHome={() => navigateTo('/')}
           searchOpen={searchOpen}
           query={query}

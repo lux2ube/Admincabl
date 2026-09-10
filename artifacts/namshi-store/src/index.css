@@ -2098,10 +2098,13 @@ img { display: block; max-width: 100%; }
 .cv-footer-grid { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); gap: 35px; padding-bottom: 44px; }
 .cv-footer-brand img { width: 112px; margin-bottom: 17px; filter: brightness(0) invert(1); }
 .cv-footer-brand .cabl-logo { margin-bottom: 17px; color: #fff; }
+.cv-footer-brand > button { display: block; border: 0; background: transparent; padding: 0; color: #fff; text-align: right; }
 .cv-footer-brand .cabl-logo-copy small { color: #bdb9ad; }
 .cv-footer-brand p { max-width: 280px; margin: 0 0 16px; color: #aeb9ce; font-size: 11px; line-height: 1.9; }
 .cv-footer-brand a { display: block; width: fit-content; margin-top: 5px; color: #fff; font-size: 11px; text-decoration: none; }
 .cv-footer-grid > div:not(.cv-footer-brand) { display: grid; align-content: start; gap: 10px; }
+.cv-footer-grid > div:not(.cv-footer-brand) a { color: #aeb9ce; font-size: 11px; text-decoration: none; }
+.cv-footer-grid > div:not(.cv-footer-brand) a:hover { color: #fff; }
 .cv-footer h3 { margin: 0 0 7px; color: #fff; font-size: 12px; }
 .cv-footer-grid button { width: fit-content; border: 0; background: transparent; color: #aeb9ce; padding: 0; font-size: 11px; text-align: right; }
 .cv-footer-grid button:hover { color: #fff; }
