@@ -252,6 +252,8 @@ function renderPage(page) {
     })),
   ];
   const related = page.related.map(([href, label]) => `<a href="${rootPrefix}${href}">${escapeHtml(label)}</a>`).join('');
+  const isBrandPage = Boolean(brandLabels[page.slug] || page.slug.startsWith('brands/'));
+  const pageTypeClass = isBrandPage ? 'seo-brand-page' : 'seo-category-page';
   const products = page.products.map((name, index) => `
         <article class="cv-product-card seo-product">
           <div class="cv-product-image"><img src="${imagePath}" alt="${escapeHtml(name)}" loading="lazy" /><span>${index < 3 ? 'اختيار CABL' : 'متوفر الآن'}</span></div>
@@ -306,17 +308,19 @@ function renderPage(page) {
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
   </head>
-  <body>
-    <div class="seo-utility"><span>ضمان المتجر حسب المنتج</span><span>توصيل داخل اليمن</span><span>خدمة العملاء</span><span>English</span></div>
+  <body class="${pageTypeClass}">
+    <div class="seo-utility"><div><span>ضمان كايرو فولت مكتوب حسب المنتج</span><span>توصيل داخل اليمن</span><span>خدمة العملاء</span><span>English</span></div></div>
     <header class="seo-header">
       <a class="seo-logo" href="${rootPrefix}"><img src="${rootPrefix}cabl-logo.svg" alt="CABL متجر شواحن في اليمن" /><strong>CABL</strong></a>
       <nav aria-label="التنقل">
-        <a href="${rootPrefix}chargers/">الشواحن</a>
-        <a href="${rootPrefix}fast-chargers/">الشواحن السريعة</a>
-        <a href="${rootPrefix}type-c-chargers/">Type-C</a>
-        <a href="${rootPrefix}delivery/yemen/">التوصيل</a>
+        <a href="${rootPrefix}baseus/">Baseus <span>⌄</span></a>
+        <a href="${rootPrefix}anker/">Anker <span>⌄</span></a>
+        <a href="${rootPrefix}ugreen/">UGREEN <span>⌄</span></a>
+        <a href="${rootPrefix}power-banks/">باور بانك</a>
+        <a href="${rootPrefix}chargers/">شواحن</a>
+        <a href="${rootPrefix}blog/">المدونة</a>
       </nav>
-      <div class="seo-header-actions"><a href="${rootPrefix}search">⌕</a><a href="${rootPrefix}#discover">السلة</a></div>
+      <div class="seo-header-actions"><a href="${rootPrefix}search" aria-label="البحث">⌕</a><a class="seo-cart" href="${rootPrefix}#discover" aria-label="السلة">▣</a></div>
     </header>
     <main>
       <section class="cabl-route-hero">
@@ -330,6 +334,20 @@ function renderPage(page) {
           <p>${escapeHtml(page.intro)}</p>
           <a class="seo-button" href="#seo-product-grid">تصفح كتالوج CABL</a>
       </section>
+      ${isBrandPage ? `
+      <section class="seo-brand-categories">
+        <div class="seo-brand-heading"><span>علامة ${escapeHtml(brandLabels[page.slug] ?? 'CABL')}</span><h2>منتجات مختارة من الكتالوج</h2><p>اختر القسم الأقرب لاستخدامك، ثم راجع الموديلات المتاحة والمواصفات قبل الشراء.</p></div>
+        <div class="seo-brand-category-grid">
+          <a href="${rootPrefix}${page.slug}/power-banks/"><strong>طاقة تكمل يومك</strong><span>باور بانك للسفر والاستخدام اليومي</span><b>تصفح الباور بانك ←</b></a>
+          <a href="${rootPrefix}${page.slug}/chargers/"><strong>شحن أسرع وأأمن</strong><span>شواحن بقدرات ومنافذ واضحة</span><b>تصفح الشواحن ←</b></a>
+          <a href="${rootPrefix}${page.slug}/cables/"><strong>الكابل الصح لجهازك</strong><span>USB-C وLightning للاستخدام اليومي</span><b>تصفح الكابلات ←</b></a>
+          <a href="${rootPrefix}${page.slug}/car-accessories/"><strong>عربيتك أذكى</strong><span>حوامل وشواحن ثابتة على الطريق</span><b>تصفح إكسسوارات السيارة ←</b></a>
+        </div>
+      </section>` : `
+      <section class="seo-category-filters" aria-label="فلترة المنتجات">
+        <button type="button">تسوق انكر</button>
+        <button type="button">تسوق جوي روم</button>
+      </section>`}
       <section class="cabl-route-points" aria-label="نقاط مهمة">
         <div><span>✓</span><strong>مواصفات واضحة من كتالوج CABL</strong></div>
         <div><span>✓</span><strong>أسعار وتوفر قبل تأكيد الطلب</strong></div>
@@ -353,10 +371,16 @@ function renderPage(page) {
         <nav aria-label="صفحات ذات صلة">${related}</nav>
       </section>
     </main>
-    <footer class="seo-footer">
-      <div><strong>CABL</strong><span>منتجات الشحن والطاقة مع توصيل داخل اليمن.</span></div>
-      <nav><a href="${rootPrefix}about/">عن CABL</a><a href="${rootPrefix}shipping/">الشحن والتوصيل</a><a href="${rootPrefix}faq/">الأسئلة الشائعة</a><a href="${rootPrefix}blog/">المدونة</a></nav>
-      <a href="https://wa.me/967771106977" rel="noopener noreferrer">تواصل عبر WhatsApp</a>
+    <footer class="seo-footer" data-testid="footer-storefront">
+      <div class="seo-footer-inner">
+        <div class="seo-footer-grid">
+          <div class="seo-footer-brand"><a href="${rootPrefix}"><strong>CABL</strong></a><p>منتجات الشحن والطاقة مع مواصفات واضحة وتوصيل داخل اليمن.</p><a href="${rootPrefix}contact/">تواصل مع خدمة العملاء</a></div>
+          <div><h3>تسوق حسب الفئة</h3><a href="${rootPrefix}chargers/">الشواحن</a><a href="${rootPrefix}cables/">الكابلات</a><a href="${rootPrefix}power-banks/">الباور بانك</a><a href="${rootPrefix}wireless-chargers/">الشحن اللاسلكي</a></div>
+          <div><h3>خدمة العملاء</h3><a href="${rootPrefix}about/">عن CABL</a><a href="${rootPrefix}shipping/">الشحن والتوصيل</a><a href="${rootPrefix}warranty/">الضمان</a><a href="${rootPrefix}faq/">الأسئلة الشائعة</a></div>
+          <div><h3>مركز المواصفات</h3><a href="${rootPrefix}search">البحث في المنتجات</a><a href="${rootPrefix}guides/power-bank-buying-guide/">أدلة الشراء</a><a href="${rootPrefix}blog/">المدونة</a></div>
+        </div>
+        <div class="seo-footer-bottom"><span>© 2026 CABL. جميع الحقوق محفوظة.</span><span>سياسة الخصوصية · الشروط والأحكام</span></div>
+      </div>
     </footer>
     <script>
       (() => {

@@ -256,6 +256,10 @@ function productRoutePath(product: Pick<Product, 'slug' | 'brandSlug' | 'categor
   return `/product/${product.slug}`;
 }
 
+const PRODUCT_ROUTE_ALIASES: Record<string, string> = {
+  'anker/power-banks/anker-powercore-10000': 'bawr-bnk-anker-bsah-10-000mah',
+};
+
 function readStoreRoute(): StoreRoute {
   const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '');
   const pathname = window.location.pathname.startsWith(basePath)
@@ -269,7 +273,8 @@ function readStoreRoute(): StoreRoute {
   if (segments[0] === 'brand' && slug) return { kind: 'brand', slug };
   if (segments[0] === 'search') return { kind: 'search', query: new URLSearchParams(window.location.search).get('q') ?? '' };
   if (segments.length === 3 && segments[0] && segments[1] && segments[2]) {
-    return { kind: 'product', brandSlug: segments[0], categorySlug: segments[1], slug: segments[2] };
+    const routeKey = segments.join('/');
+    return { kind: 'product', brandSlug: segments[0], categorySlug: segments[1], slug: PRODUCT_ROUTE_ALIASES[routeKey] ?? segments[2] };
   }
   if (resolveLandingPage(path)) return { kind: 'landing', path };
   return { kind: 'home' };
