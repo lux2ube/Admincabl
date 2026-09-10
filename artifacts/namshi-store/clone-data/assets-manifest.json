@@ -1,0 +1,282 @@
+[
+  {
+    "source": "/_next/static/media/01f0c602c274ea55-s.p.woff2",
+    "url": "https://cairovolt.com/_next/static/media/01f0c602c274ea55-s.p.woff2",
+    "local": "public/fonts/cairovolt/01f0c602c274ea55-s-p-99ba3128.woff2",
+    "bytes": 33644,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/_next/static/media/350b852752f8489d-s.p.woff2",
+    "url": "https://cairovolt.com/_next/static/media/350b852752f8489d-s.p.woff2",
+    "local": "public/fonts/cairovolt/350b852752f8489d-s-p-ceb0a02e.woff2",
+    "bytes": 30712,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/cairovolt_logo.webp",
+    "url": "https://cairovolt.com/cairovolt_logo.webp",
+    "local": "public/images/cairovolt/cairovolt_logo-8fcc534f.webp",
+    "bytes": 13140,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/videos/cairovolt-hero-poster.webp",
+    "url": "https://cairovolt.com/videos/cairovolt-hero-poster.webp",
+    "local": "public/images/cairovolt/cairovolt-hero-poster-c3c783e4.webp",
+    "bytes": 19774,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/_next/static/css/62d0902ed26593ec.css",
+    "url": "https://cairovolt.com/_next/static/css/62d0902ed26593ec.css",
+    "local": "clone-data/62d0902ed26593ec-4830cb4b.css",
+    "bytes": 1694,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/_next/static/css/837e4e7df3f922dc.css",
+    "url": "https://cairovolt.com/_next/static/css/837e4e7df3f922dc.css",
+    "local": "clone-data/837e4e7df3f922dc-ac47ca68.css",
+    "bytes": 261864,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/favicon.png",
+    "url": "https://cairovolt.com/favicon.png",
+    "local": "public/images/cairovolt/favicon-08295dcb.png",
+    "bytes": 820,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/icon.png",
+    "url": "https://cairovolt.com/icon.png",
+    "local": "public/images/cairovolt/icon-bba2fa50.png",
+    "bytes": 8478,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/apple-icon.png",
+    "url": "https://cairovolt.com/apple-icon.png",
+    "local": "public/images/cairovolt/apple-icon-1e7b8e7f.png",
+    "bytes": 7769,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/awards/apple-mfi.png",
+    "url": "https://cairovolt.com/images/awards/apple-mfi.png",
+    "local": "public/images/cairovolt/apple-mfi-1b032938.png",
+    "bytes": 4868,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/awards/hi-res-audio.png",
+    "url": "https://cairovolt.com/images/awards/hi-res-audio.png",
+    "local": "public/images/cairovolt/hi-res-audio-9ba396d9.png",
+    "bytes": 11744,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/awards/qi2-certified.png",
+    "url": "https://cairovolt.com/images/awards/qi2-certified.png",
+    "local": "public/images/cairovolt/qi2-certified-f628e9b4.png",
+    "bytes": 3821,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/awards/tuv-rheinland.png",
+    "url": "https://cairovolt.com/images/awards/tuv-rheinland.png",
+    "local": "public/images/cairovolt/tuv-rheinland-b8cee8e7.png",
+    "bytes": 14015,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/awards/ces-innovation.png",
+    "url": "https://cairovolt.com/images/awards/ces-innovation.png",
+    "local": "public/images/cairovolt/ces-innovation-9b26d863.png",
+    "bytes": 8839,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/awards/if-world-design.png",
+    "url": "https://cairovolt.com/images/awards/if-world-design.png",
+    "local": "public/images/cairovolt/if-world-design-b131be7d.png",
+    "bytes": 6163,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/awards/chargerlab-golden-2025.png",
+    "url": "https://cairovolt.com/images/awards/chargerlab-golden-2025.png",
+    "local": "public/images/cairovolt/chargerlab-golden-2025-c91edc9c.png",
+    "bytes": 11895,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/awards/ce-fcc-rohs.png",
+    "url": "https://cairovolt.com/images/awards/ce-fcc-rohs.png",
+    "local": "public/images/cairovolt/ce-fcc-rohs-a8de02ea.png",
+    "bytes": 6394,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/videos/cairovolt-hero.mp4",
+    "url": "https://cairovolt.com/videos/cairovolt-hero.mp4",
+    "local": "public/videos/cairovolt/cairovolt-hero-209cdb1c.mp4",
+    "bytes": 58886,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/home/cutouts/soundcore-liberty-5-tws-earbuds-cutout-cairovolt.png",
+    "url": "https://cairovolt.com/images/home/cutouts/soundcore-liberty-5-tws-earbuds-cutout-cairovolt.png",
+    "local": "public/images/cairovolt/soundcore-liberty-5-tws-earbuds-cutout-cairovolt-1e9b8521.png",
+    "bytes": 132516,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/home/cutouts/anker-zolo-a110d-power-bank-cutout-cairovolt.png",
+    "url": "https://cairovolt.com/images/home/cutouts/anker-zolo-a110d-power-bank-cutout-cairovolt.png",
+    "local": "public/images/cairovolt/anker-zolo-a110d-power-bank-cutout-cairovolt-ea83402d.png",
+    "bytes": 206181,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/home/cutouts/anker-nano-45w-smart-display-charger-cutout-cairovolt.png",
+    "url": "https://cairovolt.com/images/home/cutouts/anker-nano-45w-smart-display-charger-cutout-cairovolt.png",
+    "local": "public/images/cairovolt/anker-nano-45w-smart-display-charger-cutout-cairovolt-a1111cb1.png",
+    "bytes": 175980,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/home/cutouts/anker-a8050-usb-c-cable-cutout-cairovolt.png",
+    "url": "https://cairovolt.com/images/home/cutouts/anker-a8050-usb-c-cable-cutout-cairovolt.png",
+    "local": "public/images/cairovolt/anker-a8050-usb-c-cable-cutout-cairovolt-353ff8ec.png",
+    "bytes": 317330,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/home/cutouts/anker-a2216-magnetic-car-charger-cutout-cairovolt.png",
+    "url": "https://cairovolt.com/images/home/cutouts/anker-a2216-magnetic-car-charger-cutout-cairovolt.png",
+    "local": "public/images/cairovolt/anker-a2216-magnetic-car-charger-cutout-cairovolt-ef76b31b.png",
+    "bytes": 257623,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/products/anker/anker-zolo-a110e-20000/anker-zolo-a110e-20000mah-power-bank-builtin-cable-dual-output-cairovolt-480.webp",
+    "url": "https://cairovolt.com/products/anker/anker-zolo-a110e-20000/anker-zolo-a110e-20000mah-power-bank-builtin-cable-dual-output-cairovolt-480.webp",
+    "local": "public/images/cairovolt/anker-zolo-a110e-20000mah-power-bank-builtin-cable-dual-output-cairovolt-480-353d5fd3.webp",
+    "bytes": 21454,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/products/anker/anker-soundcore-r50i-nc/anker-soundcore-r50i-nc-earbud-anc-driver-detail-closeup-480.webp",
+    "url": "https://cairovolt.com/products/anker/anker-soundcore-r50i-nc/anker-soundcore-r50i-nc-earbud-anc-driver-detail-closeup-480.webp",
+    "local": "public/images/cairovolt/anker-soundcore-r50i-nc-earbud-anc-driver-detail-closeup-480-509a8f8b.webp",
+    "bytes": 18644,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/products/anker/soundcore-p30i-earbuds/soundcore-p30i-earbuds-main-view-cairovolt-480.webp",
+    "url": "https://cairovolt.com/products/anker/soundcore-p30i-earbuds/soundcore-p30i-earbuds-main-view-cairovolt-480.webp",
+    "local": "public/images/cairovolt/soundcore-p30i-earbuds-main-view-cairovolt-480-bc523a0c.webp",
+    "bytes": 12566,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/products/anker/anker-nano-45w/anker-nano-45w-package-box-contents-specifications-480.webp",
+    "url": "https://cairovolt.com/products/anker/anker-nano-45w/anker-nano-45w-package-box-contents-specifications-480.webp",
+    "local": "public/images/cairovolt/anker-nano-45w-package-box-contents-specifications-480-0e765f84.webp",
+    "bytes": 20848,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/products/anker/anker-prime-a1695-25000/anker-prime-a1695-25000mah-165w-power-bank-premium-cairovolt-480.webp",
+    "url": "https://cairovolt.com/products/anker/anker-prime-a1695-25000/anker-prime-a1695-25000mah-165w-power-bank-premium-cairovolt-480.webp",
+    "local": "public/images/cairovolt/anker-prime-a1695-25000mah-165w-power-bank-premium-cairovolt-480-22da426a.webp",
+    "bytes": 22456,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/products/anker/anker-soundcore-k20i/anker-soundcore-k20i-wireless-earbuds-charging-case-cairovolt-480.webp",
+    "url": "https://cairovolt.com/products/anker/anker-soundcore-k20i/anker-soundcore-k20i-wireless-earbuds-charging-case-cairovolt-480.webp",
+    "local": "public/images/cairovolt/anker-soundcore-k20i-wireless-earbuds-charging-case-cairovolt-480-d20e8934.webp",
+    "bytes": 15602,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/products/joyroom/joyroom-t03s-pro-earbuds/joyroom-joyroom-t03s-pro-earbuds-egypt-cairo-9-480.webp",
+    "url": "https://cairovolt.com/products/joyroom/joyroom-t03s-pro-earbuds/joyroom-joyroom-t03s-pro-earbuds-egypt-cairo-9-480.webp",
+    "local": "public/images/cairovolt/joyroom-joyroom-t03s-pro-earbuds-egypt-cairo-9-480-d7c3c333.webp",
+    "bytes": 24928,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/products/anker/anker-soundcore-flare-2/anker-soundcore-flare-2-ipx7-waterproof-pool-outdoor-480.webp",
+    "url": "https://cairovolt.com/products/anker/anker-soundcore-flare-2/anker-soundcore-flare-2-ipx7-waterproof-pool-outdoor-480.webp",
+    "local": "public/images/cairovolt/anker-soundcore-flare-2-ipx7-waterproof-pool-outdoor-480-777b83c9.webp",
+    "bytes": 65058,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/products/joyroom/joyroom-20w-usb-c-charger/joyroom-joyroom-20w-usb-c-charger-egypt-cairo-1-480.webp",
+    "url": "https://cairovolt.com/products/joyroom/joyroom-20w-usb-c-charger/joyroom-joyroom-20w-usb-c-charger-egypt-cairo-1-480.webp",
+    "local": "public/images/cairovolt/joyroom-joyroom-20w-usb-c-charger-egypt-cairo-1-480-24f631ca.webp",
+    "bytes": 15048,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/home/cutouts/joyroom-3-in-1-wireless-charging-station-cutout-cairovolt.png",
+    "url": "https://cairovolt.com/images/home/cutouts/joyroom-3-in-1-wireless-charging-station-cutout-cairovolt.png",
+    "local": "public/images/cairovolt/joyroom-3-in-1-wireless-charging-station-cutout-cairovolt-268bad6d.png",
+    "bytes": 149426,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/images/home/cutouts/jbl-charge-5-portable-speaker-cutout-cairovolt.png",
+    "url": "https://cairovolt.com/images/home/cutouts/jbl-charge-5-portable-speaker-cutout-cairovolt.png",
+    "local": "public/images/cairovolt/jbl-charge-5-portable-speaker-cutout-cairovolt-42b20303.png",
+    "bytes": 405179,
+    "ok": true,
+    "error": ""
+  },
+  {
+    "source": "/products/anker/soundcore-a25i-earbuds/soundcore-a25i-earbuds-earbuds-case-lanyard-hero-480.webp",
+    "url": "https://cairovolt.com/products/anker/soundcore-a25i-earbuds/soundcore-a25i-earbuds-earbuds-case-lanyard-hero-480.webp",
+    "local": "public/images/cairovolt/soundcore-a25i-earbuds-earbuds-case-lanyard-hero-480-61d12549.webp",
+    "bytes": 18536,
+    "ok": true,
+    "error": ""
+  }
+]
