@@ -253,10 +253,9 @@ function renderPage(page) {
   ];
   const related = page.related.map(([href, label]) => `<a href="${rootPrefix}${href}">${escapeHtml(label)}</a>`).join('');
   const products = page.products.map((name, index) => `
-        <article class="seo-product">
-          <span class="seo-product-number">0${index + 1}</span>
-          <h3>${escapeHtml(name)}</h3>
-          <p>منتج متوفر ضمن كتالوج CABL، راجع المواصفات والتوافق قبل إتمام الطلب.</p>
+        <article class="cv-product-card seo-product">
+          <div class="cv-product-image"><img src="${imagePath}" alt="${escapeHtml(name)}" loading="lazy" /><span>${index < 3 ? 'اختيار CABL' : 'متوفر الآن'}</span></div>
+          <div class="cv-product-copy"><small>CABL</small><h3>${escapeHtml(name)}</h3><p>راجع المواصفات والتوافق قبل إتمام الطلب.</p><strong>افتح المواصفات <span aria-hidden="true">←</span></strong></div>
         </article>`).join('');
   const schema = {
     '@context': 'https://schema.org',
@@ -320,8 +319,7 @@ function renderPage(page) {
       <div class="seo-header-actions"><a href="${rootPrefix}search">⌕</a><a href="${rootPrefix}#discover">السلة</a></div>
     </header>
     <main>
-      <section class="seo-hero">
-        <div>
+      <section class="cabl-route-hero">
           <nav class="seo-breadcrumbs" aria-label="مسار التنقل">
             ${breadcrumbItems.map((item, index) => index === breadcrumbItems.length - 1
     ? `<span>${escapeHtml(item.name)}</span>`
@@ -330,17 +328,19 @@ function renderPage(page) {
           <span class="seo-eyebrow">${escapeHtml(page.eyebrow)}</span>
           <h1>${page.h1}</h1>
           <p>${escapeHtml(page.intro)}</p>
-          <a class="seo-button" href="${rootPrefix}#discover">تصفح كتالوج CABL</a>
-        </div>
-        <img src="${imagePath}" alt="${escapeHtml(page.title)}" width="800" height="700" />
+          <a class="seo-button" href="#seo-product-grid">تصفح كتالوج CABL</a>
       </section>
-      <section class="seo-content">
-        <span class="seo-eyebrow">منتجات مختارة</span>
-        <h2>خيارات ${escapeHtml(page.eyebrow.toLowerCase())} داخل اليمن</h2>
-        <div class="seo-product-grid" id="seo-product-grid" data-cabl-route="${escapeHtml(page.canonicalSlug ?? page.slug)}">${products}
+      <section class="cabl-route-points" aria-label="نقاط مهمة">
+        <div><span>✓</span><strong>مواصفات واضحة من كتالوج CABL</strong></div>
+        <div><span>✓</span><strong>أسعار وتوفر قبل تأكيد الطلب</strong></div>
+        <div><span>✓</span><strong>خيارات شحن ودفع داخل اليمن</strong></div>
+      </section>
+      <section class="seo-content cv-section cv-products">
+        <div class="cv-section-heading"><div><span>من كتالوج CABL</span><h2>منتجات متاحة الآن</h2></div><p>الأسعار والمخزون والصور مأخوذة من بيانات المتجر الحالية.</p></div>
+        <div class="cv-product-grid" id="seo-product-grid" data-cabl-route="${escapeHtml(page.canonicalSlug ?? page.slug)}">${products}
         </div>
       </section>
-      <section class="seo-content seo-guide">
+      <section class="cabl-route-content seo-content">
         <span class="seo-eyebrow">اختيار مناسب</span>
         <h2>ماذا تراجع قبل شراء الشاحن؟</h2>
         <div class="seo-copy">
@@ -399,28 +399,37 @@ function renderPage(page) {
         const imagePath = (product) => product.images?.[0] ?? '';
         const createCard = (product, index) => {
           const article = document.createElement('article');
-          article.className = 'seo-product';
-          const number = document.createElement('span');
-          number.className = 'seo-product-number';
-          number.textContent = String(index + 1).padStart(2, '0');
+           article.className = 'cv-product-card seo-product';
+           const imageWrap = document.createElement('div');
+           imageWrap.className = 'cv-product-image';
           const link = document.createElement('a');
           link.href = productPath(product);
-          const heading = document.createElement('h3');
+           const image = imagePath(product);
+           if (image) {
+             const thumbnail = document.createElement('img');
+             thumbnail.src = image;
+             thumbnail.alt = product.productName;
+             thumbnail.loading = 'lazy';
+             thumbnail.width = 320;
+             thumbnail.height = 240;
+             imageWrap.append(thumbnail);
+           }
+           const badge = document.createElement('span');
+           badge.textContent = index < 3 ? 'اختيار CABL' : product.quantity > 0 ? 'متوفر الآن' : 'غير متوفر';
+           imageWrap.append(badge);
+           const copy = document.createElement('div');
+           copy.className = 'cv-product-copy';
+           const brand = document.createElement('small');
+           brand.textContent = product.brand;
+           const heading = document.createElement('h3');
           heading.textContent = product.productName;
           link.append(heading);
           const description = document.createElement('p');
           description.textContent = product.brand + ' · ' + (product.category?.name ?? 'منتجات CABL') + ' · ' + (product.quantity > 0 ? 'متوفر الآن' : 'غير متوفر');
-          article.append(number, link, description);
-          const image = imagePath(product);
-          if (image) {
-            const thumbnail = document.createElement('img');
-            thumbnail.src = image;
-            thumbnail.alt = product.productName;
-            thumbnail.loading = 'lazy';
-            thumbnail.width = 320;
-            thumbnail.height = 240;
-            article.prepend(thumbnail);
-          }
+           const action = document.createElement('strong');
+           action.textContent = 'افتح المواصفات ←';
+           copy.append(brand, link, description, action);
+           article.append(imageWrap, copy);
           return article;
         };
         fetch('/api/store/catalog', { headers: { Accept: 'application/json' } })
