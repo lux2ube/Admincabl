@@ -2010,6 +2010,12 @@ img { display: block; max-width: 100%; }
 .cv-search-results button strong { color: var(--cv-ink); font-size: 12px; }
 .cv-search-results button small { flex: 1; color: var(--cv-muted); }
 .cv-hero { position: relative; min-height: 610px; overflow: hidden; background: linear-gradient(112deg, #f5f4f3 4%, #dce2f2 42%, #7995cb 100%); }
+.cv-site > main > .cv-hero {
+  width: min(1200px, calc(100% - 48px));
+  margin: 24px auto 0;
+  border-radius: 24px;
+  box-shadow: 0 20px 45px rgba(31,55,112,.16);
+}
 .cv-hero video { position: absolute; inset: auto 0 0; width: 100%; height: 100%; object-fit: cover; object-position: center bottom; }
 .cv-hero-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,13,25,.18), rgba(7,13,25,.42) 48%, rgba(7,13,25,.76)); }
 .cv-hero-copy { position: relative; z-index: 1; display: flex; align-items: center; flex-direction: column; padding-top: 102px; text-align: center; }
@@ -2132,6 +2138,7 @@ img { display: block; max-width: 100%; }
   .cv-header-actions > button:nth-child(2) { order: 1; }
   .cv-header-actions > button:nth-child(3) { order: 2; }
   .cv-header-actions > button:nth-child(1) { order: 0; }
+  .cv-site > main > .cv-hero { width: calc(100% - 32px); margin-top: 16px; border-radius: 18px; }
   .cv-hero { min-height: 560px; }
   .cv-hero-copy { padding-top: 62px; }
   .cv-hero-copy h1 { font-size: 43px; }
@@ -2253,7 +2260,124 @@ img { display: block; max-width: 100%; }
   border-color: var(--cv-line);
   box-shadow: 0 8px 25px rgba(20,45,90,.1);
 }
+
+/* The CairoVolt-inspired shell is the canonical visual language for every route. */
+.cabl-route-site {
+  background: var(--paper);
+}
+.cabl-route-site .cabl-route-hero {
+  position: relative;
+  overflow: hidden;
+  margin-top: 24px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(142,180,255,.38), transparent 35%),
+    linear-gradient(135deg, #111a32 0%, #263b78 54%, #4974c8 100%);
+  padding: 46px 52px 52px;
+  color: #fff;
+  box-shadow: 0 20px 45px rgba(31,55,112,.16);
+}
+.cabl-route-site .cabl-route-hero::after {
+  position: absolute;
+  right: -80px;
+  bottom: -115px;
+  width: 330px;
+  height: 330px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 50%;
+  content: "";
+  box-shadow: 0 0 0 26px rgba(255,255,255,.04), 0 0 0 54px rgba(255,255,255,.03);
+}
+.cabl-route-site .cabl-breadcrumbs,
+.cabl-route-site .cabl-route-eyebrow,
+.cabl-route-site .cabl-route-hero h1,
+.cabl-route-site .cabl-route-hero > p {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+}
+.cabl-route-site .cabl-breadcrumbs { color: rgba(255,255,255,.7); }
+.cabl-route-site .cabl-breadcrumbs a:hover { color: #a8c4ff; }
+.cabl-route-site .cabl-route-eyebrow { color: #a8c4ff; }
+.cabl-route-site .cabl-route-hero h1 { max-width: 850px; }
+.cabl-route-site .cabl-route-hero > p { color: rgba(255,255,255,.82); }
+.cabl-route-site .cabl-route-points { padding-top: 24px; }
+.cabl-route-site .cabl-route-points > div {
+  min-height: 76px;
+  border: 0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(25,45,90,.07);
+}
+.cabl-route-site .cabl-route-products {
+  border-top: 0;
+  background: transparent;
+}
+.cabl-route-site .cabl-route-content {
+  border-top: 0;
+  background: #eef3ff;
+}
+.cabl-route-site .cabl-route-info {
+  margin: 24px auto 60px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #edf3ff, #fff);
+  padding: 42px;
+}
+.cabl-route-site .cv-product-card {
+  border: 1px solid #dce2ed;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(25,45,90,.04);
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+.cabl-route-site .cv-product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 30px rgba(25,45,90,.12);
+}
+.cabl-route-site .cv-product-image {
+  background: linear-gradient(145deg, #f8faff, #e9effb);
+}
+.cabl-route-site .cv-product-image > span {
+  border-radius: 999px;
+  background: var(--cobalt);
+}
+.cv-product-layout {
+  background: var(--paper);
+}
+.cv-product-layout > main {
+  background: var(--paper);
+}
+.cv-product-layout .product-preview {
+  padding-top: 38px;
+}
+.cv-product-layout .product-preview-image {
+  min-height: 550px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(142,180,255,.45), transparent 35%),
+    linear-gradient(145deg, #f8faff, #dfe8fb);
+  box-shadow: 0 18px 38px rgba(31,55,112,.12);
+}
+.cv-product-layout .product-preview-copy {
+  padding: 30px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 14px 30px rgba(31,55,112,.06);
+}
+.cv-product-layout .product-spec-list div {
+  border-radius: 12px;
+  background: #f8faff;
+}
+.cv-product-layout .product-preview-actions .button-dark {
+  border-radius: 999px;
+  padding: 14px 26px;
+}
 @media (max-width: 700px) {
+  .cabl-route-site .cabl-route-hero {
+    margin-top: 16px;
+    border-radius: 18px;
+    padding: 32px 22px 34px;
+  }
+  .cabl-route-site .cabl-route-info { padding: 28px 22px; }
   .cv-product-layout .product-preview {
     width: min(100% - 32px, 520px);
     padding-top: 28px;
@@ -2264,7 +2388,8 @@ img { display: block; max-width: 100%; }
     gap: 28px;
     margin-top: 24px;
   }
-  .cv-product-layout .product-preview-image { width: 100%; min-height: 360px; }
+  .cv-product-layout .product-preview-image { width: 100%; min-height: 360px; border-radius: 18px; }
+  .cv-product-layout .product-preview-copy { padding: 20px 0; background: transparent; box-shadow: none; }
   .cv-product-layout .product-preview-image img { height: 330px; }
   .cv-product-layout .product-preview-copy h1 { font-size: 33px; }
   .cv-product-layout .product-spec-list { gap: 8px; }
