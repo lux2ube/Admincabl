@@ -95,6 +95,7 @@ const CATEGORY_PATH_HINTS: Record<string, string[]> = {
   'car-accessories': ['سيار', 'سيارة', 'حامل'],
   'hubs-adapters': ['محور', 'هَب', 'Hub', 'محول', 'محوّل'],
 };
+
 const CATEGORY_PATH_LABELS: Record<string, string> = {
   chargers: 'الشواحن',
   cables: 'الكابلات',
@@ -208,10 +209,9 @@ function resolveLandingPage(path: string): LandingPage | null {
   const segments = path.split('/').filter(Boolean);
   const [first, second] = segments;
   if (segments.length === 1 && CATEGORY_PATH_HINTS[first]) {
-    const label = CATEGORY_PATH_LABELS[first] ?? first.replaceAll('-', ' ');
     return {
-      path, eyebrow: 'تسوق حسب الفئة', title: `${label} الأصلية | CABL`,
-      h1: first === 'power-banks' ? 'باور بانك وطاقة محمولة' : `منتجات ${label}`,
+      path, eyebrow: 'تسوق حسب الفئة', title: `${first.replaceAll('-', ' ')} | CABL`,
+      h1: first === 'power-banks' ? 'باور بانك وطاقة محمولة' : `منتجات ${first.replaceAll('-', ' ')}`,
       description: 'تصفح المنتجات المتوفرة في هذه الفئة من كتالوج CABL، مع الأسعار والمخزون وخيارات الشحن الحالية.',
       categoryKey: first,
     };
@@ -224,11 +224,10 @@ function resolveLandingPage(path: string): LandingPage | null {
     };
   }
   if (segments.length === 2 && BRAND_PATHS[first] && CATEGORY_PATH_HINTS[second]) {
-    const categoryLabel = CATEGORY_PATH_LABELS[second] ?? second.replaceAll('-', ' ');
     return {
-      path, eyebrow: `${BRAND_PATHS[first]} · ${categoryLabel}`, title: `${BRAND_PATHS[first]} ${categoryLabel} | CABL`,
-      h1: `${BRAND_PATHS[first]} · ${categoryLabel}`,
-      description: `تصفح منتجات ${BRAND_PATHS[first]} ضمن فئة ${categoryLabel} من كتالوج CABL.`,
+      path, eyebrow: `${BRAND_PATHS[first]} · ${second}`, title: `${BRAND_PATHS[first]} ${second} | CABL`,
+      h1: `${BRAND_PATHS[first]} · ${second.replaceAll('-', ' ')}`,
+      description: `تصفح منتجات ${BRAND_PATHS[first]} ضمن فئة ${second.replaceAll('-', ' ')} من كتالوج CABL.`,
       brandSlug: first, categoryKey: second,
     };
   }

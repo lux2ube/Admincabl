@@ -16,6 +16,8 @@ a { color: inherit; text-decoration: none; }
 .seo-header nav a:hover, .seo-related a:hover { color: #5f7700; }
 .seo-cta, .seo-button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0 17px; background: var(--ink); color: var(--paper); font-size: 11px; font-weight: 800; }
 .seo-hero { max-width: 1320px; min-height: 540px; margin: 0 auto; padding: 75px 5vw; display: grid; grid-template-columns: 1fr minmax(330px, .85fr); align-items: center; gap: 60px; }
+.seo-breadcrumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 28px; color: var(--muted); font-size: 11px; font-weight: 700; }
+.seo-breadcrumbs a:hover { color: #5f7700; }
 .seo-eyebrow { display: block; margin-bottom: 18px; color: var(--muted); font-size: 11px; font-weight: 800; }
 h1, h2, h3 { font-family: "Noto Kufi Arabic", sans-serif; }
 h1 { max-width: 650px; margin: 0; font-size: clamp(38px, 6vw, 78px); line-height: 1.25; letter-spacing: -.06em; }
@@ -25,6 +27,8 @@ h2 { margin: 0 0 28px; font-size: clamp(27px, 4vw, 47px); line-height: 1.3; lett
 .seo-content { max-width: 1320px; margin: 0 auto; padding: 68px 5vw; border-top: 1px solid var(--line); }
 .seo-product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .seo-product { min-height: 180px; padding: 22px; border-top: 2px solid var(--ink); background: var(--warm); }
+.seo-product img { width: 100%; height: 145px; margin: -22px -22px 18px; width: calc(100% + 44px); object-fit: cover; background: var(--paper); }
+.seo-product a:hover { color: #5f7700; }
 .seo-product-number { color: var(--muted); font-size: 11px; }
 .seo-product h3 { margin: 28px 0 10px; font-size: 18px; line-height: 1.6; }
 .seo-product p, .seo-copy p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.9; }
