@@ -103,7 +103,12 @@ const CATEGORY_PATH_LABELS: Record<string, string> = {
   'wireless-chargers': 'الشواحن اللاسلكية',
   'car-accessories': 'إكسسوارات السيارات',
   'hubs-adapters': 'المحاور والمحوّلات',
+  'charging-cables': 'كابلات الشحن',
+  'travel-adapters': 'محولات السفر',
+  'phone-accessories': 'الملحقات',
 };
+
+const categoryPathLabel = (path: string) => CATEGORY_PATH_LABELS[path] ?? path.replaceAll('-', ' ');
 
 const BRAND_PATHS: Record<string, string> = {
   baseus: 'Baseus',
@@ -209,9 +214,10 @@ function resolveLandingPage(path: string): LandingPage | null {
   const segments = path.split('/').filter(Boolean);
   const [first, second] = segments;
   if (segments.length === 1 && CATEGORY_PATH_HINTS[first]) {
+    const label = categoryPathLabel(first);
     return {
-      path, eyebrow: 'تسوق حسب الفئة', title: `${first.replaceAll('-', ' ')} | CABL`,
-      h1: first === 'power-banks' ? 'باور بانك وطاقة محمولة' : `منتجات ${first.replaceAll('-', ' ')}`,
+      path, eyebrow: 'تسوق حسب الفئة', title: `${label} | CABL`,
+      h1: first === 'power-banks' ? 'باور بانك وطاقة محمولة' : `منتجات ${label}`,
       description: 'تصفح المنتجات المتوفرة في هذه الفئة من كتالوج CABL، مع الأسعار والمخزون وخيارات الشحن الحالية.',
       categoryKey: first,
     };
@@ -224,10 +230,11 @@ function resolveLandingPage(path: string): LandingPage | null {
     };
   }
   if (segments.length === 2 && BRAND_PATHS[first] && CATEGORY_PATH_HINTS[second]) {
+    const label = categoryPathLabel(second);
     return {
-      path, eyebrow: `${BRAND_PATHS[first]} · ${second}`, title: `${BRAND_PATHS[first]} ${second} | CABL`,
-      h1: `${BRAND_PATHS[first]} · ${second.replaceAll('-', ' ')}`,
-      description: `تصفح منتجات ${BRAND_PATHS[first]} ضمن فئة ${second.replaceAll('-', ' ')} من كتالوج CABL.`,
+      path, eyebrow: `${BRAND_PATHS[first]} · ${label}`, title: `${BRAND_PATHS[first]} ${label} | CABL`,
+      h1: `${BRAND_PATHS[first]} · ${label}`,
+      description: `تصفح منتجات ${BRAND_PATHS[first]} ضمن فئة ${label} من كتالوج CABL.`,
       brandSlug: first, categoryKey: second,
     };
   }
@@ -897,9 +904,9 @@ function ProductPreview({
                 ? <a href={`${import.meta.env.BASE_URL}${product.brandSlug}/`}>{product.brand}</a>
                : product.brand}
              {' · '}
-             {product.category?.slug
-                ? <a href={`${import.meta.env.BASE_URL}${categoryRoutePath(product.category)}/`}>{product.category.name}</a>
-               : product.category?.name ?? '—'}
+              {product.category?.slug
+                 ? <a href={`${import.meta.env.BASE_URL}${categoryRoutePath(product.category)}/`}>{categoryPathLabel(categoryRoutePath(product.category))}</a>
+                : product.category?.name ?? '—'}
            </span>
           <h1>{product.name}</h1>
            <div className="product-preview-price">
@@ -911,7 +918,7 @@ function ProductPreview({
            <p className="product-preview-description">{product.description || product.color}. راجع القدرة والمنفذ والتفاصيل الظاهرة قبل الإضافة إلى السلة.</p>
           <div className="product-spec-list">
             <div><span>العلامة</span><strong>{product.brand}</strong></div>
-            <div><span>الفئة</span><strong>{product.category?.name ?? '—'}</strong></div>
+             <div><span>الفئة</span><strong>{product.category?.slug ? categoryPathLabel(categoryRoutePath(product.category)) : product.category?.name ?? '—'}</strong></div>
               <div><span>التوفر</span><strong className={product.quantity > 0 ? 'stock-available' : 'stock-unavailable'}>{product.quantity > 0 ? `متوفر الآن · ${product.quantity} قطعة` : 'غير متوفر حاليًا'}</strong></div>
               <div><span>التوصيل</span><strong>{shippingSummary}</strong></div>
             {product.sku && <div><span>SKU</span><strong>{product.sku}</strong></div>}
@@ -937,7 +944,7 @@ function ProductPreview({
          <p>{product.description || product.color}. راجع العلامة والفئة والتوفر وطريقة التوصيل الظاهرة أعلاه، ثم اختر الكمية المناسبة قبل إضافة المنتج إلى السلة.</p>
          <div className="product-information-grid">
            <div><span>العلامة</span><strong>{product.brand}</strong></div>
-           <div><span>الفئة</span><strong>{product.category?.name ?? 'غير محددة'}</strong></div>
+            <div><span>الفئة</span><strong>{product.category?.slug ? categoryPathLabel(categoryRoutePath(product.category)) : product.category?.name ?? 'غير محددة'}</strong></div>
            {product.sku && <div><span>رمز المنتج</span><strong dir="ltr">{product.sku}</strong></div>}
            {product.warranty && <div><span>الضمان</span><strong>{product.warranty}</strong></div>}
          </div>
@@ -1014,11 +1021,99 @@ function CablLandingPage({
   brandNames: string[];
   onNavigate: (path: string) => void;
 }) {
+  const isSearchPage = page.path === 'search';
+  const [searchFilter, setSearchFilter] = useState('all');
+  const isGuidePage = page.path.startsWith('guides/');
+  const isComparePage = page.path.startsWith('compare/');
+  const isBlogPage = page.path.startsWith('blog');
+  const servicePages = new Set(['about', 'contact', 'warranty', 'shipping', 'returns', 'faq', 'authenticity']);
+  const cityPages = new Set(['yemen', 'sanaa', 'aden', 'taiz', 'ibb', 'hodeidah', 'hadramout', 'marib']);
+  const isServicePage = servicePages.has(page.path);
+  const isCityPage = cityPages.has(page.path);
+  const showProducts = !isServicePage && products.length > 0;
+  const searchFilterOptions = isSearchPage
+    ? [
+      { value: 'all', label: 'الكل' },
+      ...brandNames.slice(0, 4).map((brand) => ({ value: `brand:${brand}`, label: brand })),
+      ...Object.entries(CATEGORY_PATH_LABELS).slice(0, 4).map(([slug, label]) => ({ value: `category:${slug}`, label })),
+    ]
+    : [];
+  const routeProducts = isSearchPage && searchFilter !== 'all'
+    ? products.filter((product) => searchFilter.startsWith('brand:')
+      ? product.brand === searchFilter.slice(6)
+      : product.category?.slug === searchFilter.slice(9))
+    : products;
   const guideCopy = page.path.startsWith('guides/')
     ? ['افحص قدرة جهازك أولًا', 'قارن المنفذ والقدرة والكابل معًا', 'راجع التوافق والضمان قبل الطلب']
     : page.path.startsWith('compare/')
       ? ['العلامة والمواصفات', 'القدرة والمنافذ', 'السعر والتوفر الحالي']
+      : isSearchPage
+        ? ['نتائج مطابقة لعبارة البحث', 'فلترة حسب العلامة والفئة', 'افتح صفحة المنتج قبل الشراء']
       : ['مواصفات واضحة من الكتالوج', 'أسعار محولة حسب العملة المختارة', 'خيارات شحن ودفع تظهر قبل التأكيد'];
+  const editorialCards = isGuidePage
+    ? [
+      { title: 'ابدأ من جهازك', body: 'حدد الجهاز والمنفذ والقدرة المطلوبة قبل اختيار المنتج، حتى لا تدفع مقابل مواصفات لا تحتاجها.' },
+      { title: 'قارن المواصفات', body: 'راجع القدرة بالواط، نوع المنفذ، التوافق، طول الكابل أو السعة قبل إضافة المنتج إلى السلة.' },
+      { title: 'تحقق قبل الطلب', body: 'راجع السعر الحالي، التوفر، الشحن والضمان الظاهر في صفحة المنتج قبل التأكيد.' },
+    ]
+    : isBlogPage
+      ? [
+        { title: 'كيف تختار المنتج المناسب؟', body: 'ابدأ من الاستخدام اليومي ثم قارن التوافق والقدرة والسعر بدل الاعتماد على الاسم فقط.' },
+        { title: 'افهم المواصفات بسرعة', body: 'تعرف على الفرق بين USB-C وPD وGaN والسعات المختلفة من خلال إجابات قصيرة وعملية.' },
+        { title: 'من المقال إلى المنتج', body: 'بعد تحديد احتياجك، افتح المنتج المرتبط لمراجعة السعر والمخزون وخيارات التوصيل.' },
+      ]
+      : [];
+  const serviceCards: Record<string, { title: string; body: string }[]> = {
+    about: [
+      { title: 'كتالوج واضح', body: 'نعرض منتجات الشحن والطاقة من العلامات المتوفرة في قاعدة بيانات CABL مع مواصفات وأسعار حالية.' },
+      { title: 'اختيار أسهل', body: 'نرتب المنتجات حسب الاستخدام والفئة حتى تصل إلى الحل المناسب بأقل عدد من الخطوات.' },
+      { title: 'دعم قبل وبعد الشراء', body: 'يمكنك التواصل مع CABL قبل الطلب أو استخدام التتبع بعد إرسال الطلب.' },
+    ],
+    shipping: [
+      { title: 'خيارات داخل اليمن', body: `${deliveryLabel} وتظهر التكلفة والمدة قبل تأكيد الطلب.` },
+      { title: 'اختيار العنوان', body: 'اكتب المحافظة أو المدينة والعنوان التفصيلي حتى يتم اختيار خيار الشحن المناسب.' },
+      { title: 'وضوح قبل الدفع', body: 'لا يتم إخفاء رسوم الشحن؛ تظهر في ملخص السلة والـCheckout قبل التأكيد.' },
+    ],
+    warranty: [
+      { title: 'راجع صفحة المنتج', body: 'تظهر معلومات الضمان في تفاصيل المنتج عندما تكون متوفرة من العلامة أو الكتالوج.' },
+      { title: 'احتفظ ببيانات الطلب', body: 'احتفظ برقم الطلب وبيانات المنتج لتسهيل أي متابعة بعد الشراء.' },
+      { title: 'اطلب المساعدة', body: 'تواصل مع خدمة CABL إذا احتجت توضيحًا حول الضمان أو حالة المنتج.' },
+    ],
+    returns: [
+      { title: 'راجع الشروط قبل الطلب', body: 'تحقق من سياسة الاستبدال والاسترجاع المناسبة للمنتج قبل تأكيد الشراء.' },
+      { title: 'احتفظ بحالة المنتج', body: 'حافظ على المنتج وملحقاته وبيانات الطلب عند طلب أي متابعة.' },
+      { title: 'تواصل بسرعة', body: 'استخدم قنوات CABL المتاحة لشرح الحالة وإرسال رقم الطلب.' },
+    ],
+    authenticity: [
+      { title: 'علامات معروفة', body: 'يعرض CABL منتجات من العلامات المنشورة في الكتالوج مع اسم العلامة والمواصفات.' },
+      { title: 'مواصفات قابلة للمراجعة', body: 'قارن وصف المنتج ومنافذه وقدرته مع احتياجك قبل الشراء.' },
+      { title: 'بيانات من الكتالوج', body: 'الأسعار والمخزون والصور المعروضة مرتبطة ببيانات المتجر الحالية.' },
+    ],
+    contact: [
+      { title: 'قبل الشراء', body: 'تواصل معنا إذا احتجت مساعدة في اختيار شاحن أو كابل أو باور بانك مناسب.' },
+      { title: 'بعد الطلب', body: 'جهز رقم الطلب ورقم الهاتف المستخدم عند طلب الدعم أو التتبع.' },
+      { title: 'واتساب CABL', body: 'استخدم زر WhatsApp العائم للوصول إلى فريق الدعم مباشرة.' },
+    ],
+    faq: [
+      { title: 'هل المنتجات متوفرة؟', body: 'تظهر حالة المخزون الحالية في بطاقات المنتجات وصفحات التفاصيل.' },
+      { title: 'كيف أعرف تكلفة الشحن؟', body: 'تظهر خيارات الشحن وتكلفتها ومدة التوصيل داخل السلة وقبل التأكيد.' },
+      { title: 'هل أحتاج حسابًا؟', body: 'يمكنك إرسال الطلب بدون إنشاء حساب، ثم استخدام البريد والهاتف للتتبع.' },
+    ],
+  };
+  const cityCards = isCityPage
+    ? [
+      { title: 'اختر المنتج أولًا', body: 'تصفح الشواحن والكابلات والباور بانك المناسبة لاستخدامك من الكتالوج الحالي.' },
+      { title: 'أدخل مدينتك بوضوح', body: `اكتب ${page.h1.replace('CABL في ', '').replace('توصيل إلى ', '')} في بيانات الشحن مع العنوان التفصيلي.` },
+      { title: 'راجع المدة والتكلفة', body: 'ستظهر خيارات التوصيل المتاحة والمدة والتكلفة قبل تأكيد الطلب.' },
+    ]
+    : [];
+  const comparisonRows = isComparePage
+    ? [
+      ['العلامة', page.path.includes('baseus') ? 'Baseus' : 'Anker', page.path.includes('vention') ? 'Vention' : 'UGREEN'],
+      ['طريقة الاختيار', 'تنوع المنتجات والمواصفات', 'القدرة والمنافذ والتوفر'],
+      ['قبل الشراء', 'قارن المنتج نفسه داخل الكتالوج', 'راجع السعر والضمان والشحن'],
+    ]
+    : [];
   return (
     <div className="cv-site cabl-route-site" dir="rtl">
       <CairoVoltProductHeader
@@ -1047,15 +1142,44 @@ function CablLandingPage({
         <section className="cabl-route-points cv-container" aria-label="نقاط مهمة">
           {guideCopy.map((item) => <div key={item}><CircleCheck size={18} /><span>{item}</span></div>)}
         </section>
+        {(isGuidePage || isComparePage || isBlogPage || isServicePage || isCityPage) && (
+          <section className={`cabl-route-content ${isComparePage ? 'is-comparison' : ''}`} aria-label="معلومات الصفحة">
+            <div className="cv-container">
+              {isComparePage ? (
+                <>
+                  <span className="cabl-route-content-eyebrow">مقارنة عملية</span>
+                  <h2>قارن قبل أن تختار</h2>
+                  <p>استخدم المقارنة كبداية، ثم افتح المنتجات المتاحة لمراجعة السعر والمخزون والمواصفات الفعلية.</p>
+                  <div className="cabl-comparison-table" role="table" aria-label="جدول المقارنة">
+                    {comparisonRows.map(([label, first, second]) => <div className="cabl-comparison-row" key={label} role="row"><strong role="rowheader">{label}</strong><span role="cell">{first}</span><span role="cell">{second}</span></div>)}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className="cabl-route-content-eyebrow">{isServicePage ? 'معلومات CABL' : isCityPage ? 'التوصيل والشراء' : 'إجابة مختصرة قبل الشراء'}</span>
+                  <h2>{isServicePage ? 'كل ما تحتاج معرفته قبل التواصل أو الطلب' : isCityPage ? 'شراء أوضح من مدينتك' : isBlogPage ? 'إجابات عملية تساعدك على الاختيار' : 'خطوات بسيطة لاختيار المنتج المناسب'}</h2>
+                  <p>{isServicePage ? page.description : isCityPage ? `تصفح منتجات CABL مع معلومات الشحن الحالية إلى ${page.h1.replace('CABL في ', '').replace('توصيل إلى ', '')}.` : 'اقرأ الإجابة المختصرة، ثم افتح المنتج المرتبط لمراجعة التفاصيل قبل الشراء.'}</p>
+                  <div className="cabl-route-content-grid">
+                    {(isServicePage ? serviceCards[page.path] ?? [] : isCityPage ? cityCards : editorialCards).map((card, index) => <article key={card.title}><span>0{index + 1}</span><h3>{card.title}</h3><p>{card.body}</p></article>)}
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+        )}
+        {showProducts && (
         <section className="cv-section cv-products cabl-route-products" id="cabl-route-products">
           <div className="cv-container">
             <div className="cv-section-heading">
-              <div><span>من كتالوج CABL</span><h2>منتجات متاحة الآن</h2></div>
-              <p>الأسعار والمخزون والصور مأخوذة من قاعدة بيانات المتجر الحالية.</p>
+              <div><span>{isSearchPage ? 'نتائج البحث من كتالوج CABL' : isGuidePage || isComparePage || isBlogPage ? 'منتجات مرتبطة بالموضوع' : 'من كتالوج CABL'}</span><h2>{isSearchPage ? page.h1 : 'منتجات متاحة الآن'}</h2></div>
+              <p>{isSearchPage ? `${routeProducts.length} نتيجة مطابقة من ${products.length} منتجًا في الكتالوج.` : 'الأسعار والمخزون والصور مأخوذة من قاعدة بيانات المتجر الحالية.'}</p>
             </div>
-            {products.length > 0 ? (
+            {isSearchPage && <div className="cabl-search-filters" role="group" aria-label="فلترة نتائج البحث">
+              {searchFilterOptions.map((filter) => <button className={searchFilter === filter.value ? 'is-active' : ''} type="button" key={filter.value} onClick={() => setSearchFilter(filter.value)}>{filter.label}</button>)}
+            </div>}
+            {routeProducts.length > 0 ? (
               <div className="cv-product-grid">
-                {products.slice(0, 12).map((product, index) => (
+                {routeProducts.slice(0, 12).map((product, index) => (
                   <article className="cv-product-card" key={product.id}>
                     <div className="cv-product-image" role="button" tabIndex={0} onClick={() => onOpenProduct(product)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onOpenProduct(product); }} aria-label={`فتح ${product.name}`}>
                       <img src={product.image} alt={productAlt(product)} loading="lazy" />
@@ -1071,9 +1195,10 @@ function CablLandingPage({
                   </article>
                 ))}
               </div>
-            ) : <p className="cv-empty">لا توجد منتجات مطابقة حاليًا. جرّب فئة أخرى من الكتالوج.</p>}
+            ) : <div className="cv-empty"><p>{isSearchPage ? 'لا توجد نتائج بهذا الفلتر.' : 'لا توجد منتجات مطابقة حاليًا. جرّب فئة أخرى من الكتالوج.'}</p>{isSearchPage && <button type="button" className="button-dark" onClick={() => setSearchFilter('all')}>عرض كل النتائج</button>}</div>}
           </div>
         </section>
+        )}
         <section className="cabl-route-info cv-container">
           <h2>اختيار أوضح قبل الشراء</h2>
           <p>{page.description} راجع المواصفات والتوفر وطريقة الشحن في صفحة المنتج قبل إضافة المنتج إلى السلة.</p>
@@ -1492,6 +1617,15 @@ function App() {
   const cartItemCount = cart.reduce((sum, product) => sum + (cartQuantities[product.id] ?? 1), 0);
   const landingPage = route.kind === 'landing' ? resolveLandingPage(route.path) : null;
   const brandPage = route.kind === 'landing' && landingPage && Boolean(BRAND_PATHS[route.path]) ? landingPage : null;
+  const searchPage: LandingPage | null = route.kind === 'search'
+    ? {
+      path: 'search',
+      eyebrow: 'نتائج البحث',
+      title: query.trim() ? `نتائج البحث عن ${query.trim()} | CABL` : 'البحث في متجر CABL',
+      h1: query.trim() ? `نتائج البحث عن «${query.trim()}»` : 'البحث في متجر CABL',
+      description: 'تصفح المنتجات المطابقة من كتالوج CABL، مع السعر والمخزون والمواصفات الحالية.',
+    }
+    : null;
 
   useEffect(() => {
     if (paymentMethods.length > 0 && paymentMethodId === null) {
@@ -1602,7 +1736,7 @@ function App() {
       setSelectedBrandSlug(null);
       setActiveFilter('ALL');
       setQuery(route.query);
-      setSearchOpen(true);
+      setSearchOpen(false);
     } else {
       setSelectedBrandSlug(null);
       setActiveFilter('ALL');
@@ -2520,7 +2654,27 @@ function App() {
           <div className="footer-bottom"><span>© 2026 CABL. الوكيل الحصري لـ Baseus و Vention في اليمن · منتجات Anker و UGREEN متوفرة.</span><div className="footer-socials"><button type="button" onClick={() => announce('تم اختيار اليمن')} data-testid="button-country">اليمن <ChevronDown size={12} /></button><button type="button" onClick={() => announce('تم فتح اختيار اللغة')} data-testid="button-language">العربية <ChevronDown size={12} /></button></div></div>
         </div>
       </footer>
-       </div> : brandPage ? (
+        </div> : searchPage ? (
+          <CablLandingPage
+            page={searchPage}
+            products={visibleProducts}
+            formatMoney={formatMoney}
+            cartItemCount={cartItemCount}
+            favorites={favorites}
+            onAddToCart={addToCart}
+            onToggleFavorite={toggleFavorite}
+            onOpenProduct={openProductPreview}
+            onOpenCart={() => setCartOpen(true)}
+            onGoHome={() => navigateTo('/')}
+            onOpenSearch={() => navigateTo('/search')}
+            mobileMenuOpen={mobileMenuOpen}
+            onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)}
+            onSelectCategoryByHint={selectCairoCategory}
+            deliveryLabel={deliveryLabel}
+            brandNames={brandNames}
+            onNavigate={(path) => navigateTo(path, 'cabl-route-products')}
+          />
+        ) : brandPage ? (
          <CablBrandPage
            page={brandPage}
            products={landingProducts}
@@ -2722,7 +2876,7 @@ function App() {
                <form className="quote-form checkout-layout" onSubmit={submitQuote}>
                  <div className="checkout-details">
                     <div className="checkout-heading">
-                       <p className="checkout-kicker">CAIROVOLT · CHECKOUT</p>
+                       <p className="checkout-kicker">CABL · CHECKOUT</p>
                        <h3>أكمل طلبك</h3>
                       <div className="checkout-steps" aria-label="مراحل إتمام الطلب"><span className="active">1 البيانات</span><span>2 التوصيل</span><span>3 الدفع</span><span>4 تأكيد</span></div>
                       <p className="quote-intro">أدخل البيانات الضرورية فقط. لا تحتاج إلى إنشاء حساب لإتمام الشراء.</p>

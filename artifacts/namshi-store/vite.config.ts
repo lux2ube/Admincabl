@@ -52,9 +52,18 @@ export default defineConfig({
     {
       name: 'serve-seo-directory-pages',
       configureServer(server) {
-        server.middlewares.use((request, _response, next) => {
+        server.middlewares.use((request, response, next) => {
           const rawUrl = request.url ?? '/';
           const [pathname, query = ''] = rawUrl.split('?');
+          const staticIndex = pathname !== '/' && !pathname.endsWith('/')
+            ? path.join(publicRoot, pathname, 'index.html')
+            : null;
+          if (staticIndex && !pathname.includes('/.') && fs.existsSync(staticIndex)) {
+            response.statusCode = 308;
+            response.setHeader('Location', `${pathname}/${query ? `?${query}` : ''}`);
+            response.end();
+            return;
+          }
           if (
             pathname !== '/' &&
             pathname.endsWith('/') &&
