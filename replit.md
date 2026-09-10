@@ -45,6 +45,65 @@ The CABL storefront presents published charging and accessory products from the 
 
 Use the published catalog and database as the source of truth. Keep the customer experience focused on products, pricing, ordering, delivery, and support from CABL. Treat the CABL Ecommerce UX/SEO Standard as acceptance criteria for every UI or route change.
 
+## CABL development rules
+
+Use these short prompts as mandatory product and implementation rules:
+
+### SEO & architecture
+
+- Build around search intent, not only products.
+- Target Brand × Category × Product × Problem × Comparison queries.
+- Keep clear Brand → Category → Product hierarchies.
+- Create both brand-specific and generic product-type category pages.
+- Build topical authority through connected content, not isolated SEO pages.
+- Use Arabic, English, and natural Arabic transliterations where users actually search.
+
+### UX
+
+- Organize products around customer needs, not only brands.
+- Make the store understandable within five seconds.
+- Minimize cognitive load and unnecessary clicks.
+- Give every page one primary customer intent.
+- Design mobile-first for thumb interaction.
+- Keep navigation predictable and consistent.
+
+### Product pages
+
+- Make every product detail page a complete buying-decision page.
+- Answer compatibility, specifications, price, warranty, shipping, and returns before checkout.
+- Put concise TL;DR answers before deep technical details.
+- Make products easy to compare.
+- Prefer real proof over marketing claims.
+- Show reviews and customer evidence at decision points.
+
+### Trust
+
+- Proof is stronger than marketing.
+- Make authenticity and warranty verifiable.
+- Treat trust as site infrastructure, not footer copy.
+- Expose testing methods and measurable evidence where applicable.
+- Make shipping, payment, and return policies immediately accessible.
+
+### Content & SEO
+
+- Lead users from Search → Answer → Product → Purchase.
+- Build buying guides around real commercial search intent.
+- Link every relevant category, product, comparison, and guide internally.
+- Create comparison content that naturally leads to products.
+- Write concise answer blocks suitable for search and AI extraction.
+
+### Conversion
+
+- Remove unnecessary purchase friction.
+- Use relevant related products and bundles to increase AOV.
+- Show savings clearly and honestly.
+- Make the primary CTA obvious.
+- Never hide critical purchase information.
+
+### Master prompt
+
+Build CABL using Search Intent + Need-Based UX + Strong Information Architecture + Deep Product Pages + Proof-Based Trust + Strategic Internal Linking + Frictionless Mobile Conversion. Every element must help the customer understand, trust, choose, or buy.
+
 ## Gotchas
 
 - The active app is registered at `/` and must be run through the managed `artifacts/namshi-store: web` workflow.
