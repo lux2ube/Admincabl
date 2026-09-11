@@ -6,7 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
-import { StoreProvider } from '@/lib/StoreContext';
+import { StoreProvider, useStore } from '@/lib/StoreContext';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { CairoVoltClone } from '@/components/CairoVoltClone';
