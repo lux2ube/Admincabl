@@ -3,9 +3,7 @@ import { Route, Switch, useLocation } from 'wouter';
 import { StoreContext, type Product } from './lib/StoreContext';
 import { GetStoreCatalogQueryResult, StoreCurrency } from '@workspace/api-client-react';
 
-import { Header } from './components/Header';
-import { Footer } from './components/Footer';
-import { CartDrawer } from './components/CartDrawer';
+import { StoreShell } from './components/StoreShell';
 import { Home } from './pages/Home';
 import { Category } from './pages/Category';
 import { Brand } from './pages/Brand';
@@ -23,6 +21,7 @@ const DEFAULT_CURRENCIES: StoreCurrency[] = [
 
 const PRODUCT_ROUTE_ALIASES: Record<string, string> = {
   'anker/power-banks/anker-powercore-10000': 'bawr-bnk-anker-bsah-10-000mah',
+  'product/anker-powercore-10000': 'bawr-bnk-anker-bsah-10-000mah',
 };
 
 function readCachedCatalog(): GetStoreCatalogQueryResult | null {
@@ -257,65 +256,60 @@ export default function App() {
 
   return (
     <StoreContext.Provider value={storeContextValue}>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1">
-          {catalogLoading && products.length === 0 ? (
-            <div className="min-h-[60vh] flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-            </div>
-          ) : (
-            <Switch>
-              <Route path="/" component={Home} />
-              <Route path="/power-banks">
-                {() => <Category categorySlug="power-banks" />}
-              </Route>
-              <Route path="/chargers">
-                {() => <Category categorySlug="chargers" />}
-              </Route>
-              <Route path="/cables">
-                {() => <Category categorySlug="cables" />}
-              </Route>
-              <Route path="/car-accessories">
-                {() => <Category categorySlug="car-accessories" />}
-              </Route>
-              <Route path="/anker">
-                {() => <Brand brandSlug="anker" />}
-              </Route>
-              <Route path="/baseus">
-                {() => <Brand brandSlug="baseus" />}
-              </Route>
-              <Route path="/ugreen">
-                {() => <Brand brandSlug="ugreen" />}
-              </Route>
-              <Route path="/vention">
-                {() => <Brand brandSlug="vention" />}
-              </Route>
-              <Route path="/product/:slug">
-                {({ slug }) => <ProductPage slug={PRODUCT_ROUTE_ALIASES[`product/${slug}`] || slug} />}
-              </Route>
-              <Route path="/checkout" component={Checkout} />
-              <Route path="/search" component={Search} />
-              <Route path="/favorites" component={Favorites} />
-              <Route path="/:brandSlug/:categorySlug/:slug">
-                {({ brandSlug, categorySlug, slug }) => {
-                  const resolvedSlug = PRODUCT_ROUTE_ALIASES[`${brandSlug}/${categorySlug}/${slug}`] || slug;
-                  return <ProductPage slug={resolvedSlug} />
-                }}
-              </Route>
-              <Route>
-                <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
-                  <h1 className="font-display font-bold text-4xl text-slate-800 mb-4">404</h1>
-                  <p className="text-slate-600 font-semibold mb-8">عذراً، الصفحة التي تبحث عنها غير موجودة.</p>
-                  <a href="/" className="bg-blue-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-blue-700 transition-colors">العودة للرئيسية</a>
-                </div>
-              </Route>
-            </Switch>
-          )}
-        </main>
-        <Footer />
-        <CartDrawer />
-      </div>
+      <StoreShell>
+        {catalogLoading && products.length === 0 ? (
+          <div className="min-h-[60vh] flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <Switch>
+            <Route path="/" component={Home} />
+            <Route path="/power-banks">
+              {() => <Category categorySlug="power-banks" />}
+            </Route>
+            <Route path="/chargers">
+              {() => <Category categorySlug="chargers" />}
+            </Route>
+            <Route path="/cables">
+              {() => <Category categorySlug="cables" />}
+            </Route>
+            <Route path="/car-accessories">
+              {() => <Category categorySlug="car-accessories" />}
+            </Route>
+            <Route path="/anker">
+              {() => <Brand brandSlug="anker" />}
+            </Route>
+            <Route path="/baseus">
+              {() => <Brand brandSlug="baseus" />}
+            </Route>
+            <Route path="/ugreen">
+              {() => <Brand brandSlug="ugreen" />}
+            </Route>
+            <Route path="/vention">
+              {() => <Brand brandSlug="vention" />}
+            </Route>
+            <Route path="/product/:slug">
+              {({ slug }) => <ProductPage slug={PRODUCT_ROUTE_ALIASES[`product/${slug}`] || slug} />}
+            </Route>
+            <Route path="/checkout" component={Checkout} />
+            <Route path="/search" component={Search} />
+            <Route path="/favorites" component={Favorites} />
+            <Route path="/:brandSlug/:categorySlug/:slug">
+              {({ brandSlug, categorySlug, slug }) => {
+                const resolvedSlug = PRODUCT_ROUTE_ALIASES[`${brandSlug}/${categorySlug}/${slug}`] || slug;
+                return <ProductPage slug={resolvedSlug} />
+              }}
+            </Route>
+            <Route>
+              <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
+                <h1 className="font-display font-bold text-4xl text-slate-800 mb-4">404</h1>
+                <p className="text-slate-600 font-semibold mb-8">عذراً، الصفحة التي تبحث عنها غير موجودة.</p>
+                <a href="/" className="bg-blue-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-blue-700 transition-colors">العودة للرئيسية</a>
+              </div>
+            </Route>
+          </Switch>
+        )}
+      </StoreShell>
     </StoreContext.Provider>
   );
 }
