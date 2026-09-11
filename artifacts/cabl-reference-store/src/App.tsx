@@ -22,13 +22,15 @@ const queryClient = new QueryClient();
 
 function Router() {
   const [location] = useLocation();
+  const isDynamicProductRoute = /^\/[^/]+\/[^/]+\/[^/]+$/.test(location);
   const isCairoVoltRoute =
     location === '/' ||
     location === '/checkout' ||
     location === '/power-banks' ||
     location === '/anker' ||
     location === '/anker/power-banks/anker-powercore-10000' ||
-    location === '/anker/power-banks/anker-zolo-a110e-20000';
+    location === '/anker/power-banks/anker-zolo-a110e-20000' ||
+    isDynamicProductRoute;
 
   return (
     <div className="min-h-screen flex flex-col font-sans selection:bg-primary selection:text-primary-foreground">
@@ -42,6 +44,7 @@ function Router() {
             <Route path="/anker/power-banks/anker-powercore-10000" component={() => <CairoVoltClone page="product" />} />
             <Route path="/anker/power-banks/anker-zolo-a110e-20000" component={() => <CairoVoltClone page="product" />} />
             <Route path="/checkout" component={() => <CairoVoltClone page="checkout" />} />
+            <Route path="/:brandSlug/:categorySlug/:slug" component={() => <CairoVoltClone page="product" />} />
             <Route path="/search" component={Search} />
             <Route path="/favorites" component={Favorites} />
             
