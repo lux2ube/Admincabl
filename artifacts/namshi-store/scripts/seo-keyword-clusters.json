@@ -1,0 +1,46 @@
+{
+  "source": "CABL_Yemen_Professional_Keyword_Bank-1_1789085651753.xlsx",
+  "totalKeywords": 39273,
+  "searchVolumeRows": 0,
+  "strategy": "Use as a semantic coverage bank, not a one-keyword-one-page list. Index only routes backed by distinct catalog or first-party service information.",
+  "categories": {
+    "chargers": {
+      "sourceCategory": "Chargers",
+      "keywordCount": 8387,
+      "pageKeywords": ["شاحن جوال", "شاحن سريع", "شاحن أصلي", "شاحن Type-C", "USB-C", "PD", "GaN", "شاحن آيفون", "شاحن سامسونج", "سعر شاحن", "شراء شاحن", "شاحن في اليمن", "توصيل اليمن"]
+    },
+    "cables": {
+      "sourceCategory": "Cables",
+      "keywordCount": 7037,
+      "pageKeywords": ["كيبل شحن", "كابل أصلي", "كابل سريع", "USB-C", "Type-C", "Lightning", "كابل آيفون", "كابل سامسونج", "سعر كيبل", "شراء كيبل", "كيبل في اليمن"]
+    },
+    "power-banks": {
+      "sourceCategory": "Power Banks",
+      "keywordCount": 5573,
+      "pageKeywords": ["باور بانك", "خازن متنقل", "10000mAh", "20000mAh", "شحن سريع", "USB-C", "باور بانك أصلي", "سعر باور بانك", "باور بانك في اليمن"]
+    },
+    "hubs-adapters": {
+      "sourceCategory": "Hubs & Adapters",
+      "keywordCount": 5234,
+      "pageKeywords": ["USB-C Hub", "محول USB-C", "هب تايب سي", "HDMI", "محول لابتوب", "محور متعدد المنافذ", "محول في اليمن"]
+    },
+    "phone-accessories": {
+      "sourceCategory": "Phone/Device Accessories",
+      "keywordCount": 4660,
+      "pageKeywords": ["إكسسوارات جوال", "إكسسوارات موبايل", "حامل جوال", "إكسسوارات آيفون", "إكسسوارات سامسونج", "إكسسوارات جوال في اليمن"]
+    },
+    "wireless-chargers": {
+      "sourceCategory": "Wireless Charging",
+      "keywordCount": 2795,
+      "pageKeywords": ["شاحن لاسلكي", "شاحن وايرلس", "MagSafe", "شحن لاسلكي سريع", "شاحن آيفون لاسلكي", "شاحن سامسونج لاسلكي", "شاحن لاسلكي في اليمن"]
+    },
+    "car-accessories": {
+      "sourceCategory": "Car Charging",
+      "keywordCount": 2791,
+      "pageKeywords": ["شاحن سيارة", "شاحن سيارة سريع", "شاحن سيارة Type-C", "حامل جوال للسيارة", "شاحن سيارة للآيفون", "شاحن سيارة لسامسونج", "شاحن سيارة في اليمن"]
+    }
+  },
+  "excludedUntilCatalogSupport": {
+    "Power Stations & Charging": 2796
+  }
+}

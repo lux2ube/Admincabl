@@ -41,6 +41,8 @@ export function Footer() {
               <li><Link href="/warranty" className="hover:text-white transition-colors">سياسة الضمان</Link></li>
               <li><Link href="/shipping" className="hover:text-white transition-colors">الشحن والتوصيل</Link></li>
               <li><Link href="/faq" className="hover:text-white transition-colors">الأسئلة الشائعة</Link></li>
+              <li><Link href="/guides/charger-buying-guide/" className="hover:text-white transition-colors">دليل اختيار الشاحن</Link></li>
+              <li><Link href="/compare/anker-vs-ugreen/" className="hover:text-white transition-colors">مقارنات العلامات</Link></li>
             </ul>
           </div>
         </div>

@@ -113,15 +113,20 @@ main { background: #fff; }
 .cabl-route-content p { max-width: 700px; color: var(--muted); font-size: 13px; line-height: 2; }
 .seo-related { max-width: 1200px; padding: 0 5vw 78px; }
 .seo-category-page .cabl-route-hero,
-.seo-brand-page .cabl-route-hero { max-width: none; margin-top: 0; border-radius: 0; padding-right: 10vw; padding-left: 10vw; }
+.seo-brand-page .cabl-route-hero,
+.seo-guide-page .cabl-route-hero,
+.seo-comparison-page .cabl-route-hero,
+.seo-location-page .cabl-route-hero,
+.seo-editorial-page .cabl-route-hero,
+.seo-service-page .cabl-route-hero { max-width: none; margin-top: 0; border-radius: 0; padding-right: 10vw; padding-left: 10vw; }
 .seo-category-page .cabl-route-hero { background: linear-gradient(110deg, #1f62f6 0%, #4d46f5 52%, #9919f0 100%); text-align: center; }
-.seo-category-page .cabl-route-hero p, .seo-brand-page .cabl-route-hero p { color: rgba(255,255,255,.78); }
+.seo-category-page .cabl-route-hero p, .seo-brand-page .cabl-route-hero p, .seo-guide-page .cabl-route-hero p, .seo-comparison-page .cabl-route-hero p, .seo-location-page .cabl-route-hero p, .seo-editorial-page .cabl-route-hero p, .seo-service-page .cabl-route-hero p { color: rgba(255,255,255,.78); }
 .seo-category-page .cabl-route-hero .seo-breadcrumbs { justify-content: flex-start; text-align: right; }
 .seo-category-page .cabl-route-hero h1, .seo-category-page .cabl-route-hero p { margin-right: auto; margin-left: auto; }
 .seo-brand-page .cabl-route-hero { background-color: #2960e9; background-image: linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(115deg, #2460ed, #324fc9); background-size: 32px 32px, 32px 32px, auto; }
 .seo-category-filters { display: flex; justify-content: center; gap: 12px; padding: 32px 5vw 18px; }
-.seo-category-filters button { border: 1px solid #b9d1ff; border-radius: 999px; background: #f7faff; color: #2160ef; padding: 11px 22px; font: inherit; font-size: 12px; }
-.seo-category-filters button + button { border-color: #ffc7c7; color: #ec3030; }
+.seo-category-filters a { border: 1px solid #b9d1ff; border-radius: 999px; background: #f7faff; color: #2160ef; padding: 11px 22px; font: inherit; font-size: 12px; font-weight: 700; }
+.seo-category-filters a:hover { border-color: #2160ef; background: #edf4ff; }
 .seo-brand-categories { display: grid; grid-template-columns: .8fr 2fr; align-items: center; gap: 38px; max-width: 1200px; margin: 0 auto; padding: 58px 5vw 38px; }
 .seo-brand-heading span { color: #2160ef; font-size: 12px; font-weight: 800; }
 .seo-brand-heading h2 { margin: 8px 0 12px; font-size: 32px; }
@@ -134,16 +139,34 @@ main { background: #fff; }
 .seo-brand-category-grid strong { font-family: "Noto Kufi Arabic", sans-serif; font-size: 15px; }
 .seo-brand-category-grid span { color: var(--muted); font-size: 11px; line-height: 1.7; }
 .seo-brand-category-grid b { margin-top: 6px; font-size: 10px; }
+.seo-guide-page .cabl-route-hero { background: linear-gradient(120deg, #0c285f, #205de1); }
+.seo-comparison-page .cabl-route-hero { background: linear-gradient(120deg, #32116f, #7938dc); }
+.seo-location-page .cabl-route-hero { background: linear-gradient(120deg, #075f63, #0e8b91); }
+.seo-editorial-page .cabl-route-hero, .seo-service-page .cabl-route-hero { background: linear-gradient(120deg, #111827, #334155); }
+.seo-intent-panel { display: grid; grid-template-columns: .85fr 1.15fr; gap: 42px; max-width: 1200px; margin: 0 auto; padding: 58px 5vw; align-items: start; }
+.seo-intent-panel h2 { margin: 8px 0 14px; font-size: clamp(26px, 3vw, 40px); }
+.seo-intent-panel p, .seo-intent-panel li { color: var(--muted); font-size: 13px; line-height: 1.9; }
+.seo-intent-panel ol { margin: 0; padding: 0 22px 0 0; display: grid; gap: 13px; }
+.seo-comparison-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.seo-comparison-grid div { display: grid; gap: 7px; padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: #fff; }
+.seo-comparison-grid span { color: var(--muted); font-size: 12px; }
+.seo-faq { max-width: 1200px; margin: 0 auto; padding: 10px 5vw 68px; }
+.seo-faq-list { display: grid; gap: 10px; max-width: 850px; }
+.seo-faq details { border: 1px solid var(--line); border-radius: 14px; padding: 17px 19px; background: #fff; }
+.seo-faq summary { cursor: pointer; font-weight: 800; }
+.seo-faq p { margin: 12px 0 0; color: var(--muted); font-size: 13px; line-height: 1.9; }
 @media (max-width: 720px) {
   .cabl-route-hero { margin-top: 16px; border-radius: 18px; padding-top: 36px; padding-bottom: 30px; }
   .cabl-route-hero h1 { font-size: 37px; }
   .cabl-route-hero p { font-size: 13px; }
   .cabl-route-points, .cv-product-grid { grid-template-columns: 1fr; }
-  .seo-category-page .cabl-route-hero, .seo-brand-page .cabl-route-hero { padding-right: 22px; padding-left: 22px; text-align: right; }
+  .seo-category-page .cabl-route-hero, .seo-brand-page .cabl-route-hero, .seo-guide-page .cabl-route-hero, .seo-comparison-page .cabl-route-hero, .seo-location-page .cabl-route-hero, .seo-editorial-page .cabl-route-hero, .seo-service-page .cabl-route-hero { padding-right: 22px; padding-left: 22px; text-align: right; }
   .seo-category-page .cabl-route-hero .seo-breadcrumbs { justify-content: flex-start; }
   .seo-category-filters { padding-top: 22px; }
   .seo-brand-categories { grid-template-columns: 1fr; gap: 20px; padding-top: 42px; }
   .seo-brand-category-grid { grid-template-columns: repeat(2, 180px); overflow-x: auto; }
+  .seo-intent-panel { grid-template-columns: 1fr; gap: 20px; padding-top: 42px; padding-bottom: 42px; }
+  .seo-comparison-grid { grid-template-columns: 1fr; }
   .cv-section-heading { display: block; }
   .cv-section-heading > p { margin-top: 14px; }
   .cv-product-card { display: grid; grid-template-columns: 42% 1fr; }

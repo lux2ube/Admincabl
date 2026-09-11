@@ -1,0 +1,395 @@
+أكيد. هذا Smart Prompt يوضح للمطور بالضبط الفرق بين Global Design System وPage-Specific Templates، بدون أن يجعل كل الصفحات متطابقة:
+
+CABL — Professional E-Commerce UI Architecture
+
+Build the CABL website as one unified professional e-commerce design system with specialized page templates.
+
+CORE PRINCIPLE
+
+Follow this rule strictly:
+
+«Same Design System — Different Page Experience.»
+
+Do NOT make every page visually identical.
+
+Do NOT independently design every page either.
+
+The website must feel like one coherent brand while each page type is optimized for its specific user intent.
+
+---
+
+1. GLOBAL DESIGN SYSTEM
+
+Create a single reusable design system shared across the entire website.
+
+The following must remain consistent across all pages:
+
+- Brand identity
+- Typography system
+- Color system
+- Spacing scale
+- Container widths
+- Grid system
+- Border radius
+- Shadows
+- Icon style
+- Button styles
+- Input styles
+- Product-card design language
+- Breadcrumb style
+- Badge styles
+- Loading states
+- Error states
+- Empty states
+- Responsive behavior
+- Accessibility rules
+- Interaction patterns
+
+Never create arbitrary one-off styles when an existing design-system component can be reused.
+
+---
+
+2. GLOBAL HEADER
+
+Create ONE reusable global Header component.
+
+Use the exact same Header component on:
+
+- Homepage
+- Category pages
+- Brand pages
+- Product pages
+- Search results
+- Blog/content pages
+- Other storefront pages
+
+The Header must maintain the same:
+
+- Structure
+- Logo
+- Search behavior
+- Navigation
+- Icons
+- Typography
+- Spacing
+- Desktop behavior
+- Mobile behavior
+- Sticky behavior
+
+Do not create separate versions of the Header for individual pages.
+
+The Header may change behavior responsively, but it must remain the same design system component.
+
+---
+
+3. GLOBAL FOOTER
+
+Create ONE reusable global Footer component.
+
+Use the same Footer system across the entire website.
+
+Maintain consistent:
+
+- Structure
+- Columns
+- Typography
+- Spacing
+- Links
+- Social icons
+- Trust information
+- Legal links
+- Mobile accordion behavior
+
+Do not redesign the Footer according to the page.
+
+---
+
+4. PAGE-SPECIFIC DESIGN
+
+Although the global design system remains consistent, each page must have its own optimized template.
+
+Homepage
+
+Purpose:
+
+Discover → Explore → Trust → Shop
+
+Suggested structure:
+
+Hero
+→ Featured Categories
+→ Featured Products
+→ Brands
+→ Best Sellers / New Arrivals
+→ Why CABL
+→ Trust / Warranty
+→ Content / Guides
+→ Footer
+
+The homepage should feel more editorial and discovery-oriented.
+
+---
+
+Category Page
+
+Example:
+
+"/power-banks"
+
+Purpose:
+
+Browse → Filter → Compare → Purchase
+
+Suggested structure:
+
+Breadcrumb
+→ Category Title
+→ Category Description
+→ Subcategories
+→ Filters / Sort
+→ Product Grid
+→ Buying Guide
+→ FAQ / SEO Content
+→ Footer
+
+The product grid must remain the primary focus.
+
+---
+
+Brand Page
+
+Example:
+
+"/anker"
+
+Purpose:
+
+Explore → Understand Brand → Browse Products
+
+Suggested structure:
+
+Breadcrumb
+→ Brand Hero
+→ Brand Introduction
+→ Brand Categories
+→ Featured Products
+→ All Products
+→ Brand Content
+→ FAQ
+→ Footer
+
+The brand page should visually communicate the brand while still feeling unmistakably like CABL.
+
+---
+
+Product Page
+
+Example:
+
+"/anker/power-banks/anker-powercore-10000"
+
+Purpose:
+
+Understand → Evaluate → Trust → Purchase
+
+Suggested structure:
+
+Breadcrumb
+→ Product Gallery + Product Information
+→ Price
+→ Purchase CTA
+→ Trust / Warranty / Delivery
+→ Key Benefits
+→ Specifications
+→ Compatibility
+→ What's Included
+→ Product Details
+→ FAQ
+→ Related Products
+→ Footer
+
+The product page should be conversion-focused without breaking the global design language.
+
+---
+
+5. PAGE TITLES MUST BE UNIQUE
+
+Do NOT force the same title structure on every page.
+
+Each page must have a meaningful visual title appropriate to its purpose.
+
+Examples:
+
+Homepage
+CABL — Power Your Everyday
+
+Category
+Power Banks
+
+Brand
+Anker
+
+Product
+Anker Zolo 20,000mAh
+
+Also generate unique SEO "<title>" and metadata for every indexable page.
+
+Do not duplicate page titles.
+
+---
+
+6. COMPONENT REUSE RULE
+
+Reuse components when their function and UX are the same.
+
+Examples:
+
+Use ONE ProductCard component across:
+
+- Homepage
+- Category
+- Brand
+- Search
+- Related Products
+
+Use ONE Button system everywhere.
+
+Use ONE Breadcrumb component everywhere.
+
+Use ONE Filter component system.
+
+Use ONE Header.
+
+Use ONE Footer.
+
+However, page sections themselves can be completely different when their purpose is different.
+
+---
+
+7. DO NOT OVER-REUSE
+
+Do not force unrelated content into the same component merely to achieve code reuse.
+
+A homepage Hero does not need to look like a Category Hero.
+
+A Brand Hero does not need to look like a Product Hero.
+
+A Product purchase area should not be treated like a generic content card.
+
+Reuse the design language and functional components, not the entire visual layout.
+
+---
+
+8. RESPONSIVE DESIGN
+
+Desktop and mobile must use the same design system but may use different compositions.
+
+Do not simply shrink desktop layouts.
+
+Recompose intelligently for mobile.
+
+Prioritize:
+
+- Touch usability
+- Readability
+- Product discovery
+- Search
+- Filtering
+- Purchase actions
+- Navigation
+
+Important actions must remain easy to access on mobile.
+
+---
+
+9. VISUAL HIERARCHY
+
+Every page must have a clear hierarchy.
+
+Use:
+
+Typography + spacing + alignment + scale + contrast
+
+before relying on borders, shadows, cards, or decorative elements.
+
+Avoid visual clutter.
+
+Do not put every section inside a card.
+
+Do not use decorative UI elements without a functional purpose.
+
+---
+
+10. CONSISTENCY RULE
+
+A user moving through:
+
+Home → Category → Brand → Product
+
+must immediately understand that they are still inside CABL.
+
+The interface should feel like:
+
+«One website, one brand, one design system, four specialized experiences.»
+
+Not:
+
+«Four separately designed websites.»
+
+---
+
+11. IMPLEMENTATION RULE
+
+Build the architecture using reusable components and page templates.
+
+Recommended structure:
+
+Design System
+├── Header
+├── Footer
+├── Navigation
+├── Search
+├── Breadcrumb
+├── Buttons
+├── Inputs
+├── ProductCard
+├── BrandCard
+├── CategoryCard
+├── Filters
+├── Badges
+├── FAQ
+└── Trust Components
+
+Page Templates
+├── HomeTemplate
+├── CategoryTemplate
+├── BrandTemplate
+└── ProductTemplate
+
+The global components provide consistency.
+
+The page templates provide specialization.
+
+---
+
+12. FINAL ACCEPTANCE CRITERIA
+
+The implementation is accepted only if:
+
+1. Header is a reusable global component.
+2. Footer is a reusable global component.
+3. All pages share the same design system.
+4. Home, Category, Brand and Product pages have clearly different layouts based on their purpose.
+5. Product cards remain visually consistent wherever reused.
+6. Buttons and interaction patterns remain consistent.
+7. Page titles are unique and semantically appropriate.
+8. SEO metadata is unique per indexable page.
+9. Mobile layouts are intentionally designed rather than simply compressed.
+10. No unnecessary one-off components are created.
+11. No unnecessary visual duplication is introduced.
+12. The website feels like one coherent CABL store from the first page to the last.
+13. The design prioritizes usability, clarity, trust and conversion over decoration.
+
+GOLDEN RULE
+
+«Do not clone every page identically. Clone the underlying design system, navigation language, component language and interaction principles — then build a specialized experience for each page type.»

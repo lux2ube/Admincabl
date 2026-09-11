@@ -4,6 +4,19 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.resolve(here, '../public');
+const keywordBank = JSON.parse(fs.readFileSync(path.join(here, 'seo-keyword-clusters.json'), 'utf8'));
+const siteUrl = (process.env.PUBLIC_SITE_URL ?? '').replace(/\/+$/, '');
+if (!siteUrl) {
+  console.warn('[SEO] PUBLIC_SITE_URL is not set: using relative metadata and skipping sitemap.xml until a production domain exists.');
+}
+
+function absoluteUrl(urlPath) {
+  return siteUrl ? `${siteUrl}${urlPath}` : urlPath;
+}
+
+function isIndexablePage(page) {
+  return !page.canonicalSlug && page.indexable !== false;
+}
 
 const pages = [
   {
@@ -20,6 +33,7 @@ const pages = [
   },
   {
     slug: 'fast-chargers',
+    canonicalSlug: 'chargers/fast-chargers',
     title: 'شواحن سريعة أصلية للبيع في اليمن | 20W إلى 100W',
     description: 'اكتشف شاحن سريع للآيفون وسامسونج والأجهزة المتوافقة بقدرات 20W و30W و33W و45W و65W و100W، مع خيارات PD وGaN وتوصيل داخل اليمن.',
     h1: 'شواحن سريعة<br />20W إلى 100W',
@@ -32,6 +46,7 @@ const pages = [
   },
   {
     slug: 'type-c-chargers',
+    canonicalSlug: 'chargers/type-c-chargers',
     title: 'شواحن Type-C وUSB-C سريعة في اليمن | CABL',
     description: 'اشترِ شاحن Type-C وUSB-C أصلي للآيفون وسامسونج وشاومي والأجهزة المتوافقة، مع خيارات PD وGaN وقدرات متعددة وتوصيل داخل اليمن.',
     h1: 'شواحن Type-C<br />وUSB-C في اليمن',
@@ -68,6 +83,7 @@ const pages = [
   },
   {
     slug: 'car-chargers',
+    canonicalSlug: 'car-accessories',
     title: 'شاحن سيارة سريع للجوال في اليمن | USB-C وPD',
     description: 'شاحن سيارة سريع للآيفون وسامسونج والأجهزة المتوافقة من Baseus وAnker وUGREEN، مع USB-C وخيارات متعددة المنافذ وتوصيل داخل اليمن.',
     h1: 'شواحن سيارة<br />سريعة للجوال',
@@ -92,6 +108,7 @@ const pages = [
   },
   {
     slug: 'charging-cables',
+    canonicalSlug: 'cables',
     title: 'وصلات شحن وكابلات Type-C أصلية في اليمن | CABL',
     description: 'اشترِ وصلة شحن أصلية وسريعة: كابل Type-C إلى Type-C وUSB-C إلى Lightning وUSB-A إلى USB-C بقدرات 60W و100W وتوصيل داخل اليمن.',
     h1: 'وصلات شحن<br />وكابلات أصلية',
@@ -145,7 +162,7 @@ const pages = [
     description: 'تصفح شواحن Baseus الأصلية بقدرات 20W و33W و65W و100W، إضافة إلى كابلات USB-C وباور بانك مع توصيل داخل اليمن.',
     h1: 'منتجات Baseus<br />الأصلية في اليمن',
     eyebrow: 'علامة Baseus',
-    intro: 'CABL هو الوكيل الحصري لعلامة Baseus في اليمن. تصفح حلول الشحن والطاقة والكابلات المناسبة للاستخدام اليومي والسفر.',
+    intro: 'تصفح منتجات Baseus المتاحة في كتالوج CABL، من حلول الشحن والطاقة إلى الكابلات المناسبة للاستخدام اليومي والسفر.',
     keywords: 'بيسوس, Baseus, منتجات بيسوس, شواحن بيسوس, وصلات بيسوس, شاحن Baseus, شاحن Baseus سريع, شاحن Baseus GaN, Baseus Yemen, شاحن Baseus 20W, شواحن أصلية',
     products: ['شاحن Baseus GaN بقدرة 100W', 'شاحن Baseus GaN بقدرة 65W', 'شاحن Baseus بمنفذين 33W'],
     image: '../images/vention-charger-100w.jpg',
@@ -239,34 +256,190 @@ function escapeHtml(value) {
     .replaceAll('"', '&quot;');
 }
 
+const locationSlugs = new Set(['yemen', 'sanaa', 'aden', 'taiz', 'ibb', 'hodeidah', 'hadramout', 'marib', 'delivery/yemen']);
+
+function getPageTemplate(page) {
+  const canonical = page.canonicalSlug ?? page.slug;
+  const canonicalParts = canonical.split('/');
+  if (brandLabels[page.slug] || page.slug.startsWith('brands/') || (brandLabels[canonicalParts[0]] && canonicalParts.length === 1)) return 'brand';
+  if (page.slug === 'guides' || page.slug.startsWith('guides/')) return 'guide';
+  if (page.slug === 'compare' || page.slug.startsWith('compare/')) return 'comparison';
+  if (page.slug === 'delivery' || locationSlugs.has(page.slug)) return 'location';
+  if (page.slug.startsWith('blog')) return 'editorial';
+  if (['about', 'contact', 'warranty', 'shipping', 'returns', 'faq', 'authenticity'].includes(page.slug)) return 'service';
+  return 'category';
+}
+
+function getEditorialCopy(page, template) {
+  const label = page.h1.replaceAll('<br />', ' ');
+  if (template === 'comparison') {
+    return {
+      eyebrow: 'قرار أوضح',
+      heading: 'متى تختار كل خيار؟',
+      paragraphs: [
+        'ابدأ بفئة المنتج التي تحتاجها، ثم ضع المنتجات المتوفرة جنبًا إلى جنب حسب القدرة والسعة والمنافذ والتوافق. اختلاف العلامة لا يعوض اختلاف المواصفات.',
+        'إذا تقاربت المواصفات، راجع الحجم والملحقات والضمان المكتوب والسعر الحالي. لا تعتمد على ترتيب ثابت؛ الأفضل هو الأنسب لجهازك واستخدامك.',
+      ],
+    };
+  }
+  if (template === 'location') {
+    return {
+      eyebrow: 'قبل التأكيد',
+      heading: `طلب منتجات CABL إلى ${label.replace('CABL في ', '')}`,
+      paragraphs: [
+        'تعرض صفحة المنتج المخزون والسعر قبل إضافته إلى السلة. أثناء إتمام الطلب تظهر طريقة الشحن المتاحة وتكلفتها بشكل منفصل عن قيمة المنتجات.',
+        'اكتب رقم هاتف وعنوانًا واضحين لتسهيل التأكيد. لا تفترض مدة أو تكلفة ثابتة؛ البيانات المعتمدة هي التي تظهر في الطلب الحالي.',
+      ],
+    };
+  }
+  if (template === 'guide') {
+    return {
+      eyebrow: 'قرار مبني على المواصفات',
+      heading: label,
+      paragraphs: [
+        'لا تبدأ من القدرة الأعلى أو السعر الأقل. ابدأ بنوع جهازك والمنفذ ومعيار الشحن، ثم اختر القدرة والسعة التي تناسب استخدامك الفعلي.',
+        'تأكد من أن جميع أجزاء منظومة الشحن متوافقة: الجهاز والشاحن والكابل. أضعف جزء فيها قد يحد من سرعة الشحن أو يمنع بعض الميزات.',
+      ],
+    };
+  }
+  if (template === 'brand') {
+    return {
+      eyebrow: 'فهم العلامة',
+      heading: `كيف تختار من ${label}؟`,
+      paragraphs: [
+        'استخدم أقسام العلامة للوصول إلى نوع المنتج، ثم قارن الموديلات المتاحة حسب المواصفات التي تؤثر في الاستخدام اليومي.',
+        'يعرض CABL بيانات العلامة والسعر والمخزون وخيارات المنتج الحالية. راجع صفحة كل منتج للحصول على التفاصيل قبل الشراء.',
+      ],
+    };
+  }
+  if (template === 'service' || template === 'editorial') {
+    return {
+      eyebrow: page.eyebrow,
+      heading: label,
+      paragraphs: [page.intro, 'استخدم روابط هذه الصفحة للوصول إلى المعلومات أو القسم المطلوب، ثم ارجع إلى الكتالوج عندما تكون مستعدًا للمقارنة أو الطلب.'],
+    };
+  }
+  return {
+    eyebrow: 'اختيار مناسب',
+    heading: `ماذا تراجع قبل شراء ${label}؟`,
+    paragraphs: [
+      'تحقق من نوع المنفذ والقدرة أو السعة ومعيار الشحن والتوافق مع جهازك. القدرة الأعلى ليست دائمًا الاختيار الأنسب؛ اتبع مواصفات الجهاز والكابل.',
+      'تعرض بطاقات CABL المنتجات المتاحة من الكتالوج الحالي، بينما تظهر خيارات الشحن والدفع والإجمالي أثناء إتمام الطلب.',
+    ],
+  };
+}
+
+function getFaq(page, template) {
+  const label = page.h1.replaceAll('<br />', ' ');
+  if (template === 'service' || template === 'editorial') {
+    return [
+      ['أين أجد المعلومات الأحدث؟', 'تعتمد معلومات المنتجات والأسعار والمخزون على كتالوج CABL الحالي، بينما توضح صفحات الخدمة السياسات والإرشادات المتاحة.'],
+      ['كيف أصل إلى المنتج المناسب؟', 'استخدم البحث أو روابط الفئات والعلامات، ثم راجع صفحة المنتج قبل إضافته إلى السلة.'],
+      ['كيف أتواصل مع CABL؟', 'استخدم صفحة التواصل أو قناة خدمة العملاء الظاهرة في المتجر عند الحاجة إلى مساعدة قبل الطلب أو بعده.'],
+    ];
+  }
+  if (template === 'location') {
+    return [
+      ['هل تتوفر خدمة التوصيل إلى هذه المنطقة؟', 'تظهر خيارات الشحن المتاحة وتكلفتها أثناء إتمام الطلب. تواصل مع خدمة العملاء إذا لم تجد منطقتك ضمن الخيارات.'],
+      ['هل السعر المعروض يشمل التوصيل؟', 'يعرض ملخص الطلب سعر المنتجات وتكلفة الشحن كلًا على حدة قبل التأكيد.'],
+      ['كيف أتأكد من توفر المنتج؟', 'تعكس بطاقات المنتجات المخزون الحالي من كتالوج CABL، ويعاد التحقق عند إرسال الطلب.'],
+    ];
+  }
+  if (template === 'comparison') {
+    return [
+      ['هل توجد علامة أفضل في كل الحالات؟', 'لا. الاختيار يعتمد على نوع المنتج والقدرة والمنافذ والتوافق والسعر المتاح، وليس اسم العلامة وحده.'],
+      ['كيف أستخدم المقارنة؟', 'ابدأ بجهازك والاستخدام المطلوب، ثم قارن المنتجات المتوفرة حاليًا بالمواصفات نفسها.'],
+      ['هل الأسعار ثابتة؟', 'الأسعار والتوفر يتغيران؛ راجع بطاقة المنتج وملخص الطلب للحصول على البيانات الحالية.'],
+    ];
+  }
+  if (template === 'guide') {
+    return [
+      ['ما أول خطوة قبل اختيار المنتج؟', 'ابدأ بالتوافق، ثم القدرة أو السعة، وبعدها عدد المنافذ ونوع الكابل والضمان المكتوب على المنتج.'],
+      ['هل القدرة الأعلى مناسبة دائمًا؟', 'لا. الجهاز يحدد القدرة التي يمكنه استقبالها، كما يجب أن يدعم الشاحن والكابل معيار الشحن المطلوب.'],
+      ['كيف أتأكد من التوافق؟', 'راجع مواصفات جهازك وصفحة المنتج، وتواصل مع CABL عند الحاجة قبل تأكيد الطلب.'],
+    ];
+  }
+  if (template === 'brand') {
+    return [
+      [`ما منتجات ${label} المتاحة في CABL؟`, 'تعرض الصفحة المنتجات الموجودة حاليًا في الكتالوج، ويمكن تصفحها حسب الشواحن والكابلات والباور بانك والإكسسوارات.'],
+      ['كيف أقارن بين موديلات العلامة؟', 'قارن القدرة والسعة والمنافذ والتوافق والسعر بدل الاعتماد على اسم السلسلة فقط.'],
+      ['هل كل المنتجات متوفرة دائمًا؟', 'التوفر يعتمد على المخزون الحالي ويظهر في بطاقة كل منتج قبل الطلب.'],
+    ];
+  }
+  return [
+    [`كيف أختار ${label} المناسب؟`, 'قارن التوافق والقدرة أو السعة ونوع المنافذ مع احتياج جهازك، ثم راجع التوفر والسعر الحاليين.'],
+    ['هل المنتجات أصلية؟', 'يعرض CABL العلامة والمواصفات ومعلومات الضمان المكتوبة لكل منتج حتى تتمكن من مراجعتها قبل الشراء.'],
+    ['هل يوجد توصيل داخل اليمن؟', 'تظهر خيارات التوصيل المتاحة وتكلفتها أثناء إتمام الطلب بحسب إعدادات المتجر الحالية.'],
+  ];
+}
+
+function renderIntentSection(page, template, rootPrefix) {
+  const label = escapeHtml(page.h1.replaceAll('<br />', ' '));
+  if (template === 'brand') {
+    const brand = escapeHtml(brandLabels[page.slug] ?? brandLabels[(page.canonicalSlug ?? page.slug).split('/')[0]] ?? label);
+    return `
+      <section class="seo-brand-categories">
+        <div class="seo-brand-heading"><span>علامة ${brand}</span><h2>استكشف العلامة حسب احتياجك</h2><p>تختلف تجربة العلامة عن الفئة: ابدأ بنوع الاستخدام ثم انتقل إلى المنتجات المتاحة والمواصفات.</p></div>
+        <div class="seo-brand-category-grid">
+          <a href="${rootPrefix}${page.canonicalSlug ?? page.slug}/power-banks/"><strong>طاقة متنقلة</strong><span>السعة والقدرة وعدد المخارج</span><b>تصفح الباور بانك ←</b></a>
+          <a href="${rootPrefix}${page.canonicalSlug ?? page.slug}/chargers/"><strong>شحن جداري</strong><span>القدرة والمنافذ ومعايير PD وGaN</span><b>تصفح الشواحن ←</b></a>
+          <a href="${rootPrefix}${page.canonicalSlug ?? page.slug}/cables/"><strong>كابلات الشحن</strong><span>نوع الموصل والقدرة والطول</span><b>تصفح الكابلات ←</b></a>
+          <a href="${rootPrefix}${page.canonicalSlug ?? page.slug}/car-accessories/"><strong>للسيارة والسفر</strong><span>الشحن والثبات أثناء التنقل</span><b>تصفح الإكسسوارات ←</b></a>
+        </div>
+      </section>`;
+  }
+  if (template === 'guide') {
+    return `<section class="seo-intent-panel seo-guide-panel"><div><span class="seo-eyebrow">خطوات عملية</span><h2>أربع خطوات قبل الشراء</h2><p>${label}</p></div><ol><li><b>حدد الجهاز:</b> راجع المنفذ ومعيار الشحن المدعوم.</li><li><b>حدد الاستخدام:</b> منزل، مكتب، سيارة أم سفر.</li><li><b>قارن المواصفات:</b> القدرة والسعة والمنافذ والكابل.</li><li><b>راجع الطلب:</b> تحقق من السعر والمخزون والشحن قبل التأكيد.</li></ol></section>`;
+  }
+  if (template === 'comparison') {
+    return `<section class="seo-intent-panel"><div><span class="seo-eyebrow">مقارنة عملية</span><h2>قارن على أساس المنتج، لا الاسم فقط</h2><p>تعتمد هذه المقارنة على المنتجات الموجودة في كتالوج CABL. استخدم المعايير نفسها لكل خيار قبل الشراء.</p></div><div class="seo-comparison-grid"><div><b>التوافق</b><span>الجهاز والمنفذ والمعيار</span></div><div><b>الأداء</b><span>القدرة أو السعة الفعلية</span></div><div><b>الاستخدام</b><span>الحجم والمنافذ والتنقل</span></div><div><b>الطلب</b><span>السعر والمخزون والضمان</span></div></div></section>`;
+  }
+  if (template === 'location') {
+    return `<section class="seo-intent-panel"><div><span class="seo-eyebrow">الطلب والتوصيل</span><h2>من اختيار المنتج إلى استلامه</h2><p>تصفح الكتالوج، أضف المنتجات المتوفرة، ثم راجع طريقة الدفع وخيار الشحن الظاهر لمنطقتك قبل تأكيد الطلب.</p></div><ol><li>اختر منتجًا متوافقًا مع جهازك.</li><li>أدخل المدينة والعنوان بوضوح.</li><li>راجع تكلفة الشحن والإجمالي.</li><li>انتظر تواصل فريق CABL لتأكيد التفاصيل.</li></ol></section>`;
+  }
+  return `<section class="seo-category-filters" aria-label="مسارات التسوق"><a href="${rootPrefix}anker/">Anker</a><a href="${rootPrefix}baseus/">Baseus</a><a href="${rootPrefix}ugreen/">UGREEN</a><a href="${rootPrefix}vention/">Vention</a></section>`;
+}
+
 function renderPage(page) {
   const rootPrefix = '../'.repeat(page.slug.split('/').length);
   const imagePath = `${rootPrefix}images/${page.image.split('/').pop()}`;
   const canonicalPath = `/${page.canonicalSlug ?? page.slug}/`;
   const breadcrumbPath = page.canonicalSlug ?? page.slug;
+  const breadcrumbHubLabels = {
+    guides: 'أدلة الشراء',
+    compare: 'المقارنات',
+    delivery: 'التوصيل',
+    brands: 'العلامات التجارية',
+  };
   const breadcrumbItems = [
     { name: 'الرئيسية', url: '/' },
     ...breadcrumbPath.split('/').map((segment, index, segments) => ({
-      name: page.breadcrumbNames?.[index] ?? segment.replaceAll('-', ' '),
+      name: page.breadcrumbNames?.[index]
+        ?? (index === segments.length - 1
+          ? page.h1.replaceAll('<br />', ' ')
+          : breadcrumbHubLabels[segment] ?? segment.replaceAll('-', ' ')),
       url: `/${segments.slice(0, index + 1).join('/')}/`,
     })),
   ];
   const related = page.related.map(([href, label]) => `<a href="${rootPrefix}${href}">${escapeHtml(label)}</a>`).join('');
-  const isBrandPage = Boolean(brandLabels[page.slug] || page.slug.startsWith('brands/'));
-  const pageTypeClass = isBrandPage ? 'seo-brand-page' : 'seo-category-page';
+  const template = getPageTemplate(page);
+  const pageTypeClass = `seo-${template}-page`;
+  const faq = getFaq(page, template);
+  const editorial = getEditorialCopy(page, template);
+  const showCatalog = !['service', 'editorial'].includes(template) && page.products.length > 0;
   const products = page.products.map((name, index) => `
         <article class="cv-product-card seo-product">
-          <div class="cv-product-image"><img src="${imagePath}" alt="${escapeHtml(name)}" loading="lazy" /><span>${index < 3 ? 'اختيار CABL' : 'متوفر الآن'}</span></div>
-          <div class="cv-product-copy"><small>CABL</small><h3>${escapeHtml(name)}</h3><p>راجع المواصفات والتوافق قبل إتمام الطلب.</p><strong>افتح المواصفات <span aria-hidden="true">←</span></strong></div>
+          <div class="cv-product-image"><span>من كتالوج CABL</span></div>
+          <div class="cv-product-copy"><small>CABL</small><a href="${rootPrefix}search?q=${encodeURIComponent(name)}"><h3>${escapeHtml(name)}</h3></a><p>راجع المواصفات والتوافق قبل إتمام الطلب.</p><strong>ابحث في الكتالوج <span aria-hidden="true">←</span></strong></div>
         </article>`).join('');
-  const schema = {
+  const pageSchema = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: page.title,
     description: page.description,
     inLanguage: 'ar-YE',
-    url: canonicalPath,
-    isPartOf: { '@type': 'WebSite', name: 'CABL', url: '/' },
+    url: absoluteUrl(canonicalPath),
+    isPartOf: { '@type': 'WebSite', name: 'CABL', url: absoluteUrl('/') },
     mainEntity: {
       '@type': 'ItemList',
       itemListElement: page.products.map((name, index) => ({
@@ -281,9 +454,23 @@ function renderPage(page) {
         '@type': 'ListItem',
         position: index + 1,
         name: item.name,
-        item: item.url,
+        item: absoluteUrl(item.url),
       })),
     },
+  };
+  const schema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      pageSchema,
+      {
+        '@type': 'FAQPage',
+        mainEntity: faq.map(([question, answer]) => ({
+          '@type': 'Question',
+          name: question,
+          acceptedAnswer: { '@type': 'Answer', text: answer },
+        })),
+      },
+    ],
   };
   return `<!doctype html>
 <html lang="ar" dir="rtl">
@@ -293,14 +480,14 @@ function renderPage(page) {
     <title>${escapeHtml(page.title)}</title>
     <meta name="description" content="${escapeHtml(page.description)}" />
     <meta name="keywords" content="${escapeHtml(page.keywords)}" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="${canonicalPath}" />
+    <meta name="robots" content="${isIndexablePage(page) ? 'index, follow' : 'noindex, follow'}" />
+    <link rel="canonical" href="${absoluteUrl(canonicalPath)}" />
     <meta property="og:title" content="${escapeHtml(page.title)}" />
     <meta property="og:description" content="${escapeHtml(page.description)}" />
-    <meta property="og:url" content="${canonicalPath}" />
+    <meta property="og:url" content="${absoluteUrl(canonicalPath)}" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ar_YE" />
-    <meta property="og:image" content="${rootPrefix}${page.image.replace('../', '')}" />
+    <meta property="og:image" content="${absoluteUrl('/cabl-logo.svg')}" />
     <link rel="icon" type="image/svg+xml" href="${rootPrefix}favicon.svg" />
     <link rel="stylesheet" href="${rootPrefix}seo-pages.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -313,12 +500,11 @@ function renderPage(page) {
     <header class="seo-header">
       <a class="seo-logo" href="${rootPrefix}"><img src="${rootPrefix}cabl-logo.svg" alt="CABL متجر شواحن في اليمن" /><strong>CABL</strong></a>
       <nav aria-label="التنقل">
-        <a href="${rootPrefix}baseus/">Baseus <span>⌄</span></a>
-        <a href="${rootPrefix}anker/">Anker <span>⌄</span></a>
-        <a href="${rootPrefix}ugreen/">UGREEN <span>⌄</span></a>
+        <a href="${rootPrefix}">الرئيسية</a>
         <a href="${rootPrefix}power-banks/">باور بانك</a>
         <a href="${rootPrefix}chargers/">شواحن</a>
-        <a href="${rootPrefix}blog/">المدونة</a>
+        <a href="${rootPrefix}cables/">كابلات</a>
+        <a href="${rootPrefix}anker/">منتجات Anker</a>
       </nav>
       <div class="seo-header-actions"><a href="${rootPrefix}search" aria-label="البحث">⌕</a><a class="seo-cart" href="${rootPrefix}#discover" aria-label="السلة">▣</a></div>
     </header>
@@ -332,39 +518,29 @@ function renderPage(page) {
           <span class="seo-eyebrow">${escapeHtml(page.eyebrow)}</span>
           <h1>${page.h1}</h1>
           <p>${escapeHtml(page.intro)}</p>
-          <a class="seo-button" href="#seo-product-grid">تصفح كتالوج CABL</a>
+          <a class="seo-button" href="${showCatalog ? '#seo-product-grid' : '#seo-page-content'}">${showCatalog ? 'تصفح كتالوج CABL' : 'اقرأ التفاصيل'}</a>
       </section>
-      ${isBrandPage ? `
-      <section class="seo-brand-categories">
-        <div class="seo-brand-heading"><span>علامة ${escapeHtml(brandLabels[page.slug] ?? 'CABL')}</span><h2>منتجات مختارة من الكتالوج</h2><p>اختر القسم الأقرب لاستخدامك، ثم راجع الموديلات المتاحة والمواصفات قبل الشراء.</p></div>
-        <div class="seo-brand-category-grid">
-          <a href="${rootPrefix}${page.slug}/power-banks/"><strong>طاقة تكمل يومك</strong><span>باور بانك للسفر والاستخدام اليومي</span><b>تصفح الباور بانك ←</b></a>
-          <a href="${rootPrefix}${page.slug}/chargers/"><strong>شحن أسرع وأأمن</strong><span>شواحن بقدرات ومنافذ واضحة</span><b>تصفح الشواحن ←</b></a>
-          <a href="${rootPrefix}${page.slug}/cables/"><strong>الكابل الصح لجهازك</strong><span>USB-C وLightning للاستخدام اليومي</span><b>تصفح الكابلات ←</b></a>
-          <a href="${rootPrefix}${page.slug}/car-accessories/"><strong>عربيتك أذكى</strong><span>حوامل وشواحن ثابتة على الطريق</span><b>تصفح إكسسوارات السيارة ←</b></a>
-        </div>
-      </section>` : `
-      <section class="seo-category-filters" aria-label="فلترة المنتجات">
-        <button type="button">تسوق انكر</button>
-        <button type="button">تسوق جوي روم</button>
-      </section>`}
+      ${renderIntentSection(page, template, rootPrefix)}
       <section class="cabl-route-points" aria-label="نقاط مهمة">
         <div><span>✓</span><strong>مواصفات واضحة من كتالوج CABL</strong></div>
         <div><span>✓</span><strong>أسعار وتوفر قبل تأكيد الطلب</strong></div>
         <div><span>✓</span><strong>خيارات شحن ودفع داخل اليمن</strong></div>
       </section>
-      <section class="seo-content cv-section cv-products">
-        <div class="cv-section-heading"><div><span>من كتالوج CABL</span><h2>منتجات متاحة الآن</h2></div><p>الأسعار والمخزون والصور مأخوذة من بيانات المتجر الحالية.</p></div>
+      ${showCatalog ? `<section class="seo-content cv-section cv-products">
+        <div class="cv-section-heading"><div><span>من كتالوج CABL</span><h2>منتجات مرتبطة بهذه الصفحة</h2></div><p>تتحدث القائمة تلقائيًا من بيانات المتجر عند فتح الصفحة.</p></div>
         <div class="cv-product-grid" id="seo-product-grid" data-cabl-route="${escapeHtml(page.canonicalSlug ?? page.slug)}">${products}
         </div>
-      </section>
-      <section class="cabl-route-content seo-content">
-        <span class="seo-eyebrow">اختيار مناسب</span>
-        <h2>ماذا تراجع قبل شراء الشاحن؟</h2>
+      </section>` : ''}
+      <section class="cabl-route-content seo-content" id="seo-page-content">
+        <span class="seo-eyebrow">${escapeHtml(editorial.eyebrow)}</span>
+        <h2>${escapeHtml(editorial.heading)}</h2>
         <div class="seo-copy">
-          <p>تحقق من نوع المنفذ والقدرة بالواط ومعيار الشحن السريع والتوافق مع هاتفك. لا تعني القدرة الأعلى أنها مناسبة لكل جهاز؛ اتبع مواصفات الهاتف والكابل، واختر منتجًا أصليًا من علامة موثوقة.</p>
-          <p>يعرض CABL معلومات المنتج وخيارات الشحن المتاحة أثناء إتمام الطلب. يمكنك طلب شاحن جوال أونلاين والتواصل مع فريق CABL للتأكد من التوصيل إلى مدينتك في اليمن.</p>
+          ${editorial.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('')}
         </div>
+      </section>
+      <section class="seo-faq">
+        <div class="cv-section-heading"><div><span>إجابات مباشرة</span><h2>أسئلة شائعة عن ${escapeHtml(page.h1.replaceAll('<br />', ' '))}</h2></div></div>
+        <div class="seo-faq-list">${faq.map(([question, answer]) => `<details><summary>${escapeHtml(question)}</summary><p>${escapeHtml(answer)}</p></details>`).join('')}</div>
       </section>
       <section class="seo-related">
         <h2>تصفح أيضًا</h2>
@@ -488,8 +664,9 @@ const cleanRouteSlugs = [
   'anker/wireless-chargers', 'anker/car-accessories', 'anker/hubs-adapters',
   'ugreen/chargers', 'ugreen/cables', 'ugreen/power-banks',
   'ugreen/wireless-chargers', 'ugreen/car-accessories', 'ugreen/hubs-adapters',
-  'guides/charger-buying-guide', 'guides/cable-buying-guide', 'guides/power-bank-buying-guide', 'guides/usb-c-guide',
-  'compare/baseus-vs-vention', 'compare/baseus-vs-ugreen', 'compare/anker-vs-ugreen',
+  'guides', 'guides/charger-buying-guide', 'guides/cable-buying-guide', 'guides/power-bank-buying-guide', 'guides/usb-c-guide',
+  'compare', 'compare/baseus-vs-vention', 'compare/baseus-vs-ugreen', 'compare/anker-vs-ugreen',
+  'delivery',
   'blog', 'blog/chargers', 'blog/cables', 'blog/power-banks', 'blog/baseus', 'blog/vention',
   'yemen', 'sanaa', 'aden', 'taiz', 'ibb', 'hodeidah', 'hadramout', 'marib',
   'about', 'contact', 'warranty', 'shipping', 'returns', 'faq', 'authenticity',
@@ -511,7 +688,81 @@ const categoryLabels = {
   'hubs-adapters': 'المحاور والمحوّلات',
 };
 
+const semanticKeywordMap = Object.fromEntries(
+  Object.entries(keywordBank.categories).map(([slug, cluster]) => [slug, cluster.pageKeywords.join(', ')]),
+);
+
+const catalogExamples = {
+  chargers: [
+    ['Anker', 'شاحن Anker Nano II GaN بقدرة 65W'],
+    ['Baseus', 'شاحن Baseus GaN بقدرة 100W'],
+    ['UGREEN', 'شاحن UGREEN Nexode GaN بقدرة 45W'],
+    ['Vention', 'شاحن GaN بثلاثة منافذ 70W'],
+  ],
+  cables: [
+    ['Anker', 'كابل Anker USB-C إلى Lightning'],
+    ['Baseus', 'كابل Baseus USB-C إلى USB-C بقدرة 100W'],
+    ['UGREEN', 'كابل UGREEN USB-C إلى USB-C بقدرة 60W'],
+    ['Vention', 'كابل USB-C إلى USB-C بقدرة 100W'],
+  ],
+  'power-banks': [
+    ['Anker', 'باور بنك Anker بسعة 10,000mAh'],
+    ['Baseus', 'باور بنك Baseus 20,000mAh / 30W'],
+    ['UGREEN', 'باور بنك UGREEN بسعة 20,000mAh / 30W'],
+    ['Vention', 'باور بنك 10,000mAh / 22.5W'],
+  ],
+  'hubs-adapters': [
+    ['Anker', 'محور Anker USB-C ‏7 في 1'],
+    ['Baseus', 'محور Baseus USB-C ‏5 في 1 مع HDMI'],
+    ['UGREEN', 'محور UGREEN USB-C ‏7 في 1'],
+  ],
+  'phone-accessories': [
+    ['Anker', 'محور Anker USB-C ‏7 في 1'],
+    ['Baseus', 'حامل هاتف Baseus مغناطيسي للسيارة'],
+    ['UGREEN', 'محور UGREEN USB-C ‏7 في 1'],
+  ],
+  'car-accessories': [
+    ['Anker', 'شاحن سيارة Anker بقدرة 30W أو 50W'],
+    ['Baseus', 'شاحن سيارة Baseus بمنفذين 30W'],
+    ['UGREEN', 'شاحن سيارة UGREEN بقدرة 50W'],
+  ],
+};
+
+function getCatalogExamples(brand, categorySlug) {
+  const source = catalogExamples[categorySlug] ?? [];
+  const matches = brand ? source.filter(([itemBrand]) => itemBrand === brand) : source;
+  return matches.slice(0, 4).map(([, name]) => name);
+}
+
+function inferCatalogCategory(slug, candidate) {
+  if (catalogExamples[candidate]) return candidate;
+  if (slug.includes('power-bank')) return 'power-banks';
+  if (slug.includes('cable') || slug.includes('usb-c')) return 'cables';
+  if (slug.includes('charger')) return 'chargers';
+  return candidate;
+}
+
+const indexableCleanRoutes = new Set([
+  'cables', 'car-accessories', 'hubs-adapters',
+  'chargers/fast-chargers', 'chargers/gan-chargers', 'chargers/type-c-chargers',
+  'cables/usb-c', 'cables/100w-cables', 'power-banks/10000mah', 'power-banks/20000mah',
+  'baseus', 'vention', 'anker', 'ugreen',
+  'baseus/chargers', 'baseus/cables', 'baseus/power-banks',
+  'vention/chargers', 'vention/cables', 'vention/power-banks',
+  'anker/chargers', 'anker/cables', 'anker/power-banks',
+  'ugreen/chargers', 'ugreen/cables', 'ugreen/power-banks',
+  'guides/charger-buying-guide', 'guides/cable-buying-guide', 'guides/power-bank-buying-guide', 'guides/usb-c-guide',
+  'guides',
+]);
+
 const explicitRouteMetadata = {
+  guides: {
+    title: 'أدلة اختيار الشواحن والكابلات والباور بانك | CABL',
+    description: 'أدلة CABL العملية لفهم التوافق والقدرة والسعة والمنافذ قبل شراء منتجات الشحن والطاقة.',
+    h1: 'أدلة الشراء من CABL',
+    eyebrow: 'مركز الأدلة',
+    related: [['guides/charger-buying-guide/', 'دليل اختيار الشاحن'], ['guides/cable-buying-guide/', 'دليل اختيار الكابل'], ['guides/power-bank-buying-guide/', 'دليل اختيار الباور بانك']],
+  },
   'guides/charger-buying-guide': {
     title: 'دليل شراء الشاحن المناسب | CABL',
     description: 'دليل عملي لفهم القدرة والـUSB-C وPD وGaN قبل شراء شاحن جوال في اليمن.',
@@ -553,6 +804,20 @@ const explicitRouteMetadata = {
     description: 'قارن حلول الشحن والطاقة من Anker وUGREEN قبل الشراء.',
     h1: 'Anker ضد UGREEN',
     eyebrow: 'مقارنة CABL',
+  },
+  compare: {
+    title: 'مقارنات علامات ومنتجات الشحن | CABL',
+    description: 'مقارنات عملية بين المنتجات والعلامات المتاحة في CABL حسب المواصفات والتوافق والاستخدام.',
+    h1: 'مقارنات CABL',
+    eyebrow: 'قارن قبل الشراء',
+    related: [['compare/baseus-vs-vention/', 'Baseus ضد Vention'], ['compare/baseus-vs-ugreen/', 'Baseus ضد UGREEN'], ['compare/anker-vs-ugreen/', 'Anker ضد UGREEN']],
+  },
+  delivery: {
+    title: 'الطلب والتوصيل داخل اليمن | CABL',
+    description: 'تعرف على خطوات الطلب وخيارات الشحن التي تظهر عند إتمام شراء منتجات CABL داخل اليمن.',
+    h1: 'الطلب والتوصيل',
+    eyebrow: 'خدمة CABL',
+    related: [['delivery/yemen/', 'التوصيل داخل اليمن'], ['shipping/', 'سياسة الشحن'], ['contact/', 'تواصل مع CABL']],
   },
   blog: {
     title: 'مدونة الشحن والطاقة | CABL',
@@ -620,19 +885,20 @@ const cleanRoutePages = cleanRouteSlugs.map((slug) => {
   const brand = brandLabels[first];
   const category = categoryLabels[second ?? first];
   const explicit = explicitRouteMetadata[slug];
-  const label = brand && second
+  const label = explicit?.h1 ?? (brand && second
     ? `${brand} ${category ?? second.replaceAll('-', ' ')}`
     : brand
       ? `منتجات ${brand}`
-      : category ?? slug.split('/').at(-1).replaceAll('-', ' ');
-  const title = explicit?.title ?? `${label} | CABL`;
-  const h1 = explicit?.h1 ?? label;
+      : category ?? slug.split('/').at(-1).replaceAll('-', ' '));
+  const title = explicit?.title ?? (brand && second ? `${category ?? second.replaceAll('-', ' ')} من ${brand} في اليمن | CABL` : `${label} | CABL`);
+  const h1 = explicit?.h1 ?? (brand && second ? `${category ?? second.replaceAll('-', ' ')} ${brand}` : label);
   const description = explicit?.description
     ?? (brand && second
       ? `تصفح منتجات ${brand} ضمن فئة ${category ?? second.replaceAll('-', ' ')} من كتالوج CABL.`
       : brand
         ? `تصفح منتجات ${brand} الأصلية المتاحة حاليًا في كتالوج CABL.`
         : `تصفح ${label} من كتالوج CABL، مع مواصفات واضحة وأسعار ومخزون وخيارات توصيل داخل اليمن.`);
+  const catalogCategory = inferCatalogCategory(slug, second ?? first);
   return {
     slug,
     title,
@@ -640,17 +906,40 @@ const cleanRoutePages = cleanRouteSlugs.map((slug) => {
     description,
     h1,
     eyebrow: explicit?.eyebrow ?? (brand ? `علامة ${brand}` : 'CABL · دليل التسوق'),
-    intro: `تعرّف على ${label} واختر المنتجات المناسبة من كتالوج CABL قبل إتمام الطلب.`,
-    keywords: `${label}, CABL, شواحن, كابلات, باور بانك, اليمن`,
-    products: ['منتجات أصلية من كتالوج CABL', 'خيارات شحن وطاقة متوفرة حاليًا', 'مواصفات واضحة قبل الشراء'],
+    intro: explicit?.intro
+      ?? (slug === 'guides'
+        ? 'أدلة عملية لفهم التوافق والقدرة والسعة والمنافذ قبل مقارنة منتجات الشحن والطاقة.'
+        : slug.startsWith('guides/')
+          ? 'استخدم هذا الدليل لمراجعة التوافق والمواصفات الأساسية، ثم قارن المنتجات المرتبطة من كتالوج CABL.'
+          : slug.startsWith('compare')
+            ? `قارن ${label} وفق التوافق والأداء والاستخدام والسعر الحالي بدل الاعتماد على اسم العلامة فقط.`
+            : `تعرّف على ${label} واختر المنتجات المناسبة من كتالوج CABL قبل إتمام الطلب.`),
+    keywords: `${label}, ${semanticKeywordMap[second ?? first] ?? 'إكسسوارات جوال, متجر إلكترونيات اليمن'}, ${brand ? `${brand} أصلي, ${brand} اليمن` : ''}, CABL`,
+    products: getCatalogExamples(brand, catalogCategory),
     image: '../images/vention-charger-65w.jpg',
-    breadcrumbNames: [brand ?? category ?? first, ...(second ? [category ?? second] : [])],
-    related: [['chargers/', 'الشواحن'], ['cables/', 'الكابلات'], ['power-banks/', 'الباور بانك']],
+    useFallbackImage: false,
+    indexable: indexableCleanRoutes.has(slug),
+    breadcrumbNames: explicit ? undefined : [brand ?? category ?? first, ...(second ? [category ?? second] : [])],
+    related: explicit?.related ?? [['chargers/', 'الشواحن'], ['cables/', 'الكابلات'], ['power-banks/', 'الباور بانك']],
   };
 });
 
-for (const page of [...pages, ...powerPages, ...cleanRoutePages]) {
+const generatedPages = [...pages, ...powerPages, ...cleanRoutePages];
+
+for (const page of generatedPages) {
   const outputDir = path.join(publicDir, page.slug);
   fs.mkdirSync(outputDir, { recursive: true });
   fs.writeFileSync(path.join(outputDir, 'index.html'), renderPage(page));
+}
+
+const robotsPath = path.join(publicDir, 'robots.txt');
+const robotsBase = fs.readFileSync(robotsPath, 'utf8').split('\n').filter((line) => !line.startsWith('Sitemap:')).join('\n').trim();
+if (siteUrl) {
+  const paths = [...new Set(generatedPages.filter(isIndexablePage).map((page) => `/${page.slug}/`))];
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map((urlPath) => `  <url><loc>${absoluteUrl(urlPath)}</loc></url>`).join('\n')}\n</urlset>\n`;
+  fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemap);
+  fs.writeFileSync(robotsPath, `${robotsBase}\nSitemap: ${siteUrl}/sitemap.xml\n`);
+} else {
+  fs.rmSync(path.join(publicDir, 'sitemap.xml'), { force: true });
+  fs.writeFileSync(robotsPath, `${robotsBase}\n`);
 }
