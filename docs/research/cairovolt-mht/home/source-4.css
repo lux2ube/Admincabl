@@ -1,0 +1,14 @@
+@charset "utf-8";
+
+@keyframes cv-ripple-expand { 
+  100% { transform: scale(1); opacity: 0; }
+}
+
+.cv-pressing { transform: scale(0.97) !important; transition: transform 0.1s !important; }
+
+.cv-revealed { animation: 0.6s ease-out 0s 1 normal forwards running cv-reveal; }
+
+@keyframes cv-reveal { 
+  0% { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0px); }
+}

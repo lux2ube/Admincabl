@@ -1,119 +1,109 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 @import 'tw-animate-css';
 
-:root {
-  /* CABL Palette */
-  --ink: #151515;
-  --charcoal: #272727;
-  --muted-ink: #75736f;
-  --paper: #ffffff; 
-  --warm: #f7f8fa;
-  --line: #e2e8f0;
-  --lime: #d6ee42;
-  --saffron: #efb12a;
-  --cobalt: #1e5ff4; 
-  --gradient-blue: linear-gradient(135deg, #1f62f6 0%, #4d46f5 52%, #7b20f0 100%);
-  
-  /* shadcn/ui integration */
-  --background: 210 20% 98%;
-  --foreground: 0 0% 8%;
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 224 76% 48%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 8%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 8%;
-  --primary: 224 76% 48%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-  --radius: 0.75rem;
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 220 30% 10%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 10%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 10%;
+    
+    --primary: 221 83% 53%; /* CABL Cobalt */
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 220 15% 92%;
+    --secondary-foreground: 220 30% 10%;
+    
+    --muted: 220 15% 94%;
+    --muted-foreground: 220 10% 45%;
+    
+    --accent: 221 83% 90%;
+    --accent-foreground: 221 83% 53%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-  --font-sans: 'IBM Plex Sans Arabic', sans-serif;
-  --font-display: 'Noto Kufi Arabic', sans-serif;
-}
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 221 83% 53%;
 
-.dark {
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
-  --border: 217 32% 17%;
-  --input: 217 32% 17%;
-  --ring: 224 76% 48%;
-  --card: 222 47% 11%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222 47% 11%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-}
+    --radius: 1rem;
+    
+    --font-sans: 'IBM Plex Sans Arabic', sans-serif;
+    --font-display: 'Noto Kufi Arabic', sans-serif;
+    
+    /* Brand specific */
+    --cabl-ink: 220 30% 10%;
+    --cabl-blue: 221 83% 53%;
+    --cabl-gradient: linear-gradient(135deg, #1f62f6 0%, #4d46f5 52%, #7b20f0 100%);
+  }
 
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  background-color: var(--warm);
-  color: var(--ink);
-  font-family: var(--font-sans);
-  direction: rtl;
-  text-align: right;
-  -webkit-font-smoothing: antialiased;
-}
-
-h1, h2, h3, h4, h5, h6, .font-display {
-  font-family: var(--font-display);
-}
-
-.container-custom {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 5vw;
-}
-
-@media (min-width: 1024px) {
-  .container-custom {
-    padding: 0 2rem;
+  .dark {
+    --background: 220 30% 10%;
+    --foreground: 210 20% 98%;
+    
+    --card: 220 25% 14%;
+    --card-foreground: 210 20% 98%;
+    
+    --popover: 220 25% 14%;
+    --popover-foreground: 210 20% 98%;
+    
+    --primary: 221 83% 60%;
+    --primary-foreground: 220 30% 10%;
+    
+    --secondary: 220 25% 20%;
+    --secondary-foreground: 210 20% 98%;
+    
+    --muted: 220 25% 20%;
+    --muted-foreground: 220 15% 65%;
+    
+    --accent: 220 25% 25%;
+    --accent-foreground: 210 20% 98%;
+    
+    --border: 220 25% 20%;
+    --input: 220 25% 20%;
+    --ring: 221 83% 60%;
   }
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-sans);
+    direction: rtl;
+    text-align: right;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: var(--font-display);
+  }
 }
 
-@keyframes slideInRight {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-.animate-slide-in-right {
-  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+@layer components {
+  .container-custom {
+    @apply w-full max-w-[1440px] mx-auto px-4 md:px-8;
+  }
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+  .cabl-btn-primary {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-[#0a1220] px-6 text-sm font-bold text-white shadow-lg transition-all active:scale-[0.98] hover:bg-blue-600;
+  }
+  .cabl-btn-secondary {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-6 text-sm font-bold text-slate-700 transition-all active:scale-[0.98] hover:border-slate-300 hover:bg-slate-50 hover:text-[#0a1220];
+  }
+  .cabl-card {
+    @apply rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden transition-all hover:shadow-md;
+  }
 }
 
 /* Utilities for hiding scrollbars */

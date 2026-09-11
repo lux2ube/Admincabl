@@ -1,0 +1,108 @@
+{
+  "source": "attached_assets/إتمام_الطلب___كايرو_فولت_1789086132469.mht",
+  "contentLocation": "https://cairovolt.com/checkout",
+  "htmlBytes": 67104,
+  "cssFiles": [
+    "https://cairovolt.com/_next/static/css/837e4e7df3f922dc.css",
+    "https://cairovolt.com/_next/static/css/62d0902ed26593ec.css",
+    "cid:css-0931add2-1bf7-4f61-98da-ec553988c878@mhtml.blink",
+    "cid:css-4ca1fc36-bbbb-4316-ad85-670aa8e79167@mhtml.blink"
+  ],
+  "orderedHeadingsAndActions": [
+    {
+      "tag": "button",
+      "class": "relative p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors touch-target group",
+      "text": "1"
+    },
+    {
+      "tag": "h3",
+      "class": "flex items-center gap-2 text-sm font-bold text-blue-600 mb-3",
+      "text": "انكر"
+    },
+    {
+      "tag": "h3",
+      "class": "flex items-center gap-2 text-sm font-bold text-orange-600 mb-3",
+      "text": "🎧 ساوندكور من انكر"
+    },
+    {
+      "tag": "h3",
+      "class": "flex items-center gap-2 text-sm font-bold text-red-600 mb-3",
+      "text": "جوي روم"
+    },
+    {
+      "tag": "h3",
+      "class": "flex items-center gap-2 text-sm font-bold text-orange-600 mb-3",
+      "text": "JBL"
+    },
+    {
+      "tag": "h3",
+      "class": "flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white mb-3",
+      "text": "تسوق حسب الفئة"
+    },
+    {
+      "tag": "h1",
+      "class": "text-3xl font-bold mb-8 text-center",
+      "text": "إتمام الطلب"
+    },
+    {
+      "tag": "h2",
+      "class": "font-bold mb-4",
+      "text": "ملخص الطلب"
+    },
+    {
+      "tag": "button",
+      "class": "px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-xs transition-colors whitespace-nowrap",
+      "text": "تطبيق"
+    },
+    {
+      "tag": "h2",
+      "class": "font-bold mb-4",
+      "text": "معلومات الشحن"
+    },
+    {
+      "tag": "button",
+      "class": "w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50",
+      "text": "تأكيد الطلب (الدفع عند الاستلام)"
+    },
+    {
+      "tag": "h3",
+      "class": "font-bold text-sm text-gray-700 dark:text-gray-300",
+      "text": "الدفع عند الاستلام"
+    },
+    {
+      "tag": "h3",
+      "class": "font-bold text-sm text-gray-700 dark:text-gray-300",
+      "text": "شحن لكل مصر"
+    },
+    {
+      "tag": "h3",
+      "class": "font-bold text-sm text-gray-700 dark:text-gray-300",
+      "text": "استبدال واسترجاع"
+    },
+    {
+      "tag": "h3",
+      "class": "font-bold text-sm text-gray-700 dark:text-gray-300",
+      "text": "ضمان المنتج"
+    },
+    {
+      "tag": "h3",
+      "class": "text-sm font-semibold mb-4 text-gray-900 dark:text-white",
+      "text": "تسوق حسب الفئة"
+    },
+    {
+      "tag": "h3",
+      "class": "text-sm font-semibold mb-4 text-gray-900 dark:text-white",
+      "text": "العلامات التجارية"
+    },
+    {
+      "tag": "h3",
+      "class": "text-sm font-semibold mb-4 text-gray-900 dark:text-white",
+      "text": "أدلة ومقالات"
+    },
+    {
+      "tag": "h3",
+      "class": "text-sm font-semibold mb-4 text-gray-900 dark:text-white",
+      "text": "خدمة العملاء"
+    }
+  ]
+}

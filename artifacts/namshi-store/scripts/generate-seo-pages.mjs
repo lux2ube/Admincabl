@@ -96,13 +96,14 @@ const pages = [
   },
   {
     slug: 'wireless-chargers',
+    indexable: false,
     title: 'شاحن لاسلكي سريع للآيفون وسامسونج في اليمن',
     description: 'اكتشف شاحن لاسلكي وقاعدة شحن لاسلكية للهواتف المتوافقة، مع شاحن سيارة لاسلكي UGREEN وخيارات توصيل داخل اليمن.',
     h1: 'شواحن لاسلكية<br />للهواتف المتوافقة',
     eyebrow: 'شحن لاسلكي',
     intro: 'قبل شراء شاحن لاسلكي، تأكد من أن هاتفك يدعم الشحن اللاسلكي ومن قدرة القاعدة المناسبة. بعض المنتجات تجمع بين التثبيت في السيارة والشحن.',
     keywords: 'شاحن لاسلكي, شاحن وايرلس, Wireless, شاحن لاسلكي للآيفون, شاحن لاسلكي سامسونج, قاعدة شحن لاسلكية, شاحن لاسلكي سريع, شاحن ماج سيف, MagSafe, شاحن 3 في 1',
-    products: ['شاحن سيارة UGREEN بقدرة 30W', 'حامل هاتف Baseus مغناطيسي للسيارة', 'شاحن سيارة Anker بقدرة 30W أو 50W'],
+    products: [],
     image: '../images/vention-adapter-65w.jpg',
     related: [['car-chargers/', 'شواحن السيارات'], ['chargers/', 'شواحن الجوال'], ['delivery/yemen/', 'التوصيل داخل اليمن']],
   },
@@ -496,17 +497,16 @@ function renderPage(page) {
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
   </head>
   <body class="${pageTypeClass}">
-    <div class="seo-utility"><div><span>ضمان CABL مكتوب حسب المنتج</span><span>توصيل داخل اليمن</span><span>خدمة العملاء</span><span>English</span></div></div>
+    <div class="seo-utility"><div><span>ضمان CABL المكتوب حسب المنتج</span><span>خيارات الشحن تظهر أثناء إتمام الطلب</span></div></div>
     <header class="seo-header">
-      <a class="seo-logo" href="${rootPrefix}"><img src="${rootPrefix}cabl-logo.svg" alt="CABL متجر شواحن في اليمن" /><strong>CABL</strong></a>
+      <a class="seo-logo" href="${rootPrefix}"><strong>CABL</strong></a>
       <nav aria-label="التنقل">
         <a href="${rootPrefix}">الرئيسية</a>
-        <a href="${rootPrefix}power-banks/">باور بانك</a>
-        <a href="${rootPrefix}chargers/">شواحن</a>
-        <a href="${rootPrefix}cables/">كابلات</a>
-        <a href="${rootPrefix}anker/">منتجات Anker</a>
+        <a href="${rootPrefix}power-banks/">الأقسام</a>
+        <a href="${rootPrefix}anker/">Anker</a>
+        <a href="${rootPrefix}baseus/">Baseus</a>
       </nav>
-      <div class="seo-header-actions"><a href="${rootPrefix}search" aria-label="البحث">⌕</a><a class="seo-cart" href="${rootPrefix}#discover" aria-label="السلة">▣</a></div>
+      <div class="seo-header-actions"><span class="seo-currency" aria-label="عملة العرض">YER</span><a href="${rootPrefix}search" aria-label="البحث">⌕</a><a href="${rootPrefix}favorites" aria-label="المفضلة">♡</a><a class="seo-cart" href="${rootPrefix}checkout" aria-label="السلة">▢</a></div>
     </header>
     <main>
       <section class="cabl-route-hero">
@@ -736,6 +736,7 @@ function getCatalogExamples(brand, categorySlug) {
 
 function inferCatalogCategory(slug, candidate) {
   if (catalogExamples[candidate]) return candidate;
+  if (slug.includes('wireless-chargers')) return 'wireless-chargers';
   if (slug.includes('power-bank')) return 'power-banks';
   if (slug.includes('cable') || slug.includes('usb-c')) return 'cables';
   if (slug.includes('charger')) return 'chargers';

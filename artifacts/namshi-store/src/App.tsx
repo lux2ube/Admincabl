@@ -288,6 +288,9 @@ export default function App() {
               <Route path="/ugreen">
                 {() => <Brand brandSlug="ugreen" />}
               </Route>
+              <Route path="/vention">
+                {() => <Brand brandSlug="vention" />}
+              </Route>
               <Route path="/product/:slug">
                 {({ slug }) => <ProductPage slug={PRODUCT_ROUTE_ALIASES[`product/${slug}`] || slug} />}
               </Route>

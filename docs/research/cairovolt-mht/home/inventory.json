@@ -1,0 +1,298 @@
+{
+  "source": "attached_assets/اكسسوارات_موبايل_في_مصر___انكر_وساوندكور_وJBL_وجوي_روم_1789086132562.mht",
+  "contentLocation": "https://cairovolt.com/",
+  "htmlBytes": 136334,
+  "cssFiles": [
+    "https://cairovolt.com/_next/static/css/837e4e7df3f922dc.css",
+    "https://cairovolt.com/_next/static/css/62d0902ed26593ec.css",
+    "cid:css-ad50b4cf-0aa9-41dc-95c0-d73245c1ac50@mhtml.blink",
+    "cid:css-ba2c7646-b023-404c-acdc-067db8f1be66@mhtml.blink"
+  ],
+  "orderedHeadingsAndActions": [
+    {
+      "tag": "button",
+      "class": "relative p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors touch-target group",
+      "text": "1"
+    },
+    {
+      "tag": "h3",
+      "class": "flex items-center gap-2 text-sm font-bold text-blue-600 mb-3",
+      "text": "انكر"
+    },
+    {
+      "tag": "h3",
+      "class": "flex items-center gap-2 text-sm font-bold text-orange-600 mb-3",
+      "text": "🎧 ساوندكور من انكر"
+    },
+    {
+      "tag": "h3",
+      "class": "flex items-center gap-2 text-sm font-bold text-red-600 mb-3",
+      "text": "جوي روم"
+    },
+    {
+      "tag": "h3",
+      "class": "flex items-center gap-2 text-sm font-bold text-orange-600 mb-3",
+      "text": "JBL"
+    },
+    {
+      "tag": "h3",
+      "class": "flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white mb-3",
+      "text": "تسوق حسب الفئة"
+    },
+    {
+      "tag": "h1",
+      "class": "font-outfit text-[1.6rem] font-bold leading-[1.1] tracking-[-0.03em] text-[#0a1220] sm:text-5xl sm:leading-[1.05] lg:text-[3.5rem]",
+      "text": "شحنٌ ذكي يعرف جهازك، ويحميه كل لحظة."
+    },
+    {
+      "tag": "h2",
+      "class": "mt-3 max-w-2xl font-outfit text-3xl font-bold tracking-[-0.03em] sm:text-4xl lg:text-5xl",
+      "text": "مش لازم تحفظ أرقام الموديلات."
+    },
+    {
+      "tag": "h3",
+      "class": "font-outfit text-xl font-bold leading-tight tracking-tight sm:text-2xl",
+      "text": "صوت على مزاجك"
+    },
+    {
+      "tag": "h3",
+      "class": "font-outfit text-xl font-bold leading-tight tracking-tight sm:text-2xl",
+      "text": "طاقة تكمّل اليوم"
+    },
+    {
+      "tag": "h3",
+      "class": "font-outfit text-xl font-bold leading-tight tracking-tight sm:text-2xl",
+      "text": "شحن أسرع وأأمن"
+    },
+    {
+      "tag": "h3",
+      "class": "font-outfit text-xl font-bold leading-tight tracking-tight sm:text-2xl",
+      "text": "الكابل الصح لجهازك"
+    },
+    {
+      "tag": "h3",
+      "class": "font-outfit text-xl font-bold leading-tight tracking-tight sm:text-2xl",
+      "text": "عربيتك أذكى"
+    },
+    {
+      "tag": "h2",
+      "class": "mt-3 font-outfit text-3xl font-bold tracking-[-0.03em] sm:text-4xl lg:text-5xl",
+      "text": "ابدأ من اختيارات واضحة ومتنوعة."
+    },
+    {
+      "tag": "button",
+      "class": "min-h-11 shrink-0 rounded-full px-5 text-sm font-semibold transition bg-[#07111f] text-white shadow-lg",
+      "text": "كل الاختيارات"
+    },
+    {
+      "tag": "button",
+      "class": "min-h-11 shrink-0 rounded-full px-5 text-sm font-semibold transition border border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white hover:text-[#07111f]",
+      "text": "صوتيات"
+    },
+    {
+      "tag": "button",
+      "class": "min-h-11 shrink-0 rounded-full px-5 text-sm font-semibold transition border border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white hover:text-[#07111f]",
+      "text": "باور بانك"
+    },
+    {
+      "tag": "button",
+      "class": "min-h-11 shrink-0 rounded-full px-5 text-sm font-semibold transition border border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white hover:text-[#07111f]",
+      "text": "شحن"
+    },
+    {
+      "tag": "button",
+      "class": "mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full px-3 text-xs font-bold transition active:scale-[.98] sm:text-sm bg-[#07111f] text-white hover:bg-blue-700",
+      "text": "إضافة سريعة"
+    },
+    {
+      "tag": "button",
+      "class": "mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full px-3 text-xs font-bold transition active:scale-[.98] sm:text-sm bg-[#07111f] text-white hover:bg-blue-700",
+      "text": "إضافة سريعة"
+    },
+    {
+      "tag": "button",
+      "class": "mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full px-3 text-xs font-bold transition active:scale-[.98] sm:text-sm bg-[#07111f] text-white hover:bg-blue-700",
+      "text": "إضافة سريعة"
+    },
+    {
+      "tag": "button",
+      "class": "mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full px-3 text-xs font-bold transition active:scale-[.98] sm:text-sm bg-[#07111f] text-white hover:bg-blue-700",
+      "text": "إضافة سريعة"
+    },
+    {
+      "tag": "button",
+      "class": "mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full px-3 text-xs font-bold transition active:scale-[.98] sm:text-sm bg-[#07111f] text-white hover:bg-blue-700",
+      "text": "إضافة سريعة"
+    },
+    {
+      "tag": "button",
+      "class": "mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full px-3 text-xs font-bold transition active:scale-[.98] sm:text-sm bg-[#07111f] text-white hover:bg-blue-700",
+      "text": "إضافة سريعة"
+    },
+    {
+      "tag": "button",
+      "class": "mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full px-3 text-xs font-bold transition active:scale-[.98] sm:text-sm bg-[#07111f] text-white hover:bg-blue-700",
+      "text": "إضافة سريعة"
+    },
+    {
+      "tag": "button",
+      "class": "mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full px-3 text-xs font-bold transition active:scale-[.98] sm:text-sm bg-[#07111f] text-white hover:bg-blue-700",
+      "text": "إضافة سريعة"
+    },
+    {
+      "tag": "button",
+      "class": "mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full px-3 text-xs font-bold transition active:scale-[.98] sm:text-sm bg-[#07111f] text-white hover:bg-blue-700",
+      "text": "إضافة سريعة"
+    },
+    {
+      "tag": "h2",
+      "class": "mt-3 font-outfit text-3xl font-bold tracking-[-0.03em] sm:text-4xl lg:text-5xl",
+      "text": "أربع عائلات. كل واحدة بتحل حاجة مختلفة."
+    },
+    {
+      "tag": "h3",
+      "class": "mt-5 font-outfit text-4xl font-black tracking-[-0.04em] sm:text-5xl",
+      "text": "اسمع كل تفصيلة."
+    },
+    {
+      "tag": "h3",
+      "class": "mt-3 font-outfit text-3xl font-bold tracking-tight sm:text-4xl",
+      "text": "طاقة تثق فيها."
+    },
+    {
+      "tag": "h3",
+      "class": "mt-3 font-outfit text-3xl font-bold tracking-tight sm:text-4xl",
+      "text": "ذكاء في كل جنيه."
+    },
+    {
+      "tag": "h3",
+      "class": "mt-3 font-outfit text-3xl font-bold tracking-tight sm:text-4xl",
+      "text": "صوت له تاريخ من 1946."
+    },
+    {
+      "tag": "h2",
+      "class": "mt-4 font-outfit text-3xl font-bold tracking-[-0.03em] sm:text-4xl lg:text-5xl",
+      "text": "قول لنا يومك محتاج إيه."
+    },
+    {
+      "tag": "button",
+      "class": "flex min-h-13 items-center gap-3 rounded-2xl border px-4 py-3 text-start text-sm font-semibold transition border-cyan-300/50 bg-cyan-300/12 text-white",
+      "text": "عايز صوت أفضل"
+    },
+    {
+      "tag": "button",
+      "class": "flex min-h-13 items-center gap-3 rounded-2xl border px-4 py-3 text-start text-sm font-semibold transition border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/20 hover:bg-white/[0.07]",
+      "text": "بطاريتي ما تخلصش"
+    },
+    {
+      "tag": "button",
+      "class": "flex min-h-13 items-center gap-3 rounded-2xl border px-4 py-3 text-start text-sm font-semibold transition border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/20 hover:bg-white/[0.07]",
+      "text": "عايز أشحن أسرع"
+    },
+    {
+      "tag": "button",
+      "class": "flex min-h-13 items-center gap-3 rounded-2xl border px-4 py-3 text-start text-sm font-semibold transition border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/20 hover:bg-white/[0.07]",
+      "text": "كابل يستحمل"
+    },
+    {
+      "tag": "button",
+      "class": "flex min-h-13 items-center gap-3 rounded-2xl border px-4 py-3 text-start text-sm font-semibold transition border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/20 hover:bg-white/[0.07]",
+      "text": "شحن في العربية"
+    },
+    {
+      "tag": "button",
+      "class": "min-h-10 rounded-full border px-4 py-2 text-xs font-semibold transition border-white bg-white text-[#07111f]",
+      "text": "الأفضل لاحتياجي"
+    },
+    {
+      "tag": "button",
+      "class": "min-h-10 rounded-full border px-4 py-2 text-xs font-semibold transition border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/25",
+      "text": "أقل من 1,000 ج.م"
+    },
+    {
+      "tag": "button",
+      "class": "min-h-10 rounded-full border px-4 py-2 text-xs font-semibold transition border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/25",
+      "text": "1,000–2,500 ج.م"
+    },
+    {
+      "tag": "button",
+      "class": "min-h-10 rounded-full border px-4 py-2 text-xs font-semibold transition border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/25",
+      "text": "أكثر من 2,500 ج.م"
+    },
+    {
+      "tag": "h3",
+      "class": "mt-1 font-outfit text-2xl font-bold",
+      "text": "اختيارات بعزل ضوضاء في الموديلات الداعمة"
+    },
+    {
+      "tag": "h2",
+      "class": "mt-3 font-outfit text-3xl font-bold tracking-[-0.03em] sm:text-4xl lg:text-5xl",
+      "text": "اشتري وإنت فاهم كل خطوة."
+    },
+    {
+      "tag": "h3",
+      "class": "mt-5 font-outfit text-xl font-bold",
+      "text": "راجع سجل ضمان كايرو فولت"
+    },
+    {
+      "tag": "h3",
+      "class": "mt-5 font-outfit text-xl font-bold",
+      "text": "افهم المواصفات قبل الشراء"
+    },
+    {
+      "tag": "h3",
+      "class": "mt-5 font-outfit text-xl font-bold",
+      "text": "اعرف اللي هيحصل بعد الطلب"
+    },
+    {
+      "tag": "h2",
+      "class": "mt-3 font-outfit text-3xl font-bold tracking-[-0.03em] sm:text-4xl",
+      "text": "أدلة تختصر عليك المقارنة."
+    },
+    {
+      "tag": "h3",
+      "class": "mt-5 font-outfit text-xl font-bold leading-8",
+      "text": "إزاي تختار باور بانك يناسب يومك؟"
+    },
+    {
+      "tag": "h3",
+      "class": "mt-5 font-outfit text-xl font-bold leading-8",
+      "text": "انكر ولا جوي روم: الفرق فين؟"
+    },
+    {
+      "tag": "h3",
+      "class": "mt-5 font-outfit text-xl font-bold leading-8",
+      "text": "علامات تساعدك تعرف انكر الأصلي"
+    },
+    {
+      "tag": "h2",
+      "class": "font-outfit text-2xl font-bold sm:text-3xl",
+      "text": "كايرو فولت — اختيار أوضح لإكسسوارات الموبايل في مصر"
+    },
+    {
+      "tag": "h2",
+      "class": "text-2xl font-bold text-gray-900 dark:text-white mb-6",
+      "text": "🎙️ كايرو فولت بتجاوبك (أسئلة الشارع)"
+    },
+    {
+      "tag": "h3",
+      "class": "text-sm font-semibold mb-4 text-gray-900 dark:text-white",
+      "text": "تسوق حسب الفئة"
+    },
+    {
+      "tag": "h3",
+      "class": "text-sm font-semibold mb-4 text-gray-900 dark:text-white",
+      "text": "العلامات التجارية"
+    },
+    {
+      "tag": "h3",
+      "class": "text-sm font-semibold mb-4 text-gray-900 dark:text-white",
+      "text": "أدلة ومقالات"
+    },
+    {
+      "tag": "h3",
+      "class": "text-sm font-semibold mb-4 text-gray-900 dark:text-white",
+      "text": "خدمة العملاء"
+    }
+  ]
+}
