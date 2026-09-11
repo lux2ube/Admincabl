@@ -3,8 +3,8 @@ name: Shared CABL shell
 description: The storefront's cross-route header and footer consistency rule.
 ---
 
-All CABL routes, including generated SEO directory pages, should use the CairoVolt-inspired CABL visual language: shared header/footer, the blue-to-purple utility bar, RTL logo/navigation/action placement, rounded surfaces, blue gradients, modern cards, and consistent section rhythm.
+All CABL routes, including generated SEO directory pages, should use one CairoVolt-inspired CABL design system: shared header/footer and reusable controls, with purpose-built home, category, brand, product, search, and checkout templates.
 
-**Why:** Different shells made the same storefront feel like separate websites and weakened navigation continuity between commerce, content, and SEO pages. The user selected the CairoVolt home design as the canonical future-facing direction.
+**Why:** The user explicitly chose “same design system, different page experience.” A reused global shell maintains CABL continuity, while specialized templates optimize discovery, browsing, brand education, and purchase conversion.
 
-**How to apply:** Reuse the shared app shell for interactive routes, keep generated SEO shell markup visually aligned with it, and test the homepage, product, brand, category, search, and trailing-slash routes together after shell changes. Preserve CABL identity and database-backed commerce data while matching the reference structure.
+**How to apply:** Extend the component-based storefront instead of restoring the old monolith. Keep generated SEO markup visually aligned, preserve CABL identity and real commerce data, and verify desktop/mobile routes together after shell changes.

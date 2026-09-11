@@ -309,7 +309,7 @@ function renderPage(page) {
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
   </head>
   <body class="${pageTypeClass}">
-    <div class="seo-utility"><div><span>ضمان كايرو فولت مكتوب حسب المنتج</span><span>توصيل داخل اليمن</span><span>خدمة العملاء</span><span>English</span></div></div>
+    <div class="seo-utility"><div><span>ضمان CABL مكتوب حسب المنتج</span><span>توصيل داخل اليمن</span><span>خدمة العملاء</span><span>English</span></div></div>
     <header class="seo-header">
       <a class="seo-logo" href="${rootPrefix}"><img src="${rootPrefix}cabl-logo.svg" alt="CABL متجر شواحن في اليمن" /><strong>CABL</strong></a>
       <nav aria-label="التنقل">
