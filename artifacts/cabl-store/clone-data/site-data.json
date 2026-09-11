@@ -1,0 +1,798 @@
+{
+  "title": "اكسسوارات موبايل في مصر | انكر وساوندكور وJBL وجوي روم",
+  "lang": "ar",
+  "dir": "rtl",
+  "body": {
+    "font": "Cairo, \"Cairo Fallback\", Tahoma, system-ui, sans-serif",
+    "color": "rgb(15, 23, 42)",
+    "bg": "rgb(255, 255, 255)"
+  },
+  "header": {
+    "html": "<header class=\"fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-transparent\" dir=\"rtl\"><div class=\"bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs py-1.5 hidden md:block\"><div class=\"container mx-auto px-4 flex items-center justify-between\"><div class=\"flex items-center gap-4\"><span class=\"flex items-center gap-1\"><svg class=\"w-3.5 h-3.5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 12l2 2 4-4\"></path><circle cx=\"12\" cy=\"12\" r=\"10\"></circle></svg> <!-- -->ضمان كايرو فولت مكتوب</span><span class=\"flex items-center gap-1\"><svg class=\"w-3.5 h-3.5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 3h15v13H1z\"></path><path d=\"M16 8h4l3 3v5h-7V8z\"></path><circle cx=\"5.5\" cy=\"18.5\" r=\"2.5\"></circle><circle cx=\"18.5\" cy=\"18.5\" r=\"2.5\"></circle></svg> <!-- -->توصيل داخل مصر</span></div><div class=\"flex items-center gap-4\"><a href=\"tel:+201558245974\" class=\"hover:underline\"><svg class=\"w-3.5 h-3.5 inline-block\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"5\" y=\"2\" width=\"14\" height=\"20\" rx=\"2\"></rect><path d=\"M12 18h.01\"></path></svg> <span>01558245974</span></a><a class=\"px-2 py-0.5 bg-white/20 rounded hover:bg-white/30 transition-colors\" href=\"/en\">English</a></div></div></div><div class=\"container mx-auto px-4 h-16 md:h-18 flex items-center justify-between\"><a class=\"flex items-center gap-2\" href=\"/\"><div class=\"flex items-center\"><img alt=\"CairoVolt\" loading=\"eager\" width=\"160\" height=\"89\" decoding=\"async\" data-nimg=\"1\" class=\"object-contain h-[57.5px] md:h-[58px] w-auto dark:[filter:brightness(0)_invert(1)]\" style=\"color:transparent\" src=\"/cairovolt_logo.webp\"></div></a><nav class=\"hidden lg:flex items-center gap-1\"><div class=\"relative group\"><a class=\"px-4 py-2 text-sm font-medium hover:text-blue-600 transition-colors flex items-center gap-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800\" href=\"/anker\"><span class=\"w-2 h-2 rounded-full bg-blue-600\"></span>انكر<svg class=\"w-4 h-4 opacity-50\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></a><div class=\"absolute top-full right-0 w-64 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform translate-y-2 group-hover:translate-y-0 p-2 mt-1\"><div class=\"px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider\">منتجات انكر</div><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 rounded-lg transition-colors\" href=\"/anker/power-banks\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"2\" y=\"7\" width=\"18\" height=\"10\" rx=\"2\"></rect><path d=\"M22 11v2\"></path><rect x=\"6\" y=\"9\" width=\"8\" height=\"6\" fill=\"currentColor\" opacity=\"0.3\" rx=\"1\"></rect></svg><span>باور بانك</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 rounded-lg transition-colors\" href=\"/anker/wall-chargers\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 22v-5\"></path><path d=\"M9 7V2\"></path><path d=\"M15 7V2\"></path><path d=\"M6 13V7h12v6a6 6 0 01-12 0z\"></path></svg><span>شواحن حائط</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 rounded-lg transition-colors\" href=\"/anker/cables\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71\"></path><path d=\"M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71\"></path></svg><span>كابلات شحن</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 rounded-lg transition-colors\" href=\"/anker/car-chargers\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 16H9m10 0h3v-3.15a1 1 0 00-.84-.99L16 11l-2.7-3.6a1 1 0 00-.8-.4H5.24a2 2 0 00-1.8 1.1l-.8 1.63A6 6 0 002 12.42V16h2\"></path><circle cx=\"6.5\" cy=\"16.5\" r=\"2.5\"></circle><circle cx=\"16.5\" cy=\"16.5\" r=\"2.5\"></circle></svg><span>شواحن سيارة</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 rounded-lg transition-colors\" href=\"/anker/accessories\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7\"></path><path d=\"M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z\"></path></svg><span>اكسسوارات</span></a><div class=\"border-t border-gray-100 dark:border-gray-800 mt-2 pt-2\"><div class=\"px-3 py-1.5 text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider flex items-center gap-1\"><span>🎧</span> <!-- -->ساوندكور من انكر</div><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors font-semibold text-orange-700 dark:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20\" href=\"/soundcore\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 18v-6a9 9 0 0118 0v6\"></path><path d=\"M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z\"></path></svg><span>ساوندكور (كل المنتجات الصوتية)</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors text-gray-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600\" href=\"/soundcore/audio\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 18v-6a9 9 0 0118 0v6\"></path><path d=\"M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z\"></path></svg><span>سماعات وايربودز ساوندكور</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors text-gray-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600\" href=\"/soundcore/speakers\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polygon points=\"11 5 6 9 2 9 2 15 6 15 11 19 11 5\"></polygon><path d=\"M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07\"></path></svg><span>سبيكرات بلوتوث ساوندكور</span></a></div><div class=\"border-t border-gray-100 dark:border-gray-800 mt-2 pt-2\"><a class=\"flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors\" href=\"/anker\">← عرض الكل</a></div></div></div><div class=\"relative group\"><a class=\"px-4 py-2 text-sm font-medium hover:text-red-600 transition-colors flex items-center gap-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800\" href=\"/joyroom\"><span class=\"w-2 h-2 rounded-full bg-red-600\"></span>جوي روم<svg class=\"w-4 h-4 opacity-50\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></a><div class=\"absolute top-full right-0 w-64 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform translate-y-2 group-hover:translate-y-0 p-2 mt-1\"><div class=\"px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider\">منتجات جوي روم</div><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 rounded-lg transition-colors\" href=\"/joyroom/power-banks\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"2\" y=\"7\" width=\"18\" height=\"10\" rx=\"2\"></rect><path d=\"M22 11v2\"></path><rect x=\"6\" y=\"9\" width=\"8\" height=\"6\" fill=\"currentColor\" opacity=\"0.3\" rx=\"1\"></rect></svg><span>باور بانك</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 rounded-lg transition-colors\" href=\"/joyroom/audio\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 18v-6a9 9 0 0118 0v6\"></path><path d=\"M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z\"></path></svg><span>سماعات وايربودز</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 rounded-lg transition-colors\" href=\"/joyroom/wall-chargers\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 22v-5\"></path><path d=\"M9 7V2\"></path><path d=\"M15 7V2\"></path><path d=\"M6 13V7h12v6a6 6 0 01-12 0z\"></path></svg><span>شواحن حائط</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 rounded-lg transition-colors\" href=\"/joyroom/cables\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71\"></path><path d=\"M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71\"></path></svg><span>كابلات شحن</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 rounded-lg transition-colors\" href=\"/joyroom/smart-watches\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"7\"></circle><path d=\"M12 9v3l1.5 1.5\"></path><path d=\"M16.51 17.35l-.35 3.83a2 2 0 01-2 1.82H9.83a2 2 0 01-2-1.82l-.35-3.83M7.49 6.65l.35-3.83A2 2 0 019.83 1h4.35a2 2 0 012 1.82l.35 3.83\"></path></svg><span>ساعات ذكية</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 rounded-lg transition-colors\" href=\"/joyroom/car-holders\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polygon points=\"16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76\"></polygon></svg><span>حوامل سيارة</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 rounded-lg transition-colors\" href=\"/joyroom/car-accessories\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 16H9m10 0h3v-3.15a1 1 0 00-.84-.99L16 11l-2.7-3.6a1 1 0 00-.8-.4H5.24a2 2 0 00-1.8 1.1l-.8 1.63A6 6 0 002 12.42V16h2\"></path><circle cx=\"6.5\" cy=\"16.5\" r=\"2.5\"></circle><circle cx=\"16.5\" cy=\"16.5\" r=\"2.5\"></circle></svg><span>إكسسوارات سيارة</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 rounded-lg transition-colors\" href=\"/joyroom/accessories\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7\"></path><path d=\"M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z\"></path></svg><span>اكسسوارات</span></a><div class=\"border-t border-gray-100 dark:border-gray-800 mt-2 pt-2\"><a class=\"flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors\" href=\"/joyroom\">← عرض الكل</a></div></div></div><div class=\"relative group\"><a class=\"px-4 py-2 text-sm font-medium hover:text-orange-600 transition-colors flex items-center gap-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800\" href=\"/jbl\"><span class=\"w-2 h-2 rounded-full bg-orange-500\"></span>JBL<svg class=\"w-4 h-4 opacity-50\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></a><div class=\"absolute top-full right-0 w-64 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform translate-y-2 group-hover:translate-y-0 p-2 mt-1\"><div class=\"px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider\">منتجات JBL</div><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 rounded-lg transition-colors\" href=\"/jbl/speakers\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polygon points=\"11 5 6 9 2 9 2 15 6 15 11 19 11 5\"></polygon><path d=\"M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07\"></path></svg><span>مكبرات صوت</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 rounded-lg transition-colors\" href=\"/jbl/partybox\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polygon points=\"11 5 6 9 2 9 2 15 6 15 11 19 11 5\"></polygon><path d=\"M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07\"></path></svg><span>سماعات حفلات (بازوكا)</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 rounded-lg transition-colors\" href=\"/jbl/headphones\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 18v-6a9 9 0 0118 0v6\"></path><path d=\"M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z\"></path></svg><span>سماعات رأس (هيدفون)</span></a><a class=\"flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 rounded-lg transition-colors\" href=\"/jbl/earbuds\"><svg class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 18v-6a9 9 0 0118 0v6\"></path><path d=\"M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z\"></path></svg><span>ايربودز وسماعات أذن</span></a><div class=\"border-t border-gray-100 dark:border-gray-800 mt-2 pt-2\"><a class=\"flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors\" href=\"/jbl\">← عرض الكل</a></div></div></div><a class=\"px-4 py-2 text-sm font-medium hover:text-blue-600 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800\" href=\"/power-banks\">باور بانك</a><a class=\"px-4 py-2 text-sm font-medium hover:text-blue-600 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800\" href=\"/chargers\">شواحن</a><a class=\"px-4 py-2 text-sm font-medium hover:text-blue-600 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800\" href=\"/blog\">المدونة</a></nav><div class=\"flex items-center gap-1 sm:gap-3\"><a class=\"p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors touch-target group\" aria-label=\"البحث في المنتجات\" href=\"/search\"><svg class=\"w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 transition-colors\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z\"></path></svg></a><button class=\"relative p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors touch-target group\" aria-label=\"سلة المشتريات\"><svg class=\"w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 transition-colors\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z\"></path></svg></button><a class=\"lg:hidden p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors text-sm font-bold touch-target\" href=\"/en\">EN</a><button class=\"lg:hidden p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors touch-target\" aria-expanded=\"false\" aria-label=\"القائمة\"><svg class=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h16M4 18h16\"></path></svg></button></div></div></header>",
+    "text": "ضمان كايرو فولت مكتوب\nتوصيل داخل مصر\n 01558245974\nEnglish\nانكر\nجوي روم\nJBL\nباور بانك\nشواحن\nالمدونة",
+    "links": [
+      {
+        "text": "01558245974",
+        "href": "tel:+201558245974"
+      },
+      {
+        "text": "English",
+        "href": "https://cairovolt.com/en"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/"
+      },
+      {
+        "text": "انكر",
+        "href": "https://cairovolt.com/anker"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/anker/power-banks"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/anker/wall-chargers"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/anker/cables"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/anker/car-chargers"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/anker/accessories"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/soundcore"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/soundcore/audio"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/soundcore/speakers"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/anker"
+      },
+      {
+        "text": "جوي روم",
+        "href": "https://cairovolt.com/joyroom"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom/power-banks"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom/audio"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom/wall-chargers"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom/cables"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom/smart-watches"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom/car-holders"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom/car-accessories"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom/accessories"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom"
+      },
+      {
+        "text": "JBL",
+        "href": "https://cairovolt.com/jbl"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/jbl/speakers"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/jbl/partybox"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/jbl/headphones"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/jbl/earbuds"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/jbl"
+      },
+      {
+        "text": "باور بانك",
+        "href": "https://cairovolt.com/power-banks"
+      },
+      {
+        "text": "شواحن",
+        "href": "https://cairovolt.com/chargers"
+      },
+      {
+        "text": "المدونة",
+        "href": "https://cairovolt.com/blog"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/search"
+      },
+      {
+        "text": "EN",
+        "href": "https://cairovolt.com/en"
+      }
+    ],
+    "images": [
+      {
+        "src": "https://cairovolt.com/cairovolt_logo.webp",
+        "srcset": "",
+        "alt": "CairoVolt"
+      }
+    ]
+  },
+  "footer": {
+    "html": "<footer class=\"cv-auto bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-10 md:pt-16 pb-8\" dir=\"rtl\"><div class=\"container mx-auto px-4\"><div class=\"grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-10 mb-8 md:mb-12\"><div class=\"col-span-2 md:col-span-1\"><div class=\"mb-3 md:mb-4\"><img alt=\"كايرو فولت\" loading=\"lazy\" width=\"160\" height=\"89\" decoding=\"async\" data-nimg=\"1\" class=\"object-contain h-[58px] md:h-[67px] w-auto dark:[filter:brightness(0)_invert(1)]\" style=\"color:transparent\" src=\"/cairovolt_logo.webp\"></div><p class=\"text-gray-600 dark:text-gray-400 text-xs md:text-sm leading-relaxed mb-4\">كايرو فولت متجر إلكتروني مصري مستقل لمنتجات انكر وساوندكور وJBL وجوي روم الأصلية — أسعار واضحة، فاتورة مع كل طلب، وضمان متجر مكتوب.</p><div class=\"flex items-center gap-3 text-sm\"><a href=\"https://wa.me/201558245974\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"flex items-center gap-1.5 text-green-700 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-colors font-medium\"><svg class=\"w-4 h-4\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z\"></path></svg><span>01558245974</span></a></div><a href=\"mailto:info@cairovolt.com\" class=\"mt-2 block text-xs text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300\">info@cairovolt.com</a><p class=\"mt-2 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400\">كايرو فولت علامة تجارية تتبع شركة تيسير للاستثمار الذكي (ش.ذ.م.م) — سجل تجاري رقم 8446، رقم التسجيل الضريبي 777471566.</p><div class=\"flex items-center gap-2 mt-4\"><a href=\"https://www.facebook.com/cairovolt\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"CairoVolt على Facebook\" class=\"w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all duration-200\"><svg class=\"w-4 h-4\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z\"></path></svg></a><a href=\"https://www.instagram.com/cairovolt/\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"CairoVolt على Instagram\" class=\"w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gradient-to-br hover:from-purple-600 hover:via-pink-500 hover:to-orange-400 hover:text-white dark:hover:text-white transition-all duration-200\"><svg class=\"w-4 h-4\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z\"></path></svg></a><a href=\"https://www.tiktok.com/@cairovolt\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"CairoVolt على TikTok\" class=\"w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-black hover:text-white dark:hover:bg-gray-700 dark:hover:text-white transition-all duration-200\"><svg class=\"w-4 h-4\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z\"></path></svg></a><a href=\"https://www.youtube.com/@cairovolt\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"CairoVolt على YouTube\" class=\"w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 dark:hover:text-white transition-all duration-200\"><svg class=\"w-4 h-4\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z\"></path></svg></a><a href=\"https://x.com/cairovolt\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"CairoVolt على X\" class=\"w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-200\"><svg class=\"w-4 h-4\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z\"></path></svg></a></div></div><div><h3 class=\"text-sm font-semibold mb-4 text-gray-900 dark:text-white\">تسوق حسب الفئة</h3><ul class=\"space-y-2.5 text-sm text-gray-600 dark:text-gray-400\"><li><a class=\"hover:text-blue-600 transition-colors\" href=\"/power-banks\">باور بانك</a></li><li><a class=\"hover:text-blue-600 transition-colors\" href=\"/chargers\">شواحن</a></li><li><a class=\"hover:text-blue-600 transition-colors\" href=\"/earbuds\">سماعات بلوتوث</a></li><li><a class=\"hover:text-blue-600 transition-colors\" href=\"/cables\">كابلات شحن</a></li></ul></div><div><h3 class=\"text-sm font-semibold mb-4 text-gray-900 dark:text-white\">العلامات التجارية</h3><ul class=\"space-y-2.5 text-sm text-gray-600 dark:text-gray-400\"><li><a class=\"hover:text-blue-600 transition-colors font-medium\" href=\"/anker\">جميع منتجات انكر</a></li><li><a class=\"hover:text-blue-600 transition-colors\" href=\"/anker/power-banks\">باور بانك انكر</a></li><li><a class=\"hover:text-blue-600 transition-colors\" href=\"/anker/wall-chargers\">شواحن انكر</a></li><li><a class=\"hover:text-orange-600 transition-colors font-semibold\" href=\"/soundcore\">🎧 ساوندكور من انكر</a></li><li class=\"ps-4 text-xs\"><a class=\"hover:text-orange-600 transition-colors text-gray-600 dark:text-gray-400\" href=\"/soundcore/audio\">— ايربودز ساوندكور</a></li><li class=\"ps-4 text-xs\"><a class=\"hover:text-orange-600 transition-colors text-gray-600 dark:text-gray-400\" href=\"/soundcore/speakers\">— سبيكرات ساوندكور</a></li><li class=\"pt-2 border-t border-gray-200 dark:border-gray-700\"><a class=\"hover:text-red-600 transition-colors font-medium\" href=\"/joyroom\">جميع منتجات جوي روم</a></li><li><a class=\"hover:text-red-600 transition-colors\" href=\"/joyroom/audio\">سماعات جوي روم</a></li><li><a class=\"hover:text-red-600 transition-colors\" href=\"/joyroom/power-banks\">باور بانك جوي روم</a></li><li><a class=\"hover:text-red-600 transition-colors\" href=\"/joyroom/car-accessories\">إكسسوارات سيارة جوي روم</a></li><li class=\"pt-2 border-t border-gray-200 dark:border-gray-700\"><a class=\"hover:text-orange-600 transition-colors font-medium\" href=\"/jbl\">جميع منتجات JBL</a></li><li><a class=\"hover:text-orange-600 transition-colors\" href=\"/jbl/speakers\">سبيكرات JBL</a></li><li><a class=\"hover:text-orange-600 transition-colors\" href=\"/jbl/partybox\">سماعات حفلات JBL (بازوكا)</a></li><li><a class=\"hover:text-orange-600 transition-colors\" href=\"/jbl/headphones\">هيدفون JBL</a></li><li><a class=\"hover:text-orange-600 transition-colors\" href=\"/jbl/earbuds\">ايربودز JBL</a></li></ul></div><div><h3 class=\"text-sm font-semibold mb-4 text-gray-900 dark:text-white\">أدلة ومقالات</h3><ul class=\"space-y-2.5 text-sm text-gray-600 dark:text-gray-400\"><li><a class=\"hover:text-blue-600 transition-colors font-medium\" href=\"/blog\">المدونة</a></li><li><a class=\"hover:text-gray-900 dark:hover:text-white transition-colors\" href=\"/about\">من نحن</a></li><li><a class=\"hover:text-blue-600 transition-colors\" href=\"/lab\">مركز المواصفات والحسابات</a></li><li><a class=\"hover:text-gray-900 dark:hover:text-white transition-colors\" href=\"/team\">مصادر خارجية للمراجعة</a></li><li><a class=\"hover:text-gray-900 dark:hover:text-white transition-colors\" href=\"/faq\">الأسئلة الشائعة</a></li></ul></div><div><h3 class=\"text-sm font-semibold mb-4 text-gray-900 dark:text-white\">خدمة العملاء</h3><ul class=\"space-y-2.5 text-sm text-gray-600 dark:text-gray-400\"><li><a class=\"hover:text-gray-900 dark:hover:text-white transition-colors\" href=\"/contact\">تواصل معنا</a></li><li><a class=\"hover:text-gray-900 dark:hover:text-white transition-colors\" href=\"/shipping\">سياسة الشحن</a></li><li><a class=\"hover:text-gray-900 dark:hover:text-white transition-colors\" href=\"/return-policy\">سياسة الإرجاع</a></li><li><a class=\"hover:text-gray-900 dark:hover:text-white transition-colors\" href=\"/warranty\">معلومات الضمان</a></li><li><a class=\"hover:text-emerald-600 transition-colors\" href=\"/verify\">تحقق من سجل الضمان</a></li></ul></div></div><div class=\"border-t border-gray-200 dark:border-gray-800 pt-6 pb-4\"><p class=\"mb-4 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400\">العلامات التي نوفّرها حاصلة على اعتمادات وجوائز عالمية</p><div class=\"mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-2 sm:gap-2.5\"><span title=\"شهادة Apple MFi — متوافق مع آيفون وآيباد\" class=\"flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700\"><img alt=\"شهادة Apple MFi — متوافق مع آيفون وآيباد\" loading=\"lazy\" width=\"54\" height=\"25\" decoding=\"async\" data-nimg=\"1\" class=\"object-contain\" style=\"color:transparent\" src=\"/images/awards/apple-mfi.png\"></span><span title=\"اعتماد Hi-Res Audio (ساوندكور)\" class=\"flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700\"><img alt=\"اعتماد Hi-Res Audio (ساوندكور)\" loading=\"lazy\" width=\"54\" height=\"25\" decoding=\"async\" data-nimg=\"1\" class=\"object-contain\" style=\"color:transparent\" src=\"/images/awards/hi-res-audio.png\"></span><span title=\"اعتماد Qi2 للشحن اللاسلكي\" class=\"flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700\"><img alt=\"اعتماد Qi2 للشحن اللاسلكي\" loading=\"lazy\" width=\"54\" height=\"25\" decoding=\"async\" data-nimg=\"1\" class=\"object-contain\" style=\"color:transparent\" src=\"/images/awards/qi2-certified.png\"></span><span title=\"اعتماد TÜV Rheinland لسلامة المنتج\" class=\"flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700\"><img alt=\"اعتماد TÜV Rheinland لسلامة المنتج\" loading=\"lazy\" width=\"54\" height=\"25\" decoding=\"async\" data-nimg=\"1\" class=\"object-contain\" style=\"color:transparent\" src=\"/images/awards/tuv-rheinland.png\"></span><span title=\"جائزة CES للابتكار\" class=\"flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700\"><img alt=\"جائزة CES للابتكار\" loading=\"lazy\" width=\"54\" height=\"25\" decoding=\"async\" data-nimg=\"1\" class=\"object-contain\" style=\"color:transparent\" src=\"/images/awards/ces-innovation.png\"></span><span title=\"دليل iF العالمي للتصميم\" class=\"flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700\"><img alt=\"دليل iF العالمي للتصميم\" loading=\"lazy\" width=\"54\" height=\"25\" decoding=\"async\" data-nimg=\"1\" class=\"object-contain\" style=\"color:transparent\" src=\"/images/awards/if-world-design.png\"></span><span title=\"جائزة ChargerLAB الذهبية 2025 — أنكر\" class=\"flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700\"><img alt=\"جائزة ChargerLAB الذهبية 2025 — أنكر\" loading=\"lazy\" width=\"54\" height=\"25\" decoding=\"async\" data-nimg=\"1\" class=\"object-contain\" style=\"color:transparent\" src=\"/images/awards/chargerlab-golden-2025.png\"></span><span title=\"علامات المطابقة CE و FCC و RoHS\" class=\"flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700\"><img alt=\"علامات المطابقة CE و FCC و RoHS\" loading=\"lazy\" width=\"54\" height=\"25\" decoding=\"async\" data-nimg=\"1\" class=\"object-contain\" style=\"color:transparent\" src=\"/images/awards/ce-fcc-rohs.png\"></span></div></div><div class=\"border-t border-gray-200 dark:border-gray-800 pt-4 pb-4\"><p class=\"flex items-center justify-center gap-2 text-xs text-gray-600 dark:text-gray-400 text-center\"><svg class=\"w-4 h-4 shrink-0 text-green-700 dark:text-green-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"2\" y=\"6\" width=\"20\" height=\"12\" rx=\"2\"></rect><circle cx=\"12\" cy=\"12\" r=\"3\"></circle><path d=\"M6 12h.01M18 12h.01\"></path></svg><span>الدفع عند الاستلام (كاش) متاح للطلبات والعناوين المؤهلة — وكل طلب بفاتورة.</span></p></div><div class=\"border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600 dark:text-gray-400\"><p>© <!-- -->2026<!-- --> <!-- -->كايرو فولت<!-- -->. <!-- -->جميع الحقوق محفوظة<!-- -->.</p><div class=\"flex gap-4 mt-4 md:mt-0\"><a class=\"hover:text-gray-900 dark:hover:text-white\" href=\"/privacy\">سياسة الخصوصية</a><a class=\"hover:text-gray-900 dark:hover:text-white\" href=\"/terms\">الشروط والأحكام</a></div></div></div></footer>",
+    "text": "",
+    "links": [
+      {
+        "text": "",
+        "href": "https://wa.me/201558245974"
+      },
+      {
+        "text": "",
+        "href": "mailto:info@cairovolt.com"
+      },
+      {
+        "text": "",
+        "href": "https://www.facebook.com/cairovolt"
+      },
+      {
+        "text": "",
+        "href": "https://www.instagram.com/cairovolt/"
+      },
+      {
+        "text": "",
+        "href": "https://www.tiktok.com/@cairovolt"
+      },
+      {
+        "text": "",
+        "href": "https://www.youtube.com/@cairovolt"
+      },
+      {
+        "text": "",
+        "href": "https://x.com/cairovolt"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/power-banks"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/chargers"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/earbuds"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/cables"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/anker"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/anker/power-banks"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/anker/wall-chargers"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/soundcore"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/soundcore/audio"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/soundcore/speakers"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom/audio"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom/power-banks"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/joyroom/car-accessories"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/jbl"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/jbl/speakers"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/jbl/partybox"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/jbl/headphones"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/jbl/earbuds"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/blog"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/about"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/lab"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/team"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/faq"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/contact"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/shipping"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/return-policy"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/warranty"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/verify"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/privacy"
+      },
+      {
+        "text": "",
+        "href": "https://cairovolt.com/terms"
+      }
+    ],
+    "images": [
+      {
+        "src": "https://cairovolt.com/cairovolt_logo.webp",
+        "srcset": "",
+        "alt": "كايرو فولت"
+      },
+      {
+        "src": "https://cairovolt.com/images/awards/apple-mfi.png",
+        "srcset": "",
+        "alt": "شهادة Apple MFi — متوافق مع آيفون وآيباد"
+      },
+      {
+        "src": "https://cairovolt.com/images/awards/hi-res-audio.png",
+        "srcset": "",
+        "alt": "اعتماد Hi-Res Audio (ساوندكور)"
+      },
+      {
+        "src": "https://cairovolt.com/images/awards/qi2-certified.png",
+        "srcset": "",
+        "alt": "اعتماد Qi2 للشحن اللاسلكي"
+      },
+      {
+        "src": "https://cairovolt.com/images/awards/tuv-rheinland.png",
+        "srcset": "",
+        "alt": "اعتماد TÜV Rheinland لسلامة المنتج"
+      },
+      {
+        "src": "https://cairovolt.com/images/awards/ces-innovation.png",
+        "srcset": "",
+        "alt": "جائزة CES للابتكار"
+      },
+      {
+        "src": "https://cairovolt.com/images/awards/if-world-design.png",
+        "srcset": "",
+        "alt": "دليل iF العالمي للتصميم"
+      },
+      {
+        "src": "https://cairovolt.com/images/awards/chargerlab-golden-2025.png",
+        "srcset": "",
+        "alt": "جائزة ChargerLAB الذهبية 2025 — أنكر"
+      },
+      {
+        "src": "https://cairovolt.com/images/awards/ce-fcc-rohs.png",
+        "srcset": "",
+        "alt": "علامات المطابقة CE و FCC و RoHS"
+      }
+    ]
+  },
+  "mainText": "شحنٌ ذكي يعرف جهازك،\nويحميه كل لحظة.\n\nانكر نانو 45 واط · شاشة ذكية تعرض حالة الشحن لحظيًا\n\n1,250 ج.م\n1,550\nخصم 19%\nاشترِ الآن\n←\nسجل ضمان كايرو فولت\nراجع سيريال كرت الضمان الصادر من كايرو فولت\nتوصيل داخل مصر\nتُؤكد أهلية العنوان مع الطلب\nادفع عند الاستلام\nمتاح للطلبات المؤهلة\nضمان كايرو فولت واضح حسب المنتج\nمن غير وعود عامة مبهمة\nابدأ من احتياجك\nمش لازم تحفظ أرقام الموديلات.\n\nقسمنا المتجر حسب المشكلة اللي عايز تحلها، عشان توصل للاختيار المناسب بأقل مجهود.\n\nصوت على مزاجك\n\nايربودز، هيدفون وسبيكرات لكل لحظة.\n\nاكتشف الخيارات\n←\nطاقة تكمّل اليوم\n\nباور بانك للسفر واليوم الطويل.\n\nاكتشف الخيارات\n←\nشحن أسرع وأأمن\n\nGaN وPD لقدرة تناسب جهازك.\n\nاكتشف الخيارات\n←\nالكابل الصح لجهازك\n\nUSB-C وLightning بقدرات واضحة.\n\nاكتشف الخيارات\n←\nعربيتك أذكى\n\nحوامل وشواحن ثابتة على الطريق.\n\nاكتشف الخيارات\n←\nاختيارات مميزة من الكتالوج\nابدأ من اختيارات واضحة ومتنوعة.\n\nمزيج مختار من انكر وساوندكور وجوي روم — بأسعار مطابقة للكتالوج وإضافة سريعة للسلة.\n\nكل الاختيارات\nصوتيات\nباور بانك\nشحن\nاختيار مميز\nانكر\nانكر زولو 20,000\nافتح الصفحة للمواصفات والضمان\n←\n1,730\nج.م\n1,959\nخصم 12%\nإضافة سريعة\nالأكثر مبيعاً\nساوندكور\nساوندكور R50i NC\nافتح الصفحة للمواصفات والضمان\n←\n1,199\nج.م\n1,440\nخصم 17%\nإضافة سريعة\nجديد\nساوندكور\nساوندكور P30i\nافتح الصفحة للمواصفات والضمان\n←\n1,199\nج.م\n1,440\nخصم 17%\nإضافة سريعة\nاختيار مميز\nانكر\nشاحن انكر نانو 45 واط\nافتح الصفحة للمواصفات والضمان\n←\n790\nج.م\n949\nخصم 17%\nإضافة سريعة\nالفلاجشيب\nانكر\nانكر برايم 25,000 — 165 واط\nافتح الصفحة للمواصفات والضمان\n←\n3,950\nج.م\n4,750\nخصم 17%\nإضافة سريعة\nساوندكور\nساوندكور K20i\nافتح الصفحة للمواصفات والضمان\n←\n750\nج.م\n849\nخصم 12%\nإضافة سريعة\nقيمة ممتازة\nجوي روم\nجوي روم T03S Pro ANC\nافتح الصفحة للمواصفات والضمان\n←\n664\nج.م\n799\nخصم 17%\nإضافة سريعة\nساوندكور\nسبيكر ساوندكور Flare 2\nافتح الصفحة للمواصفات والضمان\n←\n2,999\nج.م\n3,569\nخصم 16%\nإضافة سريعة\nاختيار اقتصادي\nجوي روم\nشاحن جوي روم USB-C 20 واط\nافتح الصفحة للمواصفات والضمان\n←\n236\nج.م\n290\nخصم 19%\nإضافة سريعة\nاختار الشخصية اللي شبه يومك\nأربع عائلات. كل واحدة بتحل حاجة مختلفة.\nساوندكور من انكر\nاسمع كل تفصيلة.\n\nمن سماعة للمواصلات، لهيدفون يساعدك تركز، لسبيكر يغيّر جو المكان — اختار الصوت على حسب اللحظة.\n\nعزل ضوضاء\nHi-Res Audio\nبطارية طويلة\nاستكشف عالم ساوندكور\n←\nانكر\nطاقة تثق فيها.\n\nباور بانك، شواحن وكابلات لقدرة واضحة من غير حيرة.\n\nتسوق انكر\n←\nJOYROOM\nذكاء في كل جنيه.\n\nمواصفات مفيدة وسعر عملي للاستخدام اليومي.\n\nتسوق Joyroom\n←\nJBL\nصوت له تاريخ من 1946.\n\nسبيكرات وهيدفون وايربودز وبازوكا حفلات — من علامة Harman العالمية، بمواصفات معلنة لكل موديل.\n\nمقاومة ماء IP67/IP68\nAuracast\nبازوكا PartyBox\nتسوق JBL\n←\nمساعد الاختيار السريع\nقول لنا يومك محتاج إيه.\n\nاختيارين بسيطين يضيقوا الاحتمالات ويوصلوك لأقرب نقطة بداية. النتيجة إرشادية وتقدر تفتح التفاصيل قبل الطلب.\n\n1. إيه اللي عايز تحسّنه؟\n\nعايز صوت أفضل\nبطاريتي ما تخلصش\nعايز أشحن أسرع\nكابل يستحمل\nشحن في العربية\n\nفاهمينك — دوشة المواصلات والشغل مش المفروض تبقى خلفية يومك.\n\n2. الميزانية المريحة؟\n\nمفيش إجابة صح وغلط — بنرشّح على قد ميزانيتك.\n\nالأفضل لاحتياجي\nأقل من 1,000 ج.م\n1,000–2,500 ج.م\nأكثر من 2,500 ج.م\n\nمرشّحة مخصوص ليك\n\nاختيارات بعزل ضوضاء في الموديلات الداعمة\n6 نتائج\nساوندكور\nساوندكور R50i NC\n\nعزل ضوضاء وبطارية معلنان من الشركة\n\n1,199\nج.م\n1,440\nخصم 17%\nساوندكور\n⭐ اختيار مقترح\nساوندكور P30i\n\nعزل ضوضاء نشط حسب مواصفات الموديل\n\n1,199\nج.م\n1,440\nخصم 17%\nساوندكور\nساوندكور K20i\n\nتصميم خفيف للاستخدام اليومي\n\n750\nج.م\n849\nخصم 12%\nساوندكور\nسبيكر ساوندكور Flare 2\n\nسبيكر محمول بإضاءة مدمجة\n\n2,999\nج.م\n3,569\nخصم 16%\nساوندكور\nساوندكور A25i\n\nبطارية معلنة حتى 28 ساعة\n\n1,370\nج.م\n1,540\nخصم 11%\nجوي روم\nجوي روم T03S Pro ANC\n\nخيار بسعر اقتصادي\n\n664\nج.م\n799\nخصم 17%\nبيانات المنتج موضحة\nضمان كايرو فولت حسب المنتج\nادفع لما يوصلك\nراحة البال جزء من الطلب\nاشتري وإنت فاهم كل خطوة.\n\nالثقة مش Badge على الشاشة؛ هي معلومات تقدر تراجعها، وضمان مكتوب، وسياسة واضحة قبل الدفع.\n\nراجع سجل ضمان كايرو فولت\n\nأدخل سيريال كرت الضمان لمعرفة إن كان صادراً من كايرو فولت وعرض حالة سجله.\n\nافتح سجل الضمان\n←\nافهم المواصفات قبل الشراء\n\nاستخدم مركز المواصفات والحسابات لفهم القدرة والطاقة والتوافق، مع توضيح المصادر والافتراضات.\n\nافتح مركز المواصفات\n←\nاعرف اللي هيحصل بعد الطلب\n\nراجع التوصيل والدفع والاسترجاع قبل ما تضغط تأكيد الطلب.\n\nتفاصيل التوصيل\n←\nاقرأ قبل ما تدفع\nأدلة تختصر عليك المقارنة.\nكل الأدلة والمقالات\n←\nإزاي تختار باور بانك يناسب يومك؟\nاقرأ الدليل ←\nانكر ولا جوي روم: الفرق فين؟\nاقرأ الدليل ←\nعلامات تساعدك تعرف انكر الأصلي\nاقرأ الدليل ←\nكايرو فولت — اختيار أوضح لإكسسوارات الموبايل في مصر\n\nكايرو فولت يجمع منتجات انكر للشحن والطاقة، ومنتجات ساوندكور وJBL للصوتيات، وخيارات جوي روم العملية للاستخدام اليومي. تقدر تقارن بين الباور بانك، الشواحن، الكابلات، الايربودز والهيدفون، وتشوف السعر والتوافق والضمان الخاص بكل منتج قبل الطلب. التوصيل متاح للعناوين المؤهلة داخل مصر، ويظهر تأكيد الشحن والدفع عند الاستلام قبل إتمام الطلب.\n\n🎙️ كايرو فولت بتجاوبك (أسئلة الشارع)\nأبدأ منين لو مش عارف الموديل المناسب؟\n▼\nإزاي أراجع بيانات المنتج قبل الشراء؟\n▼\nالضمان كام شهر؟\n▼\nهل الدفع عند الاستلام متاح؟\n▼\nهل التوصيل متاح خارج القاهرة؟\n▼\nلو المنتج مش مناسب، أعمل إيه؟\n▼",
+  "sections": [
+    {
+      "index": 0,
+      "tag": "div",
+      "id": "",
+      "classes": "flex flex-col bg-white",
+      "text": "شحنٌ ذكي يعرف جهازك،\nويحميه كل لحظة.\n\nانكر نانو 45 واط · شاشة ذكية تعرض حالة الشحن لحظيًا\n\n1,250 ج.م\n1,550\nخصم 19%\nاشترِ الآن\n←\nسجل ضمان كايرو فولت\nراجع سيريال كرت الضمان الصادر من كايرو فولت\nتوصيل داخل مصر\nتُؤكد أهلية العنوان مع الطلب\nادفع عند الاستلام\nمتاح للطلبات المؤهلة\nضمان كايرو فولت واضح حسب المنتج\nمن غير وعود عامة مبهمة\nابدأ من احتياجك\nمش لازم تحفظ أرقام الموديلات.\n\nقسمنا المتجر حسب المشكلة اللي عايز تحلها، عشان توصل للاختيار المناسب بأقل مجهود.\n\nصوت على مزاجك\n\nايربودز، هيدفون وسبيكرات ل",
+      "headings": [
+        "شحنٌ ذكي يعرف جهازك،\nويحميه كل لحظة.",
+        "مش لازم تحفظ أرقام الموديلات.",
+        "صوت على مزاجك",
+        "طاقة تكمّل اليوم",
+        "شحن أسرع وأأمن",
+        "الكابل الصح لجهازك",
+        "عربيتك أذكى",
+        "ابدأ من اختيارات واضحة ومتنوعة."
+      ],
+      "images": 25,
+      "links": [
+        {
+          "text": "اشترِ الآن\n←",
+          "href": "https://cairovolt.com/anker/wall-chargers/anker-nano-45w-smart-display-charger"
+        },
+        {
+          "text": "صوت على مزاجك\n\nايربودز، هيدفون وسبيكرات لكل لحظة.\n\nاكتشف الخيارات\n←",
+          "href": "https://cairovolt.com/soundcore"
+        },
+        {
+          "text": "طاقة تكمّل اليوم\n\nباور بانك للسفر واليوم الطويل.\n\nاكتشف الخيارات\n←",
+          "href": "https://cairovolt.com/power-banks"
+        },
+        {
+          "text": "شحن أسرع وأأمن\n\nGaN وPD لقدرة تناسب جهازك.\n\nاكتشف الخيارات\n←",
+          "href": "https://cairovolt.com/chargers"
+        },
+        {
+          "text": "الكابل الصح لجهازك\n\nUSB-C وLightning بقدرات واضحة.\n\nاكتشف الخيارات\n←",
+          "href": "https://cairovolt.com/cables"
+        },
+        {
+          "text": "عربيتك أذكى\n\nحوامل وشواحن ثابتة على الطريق.\n\nاكتشف الخيارات\n←",
+          "href": "https://cairovolt.com/anker/car-chargers"
+        },
+        {
+          "text": "اختيار مميز",
+          "href": "https://cairovolt.com/anker/power-banks/anker-zolo-a110e-20000"
+        },
+        {
+          "text": "انكر زولو 20,000",
+          "href": "https://cairovolt.com/anker/power-banks/anker-zolo-a110e-20000"
+        }
+      ],
+      "rect": {
+        "w": 1440,
+        "h": 8920
+      }
+    }
+  ],
+  "images": [
+    {
+      "src": "https://cairovolt.com/cairovolt_logo.webp",
+      "srcset": "",
+      "alt": "CairoVolt",
+      "width": 400,
+      "height": 222
+    },
+    {
+      "src": "https://cairovolt.com/videos/cairovolt-hero-poster.webp",
+      "srcset": "",
+      "alt": "شواحن انكر نانو الذكية بشاشات تفاعلية تعرض حالة الشحن",
+      "width": 780,
+      "height": 1200
+    },
+    {
+      "src": "https://cairovolt.com/images/home/cutouts/soundcore-liberty-5-tws-earbuds-cutout-cairovolt.png",
+      "srcset": "",
+      "alt": "صوت على مزاجك",
+      "width": 626,
+      "height": 392
+    },
+    {
+      "src": "https://cairovolt.com/images/home/cutouts/anker-zolo-a110d-power-bank-cutout-cairovolt.png",
+      "srcset": "",
+      "alt": "طاقة تكمّل اليوم",
+      "width": 492,
+      "height": 781
+    },
+    {
+      "src": "https://cairovolt.com/images/home/cutouts/anker-nano-45w-smart-display-charger-cutout-cairovolt.png",
+      "srcset": "",
+      "alt": "شحن أسرع وأأمن",
+      "width": 663,
+      "height": 686
+    },
+    {
+      "src": "https://cairovolt.com/images/home/cutouts/anker-a8050-usb-c-cable-cutout-cairovolt.png",
+      "srcset": "",
+      "alt": "الكابل الصح لجهازك",
+      "width": 816,
+      "height": 646
+    },
+    {
+      "src": "https://cairovolt.com/images/home/cutouts/anker-a2216-magnetic-car-charger-cutout-cairovolt.png",
+      "srcset": "",
+      "alt": "عربيتك أذكى",
+      "width": 708,
+      "height": 576
+    },
+    {
+      "src": "https://cairovolt.com/products/anker/anker-zolo-a110e-20000/anker-zolo-a110e-20000mah-power-bank-builtin-cable-dual-output-cairovolt-480.webp",
+      "srcset": "/products/anker/anker-zolo-a110e-20000/anker-zolo-a110e-20000mah-power-bank-builtin-cable-dual-output-cairovolt-480.webp 480w, /products/anker/anker-zolo-a110e-20000/anker-zolo-a110e-20000mah-power-bank-builtin-cable-dual-output-cairovolt-800.webp 800w",
+      "alt": "انكر زولو 20,000",
+      "width": 360,
+      "height": 360
+    },
+    {
+      "src": "https://cairovolt.com/products/anker/anker-soundcore-r50i-nc/anker-soundcore-r50i-nc-earbud-anc-driver-detail-closeup-480.webp",
+      "srcset": "/products/anker/anker-soundcore-r50i-nc/anker-soundcore-r50i-nc-earbud-anc-driver-detail-closeup-480.webp 480w, /products/anker/anker-soundcore-r50i-nc/anker-soundcore-r50i-nc-earbud-anc-driver-detail-closeup-800.webp 800w",
+      "alt": "ساوندكور R50i NC",
+      "width": 360,
+      "height": 360
+    },
+    {
+      "src": "https://cairovolt.com/products/anker/soundcore-p30i-earbuds/soundcore-p30i-earbuds-main-view-cairovolt-480.webp",
+      "srcset": "/products/anker/soundcore-p30i-earbuds/soundcore-p30i-earbuds-main-view-cairovolt-480.webp 480w, /products/anker/soundcore-p30i-earbuds/soundcore-p30i-earbuds-main-view-cairovolt-800.webp 800w",
+      "alt": "ساوندكور P30i",
+      "width": 360,
+      "height": 360
+    },
+    {
+      "src": "https://cairovolt.com/products/anker/anker-nano-45w/anker-nano-45w-package-box-contents-specifications-480.webp",
+      "srcset": "/products/anker/anker-nano-45w/anker-nano-45w-package-box-contents-specifications-480.webp 480w, /products/anker/anker-nano-45w/anker-nano-45w-package-box-contents-specifications-800.webp 800w",
+      "alt": "شاحن انكر نانو 45 واط",
+      "width": 360,
+      "height": 360
+    },
+    {
+      "src": "https://cairovolt.com/products/anker/anker-prime-a1695-25000/anker-prime-a1695-25000mah-165w-power-bank-premium-cairovolt-480.webp",
+      "srcset": "/products/anker/anker-prime-a1695-25000/anker-prime-a1695-25000mah-165w-power-bank-premium-cairovolt-480.webp 480w, /products/anker/anker-prime-a1695-25000/anker-prime-a1695-25000mah-165w-power-bank-premium-cairovolt-800.webp 800w",
+      "alt": "انكر برايم 25,000 — 165 واط",
+      "width": 360,
+      "height": 360
+    },
+    {
+      "src": "https://cairovolt.com/products/anker/anker-soundcore-k20i/anker-soundcore-k20i-wireless-earbuds-charging-case-cairovolt-480.webp",
+      "srcset": "/products/anker/anker-soundcore-k20i/anker-soundcore-k20i-wireless-earbuds-charging-case-cairovolt-480.webp 480w, /products/anker/anker-soundcore-k20i/anker-soundcore-k20i-wireless-earbuds-charging-case-cairovolt-800.webp 800w",
+      "alt": "ساوندكور K20i",
+      "width": 360,
+      "height": 360
+    },
+    {
+      "src": "https://cairovolt.com/products/joyroom/joyroom-t03s-pro-earbuds/joyroom-joyroom-t03s-pro-earbuds-egypt-cairo-9-480.webp",
+      "srcset": "/products/joyroom/joyroom-t03s-pro-earbuds/joyroom-joyroom-t03s-pro-earbuds-egypt-cairo-9-480.webp 480w, /products/joyroom/joyroom-t03s-pro-earbuds/joyroom-joyroom-t03s-pro-earbuds-egypt-cairo-9-800.webp 800w",
+      "alt": "جوي روم T03S Pro ANC",
+      "width": 360,
+      "height": 360
+    },
+    {
+      "src": "https://cairovolt.com/products/anker/anker-soundcore-flare-2/anker-soundcore-flare-2-ipx7-waterproof-pool-outdoor-480.webp",
+      "srcset": "/products/anker/anker-soundcore-flare-2/anker-soundcore-flare-2-ipx7-waterproof-pool-outdoor-480.webp 480w, /products/anker/anker-soundcore-flare-2/anker-soundcore-flare-2-ipx7-waterproof-pool-outdoor-800.webp 800w",
+      "alt": "سبيكر ساوندكور Flare 2",
+      "width": 360,
+      "height": 360
+    },
+    {
+      "src": "https://cairovolt.com/products/joyroom/joyroom-20w-usb-c-charger/joyroom-joyroom-20w-usb-c-charger-egypt-cairo-1-480.webp",
+      "srcset": "/products/joyroom/joyroom-20w-usb-c-charger/joyroom-joyroom-20w-usb-c-charger-egypt-cairo-1-480.webp 480w, /products/joyroom/joyroom-20w-usb-c-charger/joyroom-joyroom-20w-usb-c-charger-egypt-cairo-1-800.webp 800w",
+      "alt": "شاحن جوي روم USB-C 20 واط",
+      "width": 360,
+      "height": 360
+    },
+    {
+      "src": "https://cairovolt.com/images/home/cutouts/soundcore-liberty-5-tws-earbuds-cutout-cairovolt.png",
+      "srcset": "",
+      "alt": "سماعات ساوندكور Liberty 5",
+      "width": 626,
+      "height": 392
+    },
+    {
+      "src": "https://cairovolt.com/images/home/cutouts/anker-nano-45w-smart-display-charger-cutout-cairovolt.png",
+      "srcset": "",
+      "alt": "انكر Nano 45W",
+      "width": 663,
+      "height": 686
+    },
+    {
+      "src": "https://cairovolt.com/images/home/cutouts/joyroom-3-in-1-wireless-charging-station-cutout-cairovolt.png",
+      "srcset": "",
+      "alt": "محطة شحن Joyroom 3 في 1",
+      "width": 572,
+      "height": 648
+    },
+    {
+      "src": "https://cairovolt.com/images/home/cutouts/jbl-charge-5-portable-speaker-cutout-cairovolt.png",
+      "srcset": "",
+      "alt": "سماعة JBL Charge 5 بلوتوث",
+      "width": 967,
+      "height": 424
+    },
+    {
+      "src": "https://cairovolt.com/products/anker/anker-soundcore-r50i-nc/anker-soundcore-r50i-nc-earbud-anc-driver-detail-closeup-480.webp",
+      "srcset": "/products/anker/anker-soundcore-r50i-nc/anker-soundcore-r50i-nc-earbud-anc-driver-detail-closeup-480.webp 480w, /products/anker/anker-soundcore-r50i-nc/anker-soundcore-r50i-nc-earbud-anc-driver-detail-closeup-800.webp 800w",
+      "alt": "ساوندكور R50i NC",
+      "width": 288,
+      "height": 288
+    },
+    {
+      "src": "https://cairovolt.com/products/anker/soundcore-p30i-earbuds/soundcore-p30i-earbuds-main-view-cairovolt-480.webp",
+      "srcset": "/products/anker/soundcore-p30i-earbuds/soundcore-p30i-earbuds-main-view-cairovolt-480.webp 480w, /products/anker/soundcore-p30i-earbuds/soundcore-p30i-earbuds-main-view-cairovolt-800.webp 800w",
+      "alt": "ساوندكور P30i",
+      "width": 288,
+      "height": 288
+    },
+    {
+      "src": "https://cairovolt.com/products/anker/anker-soundcore-k20i/anker-soundcore-k20i-wireless-earbuds-charging-case-cairovolt-480.webp",
+      "srcset": "/products/anker/anker-soundcore-k20i/anker-soundcore-k20i-wireless-earbuds-charging-case-cairovolt-480.webp 480w, /products/anker/anker-soundcore-k20i/anker-soundcore-k20i-wireless-earbuds-charging-case-cairovolt-800.webp 800w",
+      "alt": "ساوندكور K20i",
+      "width": 288,
+      "height": 288
+    },
+    {
+      "src": "https://cairovolt.com/products/anker/anker-soundcore-flare-2/anker-soundcore-flare-2-ipx7-waterproof-pool-outdoor-480.webp",
+      "srcset": "/products/anker/anker-soundcore-flare-2/anker-soundcore-flare-2-ipx7-waterproof-pool-outdoor-480.webp 480w, /products/anker/anker-soundcore-flare-2/anker-soundcore-flare-2-ipx7-waterproof-pool-outdoor-800.webp 800w",
+      "alt": "سبيكر ساوندكور Flare 2",
+      "width": 288,
+      "height": 288
+    },
+    {
+      "src": "https://cairovolt.com/products/anker/soundcore-a25i-earbuds/soundcore-a25i-earbuds-earbuds-case-lanyard-hero-480.webp",
+      "srcset": "/products/anker/soundcore-a25i-earbuds/soundcore-a25i-earbuds-earbuds-case-lanyard-hero-480.webp 480w, /products/anker/soundcore-a25i-earbuds/soundcore-a25i-earbuds-earbuds-case-lanyard-hero-800.webp 800w",
+      "alt": "ساوندكور A25i",
+      "width": 288,
+      "height": 288
+    },
+    {
+      "src": "https://cairovolt.com/products/joyroom/joyroom-t03s-pro-earbuds/joyroom-joyroom-t03s-pro-earbuds-egypt-cairo-9-480.webp",
+      "srcset": "/products/joyroom/joyroom-t03s-pro-earbuds/joyroom-joyroom-t03s-pro-earbuds-egypt-cairo-9-480.webp 480w, /products/joyroom/joyroom-t03s-pro-earbuds/joyroom-joyroom-t03s-pro-earbuds-egypt-cairo-9-800.webp 800w",
+      "alt": "جوي روم T03S Pro ANC",
+      "width": 288,
+      "height": 288
+    },
+    {
+      "src": "https://cairovolt.com/cairovolt_logo.webp",
+      "srcset": "",
+      "alt": "كايرو فولت",
+      "width": 400,
+      "height": 222
+    },
+    {
+      "src": "https://cairovolt.com/images/awards/apple-mfi.png",
+      "srcset": "",
+      "alt": "شهادة Apple MFi — متوافق مع آيفون وآيباد",
+      "width": 150,
+      "height": 70
+    },
+    {
+      "src": "https://cairovolt.com/images/awards/hi-res-audio.png",
+      "srcset": "",
+      "alt": "اعتماد Hi-Res Audio (ساوندكور)",
+      "width": 150,
+      "height": 70
+    },
+    {
+      "src": "https://cairovolt.com/images/awards/qi2-certified.png",
+      "srcset": "",
+      "alt": "اعتماد Qi2 للشحن اللاسلكي",
+      "width": 150,
+      "height": 70
+    },
+    {
+      "src": "https://cairovolt.com/images/awards/tuv-rheinland.png",
+      "srcset": "",
+      "alt": "اعتماد TÜV Rheinland لسلامة المنتج",
+      "width": 150,
+      "height": 70
+    },
+    {
+      "src": "https://cairovolt.com/images/awards/ces-innovation.png",
+      "srcset": "",
+      "alt": "جائزة CES للابتكار",
+      "width": 150,
+      "height": 70
+    },
+    {
+      "src": "https://cairovolt.com/images/awards/if-world-design.png",
+      "srcset": "",
+      "alt": "دليل iF العالمي للتصميم",
+      "width": 150,
+      "height": 70
+    },
+    {
+      "src": "https://cairovolt.com/images/awards/chargerlab-golden-2025.png",
+      "srcset": "",
+      "alt": "جائزة ChargerLAB الذهبية 2025 — أنكر",
+      "width": 150,
+      "height": 70
+    },
+    {
+      "src": "https://cairovolt.com/images/awards/ce-fcc-rohs.png",
+      "srcset": "",
+      "alt": "علامات المطابقة CE و FCC و RoHS",
+      "width": 150,
+      "height": 70
+    }
+  ],
+  "links": [
+    {
+      "rel": "preload",
+      "href": "https://cairovolt.com/_next/static/media/01f0c602c274ea55-s.p.woff2",
+      "as": "font"
+    },
+    {
+      "rel": "preload",
+      "href": "https://cairovolt.com/_next/static/media/350b852752f8489d-s.p.woff2",
+      "as": "font"
+    },
+    {
+      "rel": "preload",
+      "href": "https://cairovolt.com/cairovolt_logo.webp",
+      "as": "image"
+    },
+    {
+      "rel": "preload",
+      "href": "https://cairovolt.com/videos/cairovolt-hero-poster.webp",
+      "as": "image"
+    },
+    {
+      "rel": "stylesheet",
+      "href": "https://cairovolt.com/_next/static/css/62d0902ed26593ec.css",
+      "as": ""
+    },
+    {
+      "rel": "stylesheet",
+      "href": "https://cairovolt.com/_next/static/css/837e4e7df3f922dc.css",
+      "as": ""
+    },
+    {
+      "rel": "preload",
+      "href": "https://cairovolt.com/_next/static/chunks/webpack-3ff549b938fb8d45.js",
+      "as": "script"
+    },
+    {
+      "rel": "dns-prefetch",
+      "href": "https://firebasestorage.googleapis.com/",
+      "as": ""
+    },
+    {
+      "rel": "dns-prefetch",
+      "href": "https://firestore.googleapis.com/",
+      "as": ""
+    },
+    {
+      "rel": "manifest",
+      "href": "https://cairovolt.com/manifest.json",
+      "as": ""
+    },
+    {
+      "rel": "search",
+      "href": "https://cairovolt.com/opensearch.xml",
+      "as": ""
+    },
+    {
+      "rel": "alternate",
+      "href": "https://cairovolt.com/feed.xml",
+      "as": ""
+    },
+    {
+      "rel": "alternate",
+      "href": "https://cairovolt.com/llms.txt",
+      "as": ""
+    },
+    {
+      "rel": "canonical",
+      "href": "https://cairovolt.com/",
+      "as": ""
+    },
+    {
+      "rel": "alternate",
+      "href": "https://cairovolt.com/",
+      "as": ""
+    },
+    {
+      "rel": "alternate",
+      "href": "https://cairovolt.com/en",
+      "as": ""
+    },
+    {
+      "rel": "alternate",
+      "href": "https://cairovolt.com/",
+      "as": ""
+    },
+    {
+      "rel": "icon",
+      "href": "https://cairovolt.com/favicon.ico?11cd5b0890458eb2",
+      "as": ""
+    },
+    {
+      "rel": "icon",
+      "href": "https://cairovolt.com/favicon.ico",
+      "as": ""
+    },
+    {
+      "rel": "icon",
+      "href": "https://cairovolt.com/favicon.png",
+      "as": ""
+    },
+    {
+      "rel": "icon",
+      "href": "https://cairovolt.com/icon.png",
+      "as": ""
+    },
+    {
+      "rel": "apple-touch-icon",
+      "href": "https://cairovolt.com/apple-icon.png",
+      "as": ""
+    },
+    {
+      "rel": "preload",
+      "href": "",
+      "as": "image"
+    },
+    {
+      "rel": "preload",
+      "href": "",
+      "as": "image"
+    },
+    {
+      "rel": "preload",
+      "href": "",
+      "as": "image"
+    }
+  ],
+  "bg": []
+}

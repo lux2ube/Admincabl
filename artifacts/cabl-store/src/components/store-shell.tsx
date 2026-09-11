@@ -1,0 +1,49 @@
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Link, useLocation } from 'wouter';
+import { Heart, Menu, Search, ShoppingBag, X, ChevronDown, ShieldCheck, Truck, PackageSearch } from 'lucide-react';
+import { useStore } from '@/lib/store';
+
+export function StoreShell({ children }: { children: ReactNode }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [location] = useLocation();
+  const { catalog, cartCount, favorites } = useStore();
+  const categories = useMemo(() => Array.from(new Map((catalog?.products || [])
+    .filter((product) => product.category)
+    .map((product) => [product.category!.slug, product.category!]))
+    .values()).slice(0, 3), [catalog]);
+  const navItems = useMemo(() => [
+    { label: 'المنتجات', href: '/search' },
+    ...categories.map((category) => ({ label: category.name, href: `/category/${category.slug}` })),
+    { label: 'العلامات التجارية', href: '/search?view=brands' },
+  ], [categories]);
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      '/search': 'كتالوج المنتجات | CABL',
+      '/cart': 'سلة المشتريات | CABL',
+      '/checkout': 'إتمام الشراء | CABL',
+      '/orders': 'تتبع الطلبات | CABL',
+    };
+    const route = location.split('?')[0];
+    if (titles[route]) document.title = titles[route];
+  }, [location]);
+  return <div dir="rtl" className="min-h-[100dvh]">
+    <div className="top-strip"><div className="container top-strip-inner"><div className="top-trust"><span><ShieldCheck size={13}/> ضمان واضح على كل منتج</span><span><Truck size={13}/> توصيل إلى كل محافظات اليمن</span></div><Link href="/orders" className="phone-link" data-testid="link-phone"><PackageSearch size={13}/> تتبع طلبك</Link></div></div>
+    <header className="site-header">
+      <div className="container header-main">
+        <button className="mobile-menu" onClick={() => setMobileOpen(true)} aria-label="فتح القائمة" data-testid="button-open-menu"><Menu size={23}/></button>
+        <Link href="/" className="brand-mark" data-testid="link-home"><span className="brand-cabl">CABL</span><span className="brand-dot">.</span><small>طاقة يومك</small></Link>
+        <nav className="desktop-nav">{navItems.map((item) => <Link href={item.href} key={item.href} className="nav-link" data-testid={`link-nav-${item.label}`}>{item.label}{item.label === 'العلامات التجارية' && <ChevronDown size={14}/>}</Link>)}</nav>
+        <div className="header-actions">
+          <Link href="/search" className="icon-action" aria-label="البحث" data-testid="link-search"><Search size={20}/></Link>
+          <Link href="/orders" className="icon-action orders-action" aria-label="تتبع الطلب" data-testid="link-orders"><PackageSearch size={20}/></Link>
+          <Link href="/cart" className="icon-action cart-action" aria-label="السلة" data-testid="link-cart"><ShoppingBag size={20}/>{cartCount > 0 && <b>{cartCount}</b>}</Link>
+          <Link href="/search?view=favorites" className="icon-action favorite-action" aria-label="المفضلة" data-testid="link-favorites"><Heart size={20}/>{favorites.length > 0 && <b>{favorites.length}</b>}</Link>
+        </div>
+      </div>
+      <div className="container search-ribbon"><Link href="/search" className="search-cta" data-testid="link-search-ribbon"><Search size={18}/><span>ابحث عن شاحن، كابل، سماعة...</span><kbd>⌘ K</kbd></Link><span className="ribbon-note">منتجات أصلية • أسعار واضحة • خدمة محلية</span></div>
+    </header>
+    {mobileOpen && <div className="mobile-drawer-backdrop" onClick={() => setMobileOpen(false)}><aside className="mobile-drawer" onClick={(event) => event.stopPropagation()}><div className="drawer-head"><span className="brand-cabl">CABL<span className="brand-dot">.</span></span><button onClick={() => setMobileOpen(false)} aria-label="إغلاق القائمة" data-testid="button-close-menu"><X/></button></div><div className="drawer-links">{navItems.map((item) => <Link href={item.href} onClick={() => setMobileOpen(false)} key={item.href} data-testid={`link-mobile-${item.label}`}>{item.label}<ChevronDown size={15}/></Link>)}<Link href="/orders" onClick={() => setMobileOpen(false)} data-testid="link-mobile-orders">تتبع طلب سابق<PackageSearch size={16}/></Link></div><div className="drawer-foot">تحتاج مساعدة؟ <Link href="/orders" onClick={() => setMobileOpen(false)}>راجع طلبك</Link></div></aside></div>}
+    <main className="page-main">{children}</main>
+    <footer className="site-footer"><div className="container footer-grid"><div className="footer-brand"><span className="brand-cabl light">CABL<span className="brand-dot">.</span></span><p>الأشياء الصغيرة التي تجعل يومك أسهل. اختيارات تقنية موثوقة تصل إليك أينما كنت في اليمن.</p><Link href="/orders" data-testid="link-footer-phone"><PackageSearch size={15}/> تتبع طلبك</Link></div><div><h3>تسوق</h3><Link href="/search" data-testid="link-footer-all">كل المنتجات</Link>{categories.map((category) => <Link href={`/category/${category.slug}`} key={category.slug} data-testid={`link-footer-category-${category.slug}`}>{category.name}</Link>)}</div><div><h3>خدمة العملاء</h3><Link href="/orders" data-testid="link-footer-orders">تتبع طلبك</Link><Link href="/cart" data-testid="link-footer-cart">سلة المشتريات</Link><Link href="/checkout" data-testid="link-footer-checkout">إتمام الشراء</Link></div><div className="footer-promise"><div><ShieldCheck size={24}/><span>أصلي ومضمون</span></div><div><Truck size={24}/><span>توصيل محلي</span></div><div><PackageSearch size={24}/><span>تتبع طلبك</span></div></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} CABL اليمن</span><span>الدفع الآمن يبدأ من معلومات واضحة</span></div></footer>
+  </div>;
+}

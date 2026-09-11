@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/cabl-store/"
+title = "Cabl Store"
+description = "An Arabic RTL electronics storefront for Yemen using the CairoVolt-inspired visual shell and the CABL admin catalog, brands, categories, currencies, shipping, and checkout data."
+version = "1.0.0"
+id = "artifacts/cabl-store"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/cabl-store/" ]
+localPort = 25770
+
+[services.development]
+run = "pnpm --filter @workspace/cabl-store run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cabl-store", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/cabl-store/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25770"
+BASE_PATH = "/cabl-store/"

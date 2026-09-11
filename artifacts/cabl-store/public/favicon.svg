@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CABL">
+  <rect width="64" height="64" rx="16" fill="#1d4ed8"/>
+  <path d="M45 18.5a19 19 0 1 0 0 27" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+  <path d="M44 23h9M44 41h9" stroke="#67e8f9" stroke-width="5" stroke-linecap="round"/>
+</svg>
