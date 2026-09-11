@@ -20,17 +20,36 @@ import Favorites from '@/pages/Favorites';
 
 const queryClient = new QueryClient();
 
+const legacyProductSlugs = new Set([
+  'anker-powercore-10000',
+  'anker-zolo-a110e-20000',
+]);
+
+function TwoSegmentRoute({ params }: { params: { categorySlug: string; slug: string } }) {
+  const { products } = useStore();
+  const isKnownProduct = legacyProductSlugs.has(params.slug) || products.some((product) => product.slug === params.slug);
+
+  return isKnownProduct
+    ? <CairoVoltClone page="product" />
+    : <ProductDetail params={params} />;
+}
+
 function Router() {
   const [location] = useLocation();
   const isDynamicProductRoute = /^\/[^/]+\/[^/]+\/[^/]+$/.test(location);
+  const isTwoPartProductRoute =
+    /^\/[^/]+\/[^/]+$/.test(location) &&
+    location !== '/anker/power-banks';
   const isCairoVoltRoute =
     location === '/' ||
     location === '/checkout' ||
     location === '/power-banks' ||
     location === '/anker' ||
+    location === '/anker/power-banks' ||
     location === '/anker/power-banks/anker-powercore-10000' ||
     location === '/anker/power-banks/anker-zolo-a110e-20000' ||
-    isDynamicProductRoute;
+    isDynamicProductRoute ||
+    isTwoPartProductRoute;
 
   return (
     <div className="min-h-screen flex flex-col font-sans selection:bg-primary selection:text-primary-foreground">
@@ -41,6 +60,7 @@ function Router() {
             <Route path="/" component={() => <CairoVoltClone page="home" />} />
             <Route path="/power-banks" component={() => <CairoVoltClone page="power-banks" />} />
             <Route path="/anker" component={() => <CairoVoltClone page="anker" />} />
+            <Route path="/anker/power-banks" component={() => <CairoVoltClone page="power-banks" />} />
             <Route path="/anker/power-banks/anker-powercore-10000" component={() => <CairoVoltClone page="product" />} />
             <Route path="/anker/power-banks/anker-zolo-a110e-20000" component={() => <CairoVoltClone page="product" />} />
             <Route path="/checkout" component={() => <CairoVoltClone page="checkout" />} />
@@ -54,7 +74,7 @@ function Router() {
             
             {/* Product Detail view: /brand/category/product-slug or /category/product-slug */}
             <Route path="/:brandSlug/:categorySlug/:slug" component={ProductDetail} />
-            <Route path="/:categorySlug/:slug" component={ProductDetail} />
+            <Route path="/:categorySlug/:slug" component={TwoSegmentRoute} />
             
             <Route component={NotFound} />
           </Switch>
