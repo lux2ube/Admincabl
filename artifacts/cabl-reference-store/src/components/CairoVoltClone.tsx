@@ -24,6 +24,15 @@ const markupByPage: Record<ClonePage, string> = {
   checkout: checkoutMarkup,
 };
 
+const sharedHeaderMarkup = homeMarkup.match(/<header\b[^>]*>[\s\S]*?<\/header>/i)?.[0] || '';
+const sharedFooterMarkup = homeMarkup.match(/<footer\b[^>]*>[\s\S]*?<\/footer>/i)?.[0] || '';
+
+function normalizeSharedChrome(markup: string) {
+  return markup
+    .replace(/<header\b[^>]*>[\s\S]*?<\/header>/i, sharedHeaderMarkup)
+    .replace(/<footer\b[^>]*>[\s\S]*?<\/footer>/i, sharedFooterMarkup);
+}
+
 function localizeLinks(markup: string) {
   const base = import.meta.env.BASE_URL;
   const localized = markup.replaceAll('__CABLVOLT_BASE__', base);
@@ -56,7 +65,7 @@ export function CairoVoltClone({ page }: { page: ClonePage }) {
   } = useStore();
   const createOrder = useCreateStoreOrder();
 
-  const markup = useMemo(() => localizeLinks(markupByPage[page]), [page]);
+  const markup = useMemo(() => localizeLinks(normalizeSharedChrome(markupByPage[page])), [page]);
   const activeProduct = useMemo(() => {
     const routeSlug = location.split('/').filter(Boolean).pop()?.split('#')[0] || '';
     const requestedSlug = legacyProductAliases[routeSlug] || routeSlug;
