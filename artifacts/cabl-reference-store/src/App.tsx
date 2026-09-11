@@ -9,6 +9,7 @@ import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 import { StoreProvider } from '@/lib/StoreContext';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { CairoVoltClone } from '@/components/CairoVoltClone';
 
 import Home from '@/pages/Home';
 import CategoryView from '@/pages/CategoryView';
@@ -20,14 +21,27 @@ import Favorites from '@/pages/Favorites';
 const queryClient = new QueryClient();
 
 function Router() {
+  const [location] = useLocation();
+  const isCairoVoltRoute =
+    location === '/' ||
+    location === '/checkout' ||
+    location === '/power-banks' ||
+    location === '/anker' ||
+    location === '/anker/power-banks/anker-powercore-10000' ||
+    location === '/anker/power-banks/anker-zolo-a110e-20000';
+
   return (
     <div className="min-h-screen flex flex-col font-sans selection:bg-primary selection:text-primary-foreground">
       <StoreProvider>
-        <Header />
+        {!isCairoVoltRoute && <Header />}
         <RoutedErrorBoundary>
           <Switch>
-            <Route path="/" component={Home} />
-            <Route path="/checkout" component={Checkout} />
+            <Route path="/" component={() => <CairoVoltClone page="home" />} />
+            <Route path="/power-banks" component={() => <CairoVoltClone page="power-banks" />} />
+            <Route path="/anker" component={() => <CairoVoltClone page="anker" />} />
+            <Route path="/anker/power-banks/anker-powercore-10000" component={() => <CairoVoltClone page="product" />} />
+            <Route path="/anker/power-banks/anker-zolo-a110e-20000" component={() => <CairoVoltClone page="product" />} />
+            <Route path="/checkout" component={() => <CairoVoltClone page="checkout" />} />
             <Route path="/search" component={Search} />
             <Route path="/favorites" component={Favorites} />
             
@@ -42,7 +56,7 @@ function Router() {
             <Route component={NotFound} />
           </Switch>
         </RoutedErrorBoundary>
-        <Footer />
+        {!isCairoVoltRoute && <Footer />}
       </StoreProvider>
     </div>
   );

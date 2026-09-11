@@ -7,3 +7,4 @@
 - [CairoVolt data boundary](cairovolt-data-boundary.md) — keep reference-site presentation assets local, but source all commerce data from the project database.
 - [Shared CABL shell](shared-cabl-shell.md) — every interactive and static route should preserve the same CABL header and footer.
 - [CABL programmatic SEO](cabl-programmatic-seo.md) — treat the keyword bank as semantic coverage, and index only pages with distinct catalog or verified first-party value.
+- [CairoVolt clone permission](cairovolt-clone-permission.md) — exact CairoVolt branding, content, assets, and page structure are authorized for this project.
