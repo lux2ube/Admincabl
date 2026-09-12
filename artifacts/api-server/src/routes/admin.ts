@@ -16,6 +16,7 @@ import {
 } from "@workspace/api-zod";
 import { pool } from "@workspace/db";
 import { adminTableMap, adminTables, type AdminColumn, type AdminTable } from "../lib/admin-schema";
+import { brandPublicPath, productPublicPath, productSlug, publicCategoryPath, slugify } from "../lib/store-seo";
 
 const router: IRouter = Router();
 const sensitiveColumns = new Set(["password_hash", "reset_token", "access_token", "refresh_token"]);
@@ -103,6 +104,126 @@ function whereClause(table: AdminTable, keyValues: Record<string, string>, param
   return clauses.join(" AND ");
 }
 
+function withGeneratedCatalogSlug(table: AdminTable, values: Record<string, unknown>) {
+  const next = { ...values };
+  if (next.slug && String(next.slug).trim()) return next;
+  if (table.key === "categories" && next.category_name) {
+    next.slug = slugify(String(next.category_name));
+  } else if (table.key === "brands" && next.brand_name) {
+    next.slug = slugify(String(next.brand_name));
+  } else if (table.key === "products" && next.product_name && next.SKU) {
+    next.slug = productSlug(String(next.product_name), String(next.SKU));
+  }
+  return next;
+}
+
+async function insertSeoRedirect(fromPath: string | null | undefined, toPath: string | null | undefined) {
+  if (!fromPath || !toPath || fromPath === toPath || !fromPath.startsWith("/") || !toPath.startsWith("/")) return;
+  await pool.query(
+    `INSERT INTO "seo_redirects" ("from_path", "to_path", "status_code", "active")
+     VALUES ($1, $2, 301, TRUE)
+     ON CONFLICT ("from_path") DO UPDATE
+       SET "to_path" = EXCLUDED."to_path", "status_code" = 301, "active" = TRUE, "updated_at" = NOW()`,
+    [fromPath, toPath],
+  );
+}
+
+async function productPathSnapshot(id: string) {
+  const result = await pool.query<{
+    slug: string | null;
+    brand_slug: string | null;
+    category_slug: string | null;
+  }>(
+    `SELECT p."slug", b."slug" AS "brand_slug", c."slug" AS "category_slug"
+     FROM "products" p
+     LEFT JOIN "brands" b ON b."id" = p."brand_id"
+     LEFT JOIN LATERAL (
+       SELECT c1."slug"
+       FROM "product_categories" pc1
+       JOIN "categories" c1 ON c1."id" = pc1."category_id" AND c1."active" = TRUE
+       WHERE pc1."product_id" = p."id"
+       ORDER BY c1."parent_id" NULLS FIRST, c1."category_name"
+       LIMIT 1
+     ) c ON TRUE
+     WHERE p."id" = $1
+     LIMIT 1`,
+    [id],
+  );
+  const row = result.rows[0];
+  if (!row?.slug || !String(row.slug).trim()) return null;
+  return {
+    path: productPublicPath({ productSlug: row.slug, brandSlug: row.brand_slug, categorySlug: row.category_slug }),
+    brandSlug: row.brand_slug,
+    categorySlug: row.category_slug,
+  };
+}
+
+async function updateCatalogRedirects(table: AdminTable, before: Record<string, unknown>, after: Record<string, unknown>) {
+  if (table.key === "categories" && before.slug !== after.slug) {
+    await insertSeoRedirect(publicCategoryPath(before.slug ? String(before.slug) : null), publicCategoryPath(after.slug ? String(after.slug) : null));
+    const affected = await pool.query<{ slug: string; brand_slug: string | null; category_slug: string | null }>(
+      `SELECT p."slug", b."slug" AS "brand_slug", c."slug" AS "category_slug"
+       FROM "products" p
+       JOIN "product_categories" pc ON pc."product_id" = p."id" AND pc."category_id" = $1
+       LEFT JOIN "brands" b ON b."id" = p."brand_id"
+       LEFT JOIN LATERAL (
+         SELECT c1."slug"
+         FROM "product_categories" pc1
+         JOIN "categories" c1 ON c1."id" = pc1."category_id" AND c1."active" = TRUE
+         WHERE pc1."product_id" = p."id"
+         ORDER BY c1."parent_id" NULLS FIRST, c1."category_name"
+         LIMIT 1
+       ) c ON TRUE
+       WHERE p."published" = TRUE AND p."slug" IS NOT NULL`,
+      [after.id],
+    );
+    for (const product of affected.rows) {
+      if (!product.category_slug || !before.slug || !after.slug) continue;
+      await insertSeoRedirect(
+        productPublicPath({ productSlug: product.slug, brandSlug: product.brand_slug, categorySlug: String(before.slug) }),
+        productPublicPath({ productSlug: product.slug, brandSlug: product.brand_slug, categorySlug: product.category_slug }),
+      );
+    }
+  }
+
+  if (table.key === "brands" && before.slug !== after.slug) {
+    await insertSeoRedirect(brandPublicPath(String(before.slug || "")), brandPublicPath(String(after.slug || "")));
+    const affected = await pool.query<{ slug: string; category_slug: string | null }>(
+      `SELECT p."slug", c."slug" AS "category_slug"
+       FROM "products" p
+       LEFT JOIN LATERAL (
+         SELECT c1."slug"
+         FROM "product_categories" pc1
+         JOIN "categories" c1 ON c1."id" = pc1."category_id" AND c1."active" = TRUE
+         WHERE pc1."product_id" = p."id"
+         ORDER BY c1."parent_id" NULLS FIRST, c1."category_name"
+         LIMIT 1
+       ) c ON TRUE
+       WHERE p."published" = TRUE AND p."brand_id" = $1 AND p."slug" IS NOT NULL`,
+      [after.id],
+    );
+    for (const product of affected.rows) {
+      if (!product.category_slug) continue;
+      await insertSeoRedirect(
+        productPublicPath({ productSlug: product.slug, brandSlug: String(before.slug || ""), categorySlug: product.category_slug }),
+        productPublicPath({ productSlug: product.slug, brandSlug: String(after.slug || ""), categorySlug: product.category_slug }),
+      );
+    }
+  }
+
+  if (table.key === "products" && before.slug !== after.slug) {
+    const current = await productPathSnapshot(String(after.id));
+    const oldPath = current
+      ? productPublicPath({
+          productSlug: String(before.slug || ""),
+          brandSlug: current.brandSlug,
+          categorySlug: current.categorySlug,
+        })
+      : null;
+    await insertSeoRedirect(oldPath, current?.path);
+  }
+}
+
 router.get("/admin/metadata", (_req, res) => {
   res.json(GetAdminMetadataResponse.parse({ tables: adminTables }));
 });
@@ -164,7 +285,7 @@ router.post("/admin/tables/:table/rows", async (req, res): Promise<void> => {
   const table = tableOr404(parsedParams.data.table, res);
   if (!table) return;
   try {
-    const entries = safeValues(table, parsedBody.data.values, true);
+    const entries = safeValues(table, withGeneratedCatalogSlug(table, parsedBody.data.values), true);
     if (entries.length === 0) throw new Error("At least one field is required");
     const columns = entries.map(([key]) => quoteIdentifier(key)).join(", ");
     const placeholders = entries.map((_, index) => `$${index + 1}`).join(", ");
@@ -189,19 +310,36 @@ router.patch("/admin/tables/:table/rows/:id", async (req, res): Promise<void> =>
   const table = tableOr404(parsedParams.data.table, res);
   if (!table) return;
   try {
-    const entries = safeValues(table, parsedBody.data.values, false);
+    const inputValues = parsedBody.data.values;
+    if (["products", "categories", "brands"].includes(table.key) && Object.prototype.hasOwnProperty.call(inputValues, "slug") && !String(inputValues.slug ?? "").trim()) {
+      throw new Error("Slug cannot be empty for a public catalog record");
+    }
+    const keyValues = parseRowId(table, parsedParams.data.id);
+    const beforeParams: unknown[] = [];
+    const beforeWhere = whereClause(table, keyValues, beforeParams);
+    const beforeResult = ["products", "categories", "brands"].includes(table.key)
+      ? await pool.query(`SELECT * FROM ${quoteIdentifier(table.key)} WHERE ${beforeWhere} LIMIT 1`, beforeParams)
+      : null;
+    const entries = safeValues(table, inputValues, false);
     if (entries.length === 0) throw new Error("At least one editable field is required");
-    const values = entries.map(([, value]) => value);
+    const updateValues = entries.map(([, value]) => value);
     const assignments = entries.map(([key], index) => `${quoteIdentifier(key)} = $${index + 1}`).join(", ");
     const keyParams: unknown[] = [];
-    const where = whereClause(table, parseRowId(table, parsedParams.data.id), keyParams, values.length);
+    const where = whereClause(table, parseRowId(table, parsedParams.data.id), keyParams, updateValues.length);
     const result = await pool.query(
       `UPDATE ${quoteIdentifier(table.key)} SET ${assignments} WHERE ${where} RETURNING *`,
-      [...values, ...keyParams],
+      [...updateValues, ...keyParams],
     );
     if (!result.rows[0]) {
       res.status(404).json({ error: "Row not found" });
       return;
+    }
+    if (beforeResult?.rows[0]) {
+      try {
+        await updateCatalogRedirects(table, beforeResult.rows[0], result.rows[0]);
+      } catch (redirectError) {
+        req.log.error({ err: redirectError, table: table.key }, "Catalog updated but SEO redirect history could not be updated");
+      }
     }
     res.json(UpdateAdminRowResponse.parse({ row: sanitizeRow(result.rows[0]) }));
   } catch (error) {

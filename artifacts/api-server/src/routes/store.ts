@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request } from "express";
 import {
   CreateStoreOrderBody,
   CreateStoreOrderResponse,
@@ -18,7 +18,10 @@ import {
   buildGuideSeo,
   buildHomeSeo,
   buildProductSeo,
+  brandPublicPath,
   productSlug,
+  productPublicPath,
+  publicCategoryPath,
   slugify,
 } from "../lib/store-seo";
 
@@ -66,6 +69,152 @@ const orderId = () => {
   const random = Math.random().toString(36).slice(2, 8).toUpperCase();
   return `CABL-${stamp}-${random}`;
 };
+
+const SITEMAP_URL_LIMIT = 50_000;
+const STATIC_SITEMAP_PATHS = [
+  "/",
+  "/about",
+  "/blog/best-power-bank-yemen",
+  "/locations/yemen",
+  "/solutions/slow-car-charging",
+  "/lab",
+  "/verify",
+  "/shipping",
+  "/return-policy",
+  "/faq",
+  "/contact",
+];
+
+const xmlEscape = (value: string) =>
+  value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&apos;");
+
+function publicSiteOrigin(req: Request) {
+  const forwardedHost = String(req.get("x-forwarded-host") || req.get("host") || "").split(",")[0].trim();
+  const forwardedProtocol = String(req.get("x-forwarded-proto") || "").split(",")[0].trim();
+  const protocol = forwardedProtocol || (process.env.NODE_ENV === "production" ? "https" : req.protocol);
+  const basePath = String(process.env.PUBLIC_SITE_BASE_PATH || "").replace(/\/$/, "");
+  return {
+    origin: String(process.env.PUBLIC_SITE_ORIGIN || `${protocol}://${forwardedHost}`).replace(/\/$/, ""),
+    basePath,
+  };
+}
+
+async function getSitemapPaths() {
+  const [categories, brands, products, guides] = await Promise.all([
+    pool.query<{ slug: string }>(
+      `SELECT "slug" FROM "categories"
+       WHERE "active" = TRUE AND "seo_indexable" = TRUE
+         AND "slug" IS NOT NULL AND BTRIM("slug") <> ''`,
+    ),
+    pool.query<{ slug: string }>(
+      `SELECT "slug" FROM "brands"
+       WHERE "seo_indexable" = TRUE AND "slug" IS NOT NULL AND BTRIM("slug") <> ''`,
+    ),
+    pool.query<{ slug: string; brand_slug: string | null; category_slug: string | null }>(
+      `SELECT p."slug", b."slug" AS "brand_slug", c."slug" AS "category_slug"
+       FROM "products" p
+       LEFT JOIN "brands" b ON b."id" = p."brand_id"
+       LEFT JOIN LATERAL (
+         SELECT c1."slug"
+         FROM "product_categories" pc1
+         JOIN "categories" c1 ON c1."id" = pc1."category_id" AND c1."active" = TRUE
+         WHERE pc1."product_id" = p."id"
+         ORDER BY c1."parent_id" NULLS FIRST, c1."category_name"
+         LIMIT 1
+       ) c ON TRUE
+       WHERE p."published" = TRUE
+         AND p."slug" IS NOT NULL AND BTRIM(p."slug") <> ''`,
+    ),
+    pool.query<{ slug: string; canonical_path: string | null }>(
+      `SELECT "slug", "canonical_path" FROM "seo_guides"
+       WHERE "published" = TRUE AND "seo_indexable" = TRUE
+         AND "slug" IS NOT NULL AND BTRIM("slug") <> ''`,
+    ),
+  ]);
+
+  const paths = new Set(STATIC_SITEMAP_PATHS);
+  for (const row of categories.rows) paths.add(publicCategoryPath(row.slug));
+  for (const row of brands.rows) paths.add(brandPublicPath(row.slug));
+  for (const row of products.rows) {
+    paths.add(productPublicPath({
+      brandSlug: row.brand_slug,
+      categorySlug: row.category_slug,
+      productSlug: row.slug,
+    }));
+  }
+  for (const row of guides.rows) paths.add(row.canonical_path || `/guide/${row.slug}`);
+  return [...paths].filter((path) => path.startsWith("/") && !path.includes("?") && !path.includes("#"));
+}
+
+function sitemapUrl(origin: string, basePath: string, path: string) {
+  return `${origin}${basePath}${path === "/" ? "/" : path}`;
+}
+
+function sitemapXml(origin: string, basePath: string, paths: string[]) {
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths
+    .map((path) => `  <url><loc>${xmlEscape(sitemapUrl(origin, basePath, path))}</loc></url>`)
+    .join("\n")}\n</urlset>\n`;
+}
+
+function sitemapIndexXml(origin: string, basePath: string, chunkCount: number) {
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${Array.from({ length: chunkCount }, (_, index) => `  <sitemap><loc>${xmlEscape(sitemapUrl(origin, basePath, `/api/store/sitemap-${index}.xml`))}</loc></sitemap>`).join("\n")}\n</sitemapindex>\n`;
+}
+
+async function findCatalogRedirect(type: "product" | "category" | "brand", slug: string) {
+  const exactPaths = type === "product"
+    ? [`/product/${slug}`]
+    : type === "category"
+      ? [publicCategoryPath(slug), `/category/${slug}`]
+      : [brandPublicPath(slug), `/brand/${slug}`];
+  const result = await pool.query<{ to_path: string }>(
+    `SELECT "to_path"
+     FROM "seo_redirects"
+     WHERE "active" = TRUE
+       AND ("from_path" = ANY($1::text[]) OR ($2 = 'product' AND "from_path" LIKE $3))
+     ORDER BY CASE WHEN "from_path" = ANY($1::text[]) THEN 0 ELSE 1 END, "updated_at" DESC NULLS LAST
+     LIMIT 1`,
+    [exactPaths, type, `%/${slug}`],
+  );
+  return result.rows[0]?.to_path ?? null;
+}
+
+const lastPathSegment = (path: string) => path.split("/").filter(Boolean).at(-1) ?? null;
+
+router.get("/store/sitemap.xml", async (req, res): Promise<void> => {
+  try {
+    const paths = await getSitemapPaths();
+    const { origin, basePath } = publicSiteOrigin(req);
+    if (paths.length <= SITEMAP_URL_LIMIT) {
+      res.type("application/xml").send(sitemapXml(origin, basePath, paths));
+      return;
+    }
+    res.type("application/xml").send(sitemapIndexXml(origin, basePath, Math.ceil(paths.length / SITEMAP_URL_LIMIT)));
+  } catch (error) {
+    req.log.error({ err: error }, "Failed to generate store sitemap");
+    res.status(500).type("text/plain").send("Unable to generate sitemap");
+  }
+});
+
+router.get("/store/sitemap-:part.xml", async (req, res): Promise<void> => {
+  const part = Number(req.params.part);
+  if (!Number.isInteger(part) || part < 0) {
+    res.status(404).send("Sitemap not found");
+    return;
+  }
+  try {
+    const paths = await getSitemapPaths();
+    const start = part * SITEMAP_URL_LIMIT;
+    if (start >= paths.length) {
+      res.status(404).send("Sitemap not found");
+      return;
+    }
+    const { origin, basePath } = publicSiteOrigin(req);
+    res.type("application/xml").send(sitemapXml(origin, basePath, paths.slice(start, start + SITEMAP_URL_LIMIT)));
+  } catch (error) {
+    req.log.error({ err: error, part }, "Failed to generate store sitemap chunk");
+    res.status(500).type("text/plain").send("Unable to generate sitemap");
+  }
+});
 
 router.get("/store/catalog", async (req, res): Promise<void> => {
   try {
@@ -241,13 +390,20 @@ router.get("/store/seo", async (req, res): Promise<void> => {
     return;
   }
 
-  const { type, slug } = parsed.data;
+    const { type, slug } = parsed.data;
   if (type !== "home" && !slug) {
     res.status(400).json({ error: "هذه الصفحة تحتاج إلى slug" });
     return;
   }
 
   try {
+    let lookupSlug = slug;
+    if (slug && (type === "product" || type === "category" || type === "brand")) {
+      const redirectTarget = await findCatalogRedirect(type, slug);
+      const redirectSlug = redirectTarget ? lastPathSegment(redirectTarget) : null;
+      if (redirectSlug) lookupSlug = redirectSlug;
+    }
+
     if (type === "home") {
       res.json(GetStoreSeoResponse.parse(buildHomeSeo()));
       return;
@@ -292,7 +448,7 @@ router.get("/store/seo", async (req, res): Promise<void> => {
          ) g ON TRUE
          WHERE p."published" = TRUE AND p."slug" = $1
          LIMIT 1`,
-        [slug],
+         [lookupSlug],
       );
       const product = result.rows[0];
       if (!product) {
@@ -335,7 +491,7 @@ router.get("/store/seo", async (req, res): Promise<void> => {
          FROM "categories"
          WHERE "slug" = $1 AND "active" = TRUE
          LIMIT 1`,
-        [slug],
+         [lookupSlug],
       );
       const category = result.rows[0];
       if (!category) {
@@ -371,7 +527,7 @@ router.get("/store/seo", async (req, res): Promise<void> => {
          FROM "brands"
          WHERE "slug" = $1
          LIMIT 1`,
-        [slug],
+         [lookupSlug],
       );
       const brand = result.rows[0];
       if (!brand) {

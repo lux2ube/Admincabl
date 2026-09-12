@@ -11,10 +11,20 @@ import { CartLine, ProductGrid, QuantityControl, RatingLine } from '@/components
 import { CollectionEditorial, EditorialSection, FAQList, HomeImportedSections, InfoCards, ProductComparisonTable, ProductEditorial } from '@/pages/content-pages';
 
 function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; slug?: string }) {
+  const [location, navigate] = useLocation();
   const params = slug ? { type, slug } : { type };
   const { data } = useGetStoreSeo(params, { query: { queryKey: getGetStoreSeoQueryKey(params), enabled: true, staleTime: 60_000 } });
   useEffect(() => {
     if (!data) return;
+    if (slug && data.slug && data.slug !== slug) {
+      const redirectPath = type === 'product'
+        ? data.canonicalPath
+        : type === 'category'
+          ? `/category/${data.slug}`
+          : `/brand/${data.slug}`;
+      if (location !== redirectPath) navigate(redirectPath);
+      return;
+    }
     setSeoHead({
       title: data.title,
       description: data.description,
@@ -42,7 +52,7 @@ function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; 
         };
       })(),
     });
-  }, [data]);
+  }, [data, location, navigate, type]);
   return null;
 }
 

@@ -80,8 +80,26 @@ const categoryPublicPaths: Record<string, string> = {
   "hubs-adapters": "hubs-adapters",
 };
 
-function publicCategoryPath(slug: string | null) {
+export function publicCategoryPath(slug: string | null) {
   return slug ? `/${categoryPublicPaths[slug] ?? slug}` : "/categories/";
+}
+
+export function brandPublicPath(slug: string) {
+  return `/${slug}`;
+}
+
+export function productPublicPath({
+  brandSlug,
+  categorySlug,
+  productSlug,
+}: {
+  brandSlug?: string | null;
+  categorySlug?: string | null;
+  productSlug: string;
+}) {
+  return brandSlug && categorySlug
+    ? `${brandPublicPath(brandSlug)}${publicCategoryPath(categorySlug)}/${productSlug}`
+    : `/product/${productSlug}`;
 }
 
 const arabicLetters = new Map([
@@ -165,9 +183,11 @@ export function buildHomeSeo(): SeoResponse {
 export function buildProductSeo(input: ProductSeoInput): SeoResponse {
   const displayName = productDisplayName(input.brand, input.productName);
   const description = productDescription(input, displayName);
-  const canonicalPath = input.brandSlug && input.categorySlug
-    ? `/${input.brandSlug}/${categoryPublicPaths[input.categorySlug] ?? input.categorySlug}/${input.slug}`
-    : `/product/${input.slug}`;
+  const canonicalPath = productPublicPath({
+    brandSlug: input.brandSlug,
+    categorySlug: input.categorySlug,
+    productSlug: input.slug,
+  });
   const categoryPath = publicCategoryPath(input.categorySlug);
   const categoryName = input.categoryName || "المنتجات";
   const price = input.discountPrice ?? input.regularPrice;

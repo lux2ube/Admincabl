@@ -10,3 +10,4 @@
 - [CABL programmatic SEO](cabl-programmatic-seo.md) — treat the keyword bank as semantic coverage, and index only pages with distinct catalog or verified first-party value.
 - [CairoVolt clone permission](cairovolt-clone-permission.md) — exact CairoVolt branding, content, assets, and page structure are authorized for this project.
 - [SEO head base path](seo-head-base-path.md) — strip the mounted artifact prefix before composing canonical and Open Graph URLs.
+- [SEO redirect snapshots](seo-redirect-snapshots.md) — capture old canonical paths before applying catalog slug mutations.

@@ -6,4 +6,4 @@ Disallow: /checkout
 Disallow: /orders
 Disallow: /order/
 
-Sitemap: /sitemap.xml
+Sitemap: /api/store/sitemap.xml
