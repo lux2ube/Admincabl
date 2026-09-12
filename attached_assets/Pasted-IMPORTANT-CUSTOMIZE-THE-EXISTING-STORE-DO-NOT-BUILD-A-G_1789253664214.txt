@@ -1,0 +1,518 @@
+IMPORTANT — CUSTOMIZE THE EXISTING STORE, DO NOT BUILD A GENERIC TEMPLATE
+
+You are working on the existing CABL e-commerce store.
+
+You already have access to the current project, its database, components, routes, products, categories, brands, SEO structure, styling, and existing homepage.
+
+DO NOT assume this is a new project.
+DO NOT replace the current store with a generic e-commerce template.
+DO NOT invent products, categories, brands, business claims, or functionality.
+
+Your task is to analyze the existing CABL store first, then improve/restructure its homepage using the universal UX architecture below.
+
+---
+
+STEP 1 — AUDIT THE CURRENT CABL STORE FIRST
+
+Before changing anything, inspect the existing implementation and determine:
+
+- Current homepage structure
+- Existing header/navigation
+- Existing categories
+- Existing brands
+- Existing products
+- Existing product-card component
+- Existing design system
+- Existing colors
+- Existing typography
+- Existing buttons
+- Existing responsive behavior
+- Existing SEO implementation
+- Existing routes
+- Existing database/schema
+- Existing CMS/Admin content
+- Existing reusable components
+- Existing trust/service information
+- Existing footer
+- Existing mobile layout
+
+Use the actual CABL data and implementation as the source of truth.
+
+Do not invent replacements for information that already exists.
+
+---
+
+STEP 2 — MAP CABL'S CURRENT CONTENT TO THE UX ARCHITECTURE
+
+Use this architecture as a UX framework, not as a rigid template:
+
+Header
+↓
+Hero
+↓
+Trust / Service Benefits
+↓
+Shop by Need
+↓
+Featured Products
+↓
+Brand / Collection Discovery
+↓
+Shop by Category
+↓
+Product Finder (only if useful)
+↓
+Recommendations (only if useful)
+↓
+Trust / Transparency
+↓
+Buying Guides / Content
+↓
+Brand Positioning
+↓
+FAQ
+↓
+Footer
+
+For every section, determine whether it actually makes sense for CABL.
+
+DO NOT blindly add all sections.
+
+If CABL does not have enough content/data to support a section, do not create filler content just to match the architecture.
+
+If an existing CABL section already performs the same job, improve/restructure it instead of creating a duplicate.
+
+---
+
+STEP 3 — PRESERVE CABL'S EXISTING IDENTITY
+
+The result must clearly remain CABL, not a clone of another store.
+
+Preserve and improve:
+
+- CABL branding
+- Existing visual identity
+- Existing product catalog
+- Existing categories
+- Existing brands
+- Existing pricing
+- Existing product information
+- Existing SEO strategy
+- Existing routes
+- Existing business information
+
+Do not copy CairoVolt, Anker, UGREEN, Baseus, or another store's branding/content.
+
+Use successful e-commerce UX principles, but adapt them to CABL.
+
+---
+
+STEP 4 — ADAPT THE HOMEPAGE TO CABL'S ACTUAL CUSTOMER
+
+Analyze the current CABL catalog and determine the actual customer buying journeys.
+
+For example, if the current catalog contains products such as:
+
+- Chargers
+- Cables
+- Power banks
+- Car accessories
+- Hubs
+- Audio
+- Other electronics
+
+then organize discovery around the actual CABL catalog, not a hypothetical catalog.
+
+Identify the most important:
+
+Customer needs
+
+What problems are CABL customers actually trying to solve?
+
+Product categories
+
+What are the actual major categories?
+
+Brands
+
+Which brands actually exist in the current database?
+
+Buying decisions
+
+What specifications actually matter when choosing CABL products?
+
+Build the homepage around those real decisions.
+
+---
+
+STEP 5 — HOMEPAGE INFORMATION ARCHITECTURE
+
+Use the following as the decision framework.
+
+1. HEADER
+
+Improve the existing CABL header.
+
+Do not replace it unnecessarily.
+
+Make it easy to:
+
+- Search
+- Browse categories
+- Browse brands
+- Open cart
+- Access important account/navigation functions
+
+Mobile navigation must be particularly simple.
+
+---
+
+2. HERO
+
+Use CABL's actual strongest commercial proposition.
+
+Do not invent a generic slogan.
+
+The hero should answer:
+
+What does CABL sell?
+Why should I care?
+What should I do next?
+
+Use actual CABL products/categories/offers where appropriate.
+
+---
+
+3. TRUST / SERVICE
+
+Use only CABL's actual policies and capabilities.
+
+Possible examples:
+
+- Authentic products
+- Warranty
+- Delivery
+- Payment
+- Customer support
+- Return policy
+
+Never invent guarantees or service claims.
+
+---
+
+4. SHOP BY NEED
+
+Analyze CABL's catalog and create need-based discovery only where it genuinely helps.
+
+Example structure:
+
+What are you looking for?
+
+Need faster charging
+Need a reliable cable
+Need power on the go
+Need something for the car
+Need accessories for travel
+
+But do not blindly use these examples.
+
+Derive the final needs from CABL's actual catalog.
+
+---
+
+5. FEATURED PRODUCTS
+
+Use CABL's real products.
+
+Support meaningful collections such as:
+
+- Best sellers
+- New arrivals
+- Featured
+- Best value
+- Deals
+
+Only use a collection if the data actually supports it.
+
+Product cards must use the existing product data and existing product routes.
+
+---
+
+6. BRANDS
+
+Analyze the current CABL brand catalog.
+
+If CABL has multiple meaningful brands, create a brand discovery section.
+
+Do not create fake brand positioning.
+
+Use actual brand/category relationships from the existing system.
+
+---
+
+7. CATEGORIES
+
+Build category discovery from CABL's actual category hierarchy.
+
+Do not duplicate Shop by Need.
+
+Need = customer objective
+
+Category = product classification
+
+---
+
+8. PRODUCT FINDER
+
+Only implement this if CABL's catalog actually benefits from guided product selection.
+
+If implemented:
+
+- Use real CABL product attributes.
+- Questions must affect results.
+- Recommendations must be explainable.
+- Do not create fake personalization.
+
+If the current catalog is too small for this feature, do not add it.
+
+---
+
+9. TRUST / TRANSPARENCY
+
+Use CABL's actual information to reduce purchase hesitation.
+
+Potential areas:
+
+- Product specifications
+- Compatibility
+- Warranty
+- Delivery
+- Payment
+- Returns
+- Authenticity
+
+Only show information that exists or can be verified in the current CABL system.
+
+---
+
+10. BUYING GUIDES / CONTENT
+
+If CABL already has a blog/content system, surface relevant content.
+
+Prioritize content that helps customers choose products.
+
+Examples:
+
+- How to choose a charger
+- USB-C compatibility
+- Charging wattage
+- Power-bank capacity
+- Cable specifications
+
+But use existing CABL content where available.
+
+Do not generate a large artificial blog section simply to fill the homepage.
+
+---
+
+11. CABL POSITIONING
+
+Use the existing CABL positioning and business information.
+
+Keep this section short.
+
+Its purpose is to answer:
+
+«Why buy from CABL instead of an ordinary marketplace seller?»
+
+Use actual CABL differentiators.
+
+---
+
+12. FAQ
+
+Use existing CABL FAQ content if available.
+
+If not, create only questions that reflect real purchasing concerns based on the actual store.
+
+---
+
+13. FOOTER
+
+Improve the existing CABL footer rather than replacing it blindly.
+
+Organize actual:
+
+- Categories
+- Brands
+- Important pages
+- Support
+- Policies
+- Contact
+- Social channels
+
+Do not add links to pages that do not exist.
+
+---
+
+CRITICAL RULE — DATA SOURCE
+
+The homepage must be data-driven from the existing CABL system.
+
+Do not hard-code:
+
+- Product names
+- Prices
+- Categories
+- Brands
+- URLs
+- Product counts
+- Stock
+- Discounts
+- Business claims
+
+unless they are genuinely static configuration already used by the project.
+
+If the existing database/API already provides the information, use it.
+
+---
+
+CRITICAL RULE — SEO
+
+DO NOT damage or rewrite the existing CABL SEO architecture.
+
+Before modifying the homepage:
+
+- Inspect the current metadata.
+- Inspect canonical implementation.
+- Inspect structured data.
+- Inspect internal linking.
+- Inspect existing routes.
+- Inspect sitemap behavior.
+- Preserve existing SEO functionality.
+
+Improve SEO only where the existing implementation is clearly deficient.
+
+Do not add keyword stuffing.
+
+Do not create duplicate SEO content.
+
+Do not create fake category/brand links.
+
+---
+
+CRITICAL RULE — COMPONENT REUSE
+
+Reuse existing CABL components wherever possible.
+
+Do not create:
+
+NewHeader
+NewProductCard
+NewFooter
+NewButton
+NewCategoryCard
+
+if equivalent components already exist.
+
+Instead:
+
+audit → reuse → improve → extend only when necessary.
+
+Maintain one coherent design system.
+
+---
+
+MOBILE UX IS A PRIORITY
+
+The homepage must be designed around the actual CABL mobile experience.
+
+Check:
+
+- Header height
+- Search
+- Navigation
+- Product cards
+- Horizontal scrolling
+- Category cards
+- CTA size
+- Typography
+- Spacing
+- Image proportions
+- Cart interaction
+- Section density
+
+Do not simply shrink the desktop homepage.
+
+---
+
+DESIGN PRINCIPLE
+
+The homepage should not feel like:
+
+«"A collection of marketing sections."»
+
+It should feel like:
+
+«A guided shopping experience.»
+
+The customer should naturally move through:
+
+What does CABL sell?
+↓
+What do I need?
+↓
+Which category/brand fits?
+↓
+Which products are worth considering?
+↓
+Which one fits me?
+↓
+Can I trust this purchase?
+↓
+Buy
+
+---
+
+FINAL REQUIREMENT
+
+Before implementation, compare the existing CABL homepage against this architecture.
+
+Then make a surgical redesign:
+
+- Keep what already works.
+- Improve what is weak.
+- Remove unnecessary sections.
+- Reorganize sections when it improves customer flow.
+- Reuse existing components.
+- Use actual CABL data.
+- Preserve SEO.
+- Preserve routes.
+- Preserve business logic.
+- Preserve CABL identity.
+
+Do NOT rebuild the website from scratch.
+
+The final result must look like a significantly more professional version of the existing CABL store, not like a generic e-commerce template.
+
+ACCEPTANCE TEST
+
+After implementation, verify:
+
+1. All homepage products come from the actual CABL catalog.
+2. All category links lead to real existing category pages.
+3. All brand links lead to real existing brand pages.
+4. All product links lead to real product pages.
+5. No invented business claims exist.
+6. No fake discounts exist.
+7. No duplicate navigation sections exist.
+8. No unnecessary UX sections were added.
+9. Mobile UX works correctly.
+10. Existing SEO is preserved.
+11. Existing routes continue working.
+12. Existing product/cart functionality continues working.
+13. Existing design system is respected.
+14. Homepage content is manageable through the existing system where applicable.
+15. The homepage clearly reflects CABL's actual catalog, market, brands, and customers.
+
+First inspect the existing CABL implementation. Then decide what to change. Do not start by blindly coding the template above.
