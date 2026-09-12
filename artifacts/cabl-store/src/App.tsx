@@ -6,6 +6,7 @@ import { StoreShell } from '@/components/store-shell';
 import { StoreProvider } from '@/lib/store';
 import NotFound from '@/pages/not-found';
 import { BrandPage, CartPage, CategoryPage, CheckoutPage, HomePage, OrderPage, OrdersPage, ProductPage, SearchPage } from '@/pages/store-pages';
+import { AboutPage, ArticlePage, ContactPage, FAQPage, LabPage, LocationPage, ReturnPage, ShippingPage, SolutionPage, VerifyPage } from '@/pages/content-pages';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } });
 
@@ -25,6 +26,16 @@ function Router() {
     <Route path="/checkout" component={CheckoutPage}/>
     <Route path="/orders" component={OrdersPage}/>
     <Route path="/order/:id" component={OrderPage}/>
+    <Route path="/about" component={AboutPage}/>
+    <Route path="/blog/:slug" component={ArticlePage}/>
+    <Route path="/locations/:slug" component={LocationPage}/>
+    <Route path="/solutions/:slug" component={SolutionPage}/>
+    <Route path="/lab" component={LabPage}/>
+    <Route path="/verify" component={VerifyPage}/>
+    <Route path="/shipping" component={ShippingPage}/>
+    <Route path="/return-policy" component={ReturnPage}/>
+    <Route path="/faq" component={FAQPage}/>
+    <Route path="/contact" component={ContactPage}/>
     <Route component={NotFound}/>
   </Switch></RoutedErrorBoundary></StoreShell>;
 }

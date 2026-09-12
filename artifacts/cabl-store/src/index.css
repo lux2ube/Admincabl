@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
+@import './editorial-pages.css';
 @custom-variant dark (&:is(.dark *));
 @font-face{font-family:CairoLocal;src:url('/cairovolt/4dccc19ac2b7.woff2') format('woff2');font-style:normal;font-weight:200 800;font-display:swap}
 @theme inline{--font-sans:var(--app-font-sans);--font-mono:var(--app-font-mono);--color-background:hsl(var(--background));--color-foreground:hsl(var(--foreground));--color-primary:hsl(var(--primary));--color-primary-foreground:hsl(var(--primary-foreground));--color-border:hsl(var(--border));--color-muted:hsl(var(--muted));--color-muted-foreground:hsl(var(--muted-foreground))}
