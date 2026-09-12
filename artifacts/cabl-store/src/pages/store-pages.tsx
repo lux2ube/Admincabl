@@ -106,6 +106,112 @@ function BrandCategoryLinks({ brandSlug, categories }: { brandSlug: string; cate
   );
 }
 
+const categorySlugAliases: Record<string, string[]> = {
+  cables: ['cables', 'charging-cables'],
+  'charging-cables': ['cables', 'charging-cables'],
+  'car-accessories': ['car-accessories', 'travel-adapters', 'car-chargers'],
+  'travel-adapters': ['car-accessories', 'travel-adapters', 'car-chargers'],
+  'phone-accessories': ['phone-accessories', 'hubs-adapters'],
+  'hubs-adapters': ['phone-accessories', 'hubs-adapters'],
+};
+
+function matchesCategory(product: StoreProduct, categorySlug: string) {
+  return categorySlugAliases[categorySlug]?.includes(product.category?.slug || '')
+    || product.category?.slug === categorySlug;
+}
+
+function guideKeyForCategory(categorySlug: string) {
+  if (categorySlug === 'charging-cables') return 'cables';
+  if (categorySlug === 'travel-adapters') return 'car-accessories';
+  return categorySlug;
+}
+
+function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string; categorySlug: string }) {
+  const { catalog, isLoading, isError } = useStore();
+  const [sort, setSort] = useState('featured');
+  const products = catalog?.products || [];
+  const brandProducts = products.filter((product) => product.brandSlug === brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-') === brandSlug);
+  const filtered = useMemo(() => brandProducts.filter((product) => matchesCategory(product, categorySlug)), [brandProducts, categorySlug]);
+  const sorted = useMemo(() => [...filtered].sort((a, b) => sort === 'price-low'
+    ? (a.discountPrice ?? a.regularPrice) - (b.discountPrice ?? b.regularPrice)
+    : sort === 'price-high'
+      ? (b.discountPrice ?? b.regularPrice) - (a.discountPrice ?? a.regularPrice)
+      : 0), [filtered, sort]);
+  const brandName = brandProducts[0]?.brand || brandSlug.replaceAll('-', ' ');
+  const categoryName = filtered[0]?.category?.name || brandProducts.find((product) => matchesCategory(product, categorySlug))?.category?.name || categorySlug.replaceAll('-', ' ');
+  const guideKey = guideKeyForCategory(categorySlug);
+  const copy = categoryGuideCopy[guideKey] || {
+    eyebrow: 'اختيار داخل العلامة',
+    title: `${categoryName} من ${brandName}`,
+    description: `تصفح منتجات ${categoryName} من ${brandName} المتاحة حالياً في كتالوج CABL، مع مقارنة البيانات والسعر والتوافر.`,
+    selection: `ابدأ من استخدامك، ثم طابق مواصفات ${categoryName} مع جهازك قبل اختيار موديل من ${brandName}.`,
+    tips: ['راجع رقم الموديل والبيانات المنشورة قبل الدفع.', 'طابق المنافذ والقدرة والتوافق مع جهازك.', 'قارن السعر والتوافر الحاليين بين المنتجات.', 'راجع الشحن والدفع في checkout قبل تأكيد الطلب.', 'احتفظ برقم الطلب وشروط الإرجاع بعد الشراء.'],
+    faqs: [
+      { question: `كيف أختار ${categoryName} من ${brandName}؟`, answer: 'ابدأ من الاستخدام، ثم قارن المواصفات والتوافق والسعر والتوافر في صفحات المنتجات.' },
+      { question: 'هل كل المنتجات متوفرة؟', answer: 'التوافر مرتبط بالكمية المنشورة وقت التصفح ويعاد التحقق عند الإضافة والطلب.' },
+      { question: 'أين أجد الشحن والإرجاع؟', answer: 'راجع الخيارات النشطة في checkout وسياسة الإرجاع قبل تأكيد الطلب.' },
+    ],
+  };
+  const comparisonProducts = sorted.slice(0, 8);
+  const publicCategorySlug = publicCategorySlugs[filtered[0]?.category?.slug || categorySlug] || categorySlug;
+  const description = `${categoryName} من ${brandName} في اليمن. قارن المواصفات والسعر والتوافر قبل الطلب من CABL.`;
+
+  return (
+    <>
+      <StaticSEO title={`${categoryName} ${brandName}`} description={description} />
+      <div className="category-landing-hero brand-category-hero">
+        <div className="container">
+          <Breadcrumbs items={[
+            { label: 'العلامات', href: `/brand/${brandSlug}` },
+            { label: brandName, href: `/brand/${brandSlug}` },
+            { label: categoryName },
+          ]} />
+          <div className="category-landing-copy">
+            <span className="eyebrow">{copy.eyebrow}</span>
+            <h1>{categoryName} {brandName}</h1>
+            <p>{copy.description}</p>
+            <div className="category-landing-actions">
+              <Link className="button button-secondary" href={`/brand/${brandSlug}`}>كل منتجات {brandName}</Link>
+              <Link className="button button-secondary" href={`/category/${publicCategorySlug}`}>كل {categoryName}</Link>
+              <Link className="button button-primary" href="/search">كل المنتجات <ArrowLeft size={16} /></Link>
+            </div>
+          </div>
+        </div>
+      </div>
+      <EditorialSection eyebrow="من الكتالوج الحالي" title={`${categoryName} من ${brandName}`}>
+        {isLoading ? <LoadingCatalog /> : isError ? <CatalogError retry={() => window.location.reload()} /> : <><CatalogToolbar products={sorted} sort={sort} setSort={setSort} /><ProductGrid products={sorted} empty={`لا توجد منتجات منشورة من ${brandName} في قسم ${categoryName} حالياً.`} /></>}
+      </EditorialSection>
+      <EditorialSection eyebrow="بيانات قابلة للمراجعة" title={`كيف تختار ${categoryName} من ${brandName}؟`}>
+        <div className="editorial-copy"><p>{copy.selection}</p></div>
+        <div className="numbered-steps category-tip-grid">{copy.tips.map((tip, index) => <div key={tip}><b>{String(index + 1).padStart(2, '0')}</b><p>{tip}</p></div>)}</div>
+      </EditorialSection>
+      <EditorialSection title={`مقارنة منتجات ${brandName}`}>
+        {comparisonProducts.length ? <ProductComparisonTable products={comparisonProducts} currencies={catalog?.currencies} /> : <p className="empty-state">ستظهر المقارنة بعد نشر منتجات في هذا المسار.</p>}
+      </EditorialSection>
+      <EditorialSection title="قبل تأكيد الطلب">
+        <InfoCards items={[
+          { icon: <ShieldCheck />, title: 'بيانات الموديل', text: 'راجع اسم الموديل ورقم SKU والمنافذ والقدرة في صفحة المنتج.' },
+          { icon: <Zap />, title: 'التوافق', text: 'طابق المنتج مع الجهاز والكابل والاستخدام، ولا تعتمد على الاسم أو الصورة فقط.' },
+          { icon: <Truck />, title: 'الشحن', text: 'اختر المدينة والعنوان في checkout لرؤية خيارات الشحن النشطة.' },
+          { icon: <RefreshCcw />, title: 'الإرجاع', text: 'راجع شروط الإرجاع والاستبدال واحتفظ برقم الطلب وإثبات الشراء.' },
+        ]} />
+      </EditorialSection>
+      <EditorialSection title={`أسئلة شائعة عن ${categoryName} ${brandName}`}>
+        <FAQList items={copy.faqs} />
+      </EditorialSection>
+      <EditorialSection title="روابط مرتبطة">
+        <div className="category-related-links">
+          <Link href={`/brand/${brandSlug}`}><ArrowRight /><strong>كل منتجات {brandName}</strong><span>تصفح جميع الأقسام المتاحة من هذه العلامة.</span><ArrowLeft size={15} /></Link>
+          <Link href={`/category/${publicCategorySlug}`}><Zap /><strong>كل {categoryName}</strong><span>قارن منتجات القسم من العلامات المتاحة.</span><ArrowLeft size={15} /></Link>
+          <Link href="/shipping"><Truck /><strong>الشحن والتوصيل</strong><span>راجع الرسوم والمدة حسب العنوان.</span><ArrowLeft size={15} /></Link>
+          <Link href="/return-policy"><RefreshCcw /><strong>الإرجاع والاستبدال</strong><span>اعرف الشروط والخطوات قبل الطلب.</span><ArrowLeft size={15} /></Link>
+        </div>
+      </EditorialSection>
+      <CTASection />
+    </>
+  );
+}
+
 const categoryGuideCopy: Record<string, {
   eyebrow: string;
   title: string;
@@ -257,6 +363,10 @@ export function CategoryPage() {
   return <CategoryLandingPage slug={slug} />;
 }
 export function BrandPage() { const { slug = '' } = useParams<{ slug: string }>(); return <CatalogPage mode="brand" slug={slug}/>; }
+export function BrandCategoryPage() {
+  const { brandSlug = '', categorySlug = '' } = useParams<{ brandSlug: string; categorySlug: string }>();
+  return <BrandCategoryPageView brandSlug={brandSlug} categorySlug={categorySlug} />;
+}
 
 export function SearchPage() {
   const { catalog, isLoading, isError, favorites } = useStore();

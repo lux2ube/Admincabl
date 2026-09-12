@@ -5,7 +5,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { StoreShell } from '@/components/store-shell';
 import { StoreProvider } from '@/lib/store';
 import NotFound from '@/pages/not-found';
-import { BrandPage, CartPage, CategoryPage, CheckoutPage, HomePage, OrderPage, OrdersPage, ProductPage, SearchPage } from '@/pages/store-pages';
+import { BrandCategoryPage, BrandPage, CartPage, CategoryPage, CheckoutPage, HomePage, OrderPage, OrdersPage, ProductPage, SearchPage } from '@/pages/store-pages';
 import { AboutPage, ArticlePage, ContactPage, FAQPage, LabPage, LocationPage, ReturnPage, ShippingPage, SolutionPage, VerifyPage } from '@/pages/content-pages';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } });
@@ -19,6 +19,7 @@ function Router() {
   return <StoreShell><RoutedErrorBoundary><Switch>
     <Route path="/" component={HomePage}/>
     <Route path="/category/:slug" component={CategoryPage}/>
+    <Route path="/brand/:brandSlug/:categorySlug" component={BrandCategoryPage}/>
     <Route path="/brand/:slug" component={BrandPage}/>
     <Route path="/product/:slug" component={ProductPage}/>
     <Route path="/search" component={SearchPage}/>
@@ -36,6 +37,7 @@ function Router() {
     <Route path="/return-policy" component={ReturnPage}/>
     <Route path="/faq" component={FAQPage}/>
     <Route path="/contact" component={ContactPage}/>
+    <Route path="/:brandSlug/:categorySlug" component={BrandCategoryPage}/>
     <Route component={NotFound}/>
   </Switch></RoutedErrorBoundary></StoreShell>;
 }
