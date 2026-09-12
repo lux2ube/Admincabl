@@ -318,7 +318,7 @@ function CategoryLandingPage({ slug }: { slug: string }) {
             <h1>{copy.title}</h1>
             <p>{copy.description}</p>
             <div className="category-landing-actions">
-              {brands.map(([brandSlug, brandName]) => <Link className="button button-secondary" href={`/brand/${brandSlug}`} key={brandSlug}>تسوق {brandName}</Link>)}
+              {brands.map(([brandSlug, brandName]) => <Link className="button button-secondary" href={`/${brandSlug}/${publicCategorySlugs[slug] || slug}`} key={brandSlug}>تسوق {brandName}</Link>)}
               <Link className="button button-primary" href="/search">كل المنتجات <ArrowLeft size={16} /></Link>
             </div>
           </div>
