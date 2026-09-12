@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, Fl
 import { getGetStoreSeoQueryKey, getGetStoreOrderQueryKey, getListStoreOrdersQueryKey, useCreateStoreOrder, useGetStoreOrder, useGetStoreSeo, useListStoreOrders } from '@workspace/api-client-react';
 import type { StoreOrderInput, StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
+import { brandCategoryPath, brandPath, productPath, publicCategorySlug } from '@/lib/store-routes';
+import { setSeoHead } from '@/lib/seo-head';
 import { Breadcrumbs, CTASection, CatalogError, CatalogToolbar, LoadingCatalog, PageHeading } from '@/components/page-parts';
 import { CartLine, ProductGrid, QuantityControl, RatingLine } from '@/components/catalog-ui';
 import { CollectionEditorial, EditorialSection, FAQList, HomeImportedSections, InfoCards, ProductComparisonTable, ProductEditorial } from '@/pages/content-pages';
@@ -13,24 +15,46 @@ function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; 
   const { data } = useGetStoreSeo(params, { query: { queryKey: getGetStoreSeoQueryKey(params), enabled: true, staleTime: 60_000 } });
   useEffect(() => {
     if (!data) return;
-    document.title = data.title;
-    const description = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
-    if (description) description.content = data.description;
-    const ogTitle = document.querySelector('meta[property="og:title"]') as HTMLMetaElement | null;
-    if (ogTitle) ogTitle.content = data.title;
-    const ogDescription = document.querySelector('meta[property="og:description"]') as HTMLMetaElement | null;
-    if (ogDescription) ogDescription.content = data.description;
+    setSeoHead({
+      title: data.title,
+      description: data.description,
+      canonicalPath: data.canonicalPath,
+      indexable: data.indexable,
+      image: Array.isArray(data.jsonLd?.image) ? String(data.jsonLd.image[0]) : typeof data.jsonLd?.image === 'string' ? data.jsonLd.image : undefined,
+      jsonLd: (() => {
+        if (!data.breadcrumbs.length || data.entityType === 'home') return data.jsonLd;
+        const primary = { ...data.jsonLd };
+        delete primary['@context'];
+        return {
+          '@context': 'https://schema.org',
+          '@graph': [
+            primary,
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: data.breadcrumbs.map((item, index) => ({
+                '@type': 'ListItem',
+                position: index + 1,
+                name: item.name,
+                item: item.path,
+              })),
+            },
+          ],
+        };
+      })(),
+    });
   }, [data]);
   return null;
 }
 
-function StaticSEO({ title, description }: { title: string; description: string }) {
+function StaticSEO({ title, description, canonicalPath, indexable = true }: { title: string; description: string; canonicalPath?: string; indexable?: boolean }) {
   useEffect(() => {
-    document.title = `${title} | CABL`;
-    const meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
-    if (meta) meta.content = description;
-  }, [title, description]);
+    setSeoHead({ title: `${title} | CABL`, description, canonicalPath, indexable });
+  }, [title, description, canonicalPath, indexable]);
   return null;
+}
+
+function NoIndex() {
+  return <StaticSEO title="CABL" description="صفحة تنقل داخل متجر CABL." indexable={false} />;
 }
 
 function ProductImage({ product, className = '' }: { product: StoreProduct; className?: string }) {
@@ -76,12 +100,6 @@ function CatalogPage({ mode, slug }: { mode: 'category' | 'brand'; slug: string 
   return <><LegacyCatalogPage mode={mode} slug={slug}/>{mode === 'brand' && <BrandCategoryLinks brandSlug={slug} categories={categoryLinks}/>}<CollectionEditorial mode={mode} name={name} products={filtered}/></>;
 }
 
-const publicCategorySlugs: Record<string, string> = {
-  'charging-cables': 'cables',
-  'travel-adapters': 'car-accessories',
-  'phone-accessories': 'hubs-adapters',
-};
-
 function BrandCategoryLinks({ brandSlug, categories }: { brandSlug: string; categories: Array<{ slug: string; name: string }> }) {
   if (!categories.length) return null;
   return (
@@ -94,7 +112,7 @@ function BrandCategoryLinks({ brandSlug, categories }: { brandSlug: string; cate
         </div>
         <div className="brand-category-nav-grid">
           {categories.map((category) => (
-            <Link href={`/${brandSlug}/${publicCategorySlugs[category.slug] || category.slug}`} className="brand-category-nav-card" key={category.slug}>
+            <Link href={brandCategoryPath(brandSlug, category.slug)} className="brand-category-nav-card" key={category.slug}>
               <strong>{category.name}</strong>
               <span>منتجات {category.name} من هذه العلامة</span>
               <ArrowLeft size={16} />
@@ -153,12 +171,12 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
     ],
   };
   const comparisonProducts = sorted.slice(0, 8);
-  const publicCategorySlug = publicCategorySlugs[filtered[0]?.category?.slug || categorySlug] || categorySlug;
+  const categoryPathSlug = publicCategorySlug(filtered[0]?.category?.slug || categorySlug);
   const description = `${categoryName} من ${brandName} في اليمن. قارن المواصفات والسعر والتوافر قبل الطلب من CABL.`;
 
   return (
     <>
-      <StaticSEO title={`${categoryName} ${brandName}`} description={description} />
+      <StaticSEO title={`${categoryName} ${brandName}`} description={description} canonicalPath={brandCategoryPath(brandSlug, categorySlug)} />
       <div className="category-landing-hero brand-category-hero">
         <div className="container">
           <Breadcrumbs items={[
@@ -171,8 +189,8 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
             <h1>{categoryName} {brandName}</h1>
             <p>{copy.description}</p>
             <div className="category-landing-actions">
-              <Link className="button button-secondary" href={`/brand/${brandSlug}`}>كل منتجات {brandName}</Link>
-              <Link className="button button-secondary" href={`/category/${publicCategorySlug}`}>كل {categoryName}</Link>
+              <Link className="button button-secondary" href={brandPath(brandSlug)}>كل منتجات {brandName}</Link>
+              <Link className="button button-secondary" href={`/category/${categoryPathSlug}`}>كل {categoryName}</Link>
               <Link className="button button-primary" href="/search">كل المنتجات <ArrowLeft size={16} /></Link>
             </div>
           </div>
@@ -201,8 +219,8 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
       </EditorialSection>
       <EditorialSection title="روابط مرتبطة">
         <div className="category-related-links">
-          <Link href={`/brand/${brandSlug}`}><ArrowRight /><strong>كل منتجات {brandName}</strong><span>تصفح جميع الأقسام المتاحة من هذه العلامة.</span><ArrowLeft size={15} /></Link>
-          <Link href={`/category/${publicCategorySlug}`}><Zap /><strong>كل {categoryName}</strong><span>قارن منتجات القسم من العلامات المتاحة.</span><ArrowLeft size={15} /></Link>
+          <Link href={brandPath(brandSlug)}><ArrowRight /><strong>كل منتجات {brandName}</strong><span>تصفح جميع الأقسام المتاحة من هذه العلامة.</span><ArrowLeft size={15} /></Link>
+          <Link href={`/category/${categoryPathSlug}`}><Zap /><strong>كل {categoryName}</strong><span>قارن منتجات القسم من العلامات المتاحة.</span><ArrowLeft size={15} /></Link>
           <Link href="/shipping"><Truck /><strong>الشحن والتوصيل</strong><span>راجع الرسوم والمدة حسب العنوان.</span><ArrowLeft size={15} /></Link>
           <Link href="/return-policy"><RefreshCcw /><strong>الإرجاع والاستبدال</strong><span>اعرف الشروط والخطوات قبل الطلب.</span><ArrowLeft size={15} /></Link>
         </div>
@@ -318,7 +336,7 @@ function CategoryLandingPage({ slug }: { slug: string }) {
             <h1>{copy.title}</h1>
             <p>{copy.description}</p>
             <div className="category-landing-actions">
-              {brands.map(([brandSlug, brandName]) => <Link className="button button-secondary" href={`/${brandSlug}/${publicCategorySlugs[slug] || slug}`} key={brandSlug}>تسوق {brandName}</Link>)}
+              {brands.map(([brandSlug, brandName]) => <Link className="button button-secondary" href={brandCategoryPath(brandSlug, slug)} key={brandSlug}>تسوق {brandName}</Link>)}
               <Link className="button button-primary" href="/search">كل المنتجات <ArrowLeft size={16} /></Link>
             </div>
           </div>
@@ -384,13 +402,12 @@ export function SearchPage() {
   const favoriteProducts = useMemo(() => products.filter((product) => favorites.includes(product.id)), [products, favorites]);
   const brandDirectory = useMemo(() => Array.from(new Map(products.map((product) => [product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'), product.brand])).entries()).sort((a, b) => a[1].localeCompare(b[1], 'ar')), [products]);
   const submit = (event: FormEvent) => { event.preventDefault(); setLocation(`/search${term ? `?q=${encodeURIComponent(term)}` : ''}`); };
-  if (view === 'brands') return <div className="container"><Breadcrumbs items={[{ label: 'العلامات التجارية' }]}/><PageHeading eyebrow="دليل العلامات" title="اختر علامتك المفضلة" description="تصفح المنتجات المنشورة حسب العلامة التجارية."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <div className="brand-directory">{brandDirectory.map(([slug, name]) => <Link href={`/brand/${slug}`} className="brand-directory-card" key={slug} data-testid={`link-brand-directory-${slug}`}><span className="brand-directory-mark">{name.slice(0, 1)}</span><span><strong>{name}</strong><small>{products.filter((product) => (product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-')) === slug).length} منتجات</small></span><ArrowLeft size={17}/></Link>)}</div>}</div>;
-  if (view === 'favorites') return <div className="container"><Breadcrumbs items={[{ label: 'المفضلة' }]}/><PageHeading eyebrow="اختياراتك" title="منتجاتك المفضلة" description="المنتجات التي حفظتها على هذا الجهاز تظهر هنا."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <ProductGrid products={favoriteProducts} empty="لم تحفظ أي منتج بعد."/>}</div>;
-  return <div className="container"><Breadcrumbs items={[{ label: 'البحث' }]}/><div className="search-hero"><div><span className="eyebrow">اكتشف بهدوء</span><h1>ابحث عن قطعتك القادمة</h1><p>النتائج تتحدث من كتالوج CABL مباشرة.</p></div><form className="big-search" onSubmit={submit}><input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="مثلاً: شاحن سريع" aria-label="بحث المنتجات" data-testid="input-search"/><button aria-label="تنفيذ البحث" data-testid="button-submit-search"><SearchIcon size={18}/></button></form></div><div className="search-layout"><aside className="filter-panel"><h3>تصفية النتائج</h3><div className="filter-group"><h4>العلامة التجارية</h4>{brands.map((item) => <label className="filter-check" key={item}><input type="radio" name="brand" checked={brand === item} onChange={() => setBrand(brand === item ? '' : item)} data-testid={`input-filter-brand-${item}`}/>{item}</label>)}</div><div className="filter-group"><h4>القسم</h4>{categories.map((item) => <label className="filter-check" key={item.slug}><input type="radio" name="category" checked={category === item.slug} onChange={() => setCategory(category === item.slug ? '' : item.slug)} data-testid={`input-filter-category-${item.slug}`}/>{item.name}</label>)}</div></aside><div>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <><CatalogToolbar products={result} sort={sort} setSort={setSort}/><ProductGrid products={result} empty="لم نجد نتائج بهذا الوصف."/></>}</div></div></div>;
+   if (view === 'brands') return <><NoIndex/><div className="container"><Breadcrumbs items={[{ label: 'العلامات التجارية' }]}/><PageHeading eyebrow="دليل العلامات" title="اختر علامتك المفضلة" description="تصفح المنتجات المنشورة حسب العلامة التجارية."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <div className="brand-directory">{brandDirectory.map(([slug, name]) => <Link href={`/brand/${slug}`} className="brand-directory-card" key={slug} data-testid={`link-brand-directory-${slug}`}><span className="brand-directory-mark">{name.slice(0, 1)}</span><span><strong>{name}</strong><small>{products.filter((product) => (product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-')) === slug).length} منتجات</small></span><ArrowLeft size={17}/></Link>)}</div>}</div></>;
+   if (view === 'favorites') return <><NoIndex/><div className="container"><Breadcrumbs items={[{ label: 'المفضلة' }]}/><PageHeading eyebrow="اختياراتك" title="منتجاتك المفضلة" description="المنتجات التي حفظتها على هذا الجهاز تظهر هنا."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <ProductGrid products={favoriteProducts} empty="لم تحفظ أي منتج بعد."/>}</div></>;
+   return <><NoIndex/><div className="container"><Breadcrumbs items={[{ label: 'البحث' }]}/><div className="search-hero"><div><span className="eyebrow">اكتشف بهدوء</span><h1>ابحث عن قطعتك القادمة</h1><p>النتائج تتحدث من كتالوج CABL مباشرة.</p></div><form className="big-search" onSubmit={submit}><input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="مثلاً: شاحن سريع" aria-label="بحث المنتجات" data-testid="input-search"/><button aria-label="تنفيذ البحث" data-testid="button-submit-search"><SearchIcon size={18}/></button></form></div><div className="search-layout"><aside className="filter-panel"><h3>تصفية النتائج</h3><div className="filter-group"><h4>العلامة التجارية</h4>{brands.map((item) => <label className="filter-check" key={item}><input type="radio" name="brand" checked={brand === item} onChange={() => setBrand(brand === item ? '' : item)} data-testid={`input-filter-brand-${item}`}/>{item}</label>)}</div><div className="filter-group"><h4>القسم</h4>{categories.map((item) => <label className="filter-check" key={item.slug}><input type="radio" name="category" checked={category === item.slug} onChange={() => setCategory(category === item.slug ? '' : item.slug)} data-testid={`input-filter-category-${item.slug}`}/>{item.name}</label>)}</div></aside><div>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <><CatalogToolbar products={result} sort={sort} setSort={setSort}/><ProductGrid products={result} empty="لم نجد نتائج بهذا الوصف."/></>}</div></div></div></>;
 }
 
-export function ProductPage() {
-  const { slug = '' } = useParams<{ slug: string }>();
+function ProductDetailPage({ slug }: { slug: string }) {
   const { catalog, isLoading, isError, formatPrice, addToCart } = useStore();
   const product = catalog?.products.find((item) => item.slug === slug);
   const [imageIndex, setImageIndex] = useState(0);
@@ -402,10 +419,20 @@ export function ProductPage() {
   return <><SEO type="product" slug={slug}/><div className="container product-detail"><Breadcrumbs items={[{ label: product.category?.name || 'المنتجات', href: product.category ? `/category/${product.category.slug}` : '/search' }, { label: product.productName }]}/><div className="product-detail-grid"><div className="detail-gallery"><div className="detail-main-image"><img src={product.images?.[imageIndex] || product.images?.[0]} alt={product.productName} data-testid="img-product-main"/></div><div className="thumb-row">{product.images.map((image, index) => <button className={`thumb ${imageIndex === index ? 'active' : ''}`} key={image} onClick={() => setImageIndex(index)} data-testid={`button-product-thumb-${index}`}><img src={image} alt=""/></button>)}</div></div><div className="detail-info"><span className="product-brand">{product.brand}</span><h1>{product.productName}</h1><RatingLine/><p className="detail-copy">{product.productDescription || product.shortDescription || 'منتج متاح من كتالوج CABL.'}</p><div className="detail-price"><strong data-testid="text-product-detail-price">{formatPrice(price)}</strong>{product.discountPrice && <del>{formatPrice(product.regularPrice)}</del>}</div><div className="stock-note"><i/>{product.quantity > 0 ? `متوفر الآن — ${product.quantity} قطعة` : 'غير متوفر حالياً'}</div><div className="detail-actions"><QuantityControl value={quantity} onChange={(value) => setQuantity(Math.max(1, Math.min(product.quantity || 1, value)))} testId="quantity-detail"/><button className="button button-primary" onClick={() => addToCart(product.id, quantity)} disabled={product.quantity < 1} data-testid="button-detail-add-cart">أضف إلى السلة <Package size={17}/></button></div><div className="detail-facts"><div className="fact"><ShieldCheck size={20}/><span>بيانات المنتج موضحة</span></div><div className="fact"><Truck size={20}/><span>خيارات شحن متاحة</span></div><div className="fact"><Zap size={20}/><span>تجهيز سريع للطلب</span></div><div className="fact"><Package size={20}/><span>دعم بعد الشراء</span></div></div>{product.productNote && <div className="detail-note">{product.productNote}</div>}</div></div><ProductEditorial product={product}/></div></>;
 }
 
+export function ProductPage() {
+  const { slug = '' } = useParams<{ slug: string }>();
+  return <ProductDetailPage slug={slug} />;
+}
+
+export function CanonicalProductPage() {
+  const { productSlug = '' } = useParams<{ productSlug: string }>();
+  return <ProductDetailPage slug={productSlug} />;
+}
+
 export function CartPage() {
   const { cartProducts, formatPrice } = useStore();
   const subtotal = cartProducts.reduce((sum, item) => sum + (item.product.discountPrice ?? item.product.regularPrice) * item.quantity, 0);
-  return <div className="container cart-page"><Breadcrumbs items={[{ label: 'السلة' }]}/><PageHeading title="سلة مشترياتك" description={cartProducts.length ? 'راجع الكميات قبل الانتقال إلى بيانات التوصيل.' : 'السلة هادئة الآن.'}/>{cartProducts.length ? <div className="cart-layout"><div className="cart-panel">{cartProducts.map((item) => <CartLine key={item.product.id} {...item}/>)}</div><aside className="summary-panel"><h2>ملخص السلة</h2><div className="summary-row"><span>المجموع الفرعي</span><b>{formatPrice(subtotal)}</b></div><div className="summary-row"><span>الشحن</span><span>يحسب عند الاختيار</span></div><div className="summary-row total"><span>الإجمالي المتوقع</span><b>{formatPrice(subtotal)}</b></div><Link href="/checkout" className="button button-primary" data-testid="link-checkout">متابعة إلى الدفع <ArrowLeft size={16}/></Link><p className="summary-note">الدفع النهائي يتضمن طريقة الشحن التي تختارها.</p></aside></div> : <div className="empty-state"><div className="empty-icon"><Package size={28}/></div><h3>لم تضف أي منتج بعد</h3><p>ابدأ من الكتالوج، وستظهر اختياراتك هنا.</p><Link href="/search" className="button button-primary" data-testid="link-cart-empty-search">استعرض المنتجات</Link></div>}</div>;
+  return <><NoIndex/><div className="container cart-page"><Breadcrumbs items={[{ label: 'السلة' }]}/><PageHeading title="سلة مشترياتك" description={cartProducts.length ? 'راجع الكميات قبل الانتقال إلى بيانات التوصيل.' : 'السلة هادئة الآن.'}/>{cartProducts.length ? <div className="cart-layout"><div className="cart-panel">{cartProducts.map((item) => <CartLine key={item.product.id} {...item}/>)}</div><aside className="summary-panel"><h2>ملخص السلة</h2><div className="summary-row"><span>المجموع الفرعي</span><b>{formatPrice(subtotal)}</b></div><div className="summary-row"><span>الشحن</span><span>يحسب عند الاختيار</span></div><div className="summary-row total"><span>الإجمالي المتوقع</span><b>{formatPrice(subtotal)}</b></div><Link href="/checkout" className="button button-primary" data-testid="link-checkout">متابعة إلى الدفع <ArrowLeft size={16}/></Link><p className="summary-note">الدفع النهائي يتضمن طريقة الشحن التي تختارها.</p></aside></div> : <div className="empty-state"><div className="empty-icon"><Package size={28}/></div><h3>لم تضف أي منتج بعد</h3><p>ابدأ من الكتالوج، وستظهر اختياراتك هنا.</p><Link href="/search" className="button button-primary" data-testid="link-cart-empty-search">استعرض المنتجات</Link></div>}</div></>;
 }
 
 export function CheckoutPage() {
@@ -425,8 +452,8 @@ export function CheckoutPage() {
   const shippingCost = selectedShipping?.free ? 0 : selectedShipping?.charge || 0;
   const update = (key: keyof typeof form) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm((current) => ({ ...current, [key]: event.target.value }));
   const submit = (event: FormEvent) => { event.preventDefault(); setError(''); if (!shippingId || !paymentId || !cartProducts.length) { setError('اختر طريقة الشحن والدفع وتأكد من وجود منتج في السلة.'); return; } const payload: StoreOrderInput = { customer: { firstName: form.firstName, lastName: form.lastName, email: form.email, phoneNumber: form.phoneNumber }, address: { addressLine1: form.addressLine1, addressLine2: form.addressLine2 || null, postalCode: form.postalCode || null, country: form.country, city: form.city, phoneNumber: form.phoneNumber || null }, items: cartProducts.map((item) => ({ productId: item.product.id, quantity: item.quantity })), shippingId, paymentMethodId: paymentId, paymentReference: form.paymentReference || null, couponCode: form.couponCode || null }; orderMutation.mutate({ data: payload }, { onSuccess: (order) => setLocation(`/order/${order.id}?phone=${encodeURIComponent(form.phoneNumber)}`), onError: () => setError('لم يتم إرسال الطلب. لم نخفي المشكلة — راجع البيانات وحاول مرة أخرى.') }); };
-  if (!cartProducts.length) return <div className="container checkout-page"><div className="empty-state"><h3>السلة فارغة</h3><Link href="/search" className="button button-primary" data-testid="link-checkout-empty">العودة للتسوق</Link></div></div>;
-  return <div className="container checkout-page"><Breadcrumbs items={[{ label: 'السلة', href: '/cart' }, { label: 'إتمام الشراء' }]}/><PageHeading title="إتمام الشراء" description="أدخل بياناتك كما هي لتأكيد طلب يمكننا متابعته معك."/><form className="checkout-layout" onSubmit={submit}><div className="checkout-panel"><section className="checkout-section"><h2>بيانات العميل</h2><div className="form-grid"><Field label="الاسم الأول" value={form.firstName} onChange={update('firstName')} required/><Field label="اسم العائلة" value={form.lastName} onChange={update('lastName')} required/><Field label="البريد الإلكتروني" type="email" value={form.email} onChange={update('email')} required/><Field label="رقم الهاتف" value={form.phoneNumber} onChange={update('phoneNumber')} required/></div></section><section className="checkout-section"><h2>عنوان التوصيل</h2><div className="form-grid"><Field label="العنوان" value={form.addressLine1} onChange={update('addressLine1')} required full/><Field label="العنوان الإضافي" value={form.addressLine2} onChange={update('addressLine2')} full/><Field label="المدينة" value={form.city} onChange={update('city')} required/><Field label="الدولة" value={form.country} onChange={update('country')} required/><Field label="الرمز البريدي" value={form.postalCode} onChange={update('postalCode')}/></div></section><section className="checkout-section"><h2>طريقة الشحن</h2>{catalog?.shippingOptions.map((option) => <label className={`method-option ${shippingId === option.id ? 'selected' : ''}`} key={option.id}><input type="radio" name="shipping" checked={shippingId === option.id} onChange={() => setShippingId(option.id)} data-testid={`input-shipping-${option.id}`}/><div><strong>{option.name} — {option.free ? 'مجاني' : formatPrice(option.charge)}</strong><span>{option.estimatedDays ? `التقدير: ${option.estimatedDays} أيام` : 'يتم تأكيد المدة مع الطلب'}</span></div></label>)}</section><section className="checkout-section"><h2>طريقة الدفع</h2>{catalog?.paymentMethods.map((method) => <label className={`method-option ${paymentId === method.id ? 'selected' : ''}`} key={method.id}><input type="radio" name="payment" checked={paymentId === method.id} onChange={() => setPaymentId(method.id)} data-testid={`input-payment-${method.id}`}/><div><strong>{method.name}</strong><span>{method.description || method.instructions || 'تفاصيل الدفع تظهر عند اختيار الطريقة.'}</span></div></label>)}{catalog?.paymentMethods.find((method) => method.id === paymentId)?.requiresTransactionReference && <Field label="مرجع التحويل" value={form.paymentReference} onChange={update('paymentReference')} full/>}</section>{error && <div className="notice" role="alert" data-testid="status-checkout-error">{error}</div>}<button className="button button-primary" type="submit" disabled={orderMutation.isPending} data-testid="button-submit-order">{orderMutation.isPending ? 'جارٍ إرسال الطلب...' : 'تأكيد الطلب'}</button></div><aside className="summary-panel"><h2>مراجعة الطلب</h2>{cartProducts.map((item) => <div className="summary-row" key={item.product.id}><span>{item.product.productName} × {item.quantity}</span><b>{formatPrice((item.product.discountPrice ?? item.product.regularPrice) * item.quantity)}</b></div>)}<div className="summary-row"><span>الشحن</span><b>{formatPrice(shippingCost)}</b></div><div className="summary-row total"><span>الإجمالي</span><b>{formatPrice(subtotal + shippingCost)}</b></div><div className="notice">لن يتم خصم أي مبلغ قبل تأكيد تفاصيل طلبك معك.</div></aside></form></div>;
+  if (!cartProducts.length) return <><NoIndex/><div className="container checkout-page"><div className="empty-state"><h3>السلة فارغة</h3><Link href="/search" className="button button-primary" data-testid="link-checkout-empty">العودة للتسوق</Link></div></div></>;
+  return <><NoIndex/><div className="container checkout-page"><Breadcrumbs items={[{ label: 'السلة', href: '/cart' }, { label: 'إتمام الشراء' }]}/><PageHeading title="إتمام الشراء" description="أدخل بياناتك كما هي لتأكيد طلب يمكننا متابعته معك."/><form className="checkout-layout" onSubmit={submit}><div className="checkout-panel"><section className="checkout-section"><h2>بيانات العميل</h2><div className="form-grid"><Field label="الاسم الأول" value={form.firstName} onChange={update('firstName')} required/><Field label="اسم العائلة" value={form.lastName} onChange={update('lastName')} required/><Field label="البريد الإلكتروني" type="email" value={form.email} onChange={update('email')} required/><Field label="رقم الهاتف" value={form.phoneNumber} onChange={update('phoneNumber')} required/></div></section><section className="checkout-section"><h2>عنوان التوصيل</h2><div className="form-grid"><Field label="العنوان" value={form.addressLine1} onChange={update('addressLine1')} required full/><Field label="العنوان الإضافي" value={form.addressLine2} onChange={update('addressLine2')} full/><Field label="المدينة" value={form.city} onChange={update('city')} required/><Field label="الدولة" value={form.country} onChange={update('country')} required/><Field label="الرمز البريدي" value={form.postalCode} onChange={update('postalCode')}/></div></section><section className="checkout-section"><h2>طريقة الشحن</h2>{catalog?.shippingOptions.map((option) => <label className={`method-option ${shippingId === option.id ? 'selected' : ''}`} key={option.id}><input type="radio" name="shipping" checked={shippingId === option.id} onChange={() => setShippingId(option.id)} data-testid={`input-shipping-${option.id}`}/><div><strong>{option.name} — {option.free ? 'مجاني' : formatPrice(option.charge)}</strong><span>{option.estimatedDays ? `التقدير: ${option.estimatedDays} أيام` : 'يتم تأكيد المدة مع الطلب'}</span></div></label>)}</section><section className="checkout-section"><h2>طريقة الدفع</h2>{catalog?.paymentMethods.map((method) => <label className={`method-option ${paymentId === method.id ? 'selected' : ''}`} key={method.id}><input type="radio" name="payment" checked={paymentId === method.id} onChange={() => setPaymentId(method.id)} data-testid={`input-payment-${method.id}`}/><div><strong>{method.name}</strong><span>{method.description || method.instructions || 'تفاصيل الدفع تظهر عند اختيار الطريقة.'}</span></div></label>)}{catalog?.paymentMethods.find((method) => method.id === paymentId)?.requiresTransactionReference && <Field label="مرجع التحويل" value={form.paymentReference} onChange={update('paymentReference')} full/>}</section>{error && <div className="notice" role="alert" data-testid="status-checkout-error">{error}</div>}<button className="button button-primary" type="submit" disabled={orderMutation.isPending} data-testid="button-submit-order">{orderMutation.isPending ? 'جارٍ إرسال الطلب...' : 'تأكيد الطلب'}</button></div><aside className="summary-panel"><h2>مراجعة الطلب</h2>{cartProducts.map((item) => <div className="summary-row" key={item.product.id}><span>{item.product.productName} × {item.quantity}</span><b>{formatPrice((item.product.discountPrice ?? item.product.regularPrice) * item.quantity)}</b></div>)}<div className="summary-row"><span>الشحن</span><b>{formatPrice(shippingCost)}</b></div><div className="summary-row total"><span>الإجمالي</span><b>{formatPrice(subtotal + shippingCost)}</b></div><div className="notice">لن يتم خصم أي مبلغ قبل تأكيد تفاصيل طلبك معك.</div></aside></form></div></>;
 }
 
 function Field({ label, value, onChange, type = 'text', required = false, full = false }: { label: string; value: string; onChange: (event: ChangeEvent<HTMLInputElement>) => void; type?: string; required?: boolean; full?: boolean }) { return <label className={`form-field ${full ? 'full' : ''}`}><span>{label}</span><input type={type} value={value} onChange={onChange} required={required} data-testid={`input-${label}`}/></label>; }
@@ -438,7 +465,7 @@ export function OrdersPage() {
   const [submitted, setSubmitted] = useState(false);
   const params = { email, phone };
   const query = useListStoreOrders(params, { query: { enabled: submitted, queryKey: getListStoreOrdersQueryKey(params) } });
-  return <div className="container orders-page"><Breadcrumbs items={[{ label: 'الطلبات' }]}/><PageHeading title="تتبع طلباتك" description="أدخل البريد ورقم الهاتف المستخدمين عند إتمام الشراء."/><div className="lookup-card"><h2>البحث عن طلب</h2><p>نستخدم بياناتك فقط للتحقق من الطلبات المرتبطة بها.</p><form className="lookup-form" onSubmit={(event) => { event.preventDefault(); setSubmitted(true); }}><input type="email" placeholder="البريد الإلكتروني" value={email} onChange={(event) => setEmail(event.target.value)} required data-testid="input-orders-email"/><input placeholder="رقم الهاتف" value={phone} onChange={(event) => setPhone(event.target.value)} required data-testid="input-orders-phone"/><button className="button button-primary" type="submit" data-testid="button-lookup-orders">عرض الطلبات</button></form></div>{submitted && query.isLoading && <LoadingCatalog/>}{submitted && query.isError && <div className="state-panel error-panel"><h3>لم نعثر على الطلبات بهذه البيانات</h3><p>راجع البريد ورقم الهاتف وحاول مرة أخرى.</p></div>}{submitted && query.data?.orders?.length === 0 && <div className="empty-state"><h3>لا توجد طلبات مرتبطة بهذه البيانات</h3><p>يمكنك العودة للمتجر وبدء طلب جديد.</p></div>}{query.data?.orders && query.data.orders.length > 0 && <div className="orders-list">{query.data.orders.map((order) => <div className="order-row" key={order.id} data-testid={`row-order-${order.id}`}><div><strong>طلب #{order.id}</strong><small>{new Date(order.createdAt).toLocaleDateString('ar-YE')}</small></div><span className="status-badge">{order.status}</span><div><strong>{formatPrice(order.total)}</strong><Link href={`/order/${order.id}?phone=${encodeURIComponent(phone)}`} className="button button-quiet" data-testid={`link-order-${order.id}`}>التفاصيل <ChevronLeft size={14}/></Link></div></div>)}</div>}</div>;
+  return <><NoIndex/><div className="container orders-page"><Breadcrumbs items={[{ label: 'الطلبات' }]}/><PageHeading title="تتبع طلباتك" description="أدخل البريد ورقم الهاتف المستخدمين عند إتمام الشراء."/><div className="lookup-card"><h2>البحث عن طلب</h2><p>نستخدم بياناتك فقط للتحقق من الطلبات المرتبطة بها.</p><form className="lookup-form" onSubmit={(event) => { event.preventDefault(); setSubmitted(true); }}><input type="email" placeholder="البريد الإلكتروني" value={email} onChange={(event) => setEmail(event.target.value)} required data-testid="input-orders-email"/><input placeholder="رقم الهاتف" value={phone} onChange={(event) => setPhone(event.target.value)} required data-testid="input-orders-phone"/><button className="button button-primary" type="submit" data-testid="button-lookup-orders">عرض الطلبات</button></form></div>{submitted && query.isLoading && <LoadingCatalog/>}{submitted && query.isError && <div className="state-panel error-panel"><h3>لم نعثر على الطلبات بهذه البيانات</h3><p>راجع البريد ورقم الهاتف وحاول مرة أخرى.</p></div>}{submitted && query.data?.orders?.length === 0 && <div className="empty-state"><h3>لا توجد طلبات مرتبطة بهذه البيانات</h3><p>يمكنك العودة للمتجر وبدء طلب جديد.</p></div>}{query.data?.orders && query.data.orders.length > 0 && <div className="orders-list">{query.data.orders.map((order) => <div className="order-row" key={order.id} data-testid={`row-order-${order.id}`}><div><strong>طلب #{order.id}</strong><small>{new Date(order.createdAt).toLocaleDateString('ar-YE')}</small></div><span className="status-badge">{order.status}</span><div><strong>{formatPrice(order.total)}</strong><Link href={`/order/${order.id}?phone=${encodeURIComponent(phone)}`} className="button button-quiet" data-testid={`link-order-${order.id}`}>التفاصيل <ChevronLeft size={14}/></Link></div></div>)}</div>}</div></>;
 }
 
 export function OrderPage() {
@@ -448,9 +475,9 @@ export function OrderPage() {
   const [phone, setPhone] = useState(queryPhone);
   const [submitted, setSubmitted] = useState(Boolean(queryPhone));
   const query = useGetStoreOrder(id, { phone }, { query: { enabled: submitted && Boolean(phone), queryKey: getGetStoreOrderQueryKey(id, { phone }) } });
-  if (!submitted || !phone) return <div className="container orders-page"><div className="lookup-card" style={{ marginTop: 70 }}><h2>تحقق من الطلب #{id}</h2><p>أدخل رقم الهاتف المستخدم عند الطلب لعرض تفاصيله.</p><form className="lookup-form" onSubmit={(event) => { event.preventDefault(); setSubmitted(true); }}><input placeholder="رقم الهاتف" value={phone} onChange={(event) => setPhone(event.target.value)} required data-testid="input-order-phone"/><button className="button button-primary" type="submit" data-testid="button-lookup-order">عرض الطلب</button></form></div></div>;
-  if (query.isLoading) return <div className="container"><LoadingCatalog/></div>;
-  if (query.isError || !query.data) return <div className="container orders-page"><div className="state-panel"><h3>تعذر العثور على هذا الطلب</h3><Link href="/orders" className="button button-primary" data-testid="link-order-retry">العودة لتتبع الطلبات</Link></div></div>;
+  if (!submitted || !phone) return <><NoIndex/><div className="container orders-page"><div className="lookup-card" style={{ marginTop: 70 }}><h2>تحقق من الطلب #{id}</h2><p>أدخل رقم الهاتف المستخدم عند الطلب لعرض تفاصيله.</p><form className="lookup-form" onSubmit={(event) => { event.preventDefault(); setSubmitted(true); }}><input placeholder="رقم الهاتف" value={phone} onChange={(event) => setPhone(event.target.value)} required data-testid="input-order-phone"/><button className="button button-primary" type="submit" data-testid="button-lookup-order">عرض الطلب</button></form></div></div></>;
+  if (query.isLoading) return <><NoIndex/><div className="container"><LoadingCatalog/></div></>;
+  if (query.isError || !query.data) return <><NoIndex/><div className="container orders-page"><div className="state-panel"><h3>تعذر العثور على هذا الطلب</h3><Link href="/orders" className="button button-primary" data-testid="link-order-retry">العودة لتتبع الطلبات</Link></div></div></>;
   const order = query.data;
-  return <div className="container confirmation-page"><Breadcrumbs items={[{ label: 'الطلبات', href: '/orders' }, { label: `طلب #${order.id}` }]}/><div className="confirmation-hero"><Check size={40}/><h1>تم استلام طلبك</h1><p>شكراً لثقتك في CABL. احتفظ برقم الطلب للمتابعة.</p><strong data-testid="text-order-id">#{order.id}</strong></div><div className="confirmation-grid"><div className="detail-list"><h2>تفاصيل المنتجات</h2>{order.items.map((item) => <div className="order-item" key={item.productId}><span>{item.productName} × {item.quantity}</span><b>{formatPrice(item.price * item.quantity)}</b></div>)}</div><div className="detail-list"><h2>ملخص الدفع</h2><div className="summary-row"><span>المجموع</span><b>{formatPrice(order.subtotal)}</b></div><div className="summary-row"><span>الشحن</span><b>{formatPrice(order.shippingCost)}</b></div><div className="summary-row total"><span>الإجمالي</span><b>{formatPrice(order.total)}</b></div><div className="notice">حالة الدفع: {order.paymentStatus} · طريقة الدفع: {order.paymentMethodName}</div><Link href="/search" className="button button-primary" data-testid="link-order-continue">متابعة التسوق <ArrowLeft size={16}/></Link></div></div></div>;
+  return <><NoIndex/><div className="container confirmation-page"><Breadcrumbs items={[{ label: 'الطلبات', href: '/orders' }, { label: `طلب #${order.id}` }]}/><div className="confirmation-hero"><Check size={40}/><h1>تم استلام طلبك</h1><p>شكراً لثقتك في CABL. احتفظ برقم الطلب للمتابعة.</p><strong data-testid="text-order-id">#{order.id}</strong></div><div className="confirmation-grid"><div className="detail-list"><h2>تفاصيل المنتجات</h2>{order.items.map((item) => <div className="order-item" key={item.productId}><span>{item.productName} × {item.quantity}</span><b>{formatPrice(item.price * item.quantity)}</b></div>)}</div><div className="detail-list"><h2>ملخص الدفع</h2><div className="summary-row"><span>المجموع</span><b>{formatPrice(order.subtotal)}</b></div><div className="summary-row"><span>الشحن</span><b>{formatPrice(order.shippingCost)}</b></div><div className="summary-row total"><span>الإجمالي</span><b>{formatPrice(order.total)}</b></div><div className="notice">حالة الدفع: {order.paymentStatus} · طريقة الدفع: {order.paymentMethodName}</div><Link href="/search" className="button button-primary" data-testid="link-order-continue">متابعة التسوق <ArrowLeft size={16}/></Link></div></div></div></>;
 }

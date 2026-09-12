@@ -65,7 +65,7 @@ type GuideSeoInput = {
   indexable: boolean;
 };
 
-const HOME_TITLE = "CABL | منتجات الشحن والطاقة الأصلية";
+const HOME_TITLE = "CABL | منتجات الشحن والطاقة والإكسسوارات";
 const HOME_DESCRIPTION = "تسوق منتجات الشحن والطاقة والإكسسوارات من كتالوج CABL، مع أسعار ومخزون وخيارات شحن مأخوذة من المتجر.";
 
 const categoryPublicPaths: Record<string, string> = {
@@ -115,7 +115,7 @@ function productDisplayName(brand: string, productName: string) {
 function productDescription(input: ProductSeoInput, displayName: string) {
   return input.shortDescription
     || input.productDescription
-    || `${displayName} أصلي من CABL مع خيارات الشحن المتاحة في المتجر.`;
+    || `${displayName} من كتالوج CABL مع خيارات الشحن المتاحة في المتجر.`;
 }
 
 function breadcrumbs(items: Breadcrumb[]) {
@@ -140,7 +140,7 @@ export function buildHomeSeo(): SeoResponse {
           "@id": "/#organization",
       name: "CABL",
           url: "/",
-          description: "متجر إلكترونيات ومنتجات شحن وطاقة أصلية.",
+           description: "متجر إلكترونيات ومنتجات شحن وطاقة من كتالوج CABL.",
         },
         {
           "@type": "WebSite",
@@ -155,8 +155,7 @@ export function buildHomeSeo(): SeoResponse {
           "@id": "/#store",
           name: "CABL منتجات الشحن والطاقة",
           url: "/",
-          areaServed: "الإقليم المحدد في إعدادات المتجر",
-          brand: ["Baseus", "Vention", "Anker", "UGREEN"],
+           description: "كتالوج CABL لمنتجات الشحن والطاقة والإكسسوارات.",
         },
       ],
     },
@@ -212,12 +211,12 @@ export function buildCategorySeo(input: CategorySeoInput): SeoResponse {
   const description = input.metaDescription
     || input.seoDescription
     || input.description
-    || `${input.name} الأصلية مع خيارات الشحن المتاحة في CABL.`;
+    || `${input.name} من كتالوج CABL مع خيارات الشحن المتاحة.`;
 
   return {
     entityType: "category",
     slug: input.slug,
-    title: input.seoTitle || `${input.name} الأصلية | CABL`,
+    title: input.seoTitle || `${input.name} | CABL`,
     h1: input.name,
     description,
     canonicalPath,
@@ -239,12 +238,12 @@ export function buildBrandSeo(input: BrandSeoInput): SeoResponse {
   const description = input.metaDescription
     || input.seoDescription
     || input.description
-    || `منتجات ${input.name} الأصلية مع خيارات الشحن المتاحة في CABL.`;
+    || `منتجات ${input.name} من كتالوج CABL مع خيارات الشحن المتاحة.`;
 
   return {
     entityType: "brand",
     slug: input.slug,
-    title: input.seoTitle || `منتجات ${input.name} الأصلية | CABL`,
+    title: input.seoTitle || `منتجات ${input.name} | CABL`,
     h1: `منتجات ${input.name}`,
     description,
     canonicalPath,

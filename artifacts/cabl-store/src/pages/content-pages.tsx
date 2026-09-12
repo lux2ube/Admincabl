@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import {
   ArrowLeft,
   BookOpen,
@@ -18,15 +18,17 @@ import {
 import { Link, useParams } from 'wouter';
 import type { StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
+import { productPath } from '@/lib/store-routes';
+import { setSeoHead } from '@/lib/seo-head';
 import { Breadcrumbs, CTASection, CatalogError, LoadingCatalog, PageHeading } from '@/components/page-parts';
 import { ProductGrid } from '@/components/catalog-ui';
 
 type Currency = { code: string; ratePerUsd: number; isDefault: boolean };
 
-function PageMeta({ title, description }: { title: string; description: string }) {
-  const meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
-  document.title = `${title} | CABL`;
-  if (meta) meta.content = description;
+function PageMeta({ title, description, canonicalPath, indexable = true }: { title: string; description: string; canonicalPath?: string; indexable?: boolean }) {
+  useEffect(() => {
+    setSeoHead({ title: `${title} | CABL`, description, canonicalPath, indexable });
+  }, [title, description, canonicalPath, indexable]);
   return null;
 }
 
@@ -146,7 +148,7 @@ export function ProductComparisonTable({
               {includeCategory && <td>{product.category?.name || 'إكسسوارات'}</td>}
               <td>{product.quantity > 0 ? 'متوفر' : 'نفد حالياً'}</td>
               <td>
-                <Link href={`/product/${product.slug}`} className="text-link">
+                <Link href={productPath(product)} className="text-link">
                   افتح المنتج <ArrowLeft size={14} />
                 </Link>
               </td>
