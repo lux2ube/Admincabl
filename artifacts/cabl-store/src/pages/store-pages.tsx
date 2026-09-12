@@ -271,7 +271,7 @@ function GuidedHomePage() {
 }
 
 function CommercialHomePage() {
-  const { catalog, isLoading, isError } = useStore();
+  const { catalog, isLoading, isError, formatPrice } = useStore();
   const products = catalog?.products || [];
   const inStockProducts = useMemo(() => products.filter((product) => product.quantity > 0), [products]);
   const featured = useMemo(
@@ -282,23 +282,53 @@ function CommercialHomePage() {
     () => Array.from(new Map(products.filter((product) => product.category).map((product) => [product.category!.slug, product.category!])).values()),
     [products],
   );
-  const brands = useMemo(
-    () => Array.from(new Map(products.map((product) => [product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'), product])).values()),
+  const brandCollections = useMemo(
+    () => Array.from(products.reduce((groups, product) => {
+      const key = product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-');
+      const current = groups.get(key) || { brand: product.brand, brandSlug: key, product, count: 0 };
+      current.count += 1;
+      groups.set(key, current);
+      return groups;
+    }, new Map<string, { brand: string; brandSlug: string; product: StoreProduct; count: number }>()).values()).slice(0, 5),
     [products],
   );
   const heroProduct = inStockProducts[0] || products[0];
-  const needs = categories.slice(0, 5).map((category, index) => {
-    const label = `${category.slug} ${category.name}`;
-    const title = /cable|كابل/i.test(label)
-      ? 'أحتاج كابلاً'
-      : /power|باور|طاقة/i.test(label)
-        ? 'أحتاج طاقة متنقلة'
-        : /charg|شاحن/i.test(label)
-          ? 'أحتاج شحناً يومياً'
-          : category.name;
-    const icon = index % 4 === 0 ? <Zap size={20} /> : index % 4 === 1 ? <Smartphone size={20} /> : index % 4 === 2 ? <Package size={20} /> : <Truck size={20} />;
-    return { category, title, icon };
-  });
+  const heroPrice = heroProduct ? (heroProduct.discountPrice ?? heroProduct.regularPrice) : 0;
+  const heroDiscount = heroProduct?.discountPrice ? Math.round((1 - heroProduct.discountPrice / heroProduct.regularPrice) * 100) : 0;
+  const [finderCategory, setFinderCategory] = useState('all');
+  const [finderBudget, setFinderBudget] = useState('all');
+  const needs = useMemo(() => {
+    const used = new Set<string>();
+    const options = [
+      { match: /cable|كابل/i, title: 'أحتاج كابلاً', text: 'وصلات واضحة لجهازك', icon: <Package size={20} /> },
+      { match: /power|باور|طاقة|battery|بطار/i, title: 'أحتاج طاقة متنقلة', text: 'حلول للطاقة أثناء التنقل', icon: <Zap size={20} /> },
+      { match: /charg|شاحن/i, title: 'أحتاج شحناً يومياً', text: 'قدرة ومنافذ للمقارنة', icon: <Smartphone size={20} /> },
+      { match: /car|سيارة|سفر|travel/i, title: 'أحتاج ملحقاً للسيارة أو السفر', text: 'ابدأ من القسم المتاح', icon: <Truck size={20} /> },
+    ];
+    const selected = options.flatMap((option) => {
+      const category = categories.find((item) => !used.has(item.slug) && option.match.test(`${item.slug} ${item.name}`));
+      if (!category) return [];
+      used.add(category.slug);
+      return [{ category, title: option.title, text: option.text, icon: option.icon }];
+    });
+    categories.forEach((category) => {
+      if (selected.length >= 5 || used.has(category.slug)) return;
+      used.add(category.slug);
+      selected.push({ category, title: category.name, text: 'تصفح المنتجات المنشورة', icon: <Package size={20} /> });
+    });
+    return selected.slice(0, 5);
+  }, [categories]);
+  const finderProducts = useMemo(() => products
+    .filter((product) => product.quantity > 0)
+    .filter((product) => finderCategory === 'all' || product.category?.slug === finderCategory)
+    .filter((product) => {
+      const price = product.discountPrice ?? product.regularPrice;
+      if (finderBudget === 'under-25') return price < 25;
+      if (finderBudget === '25-50') return price >= 25 && price <= 50;
+      if (finderBudget === 'over-50') return price > 50;
+      return true;
+    })
+    .slice(0, 4), [products, finderCategory, finderBudget]);
 
   return (
     <div className="guided-home">
@@ -321,8 +351,8 @@ function CommercialHomePage() {
                 <span className="guided-hero-index">01 / الكتالوج</span>
                 <ProductImage product={heroProduct} className="guided-hero-product-image" />
                 <span className="guided-hero-product-label">
-                  <span>{heroProduct.brand}</span>
-                  <strong>{heroProduct.productName}</strong>
+                  <span>{heroProduct.brand}<b>{formatPrice(heroPrice)}</b></span>
+                  <strong>{heroProduct.productName}{heroDiscount > 0 && <em>-{heroDiscount}%</em>}</strong>
                 </span>
               </Link>
             ) : (
@@ -408,12 +438,53 @@ function CommercialHomePage() {
             <Link href="/search?view=brands" data-testid="link-home-brands-all">كل العلامات <ArrowLeft size={15} /></Link>
           </div>
           <div className="guided-brand-list">
-            {brands.map((product) => (
-              <Link href={brandPath(product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'))} className="guided-brand-link" key={product.brandSlug || product.brand} data-testid={`link-home-brand-${product.brandSlug || product.brand}`}>
-                {product.brand}
+            {brandCollections.map(({ brand, brandSlug, product, count }) => (
+              <Link href={brandPath(brandSlug)} className="guided-brand-collection" key={brandSlug} data-testid={`link-home-brand-${brandSlug}`}>
+                <img src={product.images?.[0]} alt="" loading="lazy" />
+                <span><strong>{brand}</strong><small>{count} {count === 1 ? 'منتج منشور' : 'منتجات منشورة'}</small></span>
+                <ArrowLeft size={15} />
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="guided-finder" aria-labelledby="home-finder-title">
+        <div className="container">
+          <div className="guided-finder-heading">
+            <div>
+              <span className="eyebrow">مساعد اختيار إرشادي</span>
+              <h2 id="home-finder-title">قل لنا ما تحتاجه</h2>
+              <p>نضيّق البداية حسب القسم والسعر فقط. افتح صفحة المنتج وراجع التوافق قبل الطلب.</p>
+            </div>
+            <span className="guided-finder-result-count">{finderProducts.length} نتائج حالية</span>
+          </div>
+          <div className="guided-finder-controls">
+            <fieldset>
+              <legend>ما القسم الأقرب لاستخدامك؟</legend>
+              <div className="guided-finder-options">
+                <button type="button" className={finderCategory === 'all' ? 'is-selected' : ''} onClick={() => setFinderCategory('all')}>كل الأقسام</button>
+                {categories.slice(0, 5).map((category) => (
+                  <button type="button" className={finderCategory === category.slug ? 'is-selected' : ''} key={category.slug} onClick={() => setFinderCategory(category.slug)}>{category.name}</button>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>ما نطاق السعر المريح؟</legend>
+              <div className="guided-finder-options">
+                {[
+                  ['all', 'كل الأسعار'],
+                  ['under-25', `أقل من ${formatPrice(25)}`],
+                  ['25-50', `${formatPrice(25)} – ${formatPrice(50)}`],
+                  ['over-50', `أكثر من ${formatPrice(50)}`],
+                ].map(([value, label]) => (
+                  <button type="button" className={finderBudget === value ? 'is-selected' : ''} key={value} onClick={() => setFinderBudget(value)}>{label}</button>
+                ))}
+              </div>
+            </fieldset>
+          </div>
+          <ProductGrid products={finderProducts} empty="لا توجد نتائج متاحة بهذا الاختيار حالياً." />
+          <p className="guided-finder-note">النتائج مبنية على بيانات القسم والسعر والتوافر الحالي، وليست حكماً على التوافق. راجع تفاصيل المنتج قبل الإضافة.</p>
         </div>
       </section>
 
