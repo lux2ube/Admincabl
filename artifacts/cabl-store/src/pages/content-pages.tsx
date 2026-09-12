@@ -30,7 +30,7 @@ function PageMeta({ title, description }: { title: string; description: string }
   return null;
 }
 
-function EditorialSection({ eyebrow, title, children }: { eyebrow?: string; title: string; children: ReactNode }) {
+export function EditorialSection({ eyebrow, title, children }: { eyebrow?: string; title: string; children: ReactNode }) {
   return (
     <section className="editorial-section">
       <div className="container">
@@ -44,7 +44,7 @@ function EditorialSection({ eyebrow, title, children }: { eyebrow?: string; titl
   );
 }
 
-function InfoCards({ items }: { items: Array<{ icon: ReactNode; title: string; text: string; href?: string }> }) {
+export function InfoCards({ items }: { items: Array<{ icon: ReactNode; title: string; text: string; href?: string }> }) {
   return (
     <div className="info-card-grid">
       {items.map((item) => (
@@ -63,7 +63,7 @@ function InfoCards({ items }: { items: Array<{ icon: ReactNode; title: string; t
   );
 }
 
-function FAQList({ items }: { items: Array<{ question: string; answer: string }> }) {
+export function FAQList({ items }: { items: Array<{ question: string; answer: string }> }) {
   return (
     <div className="faq-list">
       {items.map((item) => (
@@ -114,7 +114,7 @@ function formatCatalogPrice(product: StoreProduct, currencies?: Currency[]) {
   }).format((product.discountPrice ?? product.regularPrice) * (currency?.ratePerUsd || 1));
 }
 
-function ProductComparisonTable({
+export function ProductComparisonTable({
   products,
   currencies,
   includeCategory = false,
