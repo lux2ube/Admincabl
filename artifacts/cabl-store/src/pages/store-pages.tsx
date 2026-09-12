@@ -24,6 +24,15 @@ function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; 
   return null;
 }
 
+function StaticSEO({ title, description }: { title: string; description: string }) {
+  useEffect(() => {
+    document.title = `${title} | CABL`;
+    const meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (meta) meta.content = description;
+  }, [title, description]);
+  return null;
+}
+
 function ProductImage({ product, className = '' }: { product: StoreProduct; className?: string }) {
   return <img className={className} src={product.images?.[0]} alt={product.productName} data-testid={`img-detail-${product.id}`}/>;
 }
@@ -61,7 +70,40 @@ function CatalogPage({ mode, slug }: { mode: 'category' | 'brand'; slug: string 
     ? product.category?.slug === slug
     : product.brandSlug === slug || product.brand.toLowerCase().replace(/\s+/g, '-') === slug);
   const name = mode === 'category' ? filtered[0]?.category?.name || slug.replaceAll('-', ' ') : filtered[0]?.brand || slug.replaceAll('-', ' ');
-  return <><LegacyCatalogPage mode={mode} slug={slug}/><CollectionEditorial mode={mode} name={name} products={filtered}/></>;
+  const categoryLinks = mode === 'brand'
+    ? Array.from(new Map(filtered.filter((product) => product.category).map((product) => [product.category!.slug, product.category!])).values())
+    : [];
+  return <><LegacyCatalogPage mode={mode} slug={slug}/>{mode === 'brand' && <BrandCategoryLinks brandSlug={slug} categories={categoryLinks}/>}<CollectionEditorial mode={mode} name={name} products={filtered}/></>;
+}
+
+const publicCategorySlugs: Record<string, string> = {
+  'charging-cables': 'cables',
+  'travel-adapters': 'car-accessories',
+  'phone-accessories': 'hubs-adapters',
+};
+
+function BrandCategoryLinks({ brandSlug, categories }: { brandSlug: string; categories: Array<{ slug: string; name: string }> }) {
+  if (!categories.length) return null;
+  return (
+    <section className="brand-category-nav">
+      <div className="container">
+        <div className="editorial-heading">
+          <span className="eyebrow">تصفح داخل العلامة</span>
+          <h2>اختر قسم {brandSlug}</h2>
+          <p>صفحة مستقلة لكل علامة وقسم، مع منتجات ومقارنة ونصائح مرتبطة بالاختيار.</p>
+        </div>
+        <div className="brand-category-nav-grid">
+          {categories.map((category) => (
+            <Link href={`/${brandSlug}/${publicCategorySlugs[category.slug] || category.slug}`} className="brand-category-nav-card" key={category.slug}>
+              <strong>{category.name}</strong>
+              <span>منتجات {category.name} من هذه العلامة</span>
+              <ArrowLeft size={16} />
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 const categoryGuideCopy: Record<string, {
