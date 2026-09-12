@@ -6,7 +6,7 @@ import type { StoreOrderInput, StoreProduct } from '@workspace/api-client-react'
 import { useStore } from '@/lib/store';
 import { Breadcrumbs, CTASection, CatalogError, CatalogToolbar, LoadingCatalog, PageHeading } from '@/components/page-parts';
 import { CartLine, ProductGrid, QuantityControl, RatingLine } from '@/components/catalog-ui';
-import { ProductEditorial } from '@/pages/content-pages';
+import { CollectionEditorial, HomeImportedSections, ProductEditorial } from '@/pages/content-pages';
 
 function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; slug?: string }) {
   const params = slug ? { type, slug } : { type };
@@ -28,7 +28,7 @@ function ProductImage({ product, className = '' }: { product: StoreProduct; clas
   return <img className={className} src={product.images?.[0]} alt={product.productName} data-testid={`img-detail-${product.id}`}/>;
 }
 
-export function HomePage() {
+function LegacyHomePage() {
   const { catalog, isLoading, isError } = useStore();
   const [, navigate] = useLocation();
   const products = catalog?.products || [];
@@ -39,7 +39,12 @@ export function HomePage() {
   return <><SEO type="home"/><section className="hero"><div className="container hero-inner"><div className="hero-copy reveal"><span className="eyebrow">CABL / اليمن</span><h1>اتصالك. <span>طاقتك.</span><br/>على طريقتك.</h1><p>إكسسوارات تقنية منتقاة بعناية، بأسعار واضحة وتوصيل يعتمد عليه إلى كل مدن اليمن.</p><div className="hero-actions"><Link href="/search" className="button button-primary" data-testid="link-hero-shop">تسوّق الكتالوج <ArrowLeft size={17}/></Link><Link href="/orders" className="button button-quiet" data-testid="link-hero-orders">تتبع طلبك</Link></div></div><div className="hero-art reveal">{heroProduct ? <ProductImage product={heroProduct}/> : <div className="hero-fallback"><Zap size={70}/></div>}<div className="hero-badge"><i/> مختارات تصلح للاستخدام اليومي</div></div></div></section><section className="trust-row"><div className="container trust-grid"><div className="trust-item"><ShieldCheck/><div><strong>اختيارات موثوقة</strong><span>بيانات المنتج كما هي</span></div></div><div className="trust-item"><Truck/><div><strong>توصيل داخل اليمن</strong><span>اختر الطريقة الأنسب لك</span></div></div><div className="trust-item"><Package/><div><strong>تجربة شراء واضحة</strong><span>تأكيد ومتابعة بعد الطلب</span></div></div></div></section><section className="section"><div className="container"><div className="section-heading"><div><span className="eyebrow">من الكتالوج</span><h2>قطع تستحق مكاناً في حقيبتك</h2><p>كل منتج هنا قادم من مخزون CABL المنشور.</p></div><Link href="/search" data-testid="link-featured-all">رؤية الكل <ArrowLeft size={15}/></Link></div>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <ProductGrid products={featured}/>}</div></section><section className="editorial-choice"><div className="container"><div className="editorial-heading"><span className="eyebrow">ابدأ من المشكلة</span><h2>قطعة مناسبة تبدأ بسؤال واضح</h2><p>اختر المسار الأقرب لاستخدامك، ثم راجع البيانات قبل الشراء.</p></div><div className="choice-grid"><Link href="/solutions/slow-car-charging"><Zap/><strong>الشحن البطيء في السيارة</strong><span>حل عملي للشاحن والكابل والحرارة</span></Link><Link href="/blog/best-power-bank-yemen"><BookOpenIcon/><strong>أحتاج طاقة احتياطية</strong><span>دليل اختيار باور بانك مناسب</span></Link><Link href="/locations/yemen"><MapPinIcon/><strong>أين يصل طلبي؟</strong><span>راجع خيارات الشحن والتوصيل</span></Link></div></div></section><section className="brand-strip"><div className="container"><div className="section-heading"><div><span className="eyebrow">العلامات المتاحة</span><h2>أسماء نعرفها</h2></div><Link href="/search?view=brands" data-testid="link-brands-all">كل العلامات <ArrowLeft size={15}/></Link></div><div className="brand-list">{brands.map((brand) => <Link href={`/brand/${products.find((product) => product.brand === brand)?.brandSlug || brand.toLowerCase()}`} className="brand-pill" key={brand} data-testid={`link-brand-${brand}`}>{brand}</Link>)}</div></div></section><section className="category-band"><div className="container"><div className="section-heading"><div><span className="eyebrow">اختر ما تحتاجه</span><h2>طريق أقصر للقطعة المناسبة</h2></div></div><div className="category-grid">{categories.map((category, index) => <Link href={`/category/${category.slug}`} className="category-tile" key={category.slug} data-testid={`link-category-${category.slug}`}><span><strong>0{index + 1}</strong></span><h3>{category.name}</h3><p>تصفح المنتجات المتاحة</p>{index === 0 ? <Zap size={36}/> : index === 1 ? <Smartphone size={34}/> : <Headphones size={35}/>}</Link>)}</div></div></section><section className="home-editorial-links"><div className="container"><div><span className="eyebrow">محتوى CABL</span><h2>أسئلة صغيرة قبل قرار أكبر</h2><p>دليل الشراء والسياسات والمواصفات في مكان واحد.</p></div><div className="inline-link-list"><Link href="/about">من نحن <ArrowLeft size={14}/></Link><Link href="/lab">مركز المواصفات <ArrowLeft size={14}/></Link><Link href="/faq">الأسئلة الشائعة <ArrowLeft size={14}/></Link><Link href="/return-policy">الإرجاع والاستبدال <ArrowLeft size={14}/></Link></div></div></section><CTASection/></>;
 }
 
-function CatalogPage({ mode, slug }: { mode: 'category' | 'brand'; slug: string }) {
+export function HomePage() {
+  const { catalog } = useStore();
+  return <><LegacyHomePage/><HomeImportedSections products={catalog?.products || []}/></>;
+}
+
+ function LegacyCatalogPage({ mode, slug }: { mode: 'category' | 'brand'; slug: string }) {
   const { catalog, isLoading, isError } = useStore();
   const [sort, setSort] = useState('featured');
   const products = catalog?.products || [];
@@ -47,6 +52,16 @@ function CatalogPage({ mode, slug }: { mode: 'category' | 'brand'; slug: string 
   const sorted = useMemo(() => [...filtered].sort((a, b) => sort === 'price-low' ? (a.discountPrice ?? a.regularPrice) - (b.discountPrice ?? b.regularPrice) : sort === 'price-high' ? (b.discountPrice ?? b.regularPrice) - (a.discountPrice ?? a.regularPrice) : 0), [filtered, sort]);
   const name = mode === 'category' ? filtered[0]?.category?.name || slug.replaceAll('-', ' ') : filtered[0]?.brand || slug.replaceAll('-', ' ');
   return <><SEO type={mode} slug={slug}/><div className="container"><Breadcrumbs items={[{ label: mode === 'category' ? 'الأقسام' : 'العلامات' }, { label: name }]}/><PageHeading eyebrow={mode === 'category' ? 'قسم المنتجات' : 'علامة تجارية'} title={name} description={mode === 'category' ? 'كل المنتجات المنشورة في هذا القسم، من بيانات CABL الحالية.' : `منتجات ${name} المتاحة حالياً في كتالوج CABL.`}/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <><CatalogToolbar products={sorted} sort={sort} setSort={setSort}/><ProductGrid products={sorted}/></>}</div><CTASection/></>;
+}
+
+function CatalogPage({ mode, slug }: { mode: 'category' | 'brand'; slug: string }) {
+  const { catalog } = useStore();
+  const products = catalog?.products || [];
+  const filtered = products.filter((product) => mode === 'category'
+    ? product.category?.slug === slug
+    : product.brandSlug === slug || product.brand.toLowerCase().replace(/\s+/g, '-') === slug);
+  const name = mode === 'category' ? filtered[0]?.category?.name || slug.replaceAll('-', ' ') : filtered[0]?.brand || slug.replaceAll('-', ' ');
+  return <><LegacyCatalogPage mode={mode} slug={slug}/><CollectionEditorial mode={mode} name={name} products={filtered}/></>;
 }
 
 export function CategoryPage() { const { slug = '' } = useParams<{ slug: string }>(); return <CatalogPage mode="category" slug={slug}/>; }

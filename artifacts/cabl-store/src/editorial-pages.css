@@ -32,7 +32,14 @@
 .comparison-table th,.comparison-table td{padding:15px 16px;border-bottom:1px solid #e8eef5}
 .comparison-table tr:last-child td{border-bottom:0}
 .comparison-table td:first-child{font-weight:800;color:#1b3152}
+.comparison-table td small{display:block;color:#8190a5;font-size:10px;font-weight:500;margin-top:3px}
 .lab-table td{vertical-align:middle}
+.lab-group{margin-bottom:28px}.lab-group:last-child{margin-bottom:0}.lab-group h3{font-size:17px;margin:0 0 10px;color:#243c61}
+.calculator-card{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch;background:#fff;border:1px solid #dfe8f1;border-radius:16px;padding:18px;max-width:900px}
+.calculator-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.calculator-fields .form-field{display:grid;gap:6px}.calculator-fields .form-field span{font-size:11px;font-weight:800;color:#5e7390}
+.calculator-result{display:grid;grid-template-columns:1fr 1fr;align-content:center;gap:5px 12px;background:#f0f7ff;border-radius:13px;padding:16px}.calculator-result strong{font-size:22px;color:#1757ee}.calculator-result span{font-size:11px;color:#6d8099;align-self:center}
+.content-disclaimer{font-size:11px;color:#7a8aa0;margin:12px 0 0;max-width:850px}.related-link-card{display:block;transition:transform .2s,border-color .2s}.related-link-card:hover{transform:translateY(-3px);border-color:#bcd3f4}.related-link-card .info-card-icon{display:grid}
+.inline-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
 .faq-list{display:grid;gap:10px;max-width:900px}
 .faq-item{background:#fff;border:1px solid #dfe8f1;border-radius:13px;padding:0 18px}
 .faq-item summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:17px 0;font-size:13px;font-weight:800;cursor:pointer}
@@ -83,4 +90,5 @@
   .editorial-section{padding:48px 0}.editorial-heading h2{font-size:26px}.info-card-grid,.numbered-steps,.policy-grid,.product-editorial-grid,.choice-grid{grid-template-columns:1fr}
   .info-card{min-height:auto}.large-checks{grid-template-columns:1fr}.warranty-form{display:block}.warranty-form .form-field{display:block;min-width:0;margin-bottom:12px}.warranty-form .button{width:100%}
   .help-banner{align-items:flex-start;flex-wrap:wrap}.help-banner .button{width:100%}.home-editorial-links .container{display:block}.inline-link-list{min-width:0;margin-top:22px}.comparison-table{min-width:560px}
+  .calculator-card{grid-template-columns:1fr}.calculator-fields{grid-template-columns:1fr 1fr}.calculator-fields .form-field:first-child{grid-column:1 / -1}.calculator-result{grid-template-columns:1fr 1fr}
 }
