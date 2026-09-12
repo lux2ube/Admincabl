@@ -54,7 +54,7 @@ export function BrandPage() { const { slug = '' } = useParams<{ slug: string }>(
 export function SearchPage() {
   const { catalog, isLoading, isError, favorites } = useStore();
   const [location, setLocation] = useLocation();
-  const query = new URLSearchParams(location.split('?')[1] || '');
+  const query = new URLSearchParams(window.location.search);
   const view = query.get('view') || 'products';
   const [term, setTerm] = useState(query.get('q') || '');
   const [brand, setBrand] = useState('');
@@ -126,8 +126,7 @@ export function OrdersPage() {
 
 export function OrderPage() {
   const { id = '' } = useParams<{ id: string }>();
-  const [location] = useLocation();
-  const queryPhone = new URLSearchParams(location.split('?')[1] || '').get('phone') || '';
+  const queryPhone = new URLSearchParams(window.location.search).get('phone') || '';
   const { formatPrice } = useStore();
   const [phone, setPhone] = useState(queryPhone);
   const [submitted, setSubmitted] = useState(Boolean(queryPhone));
