@@ -1,0 +1,170 @@
+Re-align the current CABL homepage with the following proven commercial architecture.
+
+Do NOT redesign from scratch. Keep the current visual direction and existing data.
+
+FINAL SECTION ORDER
+
+1. Header
+2. Hero
+3. Trust / Purchase Confidence
+4. Shop by Need
+5. Featured Products
+6. Brand / Collection Showcase
+7. Product Finder
+8. Verification / Purchase Confidence
+9. Buying Guides
+10. FAQ
+11. About CABL
+12. Footer
+
+SECTION FUNCTIONS
+
+1. Header
+
+Navigation and search.
+Prioritize real catalog destinations.
+
+2. Hero
+
+Answer:
+"What should I do first?"
+
+Keep it short, practical and product-oriented.
+One dominant CTA.
+
+3. Trust
+
+Answer:
+"Can I buy confidently?"
+
+Use only real CABL policies:
+delivery, payment, warranty, returns, support, etc.
+
+No vague trust slogans.
+
+4. Shop by Need
+
+Answer:
+"What problem are you trying to solve?"
+
+Examples must come from the actual CABL catalog:
+charging, mobile power, cables, car charging, travel, audio, etc.
+
+This must NOT simply duplicate category navigation.
+
+5. Featured Products
+
+Answer:
+"What can I buy right now?"
+
+Use real published catalog products.
+Show real prices and availability.
+
+Never invent:
+prices, discounts, stock, reviews, specifications or labels.
+
+6. Brand / Collection Showcase
+
+Answer:
+"Which brand/product family should I explore?"
+
+Generate from the actual CABL catalog.
+
+Each brand must link to its real Brand page.
+
+Where a Brand × Category page exists, use it for relevant navigation.
+
+7. Product Finder
+
+Answer:
+"I don't know which product to choose."
+
+Keep the interaction simple.
+
+Recommendations must be based ONLY on real structured product data.
+
+If the catalog does not contain enough reliable attributes, simplify or remove the finder rather than inventing recommendation logic.
+
+8. Verification / Purchase Confidence
+
+Answer:
+"How do I verify what I'm buying and what happens after purchase?"
+
+Use real CABL:
+
+- product information
+- warranty
+- delivery
+- payment
+- returns
+- support
+
+Make the information actionable, not decorative.
+
+9. Buying Guides
+
+Answer:
+"What should I know before buying?"
+
+Keep below the commercial sections.
+Only show genuinely useful guides.
+
+Do not turn the homepage into an SEO article.
+
+10. FAQ
+
+Answer:
+"What objections remain?"
+
+Use real customer purchase questions.
+Keep concise and link to the full FAQ.
+
+11. About CABL
+
+Answer:
+"Who is CABL?"
+
+Short brand positioning only.
+Do not let this section compete with shopping.
+
+12. Footer
+
+Provide:
+categories, brands, guides, policies, contact and essential navigation.
+
+GLOBAL RULES
+
+Every section must have ONE clear purpose.
+
+Homepage priority:
+
+DISCOVER → CHOOSE → VERIFY → BUY
+
+Do not add sections simply because the competitor has them.
+
+Borrow the commercial logic, not the content, branding or exact design.
+
+Use CABL's actual Yemen catalog and policies as the source of truth.
+
+No invented data.
+No fake urgency.
+No fake reviews.
+No generic AI marketing copy.
+No keyword stuffing.
+No duplicate sections.
+No unnecessary SEO text.
+
+Preserve existing:
+
+- URLs
+- SEO metadata
+- canonical
+- sitemap
+- database
+- cart
+- checkout
+- product functionality
+
+unless explicitly required otherwise.
+
+The homepage should feel like a serious Yemeni electronics store designed for fast decision-making, not an SEO landing page.

@@ -1,5 +1,5 @@
 import { Link } from 'wouter';
-import { Heart, ShoppingBag, ArrowUpLeft, Star, Plus, Minus, Trash2 } from 'lucide-react';
+import { Heart, ShoppingBag, ArrowUpLeft, Plus, Minus, Trash2 } from 'lucide-react';
 import type { StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
 import { productPath } from '@/lib/store-routes';
@@ -26,5 +26,3 @@ export function CartLine({ product, quantity }: { product: StoreProduct; quantit
   const { formatPrice, updateCart, removeFromCart } = useStore();
   return <div className="cart-line" data-testid={`row-cart-${product.id}`}><img src={product.images?.[0]} alt={product.productName}/><div className="cart-line-copy"><Link href={productPath(product)} data-testid={`link-cart-product-${product.id}`}>{product.productName}</Link><span>{product.brand}</span><strong>{formatPrice((product.discountPrice ?? product.regularPrice) * quantity)}</strong></div><QuantityControl value={quantity} onChange={(value) => updateCart(product.id, value)} testId={`quantity-${product.id}`}/><button className="remove-button" onClick={() => removeFromCart(product.id)} aria-label="حذف المنتج" data-testid={`button-remove-${product.id}`}><Trash2 size={17}/></button></div>;
 }
-
-export function RatingLine() { return <div className="rating-line" aria-label="تقييم المنتج"><span className="stars"><Star size={14} fill="currentColor"/><Star size={14} fill="currentColor"/><Star size={14} fill="currentColor"/><Star size={14} fill="currentColor"/><Star size={14}/></span><span>اختيار موثوق من مجتمع CABL</span></div>; }

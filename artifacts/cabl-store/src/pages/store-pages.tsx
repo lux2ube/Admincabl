@@ -4,11 +4,11 @@ import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, Fl
 import { getGetStoreSeoQueryKey, getGetStoreOrderQueryKey, getListStoreOrdersQueryKey, useCreateStoreOrder, useGetStoreOrder, useGetStoreSeo, useListStoreOrders } from '@workspace/api-client-react';
 import type { StoreOrderInput, StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
-import { brandCategoryPath, brandPath, productPath, publicCategorySlug } from '@/lib/store-routes';
+import { brandCategoryPath, brandPath, productPath } from '@/lib/store-routes';
 import { setSeoHead } from '@/lib/seo-head';
 import { Breadcrumbs, CTASection, CatalogError, CatalogToolbar, LoadingCatalog, PageHeading } from '@/components/page-parts';
-import { CartLine, ProductGrid, QuantityControl, RatingLine } from '@/components/catalog-ui';
-import { CollectionEditorial, EditorialSection, FAQList, InfoCards, ProductComparisonTable, ProductEditorial } from '@/pages/content-pages';
+import { CartLine, ProductGrid, QuantityControl } from '@/components/catalog-ui';
+import { EditorialSection, FAQList, InfoCards, ProductEditorial } from '@/pages/content-pages';
 
 function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; slug?: string }) {
   const [location, navigate] = useLocation();
@@ -274,27 +274,129 @@ export function HomePage() {
   return <GuidedHomePage />;
 }
 
- function LegacyCatalogPage({ mode, slug }: { mode: 'category' | 'brand'; slug: string }) {
+function BrandStorefrontPage({ slug }: { slug: string }) {
   const { catalog, isLoading, isError } = useStore();
   const [sort, setSort] = useState('featured');
   const products = catalog?.products || [];
-  const filtered = useMemo(() => products.filter((product) => mode === 'category' ? product.category?.slug === slug : product.brandSlug === slug || product.brand.toLowerCase().replace(/\s+/g, '-') === slug), [products, slug, mode]);
-  const sorted = useMemo(() => [...filtered].sort((a, b) => sort === 'price-low' ? (a.discountPrice ?? a.regularPrice) - (b.discountPrice ?? b.regularPrice) : sort === 'price-high' ? (b.discountPrice ?? b.regularPrice) - (a.discountPrice ?? a.regularPrice) : 0), [filtered, sort]);
-  const name = mode === 'category' ? filtered[0]?.category?.name || slug.replaceAll('-', ' ') : filtered[0]?.brand || slug.replaceAll('-', ' ');
-  return <><SEO type={mode} slug={slug}/><div className="container"><Breadcrumbs items={[{ label: mode === 'category' ? 'الأقسام' : 'العلامات' }, { label: name }]}/><PageHeading eyebrow={mode === 'category' ? 'قسم المنتجات' : 'علامة تجارية'} title={name} description={mode === 'category' ? 'كل المنتجات المنشورة في هذا القسم، من بيانات CABL الحالية.' : `منتجات ${name} المتاحة حالياً في كتالوج CABL.`}/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <><CatalogToolbar products={sorted} sort={sort} setSort={setSort}/><ProductGrid products={sorted}/></>}</div><CTASection/></>;
-}
+  const brandProducts = useMemo(
+    () => products.filter((product) => product.brandSlug === slug || product.brand.toLowerCase().replace(/\s+/g, '-') === slug),
+    [products, slug],
+  );
+  const brandName = brandProducts[0]?.brand || slug.replaceAll('-', ' ');
+  const categories = useMemo(
+    () => Array.from(new Map(
+      brandProducts
+        .filter((product) => product.category)
+        .map((product) => [product.category!.slug, product.category!]),
+    ).values()),
+    [brandProducts],
+  );
+  const sorted = useMemo(() => [...brandProducts].sort((a, b) => {
+    if (sort === 'price-low') return (a.discountPrice ?? a.regularPrice) - (b.discountPrice ?? b.regularPrice);
+    if (sort === 'price-high') return (b.discountPrice ?? b.regularPrice) - (a.discountPrice ?? a.regularPrice);
+    return Number(b.quantity > 0) - Number(a.quantity > 0);
+  }), [brandProducts, sort]);
 
-function CatalogPage({ mode, slug }: { mode: 'category' | 'brand'; slug: string }) {
-  const { catalog } = useStore();
-  const products = catalog?.products || [];
-  const filtered = products.filter((product) => mode === 'category'
-    ? product.category?.slug === slug
-    : product.brandSlug === slug || product.brand.toLowerCase().replace(/\s+/g, '-') === slug);
-  const name = mode === 'category' ? filtered[0]?.category?.name || slug.replaceAll('-', ' ') : filtered[0]?.brand || slug.replaceAll('-', ' ');
-  const categoryLinks = mode === 'brand'
-    ? Array.from(new Map(filtered.filter((product) => product.category).map((product) => [product.category!.slug, product.category!])).values())
-    : [];
-  return <><LegacyCatalogPage mode={mode} slug={slug}/>{mode === 'brand' && <BrandCategoryLinks brandSlug={slug} categories={categoryLinks}/>}<CollectionEditorial mode={mode} name={name} products={filtered}/></>;
+  return (
+    <>
+      <SEO type="brand" slug={slug} />
+      <section className="brand-storefront-hero">
+        <div className="container">
+          <Breadcrumbs items={[{ label: 'العلامات التجارية', href: '/search?view=brands' }, { label: brandName }]} />
+          <div className="brand-storefront-copy">
+            <span className="eyebrow">استكشف العلامة</span>
+            <h1>{brandName}</h1>
+            <p>منتجات {brandName} المنشورة حالياً في كتالوج CABL. ابدأ من القسم الأقرب لاستخدامك، ثم راجع الموديل والمواصفات والتوافر قبل الطلب.</p>
+            <div className="brand-storefront-actions">
+              {categories.slice(0, 3).map((category) => (
+                <Link className="button button-secondary" href={brandCategoryPath(slug, category.slug)} key={category.slug}>
+                  {category.name}
+                </Link>
+              ))}
+              <Link className="button button-primary" href="/search">كل المنتجات <ArrowLeft size={16} /></Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="brand-storefront-section">
+        <div className="container">
+          <div className="brand-storefront-heading">
+            <div>
+              <span className="eyebrow">تصفح داخل العلامة</span>
+              <h2>اختر القسم قبل الموديل</h2>
+              <p>روابط إلى الأقسام التي تحتوي على منتجات منشورة من {brandName} فقط.</p>
+            </div>
+            <span className="brand-product-count">{brandProducts.length} منتج</span>
+          </div>
+          {categories.length ? (
+            <div className="brand-storefront-category-grid">
+              {categories.map((category) => {
+                const count = brandProducts.filter((product) => product.category?.slug === category.slug).length;
+                return (
+                  <Link className="brand-storefront-category" href={brandCategoryPath(slug, category.slug)} key={category.slug}>
+                    <strong>{category.name}</strong>
+                    <span>{count} {count === 1 ? 'منتج' : 'منتجات'} منشورة</span>
+                    <ArrowLeft size={16} />
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="empty-state">لا توجد أقسام منشورة لهذه العلامة حالياً.</p>
+          )}
+        </div>
+      </section>
+
+      <EditorialSection eyebrow="من الكتالوج الحالي" title={`منتجات ${brandName}`}>
+        {isLoading ? <LoadingCatalog /> : isError ? <CatalogError retry={() => window.location.reload()} /> : (
+          <>
+            <CatalogToolbar products={sorted} sort={sort} setSort={setSort} />
+            <ProductGrid products={sorted} empty={`لا توجد منتجات منشورة من ${brandName} حالياً.`} />
+          </>
+        )}
+      </EditorialSection>
+
+      <EditorialSection eyebrow="طريقة الاختيار" title={`كيف تختار من ${brandName}؟`}>
+        <div className="editorial-copy">
+          <p>لا تفترض أن كل منتجات العلامة تملك نفس القدرة أو التوافق. ابدأ من الجهاز والاستخدام، ثم قارن الموديل والمنافذ والقدرة والسعر والتوافر في صفحات المنتجات.</p>
+        </div>
+        <div className="numbered-steps">
+          <div><b>01</b><h3>حدد القسم</h3><p>افتح القسم الأقرب لما تريد شراءه بدل مقارنة منتجات مختلفة الوظيفة.</p></div>
+          <div><b>02</b><h3>راجع الموديل</h3><p>طابق الاسم ورقم SKU والصورة مع القطعة التي تحتاجها.</p></div>
+          <div><b>03</b><h3>افحص التوافق</h3><p>راجع المنفذ والقدرة والكابل والجهاز قبل الإضافة إلى السلة.</p></div>
+          <div><b>04</b><h3>أكد الشحن</h3><p>اختر العنوان وطريقة الشحن والدفع في checkout قبل إرسال الطلب.</p></div>
+        </div>
+      </EditorialSection>
+
+      <EditorialSection title={`قبل طلب منتج من ${brandName}`}>
+        <InfoCards items={[
+          { icon: <ShieldCheck />, title: 'البيانات أولاً', text: 'العلامة والموديل والسعر والتوافر مأخوذة من الكتالوج الحالي.' },
+          { icon: <Zap />, title: 'التوافق مسؤوليتك', text: 'طابق المنافذ والقدرة والبروتوكول مع جهازك، ولا تعتمد على الاسم وحده.' },
+          { icon: <Truck />, title: 'الشحن في checkout', text: 'تظهر خيارات الشحن والرسوم والمدة التقديرية بعد إدخال العنوان.' },
+          { icon: <RefreshCcw />, title: 'الإرجاع قبل التأكيد', text: 'راجع سياسة الإرجاع والاستبدال واحتفظ برقم الطلب بعد الشراء.', href: '/return-policy' },
+        ]} />
+      </EditorialSection>
+
+      <EditorialSection title={`أسئلة عن ${brandName}`}>
+        <FAQList items={[
+          { question: `هل كل منتجات ${brandName} متاحة الآن؟`, answer: 'التوافر مرتبط بالكمية المنشورة لكل موديل، ويعاد التحقق عند الإضافة والطلب.' },
+          { question: `كيف أقارن بين موديلات ${brandName}؟`, answer: 'افتح المنتجات من القسم نفسه وقارن الموديل والمواصفات والسعر والتوافر، لا الاسم التجاري فقط.' },
+          { question: 'أين أجد خيارات الشحن والإرجاع؟', answer: 'تظهر خيارات الشحن والدفع في checkout، وتفاصيل الإرجاع في سياسة الإرجاع والاستبدال.' },
+        ]} />
+      </EditorialSection>
+
+      <EditorialSection title="روابط مفيدة">
+        <div className="category-related-links">
+          <Link href="/shipping"><Truck /><strong>الشحن والتوصيل</strong><span>راجع الرسوم والمدة حسب العنوان.</span><ArrowLeft size={15} /></Link>
+          <Link href="/return-policy"><RefreshCcw /><strong>الإرجاع والاستبدال</strong><span>اعرف الشروط والخطوات قبل الطلب.</span><ArrowLeft size={15} /></Link>
+          <Link href="/faq"><MessageCircleIcon /><strong>الأسئلة الشائعة</strong><span>إجابات عن الطلب والدفع والتوافق.</span><ArrowLeft size={15} /></Link>
+          <Link href="/search"><Package /><strong>كل المنتجات</strong><span>عد إلى الكتالوج الكامل.</span><ArrowLeft size={15} /></Link>
+        </div>
+      </EditorialSection>
+      <CTASection />
+    </>
+  );
 }
 
 function BrandCategoryLinks({ brandSlug, categories }: { brandSlug: string; categories: Array<{ slug: string; name: string }> }) {
@@ -367,8 +469,9 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
       { question: 'أين أجد الشحن والإرجاع؟', answer: 'راجع الخيارات النشطة في checkout وسياسة الإرجاع قبل تأكيد الطلب.' },
     ],
   };
-  const comparisonProducts = sorted.slice(0, 8);
-  const categoryPathSlug = publicCategorySlug(filtered[0]?.category?.slug || categorySlug);
+  const categoryPathSlug = filtered[0]?.category?.slug
+    || brandProducts.find((product) => matchesCategory(product, categorySlug))?.category?.slug
+    || categorySlug;
   const description = `${categoryName} من ${brandName} في اليمن. قارن المواصفات والسعر والتوافر قبل الطلب من CABL.`;
 
   return (
@@ -399,9 +502,6 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
       <EditorialSection eyebrow="بيانات قابلة للمراجعة" title={`كيف تختار ${categoryName} من ${brandName}؟`}>
         <div className="editorial-copy"><p>{copy.selection}</p></div>
         <div className="numbered-steps category-tip-grid">{copy.tips.map((tip, index) => <div key={tip}><b>{String(index + 1).padStart(2, '0')}</b><p>{tip}</p></div>)}</div>
-      </EditorialSection>
-      <EditorialSection title={`مقارنة منتجات ${brandName}`}>
-        {comparisonProducts.length ? <ProductComparisonTable products={comparisonProducts} currencies={catalog?.currencies} /> : <p className="empty-state">ستظهر المقارنة بعد نشر منتجات في هذا المسار.</p>}
       </EditorialSection>
       <EditorialSection title="قبل تأكيد الطلب">
         <InfoCards items={[
@@ -521,7 +621,6 @@ function CategoryLandingPage({ slug }: { slug: string }) {
     ],
   };
   const brands = Array.from(new Map(filtered.map((product) => [product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'), product.brand])).entries()).slice(0, 6);
-  const comparisonProducts = sorted.slice(0, 8);
   return (
     <>
       <SEO type="category" slug={slug} />
@@ -545,9 +644,6 @@ function CategoryLandingPage({ slug }: { slug: string }) {
       <EditorialSection eyebrow="كيف تختار؟" title={`دليل اختيار ${name}`}>
         <div className="editorial-copy"><p>{copy.selection}</p></div>
         <div className="numbered-steps category-tip-grid">{copy.tips.map((tip, index) => <div key={tip}><b>{String(index + 1).padStart(2, '0')}</b><p>{tip}</p></div>)}</div>
-      </EditorialSection>
-      <EditorialSection title={`مقارنة ${name}`}>
-        {comparisonProducts.length ? <ProductComparisonTable products={comparisonProducts} currencies={catalog?.currencies} /> : <p className="empty-state">ستظهر المقارنة بعد نشر منتجات في هذا القسم.</p>}
       </EditorialSection>
       <EditorialSection title="ماذا تراجع قبل الشراء؟">
         <InfoCards items={[
@@ -577,7 +673,7 @@ export function CategoryPage() {
   const { slug = '' } = useParams<{ slug: string }>();
   return <CategoryLandingPage slug={slug} />;
 }
-export function BrandPage() { const { slug = '' } = useParams<{ slug: string }>(); return <CatalogPage mode="brand" slug={slug}/>; }
+export function BrandPage() { const { slug = '' } = useParams<{ slug: string }>(); return <BrandStorefrontPage slug={slug}/>; }
 export function BrandCategoryPage() {
   const { brandSlug = '', categorySlug = '' } = useParams<{ brandSlug: string; categorySlug: string }>();
   return <BrandCategoryPageView brandSlug={brandSlug} categorySlug={categorySlug} />;
@@ -613,7 +709,48 @@ function ProductDetailPage({ slug }: { slug: string }) {
   if (isError) return <div className="container"><CatalogError retry={() => window.location.reload()}/></div>;
   if (!product) return <div className="container"><div className="state-panel" style={{ margin: '60px 0' }}><h3>هذا المنتج غير متاح</h3><Link href="/search" className="button button-primary" data-testid="link-product-missing">العودة للكتالوج</Link></div></div>;
   const price = product.discountPrice ?? product.regularPrice;
-  return <><SEO type="product" slug={slug}/><div className="container product-detail"><Breadcrumbs items={[{ label: product.category?.name || 'المنتجات', href: product.category ? `/category/${product.category.slug}` : '/search' }, { label: product.productName }]}/><div className="product-detail-grid"><div className="detail-gallery"><div className="detail-main-image"><img src={product.images?.[imageIndex] || product.images?.[0]} alt={product.productName} data-testid="img-product-main"/></div><div className="thumb-row">{product.images.map((image, index) => <button className={`thumb ${imageIndex === index ? 'active' : ''}`} key={image} onClick={() => setImageIndex(index)} data-testid={`button-product-thumb-${index}`}><img src={image} alt=""/></button>)}</div></div><div className="detail-info"><span className="product-brand">{product.brand}</span><h1>{product.productName}</h1><RatingLine/><p className="detail-copy">{product.productDescription || product.shortDescription || 'منتج متاح من كتالوج CABL.'}</p><div className="detail-price"><strong data-testid="text-product-detail-price">{formatPrice(price)}</strong>{product.discountPrice && <del>{formatPrice(product.regularPrice)}</del>}</div><div className="stock-note"><i/>{product.quantity > 0 ? `متوفر الآن — ${product.quantity} قطعة` : 'غير متوفر حالياً'}</div><div className="detail-actions"><QuantityControl value={quantity} onChange={(value) => setQuantity(Math.max(1, Math.min(product.quantity || 1, value)))} testId="quantity-detail"/><button className="button button-primary" onClick={() => addToCart(product.id, quantity)} disabled={product.quantity < 1} data-testid="button-detail-add-cart">أضف إلى السلة <Package size={17}/></button></div><div className="detail-facts"><div className="fact"><ShieldCheck size={20}/><span>بيانات المنتج موضحة</span></div><div className="fact"><Truck size={20}/><span>خيارات شحن متاحة</span></div><div className="fact"><Zap size={20}/><span>تجهيز سريع للطلب</span></div><div className="fact"><Package size={20}/><span>دعم بعد الشراء</span></div></div>{product.productNote && <div className="detail-note">{product.productNote}</div>}</div></div><ProductEditorial product={product}/></div></>;
+  return (
+    <>
+      <SEO type="product" slug={slug}/>
+      <div className="container product-detail">
+        <Breadcrumbs items={[
+          ...(product.brandSlug ? [{ label: product.brand, href: brandPath(product.brandSlug) }] : []),
+          ...(product.category ? [{ label: product.category.name, href: `/category/${product.category.slug}` }] : []),
+          { label: product.productName },
+        ]}/>
+        <div className="product-detail-grid">
+          <div className="detail-gallery">
+            <div className="detail-main-image"><img src={product.images?.[imageIndex] || product.images?.[0]} alt={product.productName} data-testid="img-product-main"/></div>
+            <div className="thumb-row">{product.images.map((image, index) => <button className={`thumb ${imageIndex === index ? 'active' : ''}`} key={image} onClick={() => setImageIndex(index)} data-testid={`button-product-thumb-${index}`}><img src={image} alt=""/></button>)}</div>
+          </div>
+          <div className="detail-info">
+            <span className="product-brand">{product.brand}</span>
+            <h1>{product.productName}</h1>
+            <div className="product-identity"><span>SKU</span><b dir="ltr">{product.sku}</b></div>
+            <p className="detail-copy">{product.shortDescription || product.productDescription || 'منتج متاح من كتالوج CABL.'}</p>
+            <div className="detail-price"><strong data-testid="text-product-detail-price">{formatPrice(price)}</strong>{product.discountPrice && <del>{formatPrice(product.regularPrice)}</del>}</div>
+            <div className="stock-note"><i/>{product.quantity > 0 ? `متوفر الآن — ${product.quantity} قطعة` : 'غير متوفر حالياً'}</div>
+            <div className="detail-actions">
+              <QuantityControl value={quantity} onChange={(value) => setQuantity(Math.max(1, Math.min(product.quantity || 1, value)))} testId="quantity-detail"/>
+              <button className="button button-primary" onClick={() => addToCart(product.id, quantity)} disabled={product.quantity < 1} data-testid="button-detail-add-cart">أضف إلى السلة <Package size={17}/></button>
+            </div>
+            <div className="detail-facts">
+              <div className="fact"><ShieldCheck size={20}/><span>بيانات المنتج موضحة</span></div>
+              <div className="fact"><Truck size={20}/><span>خيارات الشحن تظهر في checkout</span></div>
+              <div className="fact"><Zap size={20}/><span>التوافر من الكتالوج الحالي</span></div>
+              <div className="fact"><Package size={20}/><span>احتفظ برقم الطلب</span></div>
+            </div>
+            {product.productNote && <div className="detail-note">{product.productNote}</div>}
+          </div>
+        </div>
+        <div className="detail-mobile-purchase">
+          <div><strong>{formatPrice(price)}</strong><span>{product.quantity > 0 ? 'متوفر الآن' : 'غير متوفر'}</span></div>
+          <button className="button button-primary" onClick={() => addToCart(product.id, quantity)} disabled={product.quantity < 1} data-testid="button-mobile-detail-add-cart">أضف إلى السلة <Package size={17}/></button>
+        </div>
+        <ProductEditorial product={product}/>
+      </div>
+    </>
+  );
 }
 
 export function ProductPage() {

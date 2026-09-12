@@ -335,7 +335,7 @@ export function LocationPage() {
   return (
     <>
       <PageMeta title="التوصيل داخل اليمن" description="معلومات الشحن والتوصيل داخل اليمن من CABL." />
-      <EditorialHero eyebrow="التوصيل / اليمن" title="حلول شحن تصل إلى محافظتك" description={`راجع خيارات الشحن الحالية قبل تأكيد طلبك إلى ${slug === 'yemen' ? 'أي محافظة في اليمن' : slug}.`}>
+      <EditorialHero eyebrow="التوصيل / اليمن" title="راجع خيارات الشحن حسب محافظتك" description={`راجع خيارات الشحن الحالية قبل تأكيد طلبك إلى ${slug === 'yemen' ? 'المحافظة التي تختارها' : slug}.`}>
         <Link href="/checkout" className="button button-primary">ابدأ طلبك <ArrowLeft size={16} /></Link>
       </EditorialHero>
       <EditorialSection title="خيارات الشحن الحالية">
@@ -712,7 +712,7 @@ export function HomeImportedSections({ products }: { products: StoreProduct[] })
         <div className="editorial-copy"><p>ابدأ من جهازك ومدة استخدامك وميزانيتك، ثم افتح تفاصيل المنتج لمراجعة التوافق والتوافر. لا نختار بالنيابة عنك ولا نعرض توصية منفصلة عن الكتالوج.</p></div>
         {recommendations.length ? <ProductGrid products={recommendations} empty="لا توجد توصيات حالياً." /> : <p className="empty-state">لا توجد منتجات منشورة حالياً.</p>}
       </EditorialSection>
-      <EditorialSection title="لماذا يشتري العملاء بثقة؟">
+      <EditorialSection title="ما الذي يساعدك قبل الشراء؟">
         <InfoCards items={[
           { icon: <ShieldCheck />, title: 'المعلومة قبل الزينة', text: 'العلامة والموديل والسعر والتوافر تظهر قبل الإضافة إلى السلة.' },
           { icon: <FlaskConical />, title: 'الحدود مكتوبة', text: 'نوضح ما نعرفه وما لم يُقَس بدلاً من أرقام غير موثقة.' },
@@ -825,12 +825,6 @@ export function ProductEditorial({ product }: { product: StoreProduct }) {
       </EditorialSection>
       <EditorialSection title="منتجات ذات صلة">
         {related.length ? <ProductGrid products={related} empty="لا توجد منتجات مرتبطة حالياً." /> : <p className="empty-state">لا توجد منتجات مرتبطة منشورة حالياً.</p>}
-      </EditorialSection>
-      <EditorialSection title="كثيراً ما تُشترى معاً">
-        <div className="info-card-grid">
-          <div className="info-card"><Package className="info-card-icon" /><h3>أضف الكابل المناسب</h3><p>الكابل جزء من القدرة والتوافق، وليس ملحقاً منفصلاً عن الحل.</p></div>
-          <div className="info-card"><Zap className="info-card-icon" /><h3>راجع الشاحن أو مصدر الطاقة</h3><p>طابق مصدر الطاقة مع قدرة الجهاز والمنتج قبل الجمع بين القطع.</p></div>
-        </div>
       </EditorialSection>
       <EditorialSection title="أسئلة عن هذا المنتج">
         <FAQList items={[
