@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
-import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, FlaskConical, Headphones, MapPin as MapPinIcon, Package, RefreshCcw, Search as SearchIcon, ShieldCheck, Smartphone, Truck, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, FlaskConical, Headphones, MapPin as MapPinIcon, MessageCircle as MessageCircleIcon, Package, RefreshCcw, Search as SearchIcon, ShieldCheck, Smartphone, Truck, Zap } from 'lucide-react';
 import { getGetStoreSeoQueryKey, getGetStoreOrderQueryKey, getListStoreOrdersQueryKey, useCreateStoreOrder, useGetStoreOrder, useGetStoreSeo, useListStoreOrders } from '@workspace/api-client-react';
 import type { StoreOrderInput, StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
@@ -8,7 +8,7 @@ import { brandCategoryPath, brandPath, productPath, publicCategorySlug } from '@
 import { setSeoHead } from '@/lib/seo-head';
 import { Breadcrumbs, CTASection, CatalogError, CatalogToolbar, LoadingCatalog, PageHeading } from '@/components/page-parts';
 import { CartLine, ProductGrid, QuantityControl, RatingLine } from '@/components/catalog-ui';
-import { CollectionEditorial, EditorialSection, FAQList, HomeImportedSections, InfoCards, ProductComparisonTable, ProductEditorial } from '@/pages/content-pages';
+import { CollectionEditorial, EditorialSection, FAQList, InfoCards, ProductComparisonTable, ProductEditorial } from '@/pages/content-pages';
 
 function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; slug?: string }) {
   const [location, navigate] = useLocation();
@@ -82,9 +82,196 @@ function LegacyHomePage() {
   return <><SEO type="home"/><section className="hero"><div className="container hero-inner"><div className="hero-copy reveal"><span className="eyebrow">CABL / اليمن</span><h1>اتصالك. <span>طاقتك.</span><br/>على طريقتك.</h1><p>إكسسوارات تقنية منتقاة بعناية، بأسعار واضحة وتوصيل يعتمد عليه إلى كل مدن اليمن.</p><div className="hero-actions"><Link href="/search" className="button button-primary" data-testid="link-hero-shop">تسوّق الكتالوج <ArrowLeft size={17}/></Link><Link href="/orders" className="button button-quiet" data-testid="link-hero-orders">تتبع طلبك</Link></div></div><div className="hero-art reveal">{heroProduct ? <ProductImage product={heroProduct}/> : <div className="hero-fallback"><Zap size={70}/></div>}<div className="hero-badge"><i/> مختارات تصلح للاستخدام اليومي</div></div></div></section><section className="trust-row"><div className="container trust-grid"><div className="trust-item"><ShieldCheck/><div><strong>اختيارات موثوقة</strong><span>بيانات المنتج كما هي</span></div></div><div className="trust-item"><Truck/><div><strong>توصيل داخل اليمن</strong><span>اختر الطريقة الأنسب لك</span></div></div><div className="trust-item"><Package/><div><strong>تجربة شراء واضحة</strong><span>تأكيد ومتابعة بعد الطلب</span></div></div></div></section><section className="section"><div className="container"><div className="section-heading"><div><span className="eyebrow">من الكتالوج</span><h2>قطع تستحق مكاناً في حقيبتك</h2><p>كل منتج هنا قادم من مخزون CABL المنشور.</p></div><Link href="/search" data-testid="link-featured-all">رؤية الكل <ArrowLeft size={15}/></Link></div>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <ProductGrid products={featured}/>}</div></section><section className="editorial-choice"><div className="container"><div className="editorial-heading"><span className="eyebrow">ابدأ من المشكلة</span><h2>قطعة مناسبة تبدأ بسؤال واضح</h2><p>اختر المسار الأقرب لاستخدامك، ثم راجع البيانات قبل الشراء.</p></div><div className="choice-grid"><Link href="/solutions/slow-car-charging"><Zap/><strong>الشحن البطيء في السيارة</strong><span>حل عملي للشاحن والكابل والحرارة</span></Link><Link href="/blog/best-power-bank-yemen"><BookOpenIcon/><strong>أحتاج طاقة احتياطية</strong><span>دليل اختيار باور بانك مناسب</span></Link><Link href="/locations/yemen"><MapPinIcon/><strong>أين يصل طلبي؟</strong><span>راجع خيارات الشحن والتوصيل</span></Link></div></div></section><section className="brand-strip"><div className="container"><div className="section-heading"><div><span className="eyebrow">العلامات المتاحة</span><h2>أسماء نعرفها</h2></div><Link href="/search?view=brands" data-testid="link-brands-all">كل العلامات <ArrowLeft size={15}/></Link></div><div className="brand-list">{brands.map((brand) => <Link href={`/brand/${products.find((product) => product.brand === brand)?.brandSlug || brand.toLowerCase()}`} className="brand-pill" key={brand} data-testid={`link-brand-${brand}`}>{brand}</Link>)}</div></div></section><section className="category-band"><div className="container"><div className="section-heading"><div><span className="eyebrow">اختر ما تحتاجه</span><h2>طريق أقصر للقطعة المناسبة</h2></div></div><div className="category-grid">{categories.map((category, index) => <Link href={`/category/${category.slug}`} className="category-tile" key={category.slug} data-testid={`link-category-${category.slug}`}><span><strong>0{index + 1}</strong></span><h3>{category.name}</h3><p>تصفح المنتجات المتاحة</p>{index === 0 ? <Zap size={36}/> : index === 1 ? <Smartphone size={34}/> : <Headphones size={35}/>}</Link>)}</div></div></section><section className="home-editorial-links"><div className="container"><div><span className="eyebrow">محتوى CABL</span><h2>أسئلة صغيرة قبل قرار أكبر</h2><p>دليل الشراء والسياسات والمواصفات في مكان واحد.</p></div><div className="inline-link-list"><Link href="/about">من نحن <ArrowLeft size={14}/></Link><Link href="/lab">مركز المواصفات <ArrowLeft size={14}/></Link><Link href="/faq">الأسئلة الشائعة <ArrowLeft size={14}/></Link><Link href="/return-policy">الإرجاع والاستبدال <ArrowLeft size={14}/></Link></div></div></section><CTASection/></>;
 }
 
+function GuidedHomePage() {
+  const { catalog, isLoading, isError } = useStore();
+  const products = catalog?.products || [];
+  const inStockProducts = useMemo(() => products.filter((product) => product.quantity > 0), [products]);
+  const categories = useMemo(
+    () => Array.from(new Map(products.filter((product) => product.category).map((product) => [product.category!.slug, product.category!])).values()),
+    [products],
+  );
+  const brands = useMemo(
+    () => Array.from(new Map(products.map((product) => [product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'), product])).values()),
+    [products],
+  );
+  const heroProduct = inStockProducts[0] || products[0];
+  const categoryFor = (matcher: RegExp) => categories.find((category) => matcher.test(`${category.slug} ${category.name}`)) || categories[0];
+  const chargerCategory = categoryFor(/charg|شاحن/i);
+  const cableCategory = categoryFor(/cable|كابل/i);
+  const powerCategory = categoryFor(/power|باور|طاقة/i);
+
+  return (
+    <div className="guided-home">
+      <SEO type="home" />
+      <section className="guided-hero">
+        <div className="container guided-hero-inner">
+          <div className="guided-hero-copy reveal">
+            <span className="eyebrow">CABL / اليمن</span>
+            <h1>ابدأ من جهازك.<br /><em>اختر القطعة المناسبة.</em></h1>
+            <p>تصفح الكتالوج حسب ما تحتاجه، ثم راجع المنفذ والقدرة والتوافق في صفحة المنتج قبل الإضافة إلى السلة.</p>
+            <div className="guided-hero-actions">
+              <Link href="/search" className="button button-primary" data-testid="link-home-catalog">افتح الكتالوج <ArrowLeft size={16} /></Link>
+              <Link href="/orders" className="button button-quiet" data-testid="link-home-track-order">تتبع طلبك</Link>
+            </div>
+            <div className="guided-hero-note"><ShieldCheck size={15} /> السعر والتوافر من الكتالوج الحالي</div>
+          </div>
+          <div className="guided-hero-product reveal">
+            {heroProduct ? (
+              <Link href={productPath(heroProduct)} className="guided-hero-product-card" data-testid={`link-home-hero-product-${heroProduct.id}`}>
+                <span className="guided-hero-index">01 / الكتالوج</span>
+                <ProductImage product={heroProduct} className="guided-hero-product-image" />
+                <span className="guided-hero-product-label">
+                  <span>{heroProduct.brand}</span>
+                  <strong>{heroProduct.productName}</strong>
+                </span>
+              </Link>
+            ) : (
+              <div className="guided-hero-product-card" data-testid="state-home-hero-empty">
+                <Package size={46} color="#1757ee" />
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="guided-path" aria-label="خطوات الاختيار">
+        <div className="container guided-path-inner">
+          <div className="guided-path-intro">
+            <span className="eyebrow">مسار الشراء</span>
+            <h2>ثلاث خطوات قبل الإضافة</h2>
+          </div>
+          {[
+            ['01', 'حدد القسم', 'شاحن، كابل، طاقة أو ملحق'],
+            ['02', 'راجع البيانات', 'المنفذ والقدرة والتوافق'],
+            ['03', 'أكمل الطلب', 'السلة ثم العنوان والدفع'],
+          ].map(([number, title, text]) => (
+            <div className="guided-step" key={number} data-testid={`step-home-purchase-${number}`}>
+              <span className="guided-step-number">{number}</span>
+              <div><strong>{title}</strong><span>{text}</span></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="guided-section">
+        <div className="container">
+          <div className="guided-section-header">
+            <div>
+              <span className="eyebrow">اختر من احتياجك</span>
+              <h2>أقسام الكتالوج</h2>
+              <p>طريق مختصر إلى المنتجات المنشورة والمتاحة حالياً.</p>
+            </div>
+            <Link href="/search" data-testid="link-home-categories-all">كل المنتجات <ArrowLeft size={15} /></Link>
+          </div>
+          {isLoading ? (
+            <div className="guided-category-grid" data-testid="loading-home-categories">
+              {Array.from({ length: 5 }).map((_, index) => <div className="guided-category-card skeleton" key={index} />)}
+            </div>
+          ) : categories.length ? (
+            <div className="guided-category-grid">
+              {categories.slice(0, 5).map((category, index) => (
+                <Link href={`/category/${category.slug}`} className="guided-category-card" key={category.slug} data-testid={`link-home-category-${category.slug}`}>
+                  <span className="guided-category-icon">
+                    {index % 4 === 0 ? <Zap size={18} /> : index % 4 === 1 ? <Smartphone size={18} /> : index % 4 === 2 ? <Package size={18} /> : <Truck size={18} />}
+                  </span>
+                  <strong>{category.name}</strong>
+                  <span>استعرض القسم <ArrowLeft size={13} /></span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state" data-testid="empty-home-categories"><h3>ستظهر الأقسام مع تحميل الكتالوج</h3></div>
+          )}
+        </div>
+      </section>
+
+      <section className="guided-section guided-catalog">
+        <div className="container">
+          <div className="guided-section-header">
+            <div>
+              <span className="eyebrow">من الكتالوج الحالي</span>
+              <h2>منتجات متاحة الآن</h2>
+              <p>افتح صفحة المنتج لمراجعة التفاصيل قبل اختيار الكمية.</p>
+            </div>
+            <Link href="/search" data-testid="link-home-products-all">استعرض الكتالوج <ArrowLeft size={15} /></Link>
+          </div>
+          {isLoading ? <LoadingCatalog /> : isError ? <CatalogError retry={() => window.location.reload()} /> : <ProductGrid products={inStockProducts.slice(0, 8)} empty="لا توجد منتجات متاحة حالياً." />}
+        </div>
+      </section>
+
+      <section className="guided-decision">
+        <div className="container guided-decision-grid">
+          <div className="guided-decision-copy">
+            <span className="eyebrow">لو تعرف ما تحتاجه</span>
+            <h2>اذهب مباشرة إلى الاستخدام الأقرب.</h2>
+            <p>هذه روابط من أقسام الكتالوج، وليست توصيات منفصلة. افتح القسم ثم قارن مواصفات المنتجات المتاحة.</p>
+          </div>
+          <div className="guided-checklist">
+            {[
+              { category: chargerCategory, title: 'أحتاج شاحناً', text: 'قدرة ومنافذ تناسب جهازك' },
+              { category: cableCategory, title: 'أحتاج كابلاً', text: 'طرفان وطول وتصنيف واضح' },
+              { category: powerCategory, title: 'أحتاج طاقة متنقلة', text: 'سعة وقدرة ومنافذ للمقارنة' },
+              { category: categories.find((category) => /travel|car|سفر|سيارة/i.test(`${category.slug} ${category.name}`)), title: 'أحتاج ملحق سفر أو سيارة', text: 'اختر من القسم المتاح' },
+              ].map(({ category, title, text }, index) => category ? (
+              <Link href={`/category/${category.slug}`} className="guided-check" key={`${category.slug}-${index}`} data-testid={`link-home-intent-${index}`}>
+                <Check size={17} />
+                <span><strong>{title}</strong><br />{text}</span>
+                <ArrowLeft size={14} />
+              </Link>
+            ) : null)}
+          </div>
+        </div>
+      </section>
+
+      <section className="guided-brand-strip">
+        <div className="container">
+          <div className="guided-section-header">
+            <div>
+              <span className="eyebrow">العلامات الموجودة في الكتالوج</span>
+              <h2>تصفح حسب العلامة</h2>
+            </div>
+            <Link href="/search?view=brands" data-testid="link-home-brands-all">كل العلامات <ArrowLeft size={15} /></Link>
+          </div>
+          <div className="guided-brand-list">
+            {brands.map((product) => (
+              <Link href={brandPath(product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'))} className="guided-brand-link" key={product.brandSlug || product.brand} data-testid={`link-home-brand-${product.brandSlug || product.brand}`}>
+                {product.brand}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <EditorialSection eyebrow="قبل تأكيد الطلب" title="معلومات تساعدك على الاختيار">
+        <InfoCards items={[
+          { icon: <ShieldCheck />, title: 'راجع صفحة المنتج', text: 'طابق الموديل والـSKU والمنافذ والقدرة مع جهازك قبل الإضافة إلى السلة.' },
+          { icon: <Zap />, title: 'التوافر قابل للتغير', text: 'الكمية المعروضة من الكتالوج الحالي، ويعاد التحقق منها عند الإضافة والطلب.' },
+          { icon: <Truck />, title: 'الشحن يظهر في checkout', text: 'أدخل العنوان واختر طريقة الشحن والدفع قبل إرسال الطلب.' },
+          { icon: <RefreshCcw />, title: 'اقرأ سياسة الإرجاع', text: 'راجع الشروط والخطوات في سياسة الإرجاع والاستبدال قبل التأكيد.', href: '/return-policy' },
+        ]} />
+      </EditorialSection>
+
+      <EditorialSection eyebrow="محتوى CABL" title="اقرأ قبل أن تختار">
+        <InfoCards items={[
+          { icon: <BookOpenIcon />, title: 'دليل الباور بانك', text: 'قارن السعة والقدرة والمنافذ حسب الاستخدام.', href: '/blog/best-power-bank-yemen' },
+          { icon: <FlaskConical />, title: 'مركز المواصفات', text: 'افصل بين البيانات المعلنة والحسابات التوضيحية.', href: '/lab' },
+          { icon: <MessageCircleIcon />, title: 'أسئلة الشراء', text: 'راجع الإجابات المختصرة قبل فتح السلة.', href: '/faq' },
+        ]} />
+      </EditorialSection>
+
+      <EditorialSection title="أسئلة سريعة">
+        <FAQList items={[
+          { question: 'من أين أبدأ إذا لم أعرف اسم المنتج؟', answer: 'ابدأ من القسم الأقرب لاستخدامك، ثم قارن المواصفات والتوافق في صفحات المنتجات.' },
+          { question: 'هل كل ما يظهر في الصفحة متوفر؟', answer: 'التوافر مرتبط بالكمية المنشورة وقت التصفح، ويعاد التحقق عند الإضافة والطلب.' },
+          { question: 'هل السعر يشمل الشحن؟', answer: 'السعر المعروض للمنتج، وتظهر رسوم الشحن بعد اختيار العنوان والطريقة في checkout.' },
+        ]} />
+      </EditorialSection>
+    </div>
+  );
+}
+
 export function HomePage() {
-  const { catalog } = useStore();
-  return <><LegacyHomePage/><HomeImportedSections products={catalog?.products || []}/></>;
+  return <GuidedHomePage />;
 }
 
  function LegacyCatalogPage({ mode, slug }: { mode: 'category' | 'brand'; slug: string }) {
@@ -314,7 +501,7 @@ function CategoryLandingPage({ slug }: { slug: string }) {
   const { catalog, isLoading, isError } = useStore();
   const [sort, setSort] = useState('featured');
   const products = catalog?.products || [];
-  const filtered = useMemo(() => products.filter((product) => product.category?.slug === slug), [products, slug]);
+  const filtered = useMemo(() => products.filter((product) => matchesCategory(product, slug)), [products, slug]);
   const sorted = useMemo(() => [...filtered].sort((a, b) => sort === 'price-low'
     ? (a.discountPrice ?? a.regularPrice) - (b.discountPrice ?? b.regularPrice)
     : sort === 'price-high'

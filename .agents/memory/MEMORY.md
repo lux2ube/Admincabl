@@ -11,3 +11,4 @@
 - [CairoVolt clone permission](cairovolt-clone-permission.md) — exact CairoVolt branding, content, assets, and page structure are authorized for this project.
 - [SEO head base path](seo-head-base-path.md) — strip the mounted artifact prefix before composing canonical and Open Graph URLs.
 - [SEO redirect snapshots](seo-redirect-snapshots.md) — capture old canonical paths before applying catalog slug mutations.
+- [CABL public route split](cabl-public-routes.md) — standalone storefront routes differ from SEO canonical aliases; use each only where its router supports it.

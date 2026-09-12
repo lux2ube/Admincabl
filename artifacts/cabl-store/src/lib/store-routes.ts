@@ -11,7 +11,7 @@ export function publicCategorySlug(categorySlug: string | null | undefined) {
 }
 
 export function brandPath(brandSlug: string) {
-  return `/${brandSlug}`;
+  return `/brand/${brandSlug}`;
 }
 
 export function brandCategoryPath(brandSlug: string, categorySlug: string) {
