@@ -270,8 +270,191 @@ function GuidedHomePage() {
   );
 }
 
+function CommercialHomePage() {
+  const { catalog, isLoading, isError } = useStore();
+  const products = catalog?.products || [];
+  const inStockProducts = useMemo(() => products.filter((product) => product.quantity > 0), [products]);
+  const featured = useMemo(
+    () => [...inStockProducts, ...products.filter((product) => product.quantity < 1)].slice(0, 8),
+    [inStockProducts, products],
+  );
+  const categories = useMemo(
+    () => Array.from(new Map(products.filter((product) => product.category).map((product) => [product.category!.slug, product.category!])).values()),
+    [products],
+  );
+  const brands = useMemo(
+    () => Array.from(new Map(products.map((product) => [product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'), product])).values()),
+    [products],
+  );
+  const heroProduct = inStockProducts[0] || products[0];
+  const needs = categories.slice(0, 5).map((category, index) => {
+    const label = `${category.slug} ${category.name}`;
+    const title = /cable|كابل/i.test(label)
+      ? 'أحتاج كابلاً'
+      : /power|باور|طاقة/i.test(label)
+        ? 'أحتاج طاقة متنقلة'
+        : /charg|شاحن/i.test(label)
+          ? 'أحتاج شحناً يومياً'
+          : category.name;
+    const icon = index % 4 === 0 ? <Zap size={20} /> : index % 4 === 1 ? <Smartphone size={20} /> : index % 4 === 2 ? <Package size={20} /> : <Truck size={20} />;
+    return { category, title, icon };
+  });
+
+  return (
+    <div className="guided-home">
+      <SEO type="home" />
+
+      <section className="guided-hero">
+        <div className="container guided-hero-inner">
+          <div className="guided-hero-copy reveal">
+            <span className="eyebrow">CABL / اليمن</span>
+            <h1>ابدأ من جهازك.<br /><em>اختر القطعة المناسبة.</em></h1>
+            <p>افتح الكتالوج حسب احتياجك، ثم راجع المنفذ والقدرة والتوافق في صفحة المنتج قبل الإضافة إلى السلة.</p>
+            <div className="guided-hero-actions">
+              <Link href="/search" className="button button-primary" data-testid="link-home-catalog">افتح الكتالوج <ArrowLeft size={16} /></Link>
+            </div>
+            <div className="guided-hero-note"><ShieldCheck size={15} /> السعر والتوافر من الكتالوج الحالي</div>
+          </div>
+          <div className="guided-hero-product reveal">
+            {heroProduct ? (
+              <Link href={productPath(heroProduct)} className="guided-hero-product-card" data-testid={`link-home-hero-product-${heroProduct.id}`}>
+                <span className="guided-hero-index">01 / الكتالوج</span>
+                <ProductImage product={heroProduct} className="guided-hero-product-image" />
+                <span className="guided-hero-product-label">
+                  <span>{heroProduct.brand}</span>
+                  <strong>{heroProduct.productName}</strong>
+                </span>
+              </Link>
+            ) : (
+              <div className="guided-hero-product-card" data-testid="state-home-hero-empty">
+                <Package size={46} color="#1757ee" />
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="guided-path" aria-label="معلومات الشراء">
+        <div className="container guided-path-inner">
+          <div className="guided-path-intro">
+            <span className="eyebrow">قبل الشراء</span>
+            <h2>معلومات واضحة قبل تأكيد الطلب</h2>
+          </div>
+          {[
+            ['01', 'بيانات المنتج', 'الموديل والـSKU والمنافذ من الكتالوج'],
+            ['02', 'التوافر والسعر', 'الكمية والسعر الحاليان قبل الإضافة'],
+            ['03', 'الشحن والدفع', 'الخيارات تظهر قبل إرسال الطلب'],
+          ].map(([number, title, text]) => (
+            <div className="guided-step" key={number} data-testid={`step-home-confidence-${number}`}>
+              <span className="guided-step-number">{number}</span>
+              <div><strong>{title}</strong><span>{text}</span></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="guided-section" aria-labelledby="home-needs-title">
+        <div className="container">
+          <div className="guided-section-header">
+            <div>
+              <span className="eyebrow">تسوّق حسب الحاجة</span>
+              <h2 id="home-needs-title">ما الذي تريد حله اليوم؟</h2>
+              <p>ابدأ من القسم الأقرب لاستخدامك، لا من اسم المنتج فقط.</p>
+            </div>
+            <Link href="/search" data-testid="link-home-categories-all">كل المنتجات <ArrowLeft size={15} /></Link>
+          </div>
+          {isLoading ? (
+            <div className="guided-category-grid" data-testid="loading-home-categories">
+              {Array.from({ length: 5 }).map((_, index) => <div className="guided-category-card skeleton" key={index} />)}
+            </div>
+          ) : needs.length ? (
+            <div className="guided-category-grid">
+              {needs.map(({ category, title, icon }) => (
+                <Link href={`/category/${category.slug}`} className="guided-category-card" key={category.slug} data-testid={`link-home-need-${category.slug}`}>
+                  <span className="guided-category-icon">{icon}</span>
+                  <strong>{title}</strong>
+                  <span>{category.name} <ArrowLeft size={13} /></span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state" data-testid="empty-home-categories"><h3>ستظهر الأقسام مع تحميل الكتالوج</h3></div>
+          )}
+        </div>
+      </section>
+
+      <section className="guided-section guided-catalog" aria-labelledby="home-featured-title">
+        <div className="container">
+          <div className="guided-section-header">
+            <div>
+              <span className="eyebrow">من الكتالوج الحالي</span>
+              <h2 id="home-featured-title">منتجات منشورة الآن</h2>
+              <p>راجع السعر والتوافر والتفاصيل قبل اختيار الكمية.</p>
+            </div>
+            <Link href="/search" data-testid="link-home-products-all">استعرض الكتالوج <ArrowLeft size={15} /></Link>
+          </div>
+          {isLoading ? <LoadingCatalog /> : isError ? <CatalogError retry={() => window.location.reload()} /> : <ProductGrid products={featured} empty="لا توجد منتجات منشورة حالياً." />}
+        </div>
+      </section>
+
+      <section className="guided-brand-strip" aria-labelledby="home-brands-title">
+        <div className="container">
+          <div className="guided-section-header">
+            <div>
+              <span className="eyebrow">من الكتالوج الحالي</span>
+              <h2 id="home-brands-title">استكشف حسب العلامة</h2>
+              <p>كل رابط يفتح صفحة العلامة الفعلية ومنتجاتها المنشورة.</p>
+            </div>
+            <Link href="/search?view=brands" data-testid="link-home-brands-all">كل العلامات <ArrowLeft size={15} /></Link>
+          </div>
+          <div className="guided-brand-list">
+            {brands.map((product) => (
+              <Link href={brandPath(product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'))} className="guided-brand-link" key={product.brandSlug || product.brand} data-testid={`link-home-brand-${product.brandSlug || product.brand}`}>
+                {product.brand}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <EditorialSection eyebrow="تحقق قبل الإضافة" title="ما الذي تراجعه قبل تأكيد الطلب؟">
+        <InfoCards items={[
+          { icon: <ShieldCheck />, title: 'طابق بيانات المنتج', text: 'راجع الموديل والـSKU والمنافذ والقدرة مع جهازك قبل الإضافة إلى السلة.' },
+          { icon: <Zap />, title: 'التوافر قابل للتغير', text: 'الكمية المعروضة من الكتالوج الحالي، ويعاد التحقق منها عند الإضافة والطلب.' },
+          { icon: <Truck />, title: 'الشحن في checkout', text: 'أدخل العنوان واختر طريقة الشحن والدفع قبل إرسال الطلب.' },
+          { icon: <RefreshCcw />, title: 'سياسة الإرجاع', text: 'راجع الشروط والخطوات في سياسة الإرجاع والاستبدال قبل التأكيد.', href: '/return-policy' },
+        ]} />
+      </EditorialSection>
+
+      <EditorialSection eyebrow="أدلة مفيدة" title="اقرأ قبل أن تختار">
+        <InfoCards items={[
+          { icon: <BookOpenIcon />, title: 'دليل الباور بانك', text: 'قارن السعة والقدرة والمنافذ حسب الاستخدام.', href: '/blog/best-power-bank-yemen' },
+          { icon: <FlaskConical />, title: 'مركز المواصفات', text: 'افصل بين البيانات المعلنة والحسابات التوضيحية.', href: '/lab' },
+          { icon: <MessageCircleIcon />, title: 'أسئلة الشراء', text: 'راجع الإجابات المختصرة قبل فتح السلة.', href: '/faq' },
+        ]} />
+      </EditorialSection>
+
+      <EditorialSection eyebrow="أسئلة قبل الشراء" title="إجابات سريعة">
+        <FAQList items={[
+          { question: 'من أين أبدأ إذا لم أعرف اسم المنتج؟', answer: 'ابدأ من الاحتياج أو القسم الأقرب لاستخدامك، ثم قارن المواصفات والتوافق في صفحات المنتجات.' },
+          { question: 'هل كل ما يظهر في الصفحة متوفر؟', answer: 'التوافر مرتبط بالكمية المنشورة وقت التصفح، ويعاد التحقق عند الإضافة والطلب.' },
+          { question: 'هل السعر يشمل الشحن؟', answer: 'السعر المعروض للمنتج، وتظهر رسوم الشحن بعد اختيار العنوان والطريقة في checkout.' },
+        ]} />
+      </EditorialSection>
+
+      <EditorialSection eyebrow="عن CABL" title="متجر يساعدك على الاختيار">
+        <div className="editorial-copy">
+          <p>نعرض منتجات الشحن والطاقة والإكسسوارات من الكتالوج المنشور، مع معلومات تساعدك على مراجعة الموديل والسعر والتوافر قبل الطلب.</p>
+          <p>إذا لم تكن متأكداً، ابدأ من الاستخدام ثم راجع صفحة المنتج وسياسات الشحن والإرجاع قبل التأكيد.</p>
+          <Link href="/about" className="button button-quiet">اعرف أكثر عن CABL <ArrowLeft size={15} /></Link>
+        </div>
+      </EditorialSection>
+    </div>
+  );
+}
+
 export function HomePage() {
-  return <GuidedHomePage />;
+  return <CommercialHomePage />;
 }
 
 function BrandStorefrontPage({ slug }: { slug: string }) {
