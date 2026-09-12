@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
-import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, Headphones, MapPin as MapPinIcon, Package, Search as SearchIcon, ShieldCheck, Smartphone, Truck, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, FlaskConical, Headphones, MapPin as MapPinIcon, Package, RefreshCcw, Search as SearchIcon, ShieldCheck, Smartphone, Truck, Zap } from 'lucide-react';
 import { getGetStoreSeoQueryKey, getGetStoreOrderQueryKey, getListStoreOrdersQueryKey, useCreateStoreOrder, useGetStoreOrder, useGetStoreSeo, useListStoreOrders } from '@workspace/api-client-react';
 import type { StoreOrderInput, StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
 import { Breadcrumbs, CTASection, CatalogError, CatalogToolbar, LoadingCatalog, PageHeading } from '@/components/page-parts';
 import { CartLine, ProductGrid, QuantityControl, RatingLine } from '@/components/catalog-ui';
-import { CollectionEditorial, HomeImportedSections, ProductEditorial } from '@/pages/content-pages';
+import { CollectionEditorial, EditorialSection, FAQList, HomeImportedSections, InfoCards, ProductComparisonTable, ProductEditorial } from '@/pages/content-pages';
 
 function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; slug?: string }) {
   const params = slug ? { type, slug } : { type };
@@ -64,7 +64,156 @@ function CatalogPage({ mode, slug }: { mode: 'category' | 'brand'; slug: string 
   return <><LegacyCatalogPage mode={mode} slug={slug}/><CollectionEditorial mode={mode} name={name} products={filtered}/></>;
 }
 
-export function CategoryPage() { const { slug = '' } = useParams<{ slug: string }>(); return <CatalogPage mode="category" slug={slug}/>; }
+const categoryGuideCopy: Record<string, {
+  eyebrow: string;
+  title: string;
+  description: string;
+  selection: string;
+  tips: string[];
+  faqs: Array<{ question: string; answer: string }>;
+}> = {
+  'power-banks': {
+    eyebrow: 'اختيار الطاقة الاحتياطية',
+    title: 'باور بانك يناسب يومك',
+    description: 'قارن السعة والطاقة والقدرة والمنافذ والوزن والسعر الحالي قبل اختيار باور بانك داخل اليمن.',
+    selection: 'ابدأ من الجهاز ومدة الاستخدام، ثم راجع Wh والخرج والتوافق. mAh وحدها لا تحدد عدد الشحنات ولا إمكانية شحن اللابتوب.',
+    tips: ['للاستخدام اليومي: راجع فئة 10,000mAh والحجم والوزن وعدد المنافذ.', 'للسفر وانقطاع الكهرباء: قارن 20,000mAh بعد مراجعة Wh والوزن وقواعد السفر.', 'للابتوب: طابق خرج USB-C PD الفعلي مع متطلبات جهازك والكابل.', 'لا تترك البطارية في الشمس أو السيارة الحارة، ولا تعتبر عدد الشحنات وعداً ثابتاً.', 'راجع رقم الموديل والبيانات المطبوعة قبل الدفع.'],
+    faqs: [
+      { question: 'هل أختار 10,000 أم 20,000mAh؟', answer: 'اختر حسب مدة الاستخدام والوزن وقدرة الخرج. السعة الأعلى ليست أفضل إن كانت ستبقى في المنزل بسبب حجمها.' },
+      { question: 'هل كل باور بانك يشحن اللابتوب؟', answer: 'لا. يجب أن يذكر USB-C PD بقدرة مناسبة، مع كابل يدعم القدرة المطلوبة.' },
+      { question: 'هل mAh وحدها تكفي للمقارنة؟', answer: 'لا. راجع Wh والقدرة والمنافذ والوزن والتوافق مع جهازك.' },
+    ],
+  },
+  chargers: {
+    eyebrow: 'اختيار الشاحن',
+    title: 'شاحن مناسب لجهازك',
+    description: 'قارن قدرة الشاحن والمنافذ والبروتوكولات والحجم قبل شراء شاحن حائط أو شاحن سريع.',
+    selection: 'الشاحن المناسب ليس صاحب الرقم الأكبر. طابق القدرة والبروتوكول مع الجهاز، ثم تأكد من أن الكابل يدعم نفس المسار.',
+    tips: ['حدد USB-C أو USB-A وعدد المنافذ التي تحتاجها.', 'راجع USB-C PD أو PPS أو QC كما هو مذكور في صفحة الموديل.', 'القدرة الإجمالية قد تختلف عن قدرة منفذ واحد عند شحن أكثر من جهاز.', 'استخدم كابلاً مصنفاً للقدرة المطلوبة ولا تعتمد على شكل المنفذ وحده.', 'اترك مساحة للحرارة والتهوية ولا تغطِّ الشاحن أثناء الاستخدام.'],
+    faqs: [
+      { question: 'هل الشاحن الأعلى واطاً يشحن كل الأجهزة بسرعة أكبر؟', answer: 'لا. الجهاز والكابل والبروتوكول والحرارة تحدد القدرة الفعلية.' },
+      { question: 'هل USB-C يعني PD؟', answer: 'لا. USB-C شكل منفذ، أما PD فهو بروتوكول شحن يجب أن يذكره المنتج.' },
+      { question: 'هل يمكن شحن جهازين معاً؟', answer: 'نعم إذا كان الموديل يدعم ذلك، لكن راجع توزيع القدرة عند استخدام أكثر من منفذ.' },
+    ],
+  },
+  cables: {
+    eyebrow: 'اختيار الكابل',
+    title: 'كابل شحن لا يحد جهازك',
+    description: 'قارن نوع المنفذ والطول وتصنيف القدرة ونقل البيانات قبل إضافة كابل إلى السلة.',
+    selection: 'الكابل جزء من سرعة الشحن والتوافق. طابق طرفيه مع الشاحن والجهاز، ثم راجع القدرة أو سرعة البيانات المعلنة للموديل.',
+    tips: ['حدد USB-C إلى USB-C أو USB-A إلى USB-C أو Lightning حسب أجهزتك.', 'راجع القدرة بالواط إذا كنت تستخدم شحناً سريعاً أو لابتوباً.', 'لا تعتبر كل كابلات USB-C متساوية في نقل البيانات أو الفيديو.', 'اختر طولاً يناسب مكان الاستخدام دون شد أو ثني حاد.', 'استبدل الكابل عند تلف الغلاف أو ارتفاع الحرارة أو انقطاع الاتصال.'],
+    faqs: [
+      { question: 'هل كل كابل USB-C يدعم الشحن السريع؟', answer: 'لا. القدرة والتصنيف يختلفان بين الكابلات، ويجب مراجعة بيانات الموديل.' },
+      { question: 'هل طول الكابل يؤثر؟', answer: 'قد يؤثر على الراحة والفقد في بعض الاستخدامات؛ الأهم أن يكون الكابل مصنفاً للقدرة المطلوبة.' },
+      { question: 'هل الكابل يحدد سرعة البيانات؟', answer: 'نعم. بعض كابلات الشحن لا تدعم نفس سرعات البيانات أو الفيديو.' },
+    ],
+  },
+  'car-accessories': {
+    eyebrow: 'الشحن في السيارة',
+    title: 'حل شحن عملي أثناء التنقل',
+    description: 'قارن شواحن السيارة والكابلات والحوامل حسب منفذ السيارة وقدرة الهاتف والحرارة أثناء القيادة.',
+    selection: 'ابدأ من منفذ السيارة والهاتف والكابل، ثم راجع القدرة والحرارة. الشحن أثناء الملاحة يحتاج حلاً متوازناً لا رقماً تسويقياً فقط.',
+    tips: ['طابق USB-C PD أو البروتوكول المطلوب مع هاتفك.', 'استخدم كابلاً مصنفاً للقدرة المطلوبة.', 'ثبت الهاتف والحوامل بعيداً عن الحرارة المباشرة قدر الإمكان.', 'خفض السطوع والحرارة قد يساعدان الهاتف على الحفاظ على سرعة الشحن.', 'أوقف الاستخدام إذا ظهرت حرارة غير طبيعية أو انقطاع متكرر.'],
+    faqs: [
+      { question: 'لماذا يصبح الشحن بطيئاً في السيارة؟', answer: 'قد يكون السبب القدرة أو الكابل أو تفاوض البروتوكول أو الحرارة أثناء الملاحة.' },
+      { question: 'هل USB-A يكفي؟', answer: 'قد يشحن الهاتف، لكنه لا يضمن تفاوض USB-C PD أو السرعة التي يدعمها جهازك.' },
+      { question: 'هل الحامل اللاسلكي أفضل؟', answer: 'يعتمد على الهاتف والحرارة وطريقة الاستخدام. راجع التوافق ولا تستخدمه عند ارتفاع الحرارة.' },
+    ],
+  },
+  audio: {
+    eyebrow: 'اختيار الصوتيات',
+    title: 'صوتيات للاستخدام اليومي',
+    description: 'قارن السماعات وسماعات الأذن والسبيكرات حسب الاستخدام والاتصال والحجم والبطارية والراحة.',
+    selection: 'حدد المكان أولاً: مكالمات، عمل، سفر، غرفة أو تجمع. بعد ذلك راجع نوع الاتصال والبطارية والحجم والملحقات المتاحة.',
+    tips: ['للمكالمات: راجع الميكروفونات وطريقة تثبيت السماعة.', 'للسفر: قارن الوزن والبطارية والحجم والعزل إن كان مذكوراً.', 'للسبيكر: راجع الحجم والقدرة وطريقة الاقتران، ولا تفترض مستوى صوت من رقم واحد.', 'تحقق من توافق الهاتف والأنظمة قبل الطلب.', 'راجع ما إذا كانت الملحقات والشاحن ضمن العبوة أو تباع منفصلة.'],
+    faqs: [
+      { question: 'هل السماعة الأكبر صوتها أفضل؟', answer: 'ليس بالضرورة. الاستخدام والحجم والاتصال والراحة عوامل مهمة أيضاً.' },
+      { question: 'هل كل سماعات البلوتوث تعمل مع كل هاتف؟', answer: 'غالباً تتصل عبر Bluetooth، لكن راجع الإصدار والخصائص والتوافق للموديل المحدد.' },
+      { question: 'كيف أختار بين سماعة أذن وسبيكر؟', answer: 'اختر حسب الخصوصية والمكان وعدد المستمعين وطريقة الاستخدام اليومية.' },
+    ],
+  },
+};
+
+function CategoryLandingPage({ slug }: { slug: string }) {
+  const { catalog, isLoading, isError } = useStore();
+  const [sort, setSort] = useState('featured');
+  const products = catalog?.products || [];
+  const filtered = useMemo(() => products.filter((product) => product.category?.slug === slug), [products, slug]);
+  const sorted = useMemo(() => [...filtered].sort((a, b) => sort === 'price-low'
+    ? (a.discountPrice ?? a.regularPrice) - (b.discountPrice ?? b.regularPrice)
+    : sort === 'price-high'
+      ? (b.discountPrice ?? b.regularPrice) - (a.discountPrice ?? a.regularPrice)
+      : 0), [filtered, sort]);
+  const name = filtered[0]?.category?.name || slug.replaceAll('-', ' ');
+  const copy = categoryGuideCopy[slug] || {
+    eyebrow: 'دليل القسم',
+    title: `منتجات ${name} في اليمن`,
+    description: `قارن منتجات ${name} المتاحة حالياً في كتالوج CABL، ثم راجع التوافق والسعر والشحن قبل الطلب.`,
+    selection: `ابدأ من استخدامك، ثم قارن الموديل والمواصفات والسعر والتوافر بين منتجات ${name}.`,
+    tips: ['حدد الاستخدام الأساسي قبل اختيار المنتج.', 'راجع المنافذ والقدرة والتوافق في صفحة الموديل.', 'قارن السعر والتوافر الحاليين، لا الاسم وحده.', 'راجع خيارات الشحن والدفع قبل تأكيد الطلب.', 'احتفظ برقم الطلب وشروط الإرجاع بعد الشراء.'],
+    faqs: [
+      { question: 'كيف أختار منتجاً من هذا القسم؟', answer: 'ابدأ من الاستخدام، ثم راجع المواصفات والتوافق والسعر والتوافر في صفحة المنتج.' },
+      { question: 'هل كل المنتجات متوفرة؟', answer: 'التوافر مرتبط بالكمية المنشورة وقت التصفح ويعاد التحقق عند الإضافة والطلب.' },
+      { question: 'أين أجد الشحن والإرجاع؟', answer: 'راجع الخيارات النشطة في checkout وسياسة الإرجاع قبل تأكيد الطلب.' },
+    ],
+  };
+  const brands = Array.from(new Map(filtered.map((product) => [product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'), product.brand])).entries()).slice(0, 6);
+  const comparisonProducts = sorted.slice(0, 8);
+  return (
+    <>
+      <SEO type="category" slug={slug} />
+      <div className="category-landing-hero">
+        <div className="container">
+          <Breadcrumbs items={[{ label: 'الأقسام', href: '/search' }, { label: name }]} />
+          <div className="category-landing-copy">
+            <span className="eyebrow">{copy.eyebrow}</span>
+            <h1>{copy.title}</h1>
+            <p>{copy.description}</p>
+            <div className="category-landing-actions">
+              {brands.map(([brandSlug, brandName]) => <Link className="button button-secondary" href={`/brand/${brandSlug}`} key={brandSlug}>تسوق {brandName}</Link>)}
+              <Link className="button button-primary" href="/search">كل المنتجات <ArrowLeft size={16} /></Link>
+            </div>
+          </div>
+        </div>
+      </div>
+      <EditorialSection eyebrow="من الكتالوج الحالي" title={`${name} المتاحة الآن`}>
+        {isLoading ? <LoadingCatalog /> : isError ? <CatalogError retry={() => window.location.reload()} /> : <><CatalogToolbar products={sorted} sort={sort} setSort={setSort} /><ProductGrid products={sorted} empty={`لا توجد منتجات منشورة في قسم ${name} حالياً.`} /></>}
+      </EditorialSection>
+      <EditorialSection eyebrow="كيف تختار؟" title={`دليل اختيار ${name}`}>
+        <div className="editorial-copy"><p>{copy.selection}</p></div>
+        <div className="numbered-steps category-tip-grid">{copy.tips.map((tip, index) => <div key={tip}><b>{String(index + 1).padStart(2, '0')}</b><p>{tip}</p></div>)}</div>
+      </EditorialSection>
+      <EditorialSection title={`مقارنة ${name}`}>
+        {comparisonProducts.length ? <ProductComparisonTable products={comparisonProducts} currencies={catalog?.currencies} /> : <p className="empty-state">ستظهر المقارنة بعد نشر منتجات في هذا القسم.</p>}
+      </EditorialSection>
+      <EditorialSection title="ماذا تراجع قبل الشراء؟">
+        <InfoCards items={[
+          { icon: <ShieldCheck />, title: 'الموديل والبيانات', text: 'راجع اسم الموديل ورقم SKU والمنافذ والقدرة في صفحة المنتج.' },
+          { icon: <Zap />, title: 'التوافق', text: 'طابق المنتج مع الجهاز والكابل والاستخدام، ولا تعتمد على الاسم أو الصورة فقط.' },
+          { icon: <Truck />, title: 'الشحن', text: 'اختر المدينة والعنوان في checkout لرؤية خيارات الشحن النشطة.' },
+          { icon: <RefreshCcw />, title: 'الإرجاع', text: 'راجع شروط الإرجاع والاستبدال واحتفظ برقم الطلب وإثبات الشراء.' },
+        ]} />
+      </EditorialSection>
+      <EditorialSection title="أسئلة شائعة">
+        <FAQList items={copy.faqs} />
+      </EditorialSection>
+      <EditorialSection title="روابط مرتبطة">
+        <div className="category-related-links">
+          <Link href="/blog/best-power-bank-yemen"><BookOpenIcon /><strong>دليل الشراء</strong><span>مقارنات عملية قبل اختيار الطاقة والشحن.</span><ArrowLeft size={15} /></Link>
+          <Link href="/shipping"><Truck /><strong>الشحن والتوصيل</strong><span>راجع الرسوم والمدة حسب العنوان.</span><ArrowLeft size={15} /></Link>
+          <Link href="/return-policy"><RefreshCcw /><strong>الإرجاع والاستبدال</strong><span>اعرف الشروط والخطوات قبل الطلب.</span><ArrowLeft size={15} /></Link>
+          <Link href="/lab"><FlaskConical /><strong>مركز المواصفات</strong><span>افصل بين المواصفة والحساب والقياس.</span><ArrowLeft size={15} /></Link>
+        </div>
+      </EditorialSection>
+      <CTASection />
+    </>
+  );
+}
+
+export function CategoryPage() {
+  const { slug = '' } = useParams<{ slug: string }>();
+  return <CategoryLandingPage slug={slug} />;
+}
 export function BrandPage() { const { slug = '' } = useParams<{ slug: string }>(); return <CatalogPage mode="brand" slug={slug}/>; }
 
 export function SearchPage() {
