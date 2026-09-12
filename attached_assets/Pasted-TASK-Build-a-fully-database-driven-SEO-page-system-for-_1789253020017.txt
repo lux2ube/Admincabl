@@ -1,0 +1,489 @@
+TASK: Build a fully database-driven SEO page system for CABL.
+
+GOAL
+Any Category, Brand, or Product created/edited/published from the Admin panel must automatically have:
+
+1. A working public URL
+2. A dynamic public page using the existing template
+3. Correct SEO metadata
+4. A self-referencing canonical URL
+5. Automatic inclusion/exclusion from sitemap.xml
+6. Correct index/noindex behavior
+7. Correct handling of slug changes
+8. No manual code changes required when new catalog items are created
+
+CRITICAL RULE
+DO NOT create a separate React/HTML/page file for every Category, Brand, or Product.
+
+Use dynamic database-driven routes and reusable templates.
+
+==================================================
+PHASE 1 — INSPECT BEFORE MODIFYING
+==================================================
+
+Before writing code:
+
+- Inspect the existing database schema.
+- Inspect the existing Category, Brand, Product models/tables.
+- Inspect their existing fields, relationships, status/publishing fields, slugs, SEO fields and IDs.
+- Inspect the existing routing architecture.
+- Inspect the existing public Category, Brand and Product pages.
+- Inspect the current metadata implementation.
+- Inspect the current sitemap implementation, if any.
+- Inspect robots.txt.
+- Inspect canonical URL handling.
+- Inspect Admin create/edit/publish workflows.
+
+IMPORTANT:
+Do NOT rename existing database fields.
+Do NOT invent replacement fields when an equivalent field already exists.
+Do NOT duplicate existing tables.
+Do NOT create parallel SEO systems.
+Do NOT break existing data or routes.
+
+Reuse the existing schema and architecture wherever possible.
+
+If an SEO field already exists, use it.
+If a publication/status field already exists, use it.
+If a slug already exists, use it.
+
+Only introduce a new field if the existing schema genuinely has no suitable field, and explain why before adding it.
+
+==================================================
+PHASE 2 — DYNAMIC ROUTING
+==================================================
+
+Implement database-driven public routes.
+
+CATEGORY:
+A published Category with a valid slug must automatically resolve to its public Category URL.
+
+BRAND:
+A published Brand with a valid slug must automatically resolve to its public Brand URL.
+
+PRODUCT:
+A published Product with a valid slug must automatically resolve to its public Product URL.
+
+The route must query the database using the existing canonical identifier/slug.
+
+Example behavior:
+
+Admin creates:
+Category → "Chargers" → slug "chargers"
+
+The system automatically makes:
+
+/[category-route]/chargers
+
+available.
+
+Admin creates:
+
+Brand → "Anker" → slug "anker"
+
+The system automatically makes:
+
+/[brand-route]/anker
+
+available.
+
+Admin creates:
+
+Product → "Anker 65W Charger" → slug "anker-65w-charger"
+
+The system automatically makes:
+
+/[product-route]/anker-65w-charger
+
+available.
+
+DO NOT hardcode these individual pages.
+
+One reusable template must render unlimited database records.
+
+==================================================
+PHASE 3 — PUBLISHING LOGIC
+==================================================
+
+A record must NOT automatically become publicly indexable merely because it exists in the database.
+
+Respect the existing publication/status system.
+
+Expected behavior:
+
+DRAFT / UNPUBLISHED
+→ public page must not be indexable
+→ must not appear in sitemap
+→ must not be treated as a canonical indexable catalog URL
+
+PUBLISHED + INDEXABLE
+→ public page works
+→ metadata is generated
+→ canonical exists
+→ included in sitemap
+
+NOINDEX
+→ public page may exist if the existing architecture allows it
+→ robots meta must be noindex
+→ must NOT appear in sitemap
+
+DELETED / ARCHIVED
+→ must not appear in sitemap
+→ must not remain falsely indexable
+→ handle existing routing/404/redirect behavior correctly
+
+Use the project's existing status and SEO fields instead of creating duplicate status systems.
+
+==================================================
+PHASE 4 — SEO METADATA
+==================================================
+
+Metadata must be generated dynamically from the database.
+
+Every public Category, Brand and Product page must have:
+
+- unique <title>
+- unique meta description when available
+- canonical URL
+- robots directive according to its actual indexability
+- Open Graph metadata where the existing site supports it
+- appropriate social image where available
+- correct page-specific metadata
+
+NEVER use one global title/description for every catalog page.
+
+SEO priority:
+
+1. Explicit SEO fields stored in DB
+2. Existing page-specific content fields
+3. Safe generated fallback
+
+Never generate "undefined", "null", empty titles, duplicate garbage text, or broken metadata.
+
+==================================================
+PHASE 5 — CANONICAL URL
+==================================================
+
+Every indexable Category, Brand and Product page must output exactly ONE canonical URL.
+
+The canonical must represent the public preferred URL.
+
+Requirements:
+
+- absolute canonical URL
+- correct production domain
+- HTTPS
+- normalized URL
+- no tracking parameters
+- no search parameters
+- no pagination parameters unless the site's existing SEO strategy explicitly requires them
+- no duplicate canonical tags
+- canonical must match the intended public route
+
+The canonical URL must NOT be based on the current browser URL if that URL contains unnecessary parameters.
+
+Example:
+
+/products/anker-65w-charger?utm_source=instagram
+
+Canonical:
+
+/products/anker-65w-charger
+
+==================================================
+PHASE 6 — SLUG CHANGES
+==================================================
+
+Slug changes must NOT silently break existing indexed URLs.
+
+When an existing published Category, Brand or Product slug changes:
+
+OLD URL
+→ should receive the project's appropriate permanent redirect behavior
+→ NEW URL becomes the canonical URL
+→ NEW URL is included in sitemap
+→ OLD URL must NOT remain as a separate sitemap entry
+
+Do NOT create duplicate pages for old and new slugs.
+
+If the existing database has a route/history/redirect mechanism, reuse it.
+
+If no mechanism exists, implement the smallest safe redirect mechanism compatible with the existing architecture.
+
+Do NOT overwrite historical slug information in a way that makes previously indexed URLs impossible to redirect.
+
+==================================================
+PHASE 7 — DYNAMIC SITEMAP
+==================================================
+
+Implement a production-safe dynamic sitemap.
+
+The sitemap must be generated from the DATABASE, not from manually maintained URL lists.
+
+It must automatically update when Admin users:
+
+- create a Category
+- publish a Category
+- unpublish a Category
+- create a Brand
+- publish a Brand
+- unpublish a Brand
+- create a Product
+- publish a Product
+- unpublish a Product
+- delete/archive a catalog item
+- change a slug
+- change indexability
+
+Only include URLs that are:
+
+- publicly accessible
+- published
+- indexable
+- canonical
+- valid
+
+Exclude:
+
+- admin URLs
+- authentication URLs
+- drafts
+- unpublished records
+- noindex pages
+- deleted records
+- search results
+- internal filters
+- tracking URLs
+- duplicate URLs
+- temporary URLs
+- invalid records
+
+DO NOT manually add catalog URLs to sitemap.xml.
+
+The sitemap must remain correct even if the Admin creates 10, 1,000, or 100,000 catalog records.
+
+If the site's framework supports sitemap generation natively, use the framework's proper server-side sitemap mechanism.
+
+If the catalog can exceed a single sitemap's limits, implement proper sitemap index/chunking according to search-engine limits.
+
+==================================================
+PHASE 8 — DATABASE → PAGE → SEO → SITEMAP
+==================================================
+
+The complete chain must work automatically:
+
+ADMIN
+↓
+Create Category / Brand / Product
+↓
+Save to existing database
+↓
+Publish
+↓
+Dynamic route becomes available
+↓
+Public page renders from database
+↓
+Page-specific SEO metadata generated
+↓
+Canonical generated
+↓
+Sitemap automatically includes URL
+
+No developer intervention.
+
+No new code file.
+
+No manual sitemap editing.
+
+No manual route registration.
+
+==================================================
+PHASE 9 — ERROR HANDLING
+==================================================
+
+Handle:
+
+- nonexistent slug → proper 404
+- unpublished record → proper behavior according to existing architecture
+- deleted record → proper behavior
+- invalid slug → proper behavior
+- duplicate slug → prevent unsafe duplicate public URLs
+- missing SEO fields → generate safe fallback
+- missing image → use existing site fallback
+- malformed database record → do not crash the entire page
+- slug collision between entities → follow the existing URL architecture and prevent ambiguous routing
+
+Never expose database errors to users.
+
+==================================================
+PHASE 10 — PERFORMANCE
+==================================================
+
+Do not query the entire catalog just to render one page.
+
+A Category page should retrieve the required Category and its related data efficiently.
+
+A Brand page should retrieve the required Brand and its related data efficiently.
+
+A Product page should retrieve only the required Product and related information.
+
+Sitemap generation must also be implemented efficiently and must not cause unnecessary full-database queries on every normal page request.
+
+Use appropriate caching/revalidation supported by the existing framework.
+
+==================================================
+PHASE 11 — ADMIN UX
+==================================================
+
+The Admin user should only need to:
+
+Create → Fill data → Save → Publish
+
+The Admin must NOT need to:
+
+- create a route
+- create a page
+- edit code
+- add a sitemap URL
+- manually enter canonical URLs
+- manually register metadata
+- manually create an SEO page
+
+If the existing Admin has SEO fields, preserve and use them.
+
+==================================================
+PHASE 12 — TESTS / ACCEPTANCE CRITERIA
+==================================================
+
+Do not consider this task complete until all tests pass.
+
+TEST 1:
+Create a new Category from Admin.
+
+Expected:
+- Category saved in DB
+- public URL works
+- correct Category template renders
+- unique title exists
+- meta description exists when available
+- exactly one canonical exists
+- sitemap contains the Category URL if published/indexable
+
+TEST 2:
+Create a new Brand from Admin.
+
+Expected:
+Same behavior as Category.
+
+TEST 3:
+Create a new Product from Admin.
+
+Expected:
+Same behavior as Category and Brand.
+
+TEST 4:
+Create an unpublished Product.
+
+Expected:
+- public indexability is prevented
+- sitemap does not contain it
+
+TEST 5:
+Publish that Product.
+
+Expected:
+- public page works
+- metadata works
+- canonical works
+- sitemap automatically contains it
+
+TEST 6:
+Change the Product slug.
+
+Expected:
+- new URL works
+- new URL is canonical
+- sitemap contains only the new canonical URL
+- old URL is handled through the project's permanent redirect mechanism where applicable
+
+TEST 7:
+Set a page to noindex.
+
+Expected:
+- robots metadata becomes noindex
+- sitemap removes the URL
+
+TEST 8:
+Delete/archive a published Product.
+
+Expected:
+- sitemap removes the URL
+- old URL no longer behaves as a valid current product URL
+- existing redirect/404 policy is respected
+
+TEST 9:
+Create multiple Categories, Brands and Products.
+
+Expected:
+No hardcoded route/page files are created.
+
+TEST 10:
+Inspect page source/rendered metadata.
+
+Expected:
+- exactly one title
+- exactly one canonical
+- correct robots directive
+- no duplicate SEO tags
+- no "undefined"
+- no "null"
+- no placeholder metadata
+
+==================================================
+FINAL VERIFICATION
+==================================================
+
+Before declaring the task complete, verify:
+
+[ ] Existing DB schema preserved
+[ ] Existing fields preserved
+[ ] No unnecessary duplicate tables
+[ ] No per-product/category/brand page files
+[ ] Dynamic routes work
+[ ] Published records become public automatically
+[ ] Unpublished records are excluded appropriately
+[ ] SEO metadata is dynamic
+[ ] Canonical is dynamic and correct
+[ ] Slug changes are safely handled
+[ ] Sitemap is database-driven
+[ ] Sitemap automatically reflects publishing changes
+[ ] Noindex URLs are excluded from sitemap
+[ ] Deleted URLs are removed from sitemap
+[ ] robots.txt remains correct
+[ ] Desktop works
+[ ] Mobile works
+[ ] TypeScript/build passes
+[ ] No console errors
+[ ] No broken existing routes
+[ ] No SEO regressions
+
+IMPORTANT:
+Do not merely report that the architecture "should work".
+Actually inspect the implementation, make the required changes, run the relevant tests/build, and verify the final behavior.
+
+At the end, provide a concise implementation report containing:
+
+1. Files changed
+2. Existing schema/fields reused
+3. Dynamic routes implemented
+4. SEO behavior implemented
+5. Sitemap behavior implemented
+6. Slug/redirect behavior implemented
+7. Tests executed
+8. Any remaining risks or limitations
+
+DO NOT modify unrelated UI, content, branding, or SEO strategy.
+Do not redesign existing pages.
+Do not change existing URLs unless required for the dynamic routing system.
+Preserve the current CABL design and existing SEO work.
