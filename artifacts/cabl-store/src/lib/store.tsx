@@ -38,9 +38,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     catalog, isLoading: query.isLoading, isError: query.isError, cart, favorites,
     addToCart: (productId, quantity = 1) => setCart((current) => {
       const existing = current.find((line) => line.productId === productId);
-      return existing ? current.map((line) => line.productId === productId ? { ...line, quantity: Math.min(99, line.quantity + quantity) } : line) : [...current, { productId, quantity }];
+      const product = catalog?.products.find((item) => item.id === productId);
+      const maxQuantity = product?.quantity ?? 99;
+      if (maxQuantity < 1) return current;
+      return existing
+        ? current.map((line) => line.productId === productId ? { ...line, quantity: Math.min(maxQuantity, line.quantity + quantity) } : line)
+        : [...current, { productId, quantity: Math.min(maxQuantity, Math.max(1, quantity)) }];
     }),
-    updateCart: (productId, quantity) => setCart((current) => quantity < 1 ? current.filter((line) => line.productId !== productId) : current.map((line) => line.productId === productId ? { ...line, quantity: Math.min(99, quantity) } : line)),
+    updateCart: (productId, quantity) => setCart((current) => {
+      if (quantity < 1) return current.filter((line) => line.productId !== productId);
+      const product = catalog?.products.find((item) => item.id === productId);
+      const maxQuantity = product?.quantity ?? 99;
+      return maxQuantity < 1
+        ? current.filter((line) => line.productId !== productId)
+        : current.map((line) => line.productId === productId ? { ...line, quantity: Math.min(maxQuantity, quantity) } : line);
+    }),
     removeFromCart: (productId) => setCart((current) => current.filter((line) => line.productId !== productId)),
     toggleFavorite: (productId) => setFavorites((current) => current.includes(productId) ? current.filter((id) => id !== productId) : [...current, productId]),
     cartProducts, cartCount: cart.reduce((sum, line) => sum + line.quantity, 0), currency,
