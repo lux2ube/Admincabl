@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
-import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, FlaskConical, Headphones, MapPin as MapPinIcon, MessageCircle as MessageCircleIcon, Package, RefreshCcw, Search as SearchIcon, ShieldCheck, SlidersHorizontal, Smartphone, Truck, X, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, CreditCard, FlaskConical, Headphones, MapPin as MapPinIcon, MessageCircle as MessageCircleIcon, Package, RefreshCcw, Search as SearchIcon, ShieldCheck, SlidersHorizontal, Smartphone, Tag, Truck, X, Zap } from 'lucide-react';
 import { getGetStoreSeoQueryKey, getGetStoreOrderQueryKey, getListStoreOrdersQueryKey, useCreateStoreOrder, useGetStoreOrder, useGetStoreSeo, useListStoreOrders } from '@workspace/api-client-react';
 import type { StoreOrderInput, StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
@@ -1359,10 +1359,52 @@ export function CanonicalProductPage() {
   return <ProductDetailPage slug={productSlug} />;
 }
 
+function PurchaseSteps({ current }: { current: 'cart' | 'checkout' }) {
+  return <nav className="purchase-steps" aria-label="خطوات الشراء">
+    <span className={current === 'cart' ? 'is-current' : 'is-done'}><b>01</b> السلة</span>
+    <i />
+    <span className={current === 'checkout' ? 'is-current' : ''}><b>02</b> البيانات والدفع</span>
+    <i />
+    <span><b>03</b> تأكيد الطلب</span>
+  </nav>;
+}
+
 export function CartPage() {
-  const { cartProducts, formatPrice } = useStore();
+  const { cartProducts, cartCount, formatPrice } = useStore();
   const subtotal = cartProducts.reduce((sum, item) => sum + (item.product.discountPrice ?? item.product.regularPrice) * item.quantity, 0);
-  return <><NoIndex/><div className="container cart-page"><Breadcrumbs items={[{ label: 'السلة' }]}/><PageHeading title="سلة مشترياتك" description={cartProducts.length ? 'راجع الكميات قبل الانتقال إلى بيانات التوصيل.' : 'السلة هادئة الآن.'}/>{cartProducts.length ? <div className="cart-layout"><div className="cart-panel">{cartProducts.map((item) => <CartLine key={item.product.id} {...item}/>)}</div><aside className="summary-panel"><h2>ملخص السلة</h2><div className="summary-row"><span>المجموع الفرعي</span><b>{formatPrice(subtotal)}</b></div><div className="summary-row"><span>الشحن</span><span>يحسب عند الاختيار</span></div><div className="summary-row total"><span>الإجمالي المتوقع</span><b>{formatPrice(subtotal)}</b></div><Link href="/checkout" className="button button-primary" data-testid="link-checkout">متابعة إلى الدفع <ArrowLeft size={16}/></Link><p className="summary-note">الدفع النهائي يتضمن طريقة الشحن التي تختارها.</p></aside></div> : <div className="empty-state"><div className="empty-icon"><Package size={28}/></div><h3>لم تضف أي منتج بعد</h3><p>ابدأ من الكتالوج، وستظهر اختياراتك هنا.</p><Link href="/search" className="button button-primary" data-testid="link-cart-empty-search">استعرض المنتجات</Link></div>}</div></>;
+  return (
+    <>
+      <NoIndex />
+      <div className="container cart-page">
+        <Breadcrumbs items={[{ label: 'السلة' }]} />
+        <PurchaseSteps current="cart" />
+        <PageHeading title="سلة مشترياتك" description={cartProducts.length ? 'راجع اختياراتك، ثم انتقل إلى بيانات التوصيل والدفع.' : 'السلة هادئة الآن.'} />
+        {cartProducts.length ? (
+          <div className="cart-layout">
+            <section className="cart-panel">
+              <div className="purchase-panel-heading">
+                <div><span className="eyebrow">الخطوة الأولى</span><h2>راجع اختياراتك</h2></div>
+                <span className="cart-count">{cartCount} {cartCount === 1 ? 'منتج' : 'منتجات'}</span>
+              </div>
+              <div className="cart-lines">{cartProducts.map((item) => <CartLine key={item.product.id} {...item} />)}</div>
+              <Link href="/search" className="continue-shopping"><ArrowRight size={15} /> العودة للتسوق</Link>
+            </section>
+            <aside className="summary-panel cart-summary">
+              <div className="summary-kicker"><span>جاهز للطلب؟</span><ShieldCheck size={16} /></div>
+              <h2>ملخص السلة</h2>
+              <div className="summary-row"><span>المجموع الفرعي</span><b>{formatPrice(subtotal)}</b></div>
+              <div className="summary-row"><span>الشحن</span><span>يحسب بعد العنوان</span></div>
+              <div className="summary-row total"><span>الإجمالي المتوقع</span><b>{formatPrice(subtotal)}</b></div>
+              <Link href="/checkout" className="button button-primary" data-testid="link-checkout">متابعة إلى البيانات <ArrowLeft size={16} /></Link>
+              <p className="summary-note">سنحسب الشحن ونراجع الكوبون قبل تأكيد الطلب.</p>
+            </aside>
+          </div>
+        ) : (
+          <div className="empty-state"><div className="empty-icon"><Package size={28} /></div><h3>لم تضف أي منتج بعد</h3><p>ابدأ من الكتالوج، وستظهر اختياراتك هنا.</p><Link href="/search" className="button button-primary" data-testid="link-cart-empty-search">استعرض المنتجات</Link></div>
+        )}
+      </div>
+    </>
+  );
 }
 
 export function CheckoutPage() {
@@ -1373,17 +1415,81 @@ export function CheckoutPage() {
   const [paymentId, setPaymentId] = useState<number | undefined>(catalog?.paymentMethods[0]?.id);
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phoneNumber: '', addressLine1: '', addressLine2: '', city: '', country: 'اليمن', postalCode: '', paymentReference: '', couponCode: '' });
   const [error, setError] = useState('');
+  const [couponHint, setCouponHint] = useState('');
   useEffect(() => {
     if (!shippingId && catalog?.shippingOptions[0]) setShippingId(catalog.shippingOptions[0].id);
     if (!paymentId && catalog?.paymentMethods[0]) setPaymentId(catalog.paymentMethods[0].id);
   }, [catalog, shippingId, paymentId]);
   const selectedShipping = catalog?.shippingOptions.find((item) => item.id === shippingId);
+  const selectedPayment = catalog?.paymentMethods.find((item) => item.id === paymentId);
   const subtotal = cartProducts.reduce((sum, item) => sum + (item.product.discountPrice ?? item.product.regularPrice) * item.quantity, 0);
   const shippingCost = selectedShipping?.free ? 0 : selectedShipping?.charge || 0;
   const update = (key: keyof typeof form) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm((current) => ({ ...current, [key]: event.target.value }));
-  const submit = (event: FormEvent) => { event.preventDefault(); setError(''); if (!shippingId || !paymentId || !cartProducts.length) { setError('اختر طريقة الشحن والدفع وتأكد من وجود منتج في السلة.'); return; } const payload: StoreOrderInput = { customer: { firstName: form.firstName, lastName: form.lastName, email: form.email, phoneNumber: form.phoneNumber }, address: { addressLine1: form.addressLine1, addressLine2: form.addressLine2 || null, postalCode: form.postalCode || null, country: form.country, city: form.city, phoneNumber: form.phoneNumber || null }, items: cartProducts.map((item) => ({ productId: item.product.id, quantity: item.quantity })), shippingId, paymentMethodId: paymentId, paymentReference: form.paymentReference || null, couponCode: form.couponCode || null }; orderMutation.mutate({ data: payload }, { onSuccess: (order) => setLocation(`/order/${order.id}?phone=${encodeURIComponent(form.phoneNumber)}`), onError: () => setError('لم يتم إرسال الطلب. لم نخفي المشكلة — راجع البيانات وحاول مرة أخرى.') }); };
-  if (!cartProducts.length) return <><NoIndex/><div className="container checkout-page"><div className="empty-state"><h3>السلة فارغة</h3><Link href="/search" className="button button-primary" data-testid="link-checkout-empty">العودة للتسوق</Link></div></div></>;
-  return <><NoIndex/><div className="container checkout-page"><Breadcrumbs items={[{ label: 'السلة', href: '/cart' }, { label: 'إتمام الشراء' }]}/><PageHeading title="إتمام الشراء" description="أدخل بياناتك كما هي لتأكيد طلب يمكننا متابعته معك."/><form className="checkout-layout" onSubmit={submit}><div className="checkout-panel"><section className="checkout-section"><h2>بيانات العميل</h2><div className="form-grid"><Field label="الاسم الأول" value={form.firstName} onChange={update('firstName')} required/><Field label="اسم العائلة" value={form.lastName} onChange={update('lastName')} required/><Field label="البريد الإلكتروني" type="email" value={form.email} onChange={update('email')} required/><Field label="رقم الهاتف" value={form.phoneNumber} onChange={update('phoneNumber')} required/></div></section><section className="checkout-section"><h2>عنوان التوصيل</h2><div className="form-grid"><Field label="العنوان" value={form.addressLine1} onChange={update('addressLine1')} required full/><Field label="العنوان الإضافي" value={form.addressLine2} onChange={update('addressLine2')} full/><Field label="المدينة" value={form.city} onChange={update('city')} required/><Field label="الدولة" value={form.country} onChange={update('country')} required/><Field label="الرمز البريدي" value={form.postalCode} onChange={update('postalCode')}/></div></section><section className="checkout-section"><h2>طريقة الشحن</h2>{catalog?.shippingOptions.map((option) => <label className={`method-option ${shippingId === option.id ? 'selected' : ''}`} key={option.id}><input type="radio" name="shipping" checked={shippingId === option.id} onChange={() => setShippingId(option.id)} data-testid={`input-shipping-${option.id}`}/><div><strong>{option.name} — {option.free ? 'مجاني' : formatPrice(option.charge)}</strong><span>{option.estimatedDays ? `التقدير: ${option.estimatedDays} أيام` : 'يتم تأكيد المدة مع الطلب'}</span></div></label>)}</section><section className="checkout-section"><h2>طريقة الدفع</h2>{catalog?.paymentMethods.map((method) => <label className={`method-option ${paymentId === method.id ? 'selected' : ''}`} key={method.id}><input type="radio" name="payment" checked={paymentId === method.id} onChange={() => setPaymentId(method.id)} data-testid={`input-payment-${method.id}`}/><div><strong>{method.name}</strong><span>{method.description || method.instructions || 'تفاصيل الدفع تظهر عند اختيار الطريقة.'}</span></div></label>)}{catalog?.paymentMethods.find((method) => method.id === paymentId)?.requiresTransactionReference && <Field label="مرجع التحويل" value={form.paymentReference} onChange={update('paymentReference')} full/>}</section>{error && <div className="notice" role="alert" data-testid="status-checkout-error">{error}</div>}<button className="button button-primary" type="submit" disabled={orderMutation.isPending} data-testid="button-submit-order">{orderMutation.isPending ? 'جارٍ إرسال الطلب...' : 'تأكيد الطلب'}</button></div><aside className="summary-panel"><h2>مراجعة الطلب</h2>{cartProducts.map((item) => <div className="summary-row" key={item.product.id}><span>{item.product.productName} × {item.quantity}</span><b>{formatPrice((item.product.discountPrice ?? item.product.regularPrice) * item.quantity)}</b></div>)}<div className="summary-row"><span>الشحن</span><b>{formatPrice(shippingCost)}</b></div><div className="summary-row total"><span>الإجمالي</span><b>{formatPrice(subtotal + shippingCost)}</b></div><div className="notice">لن يتم خصم أي مبلغ قبل تأكيد تفاصيل طلبك معك.</div></aside></form></div></>;
+  const applyCoupon = () => setCouponHint(form.couponCode.trim() ? 'سيتم التحقق من الكود عند تأكيد الطلب.' : 'أدخل كود الخصم أولاً.');
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    setError('');
+    if (!shippingId || !paymentId || !cartProducts.length) {
+      setError('اختر طريقة الشحن والدفع وتأكد من وجود منتج في السلة.');
+      return;
+    }
+    const payload: StoreOrderInput = {
+      customer: { firstName: form.firstName, lastName: form.lastName, email: form.email, phoneNumber: form.phoneNumber },
+      address: { addressLine1: form.addressLine1, addressLine2: form.addressLine2 || null, postalCode: form.postalCode || null, country: form.country, city: form.city, phoneNumber: form.phoneNumber || null },
+      items: cartProducts.map((item) => ({ productId: item.product.id, quantity: item.quantity })),
+      shippingId,
+      paymentMethodId: paymentId,
+      paymentReference: form.paymentReference || null,
+      couponCode: form.couponCode || null,
+    };
+    orderMutation.mutate({ data: payload }, {
+      onSuccess: (order) => setLocation(`/order/${order.id}?phone=${encodeURIComponent(form.phoneNumber)}`),
+      onError: () => setError('لم يتم إرسال الطلب. راجع البيانات وكود الخصم وحاول مرة أخرى.'),
+    });
+  };
+  if (!cartProducts.length) return <><NoIndex /><div className="container checkout-page"><div className="empty-state"><h3>السلة فارغة</h3><Link href="/search" className="button button-primary" data-testid="link-checkout-empty">العودة للتسوق</Link></div></div></>;
+  return (
+    <>
+      <NoIndex />
+      <div className="container checkout-page">
+        <Breadcrumbs items={[{ label: 'السلة', href: '/cart' }, { label: 'إتمام الشراء' }]} />
+        <PurchaseSteps current="checkout" />
+        <PageHeading title="بيانات الطلب" description="خطوتان واضحتان ونراجع كل شيء قبل الإرسال." />
+        <form className="checkout-layout" onSubmit={submit}>
+          <div className="checkout-panel">
+            <section className="checkout-section">
+              <div className="checkout-section-heading"><span className="step-dot">01</span><div><h2>بياناتك</h2><p>نستخدمها لتأكيد الطلب والتواصل معك.</p></div></div>
+              <div className="form-grid"><Field label="الاسم الأول" value={form.firstName} onChange={update('firstName')} required /><Field label="اسم العائلة" value={form.lastName} onChange={update('lastName')} required /><Field label="البريد الإلكتروني" type="email" value={form.email} onChange={update('email')} required /><Field label="رقم الهاتف" value={form.phoneNumber} onChange={update('phoneNumber')} required /></div>
+            </section>
+            <section className="checkout-section">
+              <div className="checkout-section-heading"><span className="step-dot">02</span><div><h2>عنوان التوصيل</h2><p>أدخل العنوان الذي سيصل إليه الطلب.</p></div></div>
+              <div className="form-grid"><Field label="العنوان" value={form.addressLine1} onChange={update('addressLine1')} required full /><Field label="العنوان الإضافي" value={form.addressLine2} onChange={update('addressLine2')} full /><Field label="المدينة" value={form.city} onChange={update('city')} required /><Field label="الدولة" value={form.country} onChange={update('country')} required /><Field label="الرمز البريدي" value={form.postalCode} onChange={update('postalCode')} /></div>
+            </section>
+            <section className="checkout-section">
+              <div className="checkout-section-heading"><span className="step-dot">03</span><div><h2>الشحن والدفع</h2><p>خيارات مختصرة، اختر الأنسب لك.</p></div></div>
+              <h3 className="choice-label">طريقة الشحن</h3>
+              <div className="method-choice-grid">{catalog?.shippingOptions.map((option) => <label className={`method-choice ${shippingId === option.id ? 'selected' : ''}`} key={option.id}><input type="radio" name="shipping" checked={shippingId === option.id} onChange={() => setShippingId(option.id)} data-testid={`input-shipping-${option.id}`} /><span className="method-choice-mark">{shippingId === option.id && <Check size={13} />}</span><span className="method-choice-copy"><strong>{option.name}</strong><small>{option.estimatedDays ? `${option.estimatedDays} أيام تقريباً` : 'تأكيد المدة مع الطلب'}</small></span><b>{option.free ? 'مجاني' : formatPrice(option.charge)}</b></label>)}</div>
+              <h3 className="choice-label">طريقة الدفع</h3>
+              <div className="method-choice-grid">{catalog?.paymentMethods.map((method) => <label className={`method-choice ${paymentId === method.id ? 'selected' : ''}`} key={method.id}><input type="radio" name="payment" checked={paymentId === method.id} onChange={() => setPaymentId(method.id)} data-testid={`input-payment-${method.id}`} /><span className="method-choice-mark">{paymentId === method.id && <Check size={13} />}</span><span className="method-choice-copy"><strong>{method.name}</strong><small>{method.description || method.instructions || 'تفاصيل الدفع عند التأكيد'}</small></span><CreditCard size={17} className="method-choice-icon" /></label>)}</div>
+              {selectedPayment?.requiresTransactionReference && <div className="method-extra"><Field label="مرجع التحويل" value={form.paymentReference} onChange={update('paymentReference')} full /></div>}
+            </section>
+            {error && <div className="notice" role="alert" data-testid="status-checkout-error">{error}</div>}
+          </div>
+          <aside className="summary-panel checkout-summary">
+            <div className="summary-kicker"><span>الخطوة الأخيرة</span><ShieldCheck size={16} /></div>
+            <h2>راجع وأرسل</h2>
+            <div className="summary-items">{cartProducts.map((item) => <div className="summary-item" key={item.product.id}><span>{item.product.productName} <b>× {item.quantity}</b></span><strong>{formatPrice((item.product.discountPrice ?? item.product.regularPrice) * item.quantity)}</strong></div>)}</div>
+            <div className="coupon-box"><div className="coupon-heading"><Tag size={15} /><strong>لديك كود خصم؟</strong></div><div className="coupon-row"><input value={form.couponCode} onChange={update('couponCode')} placeholder="أدخل الكود" aria-label="كود الخصم" data-testid="input-coupon-code" /><button type="button" onClick={applyCoupon} data-testid="button-apply-coupon">تطبيق</button></div>{couponHint && <small className="coupon-hint">{couponHint}</small>}</div>
+            <div className="summary-row"><span>المجموع الفرعي</span><b>{formatPrice(subtotal)}</b></div>
+            <div className="summary-row"><span>الشحن</span><b>{formatPrice(shippingCost)}</b></div>
+            <div className="summary-row total"><span>الإجمالي</span><b>{formatPrice(subtotal + shippingCost)}</b></div>
+            <button className="button button-primary checkout-submit" type="submit" disabled={orderMutation.isPending} data-testid="button-submit-order">{orderMutation.isPending ? 'جارٍ إرسال الطلب...' : 'تأكيد وإرسال الطلب'} <ArrowLeft size={16} /></button>
+            <p className="summary-note">لن يتم خصم أي مبلغ قبل مراجعة تفاصيل الطلب معك.</p>
+          </aside>
+        </form>
+      </div>
+    </>
+  );
 }
 
 function Field({ label, value, onChange, type = 'text', required = false, full = false }: { label: string; value: string; onChange: (event: ChangeEvent<HTMLInputElement>) => void; type?: string; required?: boolean; full?: boolean }) { return <label className={`form-field ${full ? 'full' : ''}`}><span>{label}</span><input type={type} value={value} onChange={onChange} required={required} data-testid={`input-${label}`}/></label>; }
