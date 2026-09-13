@@ -108,7 +108,7 @@ input:focus,select:focus,textarea:focus{border-color:hsl(var(--accent));box-shad
 .guided-needs-header h2{font-size:31px;line-height:1.2;letter-spacing:-.07em;margin:6px 0 0}
 .guided-needs-header p{font-size:13px;color:#71819b;margin:5px 0 0}
 .guided-needs-all{display:flex;align-items:center;gap:5px;color:#1757ee;font-size:12px;font-weight:800;white-space:nowrap}
-.guided-needs-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.guided-needs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
 .guided-need-card{min-height:185px;background:#fff;border:1px solid #dce7f1;border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:14px;transition:transform .2s,border-color .2s,box-shadow .2s}
 .guided-need-card:hover{transform:translateY(-4px);border-color:#a9c9ef;box-shadow:0 14px 28px #1d4e8515}
 .guided-need-icon{width:42px;height:42px;border-radius:13px;background:#eaf4ff;color:#1757ee;display:grid;place-items:center}
