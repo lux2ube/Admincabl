@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Heart, Menu, Search, ShoppingBag, X, ChevronDown, ShieldCheck, Truck, PackageSearch, Phone } from 'lucide-react';
+import { Heart, Menu, Search, ShoppingBag, X, ChevronDown, PackageSearch, MessageCircle } from 'lucide-react';
 import { useStore } from '@/lib/store';
 
 export function StoreShell({ children }: { children: ReactNode }) {
@@ -44,7 +44,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [mobileOpen]);
   return <div dir="rtl" className="min-h-[100dvh]">
-     <div className="top-strip"><div className="container top-strip-inner"><div className="top-announcement"><span><ShieldCheck size={13}/> الوكيل الحصري لشركة Baseus في اليمن</span><a href="tel:771106977" className="top-phone" dir="ltr" aria-label="اتصل بنا على 771106977" data-testid="link-phone"><Phone size={13}/> 771106977</a></div><Link href="/orders" className="phone-link" data-testid="link-track-order"><PackageSearch size={13}/> تتبع طلبك</Link></div></div>
+     <div className="top-strip"><div className="container top-strip-inner"><div className="top-announcement"><span>الوكيل الحصري لشركة Baseus في اليمن</span><a href="https://wa.me/967771106977" target="_blank" rel="noreferrer" className="top-phone" dir="ltr" aria-label="تواصل معنا عبر واتساب على 771106977" data-testid="link-whatsapp"><MessageCircle size={13}/> 771106977</a></div><Link href="/orders" className="phone-link" data-testid="link-track-order"><PackageSearch size={13}/> تتبع طلبك</Link></div></div>
      <header className={`site-header${isScrolled ? ' is-scrolled' : ''}`}>
       <div className="container header-main">
         <button className="mobile-menu" onClick={() => setMobileOpen(true)} aria-label="فتح القائمة" data-testid="button-open-menu"><Menu size={23}/></button>
