@@ -34,7 +34,13 @@ export function StoreShell({ children }: { children: ReactNode }) {
       <div className="container header-main">
         <button className="mobile-menu" onClick={() => setMobileOpen(true)} aria-label="فتح القائمة" data-testid="button-open-menu"><Menu size={23}/></button>
         <Link href="/" className="brand-mark" data-testid="link-home"><span className="brand-cabl">CABL</span><span className="brand-dot">.</span><small>طاقة يومك</small></Link>
-        <nav className="desktop-nav">{navItems.map((item) => <Link href={item.href} key={item.href} className="nav-link" data-testid={`link-nav-${item.label}`}>{item.label}{item.label === 'العلامات التجارية' && <ChevronDown size={14}/>}</Link>)}</nav>
+       <nav className="desktop-nav">{navItems.map((item) => {
+         const route = location.split('?')[0];
+         const isActive = item.href === '/search'
+           ? route === '/search'
+           : item.href === '/' ? route === '/' : route === item.href || route.startsWith(`${item.href}/`);
+         return <Link href={item.href} key={item.href} className={`nav-link${isActive ? ' is-active' : ''}`} aria-current={isActive ? 'page' : undefined} data-testid={`link-nav-${item.label}`}>{item.label}{item.label === 'العلامات التجارية' && <ChevronDown size={14}/>}</Link>;
+       })}</nav>
         <div className="header-actions">
           <Link href="/search" className="icon-action" aria-label="البحث" data-testid="link-search"><Search size={20}/></Link>
           <Link href="/orders" className="icon-action orders-action" aria-label="تتبع الطلب" data-testid="link-orders"><PackageSearch size={20}/></Link>

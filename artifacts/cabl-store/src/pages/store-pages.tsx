@@ -71,6 +71,13 @@ function ProductImage({ product, className = '' }: { product: StoreProduct; clas
   return <img className={className} src={product.images?.[0]} alt={product.productName} data-testid={`img-detail-${product.id}`}/>;
 }
 
+function BrandCollectionImage({ product, brand }: { product: StoreProduct; brand: string }) {
+  const [failed, setFailed] = useState(false);
+  return <span className="brand-collection-image">
+    {failed ? <span className="brand-collection-fallback" aria-hidden="true">{brand.slice(0, 1)}</span> : <img src={product.images?.[0]} alt="" loading="lazy" onError={() => setFailed(true)} />}
+  </span>;
+}
+
 function LegacyHomePage() {
   const { catalog, isLoading, isError } = useStore();
   const [, navigate] = useLocation();
@@ -442,7 +449,7 @@ function CommercialHomePage() {
           <div className="guided-brand-list">
             {brandCollections.map(({ brand, brandSlug, product, count }) => (
               <Link href={brandPath(brandSlug)} className="guided-brand-collection" key={brandSlug} data-testid={`link-home-brand-${brandSlug}`}>
-                <img src={product.images?.[0]} alt="" loading="lazy" />
+                <BrandCollectionImage product={product} brand={brand} />
                 <span><strong>{brand}</strong><small>{count} {count === 1 ? 'منتج منشور' : 'منتجات منشورة'}</small></span>
                 <ArrowLeft size={15} />
               </Link>
