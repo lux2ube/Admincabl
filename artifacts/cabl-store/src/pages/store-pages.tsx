@@ -286,10 +286,6 @@ function CommercialHomePage() {
   const { catalog, isLoading, isError, formatPrice } = useStore();
   const products = catalog?.products || [];
   const inStockProducts = useMemo(() => products.filter((product) => product.quantity > 0), [products]);
-  const featured = useMemo(
-    () => [...inStockProducts, ...products.filter((product) => product.quantity < 1)].slice(0, 8),
-    [inStockProducts, products],
-  );
   const categories = useMemo(
     () => Array.from(new Map(products.filter((product) => product.category).map((product) => [product.category!.slug, product.category!])).values()),
     [products],
@@ -310,18 +306,12 @@ function CommercialHomePage() {
   const heroDiscount = heroProduct && heroDiscountPrice !== null && heroDiscountPrice < heroProduct.regularPrice
     ? Math.round((1 - heroDiscountPrice / heroProduct.regularPrice) * 100)
     : 0;
-  const [finderCategory, setFinderCategory] = useState('all');
-  const [finderBudget, setFinderBudget] = useState('all');
   const [quickBrand, setQuickBrand] = useState('');
   const [quickCategory, setQuickCategory] = useState('');
   const quickMatches = useMemo(
     () => products.filter((product) => (!quickBrand || product.brand === quickBrand) && (!quickCategory || product.category?.slug === quickCategory)),
     [products, quickBrand, quickCategory],
   );
-  const quickSearch = new URLSearchParams();
-  if (quickBrand) quickSearch.set('brand', quickBrand);
-  if (quickCategory) quickSearch.set('category', quickCategory);
-  const quickSearchHref = `/search${quickSearch.toString() ? `?${quickSearch.toString()}` : ''}`;
   const needs = useMemo(() => {
     const used = new Set<string>();
     const options = [
@@ -343,18 +333,6 @@ function CommercialHomePage() {
     });
     return selected.slice(0, 5);
   }, [categories]);
-  const finderProducts = useMemo(() => products
-    .filter((product) => product.quantity > 0)
-    .filter((product) => finderCategory === 'all' || product.category?.slug === finderCategory)
-    .filter((product) => {
-      const price = product.discountPrice ?? product.regularPrice;
-      if (finderBudget === 'under-25') return price < 25;
-      if (finderBudget === '25-50') return price >= 25 && price <= 50;
-      if (finderBudget === 'over-50') return price > 50;
-      return true;
-    })
-    .slice(0, 4), [products, finderCategory, finderBudget]);
-
   return (
     <div className="guided-home">
       <SEO type="home" />
