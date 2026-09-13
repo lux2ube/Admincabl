@@ -315,10 +315,11 @@ function CommercialHomePage() {
   const needs = useMemo(() => {
     const used = new Set<string>();
     const options = [
-      { match: /cable|كابل/i, title: 'أحتاج كابلاً مناسباً', text: 'للهاتف أو اللابتوب أو الشحن اليومي', icon: <Package size={20} /> },
-      { match: /power|باور|طاقة|battery|بطار/i, title: 'أحتاج طاقة أثناء التنقل', text: 'حلول احتياطية للهاتف والراوتر والسفر', icon: <Zap size={20} /> },
-      { match: /charg|شاحن/i, title: 'أحتاج شحناً أسرع', text: 'قارن القدرة والمنافذ والتوافق', icon: <Smartphone size={20} /> },
-      { match: /car|سيارة|سفر|travel/i, title: 'أحتاج ملحقاً للسيارة أو السفر', text: 'خيارات تناسب الحركة والاستخدام اليومي', icon: <Truck size={20} /> },
+      { match: /(?:^|-)chargers(?:\s|$)|الشواحن|شواحن/i, title: 'تحتاج شاحن سريع؟', text: 'شواحن', icon: <Zap size={20} /> },
+      { match: /cable|كابل|وصلة/i, title: 'تحتاج وصلة شحن قوية؟', text: 'كابلات', icon: <Package size={20} /> },
+      { match: /power|باور|طاقة|battery|بطار/i, title: 'تحتاج جوالك يبقى شغال طول اليوم؟', text: 'بور بانك', icon: <Zap size={20} /> },
+      { match: /car|سيارة|سفر|travel/i, title: 'تحتاج شحن سريع للسيارة؟', text: 'cars', icon: <Truck size={20} /> },
+      { match: /accessor|ملحق|توصيل|connect|adapter/i, title: 'تحتاج توصيل بين أجهزتك؟', text: 'الملحقات', icon: <Package size={20} /> },
     ];
     const selected = options.flatMap((option) => {
       const category = categories.find((item) => !used.has(item.slug) && option.match.test(`${item.slug} ${item.name}`));
