@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
-import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, FlaskConical, Headphones, MapPin as MapPinIcon, MessageCircle as MessageCircleIcon, Package, RefreshCcw, Search as SearchIcon, ShieldCheck, Smartphone, Truck, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, FlaskConical, Headphones, MapPin as MapPinIcon, MessageCircle as MessageCircleIcon, Package, RefreshCcw, Search as SearchIcon, ShieldCheck, SlidersHorizontal, Smartphone, Truck, X, Zap } from 'lucide-react';
 import { getGetStoreSeoQueryKey, getGetStoreOrderQueryKey, getListStoreOrdersQueryKey, useCreateStoreOrder, useGetStoreOrder, useGetStoreSeo, useListStoreOrders } from '@workspace/api-client-react';
 import type { StoreOrderInput, StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
@@ -720,17 +720,253 @@ function guideKeyForCategory(categorySlug: string) {
   return categorySlug;
 }
 
+type CategoryPriceBand = {
+  id: string;
+  min: number;
+  max: number;
+  label: string;
+};
+
+function productPrice(product: StoreProduct) {
+  return product.discountPrice ?? product.regularPrice;
+}
+
+function categoryBrandKey(product: StoreProduct) {
+  return product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-');
+}
+
+function categoryPriceBands(products: StoreProduct[], formatPrice: (usd: number) => string): CategoryPriceBand[] {
+  const prices = products.map(productPrice).filter((price) => Number.isFinite(price)).sort((a, b) => a - b);
+  if (prices.length < 2 || prices[0] === prices[prices.length - 1]) return [];
+  const min = prices[0];
+  const max = prices[prices.length - 1];
+  const step = (max - min) / 3;
+  const boundaries = [min, min + step, min + step * 2, max];
+  return [
+    { id: 'price-low', min: boundaries[0], max: boundaries[1], label: `حتى ${formatPrice(boundaries[1])}` },
+    { id: 'price-mid', min: boundaries[1], max: boundaries[2], label: `${formatPrice(boundaries[1])} – ${formatPrice(boundaries[2])}` },
+    { id: 'price-high', min: boundaries[2], max: boundaries[3], label: `من ${formatPrice(boundaries[2])}` },
+  ];
+}
+
+function CategoryFilterFields({
+  brands,
+  selectedBrands,
+  setSelectedBrands,
+  stockOnly,
+  setStockOnly,
+  priceBands,
+  selectedPriceBand,
+  setSelectedPriceBand,
+}: {
+  brands: Array<[string, string]>;
+  selectedBrands: string[];
+  setSelectedBrands: (value: string[]) => void;
+  stockOnly: boolean;
+  setStockOnly: (value: boolean) => void;
+  priceBands: CategoryPriceBand[];
+  selectedPriceBand: string;
+  setSelectedPriceBand: (value: string) => void;
+}) {
+  const toggleBrand = (brandSlug: string) => {
+    setSelectedBrands(selectedBrands.includes(brandSlug)
+      ? selectedBrands.filter((item) => item !== brandSlug)
+      : [...selectedBrands, brandSlug]);
+  };
+  return (
+    <>
+      {brands.length > 1 && (
+        <div className="filter-group">
+          <h4>العلامة التجارية</h4>
+          {brands.map(([brandSlug, brandName]) => (
+            <label className="filter-check" key={brandSlug}>
+              <input type="checkbox" checked={selectedBrands.includes(brandSlug)} onChange={() => toggleBrand(brandSlug)} data-testid={`input-category-brand-${brandSlug}`} />
+              <span>{brandName}</span>
+            </label>
+          ))}
+        </div>
+      )}
+      <div className="filter-group">
+        <h4>التوافر</h4>
+        <label className="filter-check">
+          <input type="checkbox" checked={stockOnly} onChange={(event) => setStockOnly(event.target.checked)} data-testid="input-category-stock" />
+          <span>المتاح الآن فقط</span>
+        </label>
+      </div>
+      {priceBands.length > 0 && (
+        <div className="filter-group">
+          <h4>نطاق السعر</h4>
+          <label className="filter-check">
+            <input type="radio" name="category-price" checked={!selectedPriceBand} onChange={() => setSelectedPriceBand('')} data-testid="input-category-price-all" />
+            <span>كل الأسعار</span>
+          </label>
+          {priceBands.map((band) => (
+            <label className="filter-check" key={band.id}>
+              <input type="radio" name="category-price" checked={selectedPriceBand === band.id} onChange={() => setSelectedPriceBand(band.id)} data-testid={`input-category-price-${band.id}`} />
+              <span>{band.label}</span>
+            </label>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+function CategoryFilterPanel({
+  mobile = false,
+  onClose,
+  ...props
+}: React.ComponentProps<typeof CategoryFilterFields> & { mobile?: boolean; onClose?: () => void }) {
+  const fields = <CategoryFilterFields {...props} />;
+  if (mobile) {
+    return (
+      <div className="category-filter-modal" role="dialog" aria-modal="true" aria-label="تصفية منتجات القسم">
+        <button className="category-filter-backdrop" aria-label="إغلاق الفلاتر" onClick={onClose} />
+        <div className="category-filter-drawer">
+          <div className="category-filter-drawer-head">
+            <div><span className="eyebrow">تخصيص النتائج</span><h2>تصفية المنتجات</h2></div>
+            <button type="button" onClick={onClose} aria-label="إغلاق الفلاتر"><X size={19} /></button>
+          </div>
+          {fields}
+          <button type="button" className="button button-primary category-filter-apply" onClick={onClose} data-testid="button-category-filter-apply">عرض النتائج</button>
+        </div>
+      </div>
+    );
+  }
+  return <aside className="filter-panel category-filter-panel"><h3>تصفية القسم</h3>{fields}</aside>;
+}
+
+function CategoryShoppingSection({
+  products,
+  isLoading,
+  isError,
+  retry,
+  title,
+  empty,
+}: {
+  products: StoreProduct[];
+  isLoading: boolean;
+  isError: boolean;
+  retry: () => void;
+  title: string;
+  empty: string;
+}) {
+  const { formatPrice } = useStore();
+  const [sort, setSort] = useState('featured');
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [stockOnly, setStockOnly] = useState(false);
+  const [selectedPriceBand, setSelectedPriceBand] = useState('');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const brands = useMemo(
+    () => Array.from(new Map(products.map((product) => [categoryBrandKey(product), product.brand])).entries()).sort((a, b) => a[1].localeCompare(b[1], 'ar')),
+    [products],
+  );
+  const priceBands = useMemo(() => categoryPriceBands(products, formatPrice), [products, formatPrice]);
+  const filtered = useMemo(() => products.filter((product) => {
+    const matchesBrand = !selectedBrands.length || selectedBrands.includes(categoryBrandKey(product));
+    const matchesStock = !stockOnly || product.quantity > 0;
+    const band = priceBands.find((item) => item.id === selectedPriceBand);
+    const price = productPrice(product);
+    const matchesPrice = !band || (price >= band.min && (band.id === 'price-high' ? price <= band.max : price <= band.max));
+    return matchesBrand && matchesStock && matchesPrice;
+  }), [products, selectedBrands, stockOnly, selectedPriceBand, priceBands]);
+  const sorted = useMemo(() => [...filtered].sort((a, b) => {
+    if (sort === 'price-low') return productPrice(a) - productPrice(b);
+    if (sort === 'price-high') return productPrice(b) - productPrice(a);
+    if (sort === 'name') return a.productName.localeCompare(b.productName, 'ar');
+    return Number(b.quantity > 0) - Number(a.quantity > 0);
+  }), [filtered, sort]);
+  const activeFilterCount = selectedBrands.length + Number(stockOnly) + Number(Boolean(selectedPriceBand));
+  const clearFilters = () => {
+    setSelectedBrands([]);
+    setStockOnly(false);
+    setSelectedPriceBand('');
+  };
+
+  return (
+    <section className="category-shopping-section">
+      <div className="container">
+        <div className="category-shopping-heading">
+          <div>
+            <span className="eyebrow">من الكتالوج الحالي</span>
+            <h2>{title}</h2>
+            <p>قارن المنتجات المنشورة حسب السعر والتوافر والبيانات الظاهرة قبل فتح صفحة المنتج.</p>
+          </div>
+          <span className="category-shopping-note"><ShieldCheck size={15} /> السعر والتوافر من الكتالوج الحالي</span>
+        </div>
+        {isLoading ? <LoadingCatalog /> : isError ? <CatalogError retry={retry} /> : (
+          <div className="category-shopping-layout">
+            <CategoryFilterPanel
+              brands={brands}
+              selectedBrands={selectedBrands}
+              setSelectedBrands={setSelectedBrands}
+              stockOnly={stockOnly}
+              setStockOnly={setStockOnly}
+              priceBands={priceBands}
+              selectedPriceBand={selectedPriceBand}
+              setSelectedPriceBand={setSelectedPriceBand}
+            />
+            <main>
+              <div className="category-mobile-toolbar">
+                <button type="button" className="category-filter-toggle" onClick={() => setMobileFiltersOpen(true)} aria-expanded={mobileFiltersOpen} data-testid="button-category-filters">
+                  <SlidersHorizontal size={16} /> الفلاتر {activeFilterCount > 0 && <b>{activeFilterCount}</b>}
+                </button>
+                {activeFilterCount > 0 && <button type="button" className="category-clear-mobile" onClick={clearFilters} data-testid="button-category-clear-mobile">مسح الكل</button>}
+              </div>
+              <CatalogToolbar products={sorted} sort={sort} setSort={setSort} />
+              {activeFilterCount > 0 && (
+                <div className="category-active-filters" aria-label="الفلاتر النشطة">
+                  {selectedBrands.map((brandSlug) => <button type="button" key={brandSlug} onClick={() => setSelectedBrands(selectedBrands.filter((item) => item !== brandSlug))}>{brands.find(([slug]) => slug === brandSlug)?.[1] || brandSlug} <X size={12} /></button>)}
+                  {stockOnly && <button type="button" onClick={() => setStockOnly(false)}>المتاح فقط <X size={12} /></button>}
+                  {selectedPriceBand && <button type="button" onClick={() => setSelectedPriceBand('')}>{priceBands.find((band) => band.id === selectedPriceBand)?.label} <X size={12} /></button>}
+                  <button type="button" className="category-clear-filters" onClick={clearFilters} data-testid="button-category-clear-filters">مسح الكل</button>
+                </div>
+              )}
+              <ProductGrid products={sorted} empty={empty} />
+            </main>
+          </div>
+        )}
+      </div>
+      {mobileFiltersOpen && !isLoading && !isError && (
+        <CategoryFilterPanel
+          mobile
+          onClose={() => setMobileFiltersOpen(false)}
+          brands={brands}
+          selectedBrands={selectedBrands}
+          setSelectedBrands={setSelectedBrands}
+          stockOnly={stockOnly}
+          setStockOnly={setStockOnly}
+          priceBands={priceBands}
+          selectedPriceBand={selectedPriceBand}
+          setSelectedPriceBand={setSelectedPriceBand}
+        />
+      )}
+    </section>
+  );
+}
+
+function CategoryBrandShortcuts({ brands, categorySlug }: { brands: Array<[string, string]>; categorySlug: string }) {
+  if (!brands.length) return null;
+  return (
+    <section className="category-brand-shortcuts">
+      <div className="container">
+        <div className="category-brand-shortcuts-heading">
+          <div><span className="eyebrow">من العلامات المتاحة</span><h2>اختر علامة للمقارنة</h2></div>
+          <span>روابط من المنتجات المنشورة في هذا القسم</span>
+        </div>
+        <div className="category-brand-shortcuts-list">
+          {brands.map(([brandSlug, brandName]) => <Link href={brandCategoryPath(brandSlug, categorySlug)} className="category-brand-shortcut" key={brandSlug}><span>{brandName}</span><ArrowLeft size={15} /></Link>)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string; categorySlug: string }) {
   const { catalog, isLoading, isError } = useStore();
-  const [sort, setSort] = useState('featured');
   const products = catalog?.products || [];
   const brandProducts = products.filter((product) => product.brandSlug === brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-') === brandSlug);
   const filtered = useMemo(() => brandProducts.filter((product) => matchesCategory(product, categorySlug)), [brandProducts, categorySlug]);
-  const sorted = useMemo(() => [...filtered].sort((a, b) => sort === 'price-low'
-    ? (a.discountPrice ?? a.regularPrice) - (b.discountPrice ?? b.regularPrice)
-    : sort === 'price-high'
-      ? (b.discountPrice ?? b.regularPrice) - (a.discountPrice ?? a.regularPrice)
-      : 0), [filtered, sort]);
   const brandName = brandProducts[0]?.brand || brandSlug.replaceAll('-', ' ');
   const categoryName = filtered[0]?.category?.name || brandProducts.find((product) => matchesCategory(product, categorySlug))?.category?.name || categorySlug.replaceAll('-', ' ');
   const guideKey = guideKeyForCategory(categorySlug);
@@ -773,9 +1009,14 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
           </div>
         </div>
       </div>
-      <EditorialSection eyebrow="من الكتالوج الحالي" title={`${categoryName} من ${brandName}`}>
-        {isLoading ? <LoadingCatalog /> : isError ? <CatalogError retry={() => window.location.reload()} /> : <><CatalogToolbar products={sorted} sort={sort} setSort={setSort} /><ProductGrid products={sorted} empty={`لا توجد منتجات منشورة من ${brandName} في قسم ${categoryName} حالياً.`} /></>}
-      </EditorialSection>
+      <CategoryShoppingSection
+        products={filtered}
+        isLoading={isLoading}
+        isError={isError}
+        retry={() => window.location.reload()}
+        title={`${categoryName} من ${brandName}`}
+        empty={`لا توجد منتجات منشورة من ${brandName} في قسم ${categoryName} حالياً.`}
+      />
       <EditorialSection eyebrow="بيانات قابلة للمراجعة" title={`كيف تختار ${categoryName} من ${brandName}؟`}>
         <div className="editorial-copy"><p>{copy.selection}</p></div>
         <div className="numbered-steps category-tip-grid">{copy.tips.map((tip, index) => <div key={tip}><b>{String(index + 1).padStart(2, '0')}</b><p>{tip}</p></div>)}</div>
@@ -876,15 +1117,13 @@ const categoryGuideCopy: Record<string, {
 
 function CategoryLandingPage({ slug }: { slug: string }) {
   const { catalog, isLoading, isError } = useStore();
-  const [sort, setSort] = useState('featured');
   const products = catalog?.products || [];
-  const filtered = useMemo(() => products.filter((product) => matchesCategory(product, slug)), [products, slug]);
-  const sorted = useMemo(() => [...filtered].sort((a, b) => sort === 'price-low'
-    ? (a.discountPrice ?? a.regularPrice) - (b.discountPrice ?? b.regularPrice)
-    : sort === 'price-high'
-      ? (b.discountPrice ?? b.regularPrice) - (a.discountPrice ?? a.regularPrice)
-      : 0), [filtered, sort]);
-  const name = filtered[0]?.category?.name || slug.replaceAll('-', ' ');
+  const seoParams = { type: 'category' as const, slug };
+  const { data: categorySeo } = useGetStoreSeo(seoParams, {
+    query: { queryKey: getGetStoreSeoQueryKey(seoParams), enabled: Boolean(slug), staleTime: 60_000 },
+  });
+  const categoryProducts = useMemo(() => products.filter((product) => matchesCategory(product, slug)), [products, slug]);
+  const name = categorySeo?.h1 || categoryProducts[0]?.category?.name || slug.replaceAll('-', ' ');
   const copy = categoryGuideCopy[slug] || {
     eyebrow: 'دليل القسم',
     title: `منتجات ${name} في اليمن`,
@@ -897,7 +1136,21 @@ function CategoryLandingPage({ slug }: { slug: string }) {
       { question: 'أين أجد الشحن والإرجاع؟', answer: 'راجع الخيارات النشطة في checkout وسياسة الإرجاع قبل تأكيد الطلب.' },
     ],
   };
-  const brands = Array.from(new Map(filtered.map((product) => [product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'), product.brand])).entries()).slice(0, 6);
+  const description = categorySeo?.description || copy.description;
+  const brands = useMemo(
+    () => Array.from(new Map(categoryProducts.map((product) => [categoryBrandKey(product), product.brand])).entries()).sort((a, b) => a[1].localeCompare(b[1], 'ar')),
+    [categoryProducts],
+  );
+  const relatedCategories = useMemo(
+    () => Array.from(new Map(
+      products
+        .filter((product) => product.category && !matchesCategory(product, slug))
+        .map((product) => [product.category!.slug, product.category!]),
+    ).values()).slice(0, 4),
+    [products, slug],
+  );
+  const guideKey = guideKeyForCategory(slug);
+  const guideHref = guideKey === 'power-banks' ? '/blog/best-power-bank-yemen' : null;
   return (
     <>
       <SEO type="category" slug={slug} />
@@ -906,18 +1159,20 @@ function CategoryLandingPage({ slug }: { slug: string }) {
           <Breadcrumbs items={[{ label: 'الأقسام', href: '/search' }, { label: name }]} />
           <div className="category-landing-copy">
             <span className="eyebrow">{copy.eyebrow}</span>
-            <h1>{copy.title}</h1>
-            <p>{copy.description}</p>
-            <div className="category-landing-actions">
-              {brands.map(([brandSlug, brandName]) => <Link className="button button-secondary" href={brandCategoryPath(brandSlug, slug)} key={brandSlug}>تسوق {brandName}</Link>)}
-              <Link className="button button-primary" href="/search">كل المنتجات <ArrowLeft size={16} /></Link>
-            </div>
+            <h1>{name}</h1>
+            <p>{description}</p>
           </div>
         </div>
       </div>
-      <EditorialSection eyebrow="من الكتالوج الحالي" title={`${name} المتاحة الآن`}>
-        {isLoading ? <LoadingCatalog /> : isError ? <CatalogError retry={() => window.location.reload()} /> : <><CatalogToolbar products={sorted} sort={sort} setSort={setSort} /><ProductGrid products={sorted} empty={`لا توجد منتجات منشورة في قسم ${name} حالياً.`} /></>}
-      </EditorialSection>
+      <CategoryBrandShortcuts brands={brands} categorySlug={slug} />
+      <CategoryShoppingSection
+        products={categoryProducts}
+        isLoading={isLoading}
+        isError={isError}
+        retry={() => window.location.reload()}
+        title={`${name} المتاحة الآن`}
+        empty={`لا توجد منتجات منشورة في قسم ${name} حالياً.`}
+      />
       <EditorialSection eyebrow="كيف تختار؟" title={`دليل اختيار ${name}`}>
         <div className="editorial-copy"><p>{copy.selection}</p></div>
         <div className="numbered-steps category-tip-grid">{copy.tips.map((tip, index) => <div key={tip}><b>{String(index + 1).padStart(2, '0')}</b><p>{tip}</p></div>)}</div>
@@ -935,7 +1190,8 @@ function CategoryLandingPage({ slug }: { slug: string }) {
       </EditorialSection>
       <EditorialSection title="روابط مرتبطة">
         <div className="category-related-links">
-          <Link href="/blog/best-power-bank-yemen"><BookOpenIcon /><strong>دليل الشراء</strong><span>مقارنات عملية قبل اختيار الطاقة والشحن.</span><ArrowLeft size={15} /></Link>
+          {guideHref && <Link href={guideHref}><BookOpenIcon /><strong>دليل الشراء</strong><span>مقارنات عملية قبل اختيار الطاقة والشحن.</span><ArrowLeft size={15} /></Link>}
+          {relatedCategories.map((category) => <Link href={`/category/${category.slug}`} key={category.slug}><Package /><strong>{category.name}</strong><span>انتقل إلى قسم مرتبط من الكتالوج.</span><ArrowLeft size={15} /></Link>)}
           <Link href="/shipping"><Truck /><strong>الشحن والتوصيل</strong><span>راجع الرسوم والمدة حسب العنوان.</span><ArrowLeft size={15} /></Link>
           <Link href="/return-policy"><RefreshCcw /><strong>الإرجاع والاستبدال</strong><span>اعرف الشروط والخطوات قبل الطلب.</span><ArrowLeft size={15} /></Link>
           <Link href="/lab"><FlaskConical /><strong>مركز المواصفات</strong><span>افصل بين المواصفة والحساب والقياس.</span><ArrowLeft size={15} /></Link>
