@@ -9,19 +9,22 @@
 .editorial-copy{max-width:760px;color:#687a93;font-size:15px}
 .editorial-copy p{margin:0 0 16px}
 .editorial-copy p:last-child{margin-bottom:0}
-.info-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:38px;border-top:1px solid #dfe8f1}
-.info-card{background:transparent;border:0;border-bottom:1px solid #dfe8f1;border-radius:0;padding:18px 0;min-height:0;display:grid;grid-template-columns:36px minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;align-content:start}
-.info-card-icon{grid-row:1 / span 2;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#eaf4ff;color:#1757ee;margin:0}
-.info-card h3{font-size:15px;margin:0 0 5px}
-.info-card p{font-size:12px;color:#71819a;line-height:1.8;margin:0 0 8px}
+.info-card-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.info-card{position:relative;overflow:hidden;background:linear-gradient(145deg,#fff 0%,#f5f9ff 100%);border:1px solid #dce8f4;border-radius:21px;padding:18px;min-height:154px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;box-shadow:0 10px 26px #183c6710;transition:transform .2s,box-shadow .2s,border-color .2s}
+.info-card::after{content:'';position:absolute;inset:auto -25px -38px auto;width:100px;height:100px;border-radius:50%;background:#e8f2ff;opacity:.65;pointer-events:none}
+.info-card:hover{transform:translateY(-3px);border-color:#b9d4ef;box-shadow:0 16px 32px #183c6718}
+.info-card-icon{position:relative;z-index:1;width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:#e8f2ff;color:#1757ee;margin:0}
+.info-card h3{position:relative;z-index:1;font-size:14px;margin:0}
+.info-card p{position:relative;z-index:1;font-size:11px;color:#71819a;line-height:1.75;margin:0}
+.info-card .text-link{position:relative;z-index:1;margin-top:auto}
 .text-link{display:inline-flex;align-items:center;gap:5px;color:#1757ee;font-size:11px;font-weight:800}
 .editorial-brand-list{justify-content:flex-start;flex-wrap:wrap}
 .check-list{display:grid;gap:13px;color:#61738c;font-size:14px}
 .check-list li,.check-list div{display:flex;align-items:flex-start;gap:9px}
 .check-list svg{flex:none;color:#16a56d;margin-top:4px}
 .large-checks{grid-template-columns:1fr 1fr;max-width:800px}
-.numbered-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid #dfe8f1}
-.numbered-steps>div{background:transparent;border:0;border-bottom:1px solid #dfe8f1;border-radius:0;padding:18px 18px 18px 0}
+.numbered-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.numbered-steps>div{background:linear-gradient(145deg,#fff,#f5f9ff);border:1px solid #dfe8f1;border-radius:19px;padding:18px;box-shadow:0 8px 22px #183c670d}
 .numbered-steps b{color:#1757ee;font-size:13px;letter-spacing:.08em}
 .numbered-steps h3{font-size:17px;margin:10px 0 5px}
 .numbered-steps p{font-size:12px;color:#71819a;margin:0}
@@ -38,7 +41,7 @@
 .calculator-card{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch;background:#fff;border:1px solid #dfe8f1;border-radius:16px;padding:18px;max-width:900px}
 .calculator-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.calculator-fields .form-field{display:grid;gap:6px}.calculator-fields .form-field span{font-size:11px;font-weight:800;color:#5e7390}
 .calculator-result{display:grid;grid-template-columns:1fr 1fr;align-content:center;gap:5px 12px;background:#f0f7ff;border-radius:13px;padding:16px}.calculator-result strong{font-size:22px;color:#1757ee}.calculator-result span{font-size:11px;color:#6d8099;align-self:center}
-.content-disclaimer{font-size:11px;color:#7a8aa0;margin:12px 0 0;max-width:850px}.related-link-card{display:grid;transition:background .2s,color .2s}.related-link-card:hover{background:#f6faff}.related-link-card .info-card-icon{display:grid}
+.content-disclaimer{font-size:11px;color:#7a8aa0;margin:12px 0 0;max-width:850px}.related-link-card{display:flex;transition:transform .2s,box-shadow .2s,border-color .2s}.related-link-card:hover{background:linear-gradient(145deg,#fff,#f0f7ff)}.related-link-card .info-card-icon{display:grid}
 .inline-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
 .faq-list{display:grid;gap:10px;max-width:900px}
 .faq-item{background:#fff;border:1px solid #dfe8f1;border-radius:13px;padding:0 18px}
