@@ -21,7 +21,7 @@ function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; 
         ? data.canonicalPath
         : type === 'category'
           ? `/category/${data.slug}`
-          : `/brand/${data.slug}`;
+          : data.canonicalPath;
       if (location !== redirectPath) navigate(redirectPath);
       return;
     }
@@ -553,13 +553,16 @@ export function HomePage() {
 
 function BrandStorefrontPage({ slug }: { slug: string }) {
   const { catalog, isLoading, isError } = useStore();
-  const [sort, setSort] = useState('featured');
   const products = catalog?.products || [];
+  const seoParams = { type: 'brand' as const, slug };
+  const { data: brandSeo } = useGetStoreSeo(seoParams, {
+    query: { queryKey: getGetStoreSeoQueryKey(seoParams), enabled: Boolean(slug), staleTime: 60_000 },
+  });
   const brandProducts = useMemo(
     () => products.filter((product) => product.brandSlug === slug || product.brand.toLowerCase().replace(/\s+/g, '-') === slug),
     [products, slug],
   );
-  const brandName = brandProducts[0]?.brand || slug.replaceAll('-', ' ');
+  const brandName = brandSeo?.h1 || brandProducts[0]?.brand || slug.replaceAll('-', ' ');
   const categories = useMemo(
     () => Array.from(new Map(
       brandProducts
@@ -568,11 +571,40 @@ function BrandStorefrontPage({ slug }: { slug: string }) {
     ).values()),
     [brandProducts],
   );
-  const sorted = useMemo(() => [...brandProducts].sort((a, b) => {
-    if (sort === 'price-low') return (a.discountPrice ?? a.regularPrice) - (b.discountPrice ?? b.regularPrice);
-    if (sort === 'price-high') return (b.discountPrice ?? b.regularPrice) - (a.discountPrice ?? a.regularPrice);
-    return Number(b.quantity > 0) - Number(a.quantity > 0);
-  }), [brandProducts, sort]);
+  const availableProducts = brandProducts.filter((product) => product.quantity > 0).length;
+  const brandDescription = brandSeo?.description || `منتجات ${brandName} المنشورة حالياً في كتالوج CABL. ابدأ من القسم الأقرب لاستخدامك، ثم راجع الموديل والمواصفات والتوافر قبل الطلب.`;
+  const technologies = useMemo(() => {
+    const evidence = brandProducts
+      .flatMap((product) => [product.productName, product.shortDescription, product.productDescription, product.productNote])
+      .filter(Boolean)
+      .join(' ');
+    return [
+      { label: 'GaN', pattern: /\bgan\b/i },
+      { label: 'PowerIQ', pattern: /\bpoweriq\b/i },
+      { label: 'PD', pattern: /(^|[^a-z])pd([^a-z]|$)/i },
+      { label: 'PPS', pattern: /(^|[^a-z])pps([^a-z]|$)/i },
+      { label: 'Wh', pattern: /(^|[^a-z])wh([^a-z]|$)/i },
+      { label: 'USB-C', pattern: /usb[\s-]?c/i },
+    ].filter((technology) => technology.pattern.test(evidence));
+  }, [brandProducts]);
+
+  if (!isLoading && !isError && brandProducts.length === 0) {
+    return (
+      <>
+        <SEO type="brand" slug={slug} />
+        <NoIndex />
+        <div className="container brand-empty-page">
+          <Breadcrumbs items={[{ label: 'العلامات التجارية', href: '/search?view=brands' }, { label: brandName }]} />
+          <div className="state-panel">
+            <Package size={30} />
+            <h1>لم نجد منتجات منشورة من {brandName}</h1>
+            <p>قد تكون العلامة غير متاحة حالياً أو تغيّر رابطها. استعرض العلامات والمنتجات المنشورة من الكتالوج.</p>
+            <Link href="/search?view=brands" className="button button-primary">استعرض العلامات <ArrowLeft size={16} /></Link>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -583,7 +615,11 @@ function BrandStorefrontPage({ slug }: { slug: string }) {
           <div className="brand-storefront-copy">
             <span className="eyebrow">استكشف العلامة</span>
             <h1>{brandName}</h1>
-            <p>منتجات {brandName} المنشورة حالياً في كتالوج CABL. ابدأ من القسم الأقرب لاستخدامك، ثم راجع الموديل والمواصفات والتوافر قبل الطلب.</p>
+            <p>{brandDescription}</p>
+            <div className="brand-storefront-facts">
+              <span><strong>{brandProducts.length}</strong> منتجات منشورة</span>
+              <span><strong>{availableProducts}</strong> متاح الآن</span>
+            </div>
             <div className="brand-storefront-actions">
               {categories.slice(0, 3).map((category) => (
                 <Link className="button button-secondary" href={brandCategoryPath(slug, category.slug)} key={category.slug}>
@@ -614,6 +650,7 @@ function BrandStorefrontPage({ slug }: { slug: string }) {
                   <Link className="brand-storefront-category" href={brandCategoryPath(slug, category.slug)} key={category.slug}>
                     <strong>{category.name}</strong>
                     <span>{count} {count === 1 ? 'منتج' : 'منتجات'} منشورة</span>
+                    <small>{brandProducts.filter((product) => product.category?.slug === category.slug && product.quantity > 0).length} متاح الآن</small>
                     <ArrowLeft size={16} />
                   </Link>
                 );
@@ -625,31 +662,40 @@ function BrandStorefrontPage({ slug }: { slug: string }) {
         </div>
       </section>
 
-      <EditorialSection eyebrow="من الكتالوج الحالي" title={`منتجات ${brandName}`}>
-        {isLoading ? <LoadingCatalog /> : isError ? <CatalogError retry={() => window.location.reload()} /> : (
-          <>
-            <CatalogToolbar products={sorted} sort={sort} setSort={setSort} />
-            <ProductGrid products={sorted} empty={`لا توجد منتجات منشورة من ${brandName} حالياً.`} />
-          </>
-        )}
-      </EditorialSection>
+      <CategoryShoppingSection
+        products={brandProducts}
+        isLoading={isLoading}
+        isError={isError}
+        retry={() => window.location.reload()}
+        title={`منتجات ${brandName}`}
+        empty={`لا توجد منتجات منشورة من ${brandName} حالياً.`}
+      />
 
       <EditorialSection eyebrow="طريقة الاختيار" title={`كيف تختار من ${brandName}؟`}>
         <div className="editorial-copy">
-          <p>لا تفترض أن كل منتجات العلامة تملك نفس القدرة أو التوافق. ابدأ من الجهاز والاستخدام، ثم قارن الموديل والمنافذ والقدرة والسعر والتوافر في صفحات المنتجات.</p>
+          <p>لا تفترض أن كل منتجات العلامة تؤدي الوظيفة نفسها. ابدأ من الجهاز والاستخدام، ثم قارن الموديل والبيانات الظاهرة والسعر والتوافر في صفحات المنتجات.</p>
         </div>
         <div className="numbered-steps">
           <div><b>01</b><h3>حدد القسم</h3><p>افتح القسم الأقرب لما تريد شراءه بدل مقارنة منتجات مختلفة الوظيفة.</p></div>
           <div><b>02</b><h3>راجع الموديل</h3><p>طابق الاسم ورقم SKU والصورة مع القطعة التي تحتاجها.</p></div>
-          <div><b>03</b><h3>افحص التوافق</h3><p>راجع المنفذ والقدرة والكابل والجهاز قبل الإضافة إلى السلة.</p></div>
-          <div><b>04</b><h3>أكد الشحن</h3><p>اختر العنوان وطريقة الشحن والدفع في checkout قبل إرسال الطلب.</p></div>
+          <div><b>03</b><h3>قارن المتاح</h3><p>راجع السعر والتوافر والبيانات المعلنة بين الموديلات من القسم نفسه.</p></div>
+          <div><b>04</b><h3>أكد الشراء</h3><p>اختر العنوان وطريقة الشحن والدفع في checkout قبل إرسال الطلب.</p></div>
         </div>
       </EditorialSection>
+
+      {technologies.length > 0 && (
+        <EditorialSection eyebrow="من بيانات المنتجات" title={`تقنيات ومواصفات ظاهرة في ${brandName}`}>
+          <div className="brand-technology-list">
+            {technologies.map((technology) => <span key={technology.label}>{technology.label}</span>)}
+          </div>
+          <p className="content-disclaimer">هذه الكلمات ظهرت في بيانات المنتجات المنشورة لهذه العلامة، وليست قائمة شاملة بمواصفات كل موديل.</p>
+        </EditorialSection>
+      )}
 
       <EditorialSection title={`قبل طلب منتج من ${brandName}`}>
         <InfoCards items={[
           { icon: <ShieldCheck />, title: 'البيانات أولاً', text: 'العلامة والموديل والسعر والتوافر مأخوذة من الكتالوج الحالي.' },
-          { icon: <Zap />, title: 'التوافق مسؤوليتك', text: 'طابق المنافذ والقدرة والبروتوكول مع جهازك، ولا تعتمد على الاسم وحده.' },
+          { icon: <Zap />, title: 'راجع جهازك', text: 'طابق احتياجك مع البيانات الظاهرة في صفحة المنتج، ولا تعتمد على الاسم وحده.' },
           { icon: <Truck />, title: 'الشحن في checkout', text: 'تظهر خيارات الشحن والرسوم والمدة التقديرية بعد إدخال العنوان.' },
           { icon: <RefreshCcw />, title: 'الإرجاع قبل التأكيد', text: 'راجع سياسة الإرجاع والاستبدال واحتفظ برقم الطلب بعد الشراء.', href: '/return-policy' },
         ]} />
