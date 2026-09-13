@@ -1,0 +1,257 @@
+Refine CABL CATEGORY pages to follow the proven commercial logic of the reference category page, without copying its content, branding, country-specific claims, or exact design.
+
+PAGE PURPOSE
+
+A category page answers:
+
+«"I know what type of product I need. Which one should I choose?"»
+
+The page must prioritize SHOPPING first and EDUCATION second.
+
+REQUIRED ORDER
+
+1. Header
+
+Global CABL navigation, search and cart.
+
+2. Breadcrumb + Category H1
+
+Clearly identify the category.
+
+Example:
+Home / Power Banks
+H1: Power Banks
+
+Use natural Yemen-focused language.
+
+3. Category Introduction
+
+Briefly explain:
+
+- what the category contains
+- the main differences between products
+- what customers should compare
+
+Keep it concise.
+
+Do not place a huge SEO article before products.
+
+4. Brand Shortcuts
+
+Show brands that actually have published products in this category.
+
+Example:
+UGREEN / Anker / Baseus / Vention
+
+Generate dynamically from the catalog.
+
+Where a valid Brand × Category page exists, link to it.
+
+5. Product Listing
+
+This is the MAIN SHOPPING AREA.
+
+Show:
+
+- real product image
+- brand
+- product name
+- important decision-making specification
+- current price
+- valid previous price/discount only when real
+- availability
+- relevant purchase information
+
+Keep cards scannable.
+
+6. Filters + Sorting
+
+Allow users to narrow the category.
+
+Filters MUST come from actual structured product attributes.
+
+Never invent filters.
+
+Mobile:
+
+- easy filter button
+- active filter indicators
+- Clear All
+- no horizontal overflow
+
+7. Buying Tips
+
+Answer the most important category-level buying questions.
+
+For Power Banks, for example:
+
+- capacity
+- Wh
+- output power
+- PD
+- ports
+- weight
+- travel considerations
+
+Use only data/facts supported by the actual catalog or reliable content.
+
+8. FAQ
+
+Answer genuine search and purchase questions for this category.
+
+Questions should address:
+
+- choosing
+- compatibility
+- specifications
+- price
+- usage
+- safety
+- travel where relevant
+
+Do not create generic filler questions.
+
+9. Category Buying Guide
+
+Provide deeper educational content AFTER the product-shopping experience.
+
+Explain how to choose the category correctly.
+
+Use practical customer language.
+
+Do not turn the page into keyword-stuffed SEO content.
+
+10. Comparison
+
+Include a comparison table ONLY when enough real comparable products/data exist.
+
+Compare meaningful decision attributes.
+
+Never fabricate missing values.
+
+11. Category-Specific Subsections
+
+Create additional sections only when they provide genuine shopping value.
+
+Examples:
+
+- 10,000mAh vs 20,000mAh
+- fast charging / PD
+- travel selection
+- laptop compatibility
+
+These must be based on actual category/product data.
+
+12. Related Articles
+
+Show only genuinely relevant CABL articles/guides.
+
+Do not use irrelevant articles just to increase internal links.
+
+13. Related Categories
+
+Help users continue shopping.
+
+Example:
+Power Banks → Chargers → Cables → Car Chargers
+
+Only use real CABL categories.
+
+14. Trust / Delivery / Returns
+
+Use actual CABL policies.
+
+Do not copy CairoVolt's Egypt-specific claims.
+
+For CABL, use Yemen-specific information only when it actually exists in the system.
+
+15. Footer
+
+Categories, brands, guides, policies and customer support.
+
+---
+
+STRICT RULES
+
+The category page is NOT:
+
+SEO article → products
+
+It is:
+
+CATEGORY → PRODUCTS → FILTER → COMPARE → LEARN → BUY
+
+The product grid must appear early.
+
+Every section must have one purpose.
+
+Do not duplicate the same information across:
+
+- intro
+- buying guide
+- FAQ
+- comparison
+- product cards
+
+Do not create sections merely because the reference store has them.
+
+Only implement sections supported by real CABL data.
+
+---
+
+DATA RULE
+
+The existing CABL database/catalog is the source of truth.
+
+Never invent:
+
+- products
+- brands
+- prices
+- discounts
+- stock
+- specifications
+- reviews
+- warranty
+- delivery claims
+- compatibility claims
+
+---
+
+SEO RULES
+
+Preserve the existing CABL SEO architecture.
+
+For indexable category pages:
+
+- one primary H1
+- unique title
+- unique meta description
+- correct canonical
+- clean URL
+- crawlable internal links
+- appropriate structured data
+- no keyword stuffing
+- no duplicate filter URLs indexed
+
+Do not change existing SEO unless required.
+
+---
+
+ACCEPTANCE CRITERIA
+
+- Products are visible before long educational content
+- Filters actually change results
+- Sorting actually works
+- Brand links lead to valid destinations
+- Product links lead to valid product pages
+- 0 invented catalog data
+- 0 broken links
+- 0 fake discounts
+- 0 fake stock states
+- 0 new console errors
+- No horizontal overflow at 360px, 390px, 768px, 1024px and 1440px
+- Category remains shopping-focused
+- Mobile shopping experience is fast and scannable
+
+Build the CATEGORY page as a decision-making interface, not an SEO article with a product grid attached.
