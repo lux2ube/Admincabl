@@ -301,7 +301,7 @@ function CommercialHomePage() {
       current.count += 1;
       groups.set(key, current);
       return groups;
-    }, new Map<string, { brand: string; brandSlug: string; product: StoreProduct; count: number }>()).values()).slice(0, 5),
+    }, new Map<string, { brand: string; brandSlug: string; product: StoreProduct; count: number }>()).values()),
     [products],
   );
   const heroProduct = inStockProducts[0];
@@ -312,6 +312,16 @@ function CommercialHomePage() {
     : 0;
   const [finderCategory, setFinderCategory] = useState('all');
   const [finderBudget, setFinderBudget] = useState('all');
+  const [quickBrand, setQuickBrand] = useState('');
+  const [quickCategory, setQuickCategory] = useState('');
+  const quickMatches = useMemo(
+    () => products.filter((product) => (!quickBrand || product.brand === quickBrand) && (!quickCategory || product.category?.slug === quickCategory)),
+    [products, quickBrand, quickCategory],
+  );
+  const quickSearch = new URLSearchParams();
+  if (quickBrand) quickSearch.set('brand', quickBrand);
+  if (quickCategory) quickSearch.set('category', quickCategory);
+  const quickSearchHref = `/search${quickSearch.toString() ? `?${quickSearch.toString()}` : ''}`;
   const needs = useMemo(() => {
     const used = new Set<string>();
     const options = [
@@ -403,6 +413,59 @@ function CommercialHomePage() {
               <div><strong>{title}</strong><span>{text}</span></div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="guided-quick-access" aria-labelledby="home-quick-access-title">
+        <div className="container">
+          <div className="guided-section-header">
+            <div>
+              <span className="eyebrow">وصول سريع للكتالوج</span>
+              <h2 id="home-quick-access-title">اختر العلامة والقسم بسهولة</h2>
+              <p>مثلاً: اختر UGREEN ثم الشواحن لعرض النتائج المطابقة مباشرة.</p>
+            </div>
+            <span className="guided-finder-result-count">{quickMatches.length} منتج مطابق</span>
+          </div>
+          {isLoading ? (
+            <div className="quick-access-loading skeleton" aria-label="جارٍ تحميل خيارات الكتالوج" />
+          ) : isError ? (
+            <CatalogError retry={() => window.location.reload()} />
+          ) : (
+            <>
+              <div className="guided-quick-access-grid">
+                <fieldset className="guided-quick-fieldset">
+                  <legend>العلامة التجارية</legend>
+                  <div className="guided-finder-options">
+                    <button type="button" className={!quickBrand ? 'is-selected' : ''} onClick={() => setQuickBrand('')}>كل العلامات</button>
+                    {brandCollections.map(({ brand }) => (
+                      <button type="button" className={quickBrand === brand ? 'is-selected' : ''} key={brand} onClick={() => setQuickBrand(quickBrand === brand ? '' : brand)}>{brand}</button>
+                    ))}
+                  </div>
+                </fieldset>
+                <fieldset className="guided-quick-fieldset">
+                  <legend>القسم</legend>
+                  <div className="guided-finder-options">
+                    <button type="button" className={!quickCategory ? 'is-selected' : ''} onClick={() => setQuickCategory('')}>كل الأقسام</button>
+                    {categories.map((category) => (
+                      <button type="button" className={quickCategory === category.slug ? 'is-selected' : ''} key={category.slug} onClick={() => setQuickCategory(quickCategory === category.slug ? '' : category.slug)}>{category.name}</button>
+                    ))}
+                  </div>
+                </fieldset>
+              </div>
+              <div className="guided-quick-summary">
+                <div>
+                  <strong>{quickBrand || 'كل العلامات'}{quickCategory ? ` · ${categories.find((category) => category.slug === quickCategory)?.name || quickCategory}` : ''}</strong>
+                  <span>{quickMatches.length ? 'تظهر النتائج من الكتالوج الحالي فقط.' : 'لا توجد منتجات مطابقة لهذا الاختيار حالياً.'}</span>
+                </div>
+                <Link href={quickSearchHref} className="button button-primary" data-testid="link-home-quick-results">عرض النتائج <ArrowLeft size={16} /></Link>
+              </div>
+            </>
+          )}
+          <div className="guided-quick-directory" aria-label="روابط كل الأقسام والعلامات">
+            <span>فتح صفحة مستقلة:</span>
+            {categories.map((category) => <Link href={`/category/${category.slug}`} key={`category-${category.slug}`}>{category.name}</Link>)}
+            {brandCollections.map(({ brand, brandSlug }) => <Link href={brandPath(brandSlug)} key={`brand-${brandSlug}`}>{brand}</Link>)}
+          </div>
         </div>
       </section>
 
@@ -1264,8 +1327,8 @@ export function SearchPage() {
   const query = new URLSearchParams(window.location.search);
   const view = query.get('view') || 'products';
   const [term, setTerm] = useState(query.get('q') || '');
-  const [brand, setBrand] = useState('');
-  const [category, setCategory] = useState('');
+  const [brand, setBrand] = useState(query.get('brand') || '');
+  const [category, setCategory] = useState(query.get('category') || '');
   const [sort, setSort] = useState('featured');
   const products = catalog?.products || [];
   const brands = Array.from(new Set(products.map((product) => product.brand)));
