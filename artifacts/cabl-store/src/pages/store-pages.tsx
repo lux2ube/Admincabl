@@ -397,16 +397,16 @@ function CommercialHomePage() {
         </div>
       </section>
 
-      <section className="guided-path" aria-label="معلومات الشراء">
+      <section className="guided-path" aria-label="لماذا يختار العملاء CABL">
         <div className="container guided-path-inner">
           <div className="guided-path-intro">
-            <span className="eyebrow">قبل الشراء</span>
-            <h2>معلومات واضحة قبل تأكيد الطلب</h2>
+            <span className="eyebrow">لماذا CABL؟</span>
+            <h2>ثقة تبدأ من المعلومة وتستمر بعد الشراء</h2>
           </div>
           {[
-            ['01', 'بيانات المنتج', 'الموديل والـSKU والمنافذ من الكتالوج'],
-            ['02', 'التوافر والسعر', 'الكمية والسعر الحاليان قبل الإضافة'],
-            ['03', 'الشحن والدفع', 'الخيارات تظهر قبل إرسال الطلب'],
+            ['01', 'مساعدة قبل الشراء', 'نساعدك على قراءة القدرة والمنافذ والتوافق لاختيار ما يناسب جهازك واستخدامك'],
+            ['02', 'وضوح في كل طلب', 'العلامة والموديل والسعر والتوافر، ثم خيارات الشحن والدفع قبل التأكيد'],
+            ['03', 'متابعة بعد الشراء', 'تتبع طلبك وراجع الإرجاع والضمان حسب الشروط المنشورة مع الاحتفاظ برقم الطلب'],
           ].map(([number, title, text]) => (
             <div className="guided-step" key={number} data-testid={`step-home-confidence-${number}`}>
               <span className="guided-step-number">{number}</span>
