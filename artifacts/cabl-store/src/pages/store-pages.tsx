@@ -381,18 +381,24 @@ function CommercialHomePage() {
           <div className="guided-path-intro">
             <span className="eyebrow">ليش CABL؟</span>
             <h2>اختَر وأنت مطمّن</h2>
+            <p>خدمة واضحة من أول سؤال إلى ما بعد استلام طلبك.</p>
           </div>
-          {[
-            ['01', 'نساعدك تختار', 'نساعدك بخبرة تختار المنتج اللي يناسب جهازك بالضبط.'],
-            ['02', 'منتجات أصلية فقط', 'منتجات فاخرة من براندات عالمية معروفة.'],
-            ['03', 'نوصل لباب بيتك', 'نوصل لجميع المحافظات اليمنية.'],
-            ['04', 'معك حتى بعد الشراء', 'ضمان، خدمة ما بعد البيع، وإمكانية الإرجاع والاستبدال.'],
-          ].map(([number, title, text]) => (
-            <div className="guided-step" key={number} data-testid={`step-home-confidence-${number}`}>
-              <span className="guided-step-number">{number}</span>
-              <div><strong>{title}</strong><span>{text}</span></div>
-            </div>
-          ))}
+          <div className="guided-path-home-cards">
+            {[
+              ['01', 'نساعدك تختار', 'نساعدك بخبرة تختار المنتج اللي يناسب جهازك بالضبط.', <ShieldCheck size={18} />],
+              ['02', 'منتجات أصلية فقط', 'منتجات فاخرة من براندات عالمية معروفة.', <Package size={18} />],
+              ['03', 'نوصل لباب بيتك', 'نوصل لجميع المحافظات اليمنية.', <Truck size={18} />],
+              ['04', 'معك حتى بعد الشراء', 'ضمان، خدمة ما بعد البيع، وإمكانية الإرجاع والاستبدال.', <RefreshCcw size={18} />],
+            ].map(([number, title, text, icon]) => (
+              <div className="guided-step" key={number} data-testid={`step-home-confidence-${number}`}>
+                <div className="guided-step-head">
+                  <span className="guided-step-number">{number}</span>
+                  <span className="guided-step-icon">{icon}</span>
+                </div>
+                <div className="guided-step-copy"><strong>{title}</strong><span>{text}</span></div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
