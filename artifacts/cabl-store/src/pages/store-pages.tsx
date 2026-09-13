@@ -334,31 +334,33 @@ function CommercialHomePage() {
     <div className="guided-home">
       <SEO type="home" />
 
-      <section className="guided-hero">
-        <div className="container guided-hero-inner">
-          <div className="guided-hero-copy reveal">
+      <section className="reference-hero">
+        <div className="container reference-hero-inner">
+          <div className="reference-hero-copy reveal">
             <span className="eyebrow">CABL / اليمن</span>
-            <h1>ابدأ من جهازك.<br /><em>اختر القطعة المناسبة.</em></h1>
-            <p>افتح الكتالوج حسب احتياجك، ثم راجع المنفذ والقدرة والتوافق في صفحة المنتج قبل الإضافة إلى السلة.</p>
-            <div className="guided-hero-actions">
-              <Link href="/search" className="button button-primary" data-testid="link-home-catalog">افتح الكتالوج <ArrowLeft size={16} /></Link>
-            </div>
-            <div className="guided-hero-note"><ShieldCheck size={15} /> السعر والتوافر من الكتالوج الحالي</div>
+            <h1>شحن أوضح.<br /><em>اختيار أذكى.</em></h1>
+            <p>{heroProduct?.shortDescription || 'راجع المنتج والسعر والتوافر قبل الإضافة إلى السلة.'}</p>
+            {heroProduct && (
+              <div className="reference-hero-price">
+                <strong>{formatPrice(heroPrice)}</strong>
+                {heroProduct.discountPrice && <del>{formatPrice(heroProduct.regularPrice)}</del>}
+                {heroDiscount > 0 && <span>-{heroDiscount}%</span>}
+              </div>
+            )}
+            <Link href={heroProduct ? productPath(heroProduct) : '/search'} className="reference-hero-cta" data-testid="link-home-hero-cta">
+              {heroProduct ? 'افتح المنتج' : 'افتح الكتالوج'} <ArrowLeft size={16} />
+            </Link>
+            <div className="reference-hero-note"><ShieldCheck size={15} /> السعر والتوافر من الكتالوج الحالي</div>
           </div>
-          <div className="guided-hero-product reveal">
+          <div className="reference-hero-media reveal">
             {heroProduct ? (
-              <Link href={productPath(heroProduct)} className="guided-hero-product-card" data-testid={`link-home-hero-product-${heroProduct.id}`}>
-                <span className="guided-hero-index">01 / الكتالوج</span>
-                <ProductImage product={heroProduct} className="guided-hero-product-image" />
-                <span className="guided-hero-product-label">
-                  <span>{heroProduct.brand}<b>{formatPrice(heroPrice)}</b></span>
-                  <strong>{heroProduct.productName}{heroDiscount > 0 && <em>-{heroDiscount}%</em>}</strong>
-                </span>
+              <Link href={productPath(heroProduct)} className="reference-hero-product" data-testid={`link-home-hero-product-${heroProduct.id}`}>
+                <span className="reference-hero-product-mark">{heroProduct.brand}</span>
+                <ProductImage product={heroProduct} className="reference-hero-product-image" />
+                <span className="reference-hero-product-name">{heroProduct.productName}</span>
               </Link>
             ) : (
-              <div className="guided-hero-product-card" data-testid="state-home-hero-empty">
-                <Package size={46} color="#1757ee" />
-              </div>
+              <div className="reference-hero-empty" data-testid="state-home-hero-empty"><Package size={46} color="#1757ee" /></div>
             )}
           </div>
         </div>
