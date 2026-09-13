@@ -385,11 +385,11 @@ function CommercialHomePage() {
           </div>
           <div className="guided-path-home-cards">
             {[
-              ['01', 'نساعدك تختار', 'نساعدك بخبرة تختار المنتج اللي يناسب جهازك بالضبط.', <ShieldCheck size={18} />],
-              ['02', 'منتجات أصلية فقط', 'منتجات فاخرة من براندات عالمية معروفة.', <Package size={18} />],
-              ['03', 'نوصل لباب بيتك', 'نوصل لجميع المحافظات اليمنية.', <Truck size={18} />],
-              ['04', 'معك حتى بعد الشراء', 'ضمان، خدمة ما بعد البيع، وإمكانية الإرجاع والاستبدال.', <RefreshCcw size={18} />],
-            ].map(([number, title, text, icon]) => (
+              { number: '01', title: 'نساعدك تختار', text: 'نساعدك بخبرة تختار المنتج اللي يناسب جهازك بالضبط.', icon: <ShieldCheck size={18} /> },
+              { number: '02', title: 'منتجات أصلية فقط', text: 'منتجات فاخرة من براندات عالمية معروفة.', icon: <Package size={18} /> },
+              { number: '03', title: 'نوصل لباب بيتك', text: 'نوصل لجميع المحافظات اليمنية.', icon: <Truck size={18} /> },
+              { number: '04', title: 'معك حتى بعد الشراء', text: 'ضمان، خدمة ما بعد البيع، وإمكانية الإرجاع والاستبدال.', icon: <RefreshCcw size={18} /> },
+            ].map(({ number, title, text, icon }) => (
               <div className="guided-step" key={number} data-testid={`step-home-confidence-${number}`}>
                 <div className="guided-step-head">
                   <span className="guided-step-number">{number}</span>
