@@ -145,6 +145,7 @@ input:focus,select:focus,textarea:focus{border-color:hsl(var(--accent));box-shad
 .guided-finder .product-grid{margin-top:0}
 .guided-finder-note{font-size:11px;color:#71819b;margin:15px 0 0}
 @media (max-width:767px){
+  .reference-hero-inner{min-height:560px;padding:43px 0 0}.reference-hero-copy h1{font-size:44px}.reference-hero-copy>p{font-size:12px;max-width:320px}.reference-hero-price{margin-bottom:14px}.reference-hero-price strong{font-size:22px}.reference-hero-cta{padding:12px 23px}.reference-hero-media{height:250px;margin-top:10px}.reference-hero-media:before{height:180px;bottom:-70px;width:110vw}.reference-hero-product-image{height:240px}.reference-hero-product-mark{top:4px;right:8px;font-size:10px}.reference-hero-product-name{bottom:8px;max-width:90%;font-size:10px}
   .guided-hero-inner{display:flex;flex-direction:column;align-items:stretch;gap:19px;min-height:0;padding:44px 0 31px}
   .guided-hero-copy{text-align:center}.guided-hero-copy h1{font-size:45px}.guided-hero-copy>p{font-size:13px;margin-inline:auto}.guided-hero-actions{justify-content:center}.guided-hero-note{justify-content:center}
   .guided-hero-product{min-height:255px}.guided-hero-product:before{width:230px;height:230px}.guided-hero-product-card{height:245px;width:min(330px,100%);transform:rotate(-2deg)}.guided-hero-product-label{transform:rotate(2deg);bottom:12px}
