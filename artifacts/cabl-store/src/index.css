@@ -178,3 +178,71 @@ input:focus,select:focus,textarea:focus{border-color:hsl(var(--accent));box-shad
   .product-copy{padding:11px}
   .guided-brand-collection .brand-collection-image{width:34px;height:34px}
 }
+
+/* CABL 2026 interaction system */
+:root{
+  --surface:0 0% 100%;
+  --surface-muted:216 32% 98%;
+  --success:153 58% 38%;
+  --warning:39 83% 48%;
+  --destructive:347 79% 59%;
+  --space-1:.25rem;
+  --space-2:.5rem;
+  --space-3:.75rem;
+  --space-4:1rem;
+  --space-5:1.5rem;
+  --space-6:2rem;
+  --radius-sm:.5rem;
+  --radius-md:.75rem;
+  --radius-lg:1rem;
+  --motion-fast:140ms;
+  --motion-base:220ms;
+  --ease-out:cubic-bezier(.2,.75,.25,1);
+}
+:where(a,button,input,select,textarea):focus-visible{
+  outline:3px solid hsl(var(--ring)/.42);
+  outline-offset:3px;
+}
+button:active,.button:active,.icon-action:active,.add-button:active,.favorite-toggle:active{
+  transform:translateY(1px);
+}
+.button,.icon-action,.nav-link,.add-button,.favorite-toggle,.quick-view,.category-filter-toggle{
+  transition-duration:var(--motion-fast);
+  transition-timing-function:var(--ease-out);
+}
+.button:hover{transform:translateY(-1px)}
+.button-primary{background:hsl(var(--primary));box-shadow:0 8px 18px hsl(var(--primary)/.16)}
+.button-primary:hover{background:hsl(224 77% 45%)}
+.button:disabled,.add-button:disabled{cursor:not-allowed;filter:saturate(.65)}
+.site-header{transition:box-shadow var(--motion-base) var(--ease-out),background var(--motion-base) var(--ease-out)}
+.site-header.is-scrolled{background:rgba(255,255,255,.97);box-shadow:0 8px 24px #17345c12}
+.site-header.is-scrolled .header-main{height:62px}
+.site-header.is-scrolled .search-ribbon{height:36px}
+.nav-link{position:relative}
+.nav-link::after{content:'';position:absolute;inset:auto 12px 4px;height:2px;background:hsl(var(--primary));transform:scaleX(0);transform-origin:center;transition:transform var(--motion-base) var(--ease-out)}
+.nav-link:hover::after,.nav-link.is-active::after{transform:scaleX(1)}
+.icon-action:hover svg,.favorite-toggle:hover svg{transform:scale(1.04)}
+.icon-action svg,.favorite-toggle svg{transition:transform var(--motion-fast) var(--ease-out)}
+.product-card{transition:box-shadow var(--motion-base) var(--ease-out),border-color var(--motion-base) var(--ease-out)}
+.product-card:hover{transform:none;box-shadow:0 14px 28px #1d4e8515}
+.product-card:focus-within{border-color:#a9c9ef;box-shadow:0 0 0 3px #1757ee18,0 12px 26px #1d4e8512}
+.product-card:hover .product-visual img{transform:scale(1.035)}
+.add-button{position:relative;min-height:34px}
+.add-button.is-success{background:#e3f7ed;color:#168254}
+.add-button.is-success svg{color:#168254}
+.product-stock.is-available i{background:hsl(var(--success))}
+.product-stock.is-unavailable i{background:#a8b4c3}
+input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:hsl(var(--muted));opacity:.7}
+.mobile-drawer-backdrop{animation:backdrop-in var(--motion-base) var(--ease-out) both}
+.mobile-drawer{animation:drawer var(--motion-base) var(--ease-out) both}
+@keyframes backdrop-in{from{opacity:0}to{opacity:1}}
+@media (max-width:767px){
+  .site-header.is-scrolled .header-main{height:56px}
+  .site-header.is-scrolled .search-ribbon{height:40px}
+  .nav-link::after{display:none}
+  .button,.icon-action,.category-filter-toggle{min-height:42px}
+  .add-button{min-height:38px}
+}
+@media (prefers-reduced-motion:reduce){
+  .site-header,.button,.icon-action,.nav-link,.add-button,.favorite-toggle,.quick-view,.product-card,.product-card:hover .product-visual img{transition:none!important;transform:none!important}
+}

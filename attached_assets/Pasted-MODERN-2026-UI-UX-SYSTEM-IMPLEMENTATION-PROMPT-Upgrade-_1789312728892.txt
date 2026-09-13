@@ -1,0 +1,800 @@
+MODERN 2026 UI/UX SYSTEM — IMPLEMENTATION PROMPT
+
+Upgrade the entire website to a modern 2026 premium e-commerce UI system.
+
+Do NOT redesign the business logic, database schema, URLs, SEO architecture, SEO content, or existing functionality unless explicitly required for the UI implementation.
+
+The goal is:
+
+Modern + clean + premium + fast + conversion-focused + mobile-first
+
+NOT:
+
+- excessive glassmorphism
+- excessive gradients
+- excessive rounded cards
+- excessive shadows
+- excessive animations
+- generic AI-generated UI
+- decorative motion with no UX purpose
+
+---
+
+1. ESTABLISH A SINGLE DESIGN SYSTEM
+
+Create reusable design tokens for:
+
+Typography
+
+Use:
+
+- Fluid Type Scale
+- Clear display/body hierarchy
+- Tight heading tracking where appropriate
+- Comfortable body line-height
+- Consistent font weights
+
+Color
+
+Use semantic Color Tokens:
+
+- background
+- foreground
+- surface
+- surface-muted
+- border
+- primary
+- primary-foreground
+- muted
+- success
+- warning
+- destructive
+
+Never introduce random colors component-by-component.
+
+Spacing
+
+Use a consistent Spacing Scale.
+
+Avoid arbitrary margins and padding.
+
+Radius
+
+Use a restrained Corner Radius system.
+
+Do NOT make every element excessively rounded.
+
+Elevation
+
+Use Layered Elevation:
+
+- flat surface
+- subtle elevation
+- floating elevation
+- overlay elevation
+
+Prefer subtle shadows and surface contrast over heavy shadows.
+
+Motion
+
+Create a centralized Motion system.
+
+Use:
+
+- fast micro-interactions
+- ease-out transitions
+- spring motion only where appropriate
+- reduced-motion support
+
+Default motion should feel fast and intentional.
+
+---
+
+2. MODERN COMPONENT ARCHITECTURE
+
+Organize reusable components into:
+
+TOKENS
+PRIMITIVES
+OVERLAYS
+NAVIGATION
+COMMERCE
+DISCOVERY
+CONTENT
+
+PRIMITIVES
+
+Implement:
+
+- Button
+- Field
+- Badge
+- Avatar
+- Icon Button
+- Separator
+- Skeleton
+
+Each primitive must have:
+
+- consistent states
+- hover
+- focus-visible
+- pressed
+- disabled
+- loading where applicable
+- keyboard accessibility
+- mobile behavior
+
+---
+
+3. MODERN INTERACTION EFFECTS
+
+Implement motion based on user intent.
+
+Button
+
+Use:
+
+- Hover Surface Transition
+- Press Feedback
+- Focus Ring
+- Loading State
+- Success State where relevant
+
+Press feedback should be subtle.
+
+Do NOT use bouncing buttons.
+
+---
+
+Field
+
+Use:
+
+- Focus Ring
+- Clear Active State
+- Validation Feedback
+- Error State
+- Disabled State
+
+Never rely on color alone for errors.
+
+---
+
+Badge
+
+Use:
+
+- semantic status styling
+- subtle transitions
+
+Only use Pulse for genuinely live states.
+
+Do NOT permanently animate ordinary badges.
+
+---
+
+Icon Button
+
+Use:
+
+- hover surface
+- subtle icon transition
+- press feedback
+- tooltip when the icon meaning is not obvious
+
+---
+
+Skeleton
+
+Use:
+
+Shimmer Loading
+
+The shimmer must be subtle and must not create layout shift.
+
+---
+
+4. OVERLAYS
+
+Dialog
+
+Use:
+
+Backdrop Fade + Subtle Scale/Fade
+
+Avoid dramatic zoom animations.
+
+Sheet
+
+Use:
+
+Directional Slide + Backdrop Fade
+
+Drawer
+
+Use:
+
+Directional Slide + Backdrop Fade
+
+Especially for:
+
+- cart
+- mobile navigation
+- filters
+
+Popover
+
+Use:
+
+Scale + Fade
+
+Dropdown Menu
+
+Use:
+
+Fast Fade + Subtle Scale
+
+Tooltip
+
+Use:
+
+Delayed Fade + Micro Slide
+
+Command Menu
+
+Use:
+
+- backdrop
+- subtle scale/fade
+- instant search
+- keyboard navigation
+- highlighted matching results
+- clear focus state
+
+---
+
+5. NAVIGATION
+
+Site Header
+
+Implement:
+
+Sticky + Scroll-aware Header
+
+Behavior:
+
+- normal state at top
+- compact state after scrolling
+- restore when appropriate on upward scroll
+
+Do NOT make the header jump or disappear unpredictably.
+
+Primary Navigation
+
+Use:
+
+Active Indicator + Smooth Indicator Transition
+
+Avoid large hover animations.
+
+Mobile Navigation
+
+Use:
+
+Drawer/Sheet + Backdrop Fade
+
+Keep navigation easy to close and keyboard accessible.
+
+Breadcrumbs
+
+Keep mostly static.
+
+Use only subtle opacity/color transitions.
+
+Tabs
+
+Use:
+
+Sliding Active Indicator
+
+The active indicator should move smoothly between tabs.
+
+Sidebar Navigation
+
+Use:
+
+- active indicator
+- smooth collapse/expand
+- clear hierarchy
+
+Pagination
+
+Use:
+
+- strong active state
+- subtle hover
+- press feedback
+
+---
+
+6. COMMERCE COMPONENTS
+
+These are the highest-priority components.
+
+Product Card
+
+Use:
+
+Image Zoom + Surface Lift + Action Reveal
+
+On hover:
+
+- image scale approximately 1.02–1.04
+- subtle surface/elevation change
+- optional action reveal
+
+Do NOT make the entire card jump.
+
+On mobile, replace hover behavior with touch-appropriate states.
+
+---
+
+Product Item
+
+Use:
+
+- subtle hover surface
+- image transition
+- press feedback
+
+Keep list items compact and scannable.
+
+---
+
+Product Grid
+
+Use:
+
+- consistent responsive grid
+- stable image aspect ratio
+- no layout shift
+- optional one-time Progressive Reveal
+
+Do NOT repeatedly animate products every time they enter the viewport.
+
+---
+
+Product Gallery
+
+Use:
+
+- image crossfade
+- active thumbnail indicator
+- subtle image zoom
+- swipe on mobile
+- fullscreen media viewer where appropriate
+
+Images must load without causing layout jumps.
+
+---
+
+Price Display
+
+Use strong visual hierarchy.
+
+For sale prices:
+
+- current price = dominant
+- old price = muted + struck through
+- discount = secondary emphasis
+
+Do NOT continuously animate prices.
+
+---
+
+Variant Selector
+
+Use:
+
+- active ring
+- selection feedback
+- image crossfade where relevant
+- clear unavailable state
+
+Selection must be immediately understandable.
+
+---
+
+Quantity Selector
+
+Use:
+
+- press feedback
+- subtle number transition
+
+No unnecessary animation.
+
+---
+
+Add to Cart
+
+Implement a high-quality:
+
+Success Morph
+
+Example:
+
+Add to Cart
+     ↓
+✓ Added
+
+Also update the cart count with subtle feedback.
+
+The animation must clearly communicate:
+
+user action → successful result
+
+---
+
+Availability Indicator
+
+Use a semantic status indicator.
+
+Example:
+
+● In stock
+
+Use pulse only when the status is genuinely live/dynamic.
+
+---
+
+Cart Drawer
+
+Use:
+
+Slide + Backdrop + Item Feedback + Total Transition
+
+When an item is added:
+
+1. item enters cart
+2. cart count updates
+3. subtotal updates
+4. user receives clear confirmation
+
+Avoid unnecessary animation.
+
+---
+
+7. DISCOVERY
+
+Search
+
+Create a modern:
+
+Command-style Search Experience
+
+Support:
+
+- instant results
+- recent searches
+- product suggestions
+- category suggestions
+- keyboard navigation
+- highlighted matches
+- mobile-friendly search
+
+Search Suggestions
+
+Use:
+
+- instant reveal
+- highlighted matching text
+- clear grouping
+
+Filter Bar
+
+Use:
+
+- active filter states
+- removable filter chips
+- subtle add/remove transitions
+- clear-all action
+
+Filter Sheet
+
+On mobile use:
+
+Bottom Sheet / Side Sheet
+
+Filters should be easy to apply and clear.
+
+Sort Control
+
+Use a clean Popover/Dropdown interaction.
+
+Category Rail
+
+Use:
+
+- horizontal scrolling
+- active state
+- snap scrolling on mobile where appropriate
+- subtle image/icon interaction
+
+Do NOT autoplay.
+
+Brand Selector
+
+Use:
+
+- searchable selection
+- active indicator
+- logo/image transition
+- keyboard navigation
+
+---
+
+8. CONTENT COMPONENTS
+
+Review Summary
+
+Use:
+
+- clear rating hierarchy
+- rating distribution
+- subtle star transitions only when useful
+
+Specification Table
+
+Use:
+
+- clean rows
+- subtle row hover
+- responsive mobile presentation
+
+Trust Signals
+
+Use:
+
+Icon Reveal / Subtle Hover
+
+Trust information must remain immediately readable even with animations disabled.
+
+Feature List
+
+Use:
+
+- strong iconography
+- clear hierarchy
+- optional one-time progressive reveal
+
+FAQ Accordion
+
+Use:
+
+Height Transition + Icon Morph
+
+Example:
+
+Question                    +
+Question                    −
+────────────────────────────
+Answer
+
+Related Products
+
+Use:
+
+- responsive product rail
+- horizontal mobile scrolling
+- standard Product Card behavior
+
+Do NOT autoplay carousels.
+
+Recently Viewed
+
+Keep motion minimal.
+
+Only animate when an item is newly added.
+
+Empty State
+
+Use:
+
+Soft Fade + Clear Recovery Action
+
+Always provide an actionable next step.
+
+Example:
+
+No products found
+
+Try removing a filter.
+
+[ Clear filters ]
+
+Error State
+
+Use:
+
+- clear explanation
+- recovery action
+- Retry button where appropriate
+
+Do NOT use aggressive shaking except for direct input validation when useful.
+
+---
+
+9. MOTION RULES
+
+Motion must communicate:
+
+Where something came from → what changed → what the user can do next.
+
+Use these approved motion patterns:
+
+- Micro-interaction
+- Spring Motion
+- Ease-out Transition
+- Progressive Reveal
+- Staggered Reveal
+- Surface Lift
+- Press Feedback
+- Active Indicator
+- Sliding Indicator
+- Image Crossfade
+- Image Zoom
+- Backdrop Fade
+- Scale + Fade
+- Directional Slide
+- Success Morph
+- Icon Morph
+- Number Transition
+- Accordion Height Transition
+- Scroll-aware Header
+- Sticky Contextual UI
+- Shimmer Loading
+
+Do NOT use:
+
+- excessive bouncing
+- infinite decorative animations
+- random floating elements
+- excessive parallax
+- autoplay product carousels
+- large hover scaling
+- animation on every element
+- animation that delays interaction
+
+---
+
+10. PERFORMANCE RULES
+
+Animations must never compromise shopping speed.
+
+Prioritize:
+
+- transform
+- opacity
+- compositor-friendly animation
+
+Avoid expensive layout-triggering animations where possible.
+
+Respect:
+
+"prefers-reduced-motion"
+
+Do not animate content that causes:
+
+- layout shift
+- CLS problems
+- delayed interaction
+- unreadable content
+
+---
+
+11. RESPONSIVE BEHAVIOR
+
+Do NOT simply shrink desktop UI for mobile.
+
+Design separate responsive behavior where appropriate.
+
+Desktop:
+
+- hover interactions
+- popovers
+- side panels
+- multi-column layouts
+
+Mobile:
+
+- touch interactions
+- drawers
+- bottom sheets
+- sticky contextual actions
+- horizontal rails
+- larger touch targets
+
+All important actions must remain easy to use with one hand.
+
+---
+
+12. VISUAL QUALITY RULE
+
+The site should feel modern because of:
+
+Typography + hierarchy + whitespace + alignment + imagery + surface treatment + intentional motion
+
+NOT because of:
+
+gradients + shadows + glassmorphism + huge rounded cards + animation.
+
+Use visual restraint.
+
+Every effect must have a UX reason.
+
+---
+
+13. COMPONENT CONSISTENCY
+
+Before creating a new component:
+
+1. Check whether an existing primitive/pattern can be reused.
+2. Extend the existing component if appropriate.
+3. Do not create visually similar duplicate components.
+4. Keep states consistent across the entire site.
+5. Keep interaction behavior consistent across desktop and mobile.
+
+Example:
+
+Every button across the website must share the same:
+
+- typography
+- height system
+- radius
+- focus behavior
+- loading behavior
+- press feedback
+
+Product cards may have different compositions when required by the page, but they must share the same underlying visual language.
+
+---
+
+14. FINAL UX STANDARD
+
+The finished website should pass this test:
+
+First impression
+
+Looks modern immediately.
+
+Scanning
+
+User can understand products and categories quickly.
+
+Interaction
+
+Every interactive element gives appropriate feedback.
+
+Motion
+
+Motion explains changes instead of decorating the interface.
+
+Mobile
+
+Shopping is fast and comfortable with one hand.
+
+Accessibility
+
+Keyboard navigation, focus states, contrast, labels and reduced-motion behavior work correctly.
+
+Performance
+
+No unnecessary animation, layout shift, or interaction delay.
+
+Professionalism
+
+The result should look like a professionally designed 2026 e-commerce product — NOT an AI-generated template.
+
+Before finishing, audit every page and remove any animation, shadow, radius, gradient, or decorative element that does not improve usability or visual hierarchy.
