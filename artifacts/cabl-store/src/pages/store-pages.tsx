@@ -315,10 +315,10 @@ function CommercialHomePage() {
   const needs = useMemo(() => {
     const used = new Set<string>();
     const options = [
-      { match: /cable|كابل/i, title: 'أحتاج كابلاً', text: 'وصلات واضحة لجهازك', icon: <Package size={20} /> },
-      { match: /power|باور|طاقة|battery|بطار/i, title: 'أحتاج طاقة متنقلة', text: 'حلول للطاقة أثناء التنقل', icon: <Zap size={20} /> },
-      { match: /charg|شاحن/i, title: 'أحتاج شحناً يومياً', text: 'قدرة ومنافذ للمقارنة', icon: <Smartphone size={20} /> },
-      { match: /car|سيارة|سفر|travel/i, title: 'أحتاج ملحقاً للسيارة أو السفر', text: 'ابدأ من القسم المتاح', icon: <Truck size={20} /> },
+      { match: /cable|كابل/i, title: 'أحتاج كابلاً مناسباً', text: 'للهاتف أو اللابتوب أو الشحن اليومي', icon: <Package size={20} /> },
+      { match: /power|باور|طاقة|battery|بطار/i, title: 'أحتاج طاقة أثناء التنقل', text: 'حلول احتياطية للهاتف والراوتر والسفر', icon: <Zap size={20} /> },
+      { match: /charg|شاحن/i, title: 'أحتاج شحناً أسرع', text: 'قارن القدرة والمنافذ والتوافق', icon: <Smartphone size={20} /> },
+      { match: /car|سيارة|سفر|travel/i, title: 'أحتاج ملحقاً للسيارة أو السفر', text: 'خيارات تناسب الحركة والاستخدام اليومي', icon: <Truck size={20} /> },
     ];
     const selected = options.flatMap((option) => {
       const category = categories.find((item) => !used.has(item.slug) && option.match.test(`${item.slug} ${item.name}`));
@@ -329,7 +329,7 @@ function CommercialHomePage() {
     categories.forEach((category) => {
       if (selected.length >= 5 || used.has(category.slug)) return;
       used.add(category.slug);
-      selected.push({ category, title: category.name, text: 'تصفح المنتجات المنشورة', icon: <Package size={20} /> });
+       selected.push({ category, title: category.name, text: 'منتجات منشورة في هذا القسم', icon: <Package size={20} /> });
     });
     return selected.slice(0, 5);
   }, [categories]);
@@ -394,6 +394,36 @@ function CommercialHomePage() {
         </div>
       </section>
 
+      <section className="guided-needs-section" aria-labelledby="home-needs-title">
+        <div className="container">
+          <div className="guided-needs-header">
+            <div>
+              <span className="eyebrow">تسوّق حسب الحاجة</span>
+              <h2 id="home-needs-title">ماذا تريد أن تنجز اليوم؟</h2>
+              <p>ابدأ من الاستخدام الأقرب لك، ثم قارن المنتجات المنشورة في القسم.</p>
+            </div>
+            <Link href="/search" className="guided-needs-all" data-testid="link-home-categories-all">كل المنتجات <ArrowLeft size={15} /></Link>
+          </div>
+          {isLoading ? (
+            <div className="guided-needs-grid" data-testid="loading-home-categories">
+              {Array.from({ length: 5 }).map((_, index) => <div className="guided-need-card skeleton" key={index} />)}
+            </div>
+          ) : needs.length ? (
+            <div className="guided-needs-grid">
+              {needs.map(({ category, title, text, icon }) => (
+                <Link href={`/category/${category.slug}`} className="guided-need-card" key={category.slug} data-testid={`link-home-need-${category.slug}`}>
+                  <span className="guided-need-icon">{icon}</span>
+                  <span className="guided-need-copy"><strong>{title}</strong><small>{text}</small></span>
+                  <span className="guided-need-footer">{category.name} <ArrowLeft size={13} /></span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state" data-testid="empty-home-categories"><h3>ستظهر الأقسام مع تحميل الكتالوج</h3></div>
+          )}
+        </div>
+      </section>
+
       <section className="guided-quick-access guided-home-catalog" aria-labelledby="home-quick-access-title">
         <div className="container">
           <div className="guided-section-header">
@@ -441,36 +471,6 @@ function CommercialHomePage() {
                 <ProductGrid products={quickMatches} empty="لا توجد منتجات مطابقة لهذا الاختيار حالياً." />
               </div>
             </>
-          )}
-        </div>
-      </section>
-
-      <section className="guided-section" aria-labelledby="home-needs-title">
-        <div className="container">
-          <div className="guided-section-header">
-            <div>
-              <span className="eyebrow">تسوّق حسب الحاجة</span>
-              <h2 id="home-needs-title">ما الذي تريد حله اليوم؟</h2>
-              <p>ابدأ من القسم الأقرب لاستخدامك، لا من اسم المنتج فقط.</p>
-            </div>
-            <Link href="/search" data-testid="link-home-categories-all">كل المنتجات <ArrowLeft size={15} /></Link>
-          </div>
-          {isLoading ? (
-            <div className="guided-category-grid" data-testid="loading-home-categories">
-              {Array.from({ length: 5 }).map((_, index) => <div className="guided-category-card skeleton" key={index} />)}
-            </div>
-          ) : needs.length ? (
-            <div className="guided-category-grid">
-              {needs.map(({ category, title, icon }) => (
-                <Link href={`/category/${category.slug}`} className="guided-category-card" key={category.slug} data-testid={`link-home-need-${category.slug}`}>
-                  <span className="guided-category-icon">{icon}</span>
-                  <strong>{title}</strong>
-                  <span>{category.name} <ArrowLeft size={13} /></span>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state" data-testid="empty-home-categories"><h3>ستظهر الأقسام مع تحميل الكتالوج</h3></div>
           )}
         </div>
       </section>
