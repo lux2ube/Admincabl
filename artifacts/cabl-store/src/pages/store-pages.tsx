@@ -376,16 +376,17 @@ function CommercialHomePage() {
         </div>
       </section>
 
-      <section className="guided-path" aria-label="لماذا يختار العملاء CABL">
+      <section className="guided-path guided-path-home" aria-label="لماذا يختار العملاء CABL">
         <div className="container guided-path-inner">
           <div className="guided-path-intro">
-            <span className="eyebrow">لماذا CABL؟</span>
-            <h2>ثقة تبدأ من المعلومة وتستمر بعد الشراء</h2>
+            <span className="eyebrow">ليش CABL؟</span>
+            <h2>اختَر وأنت مطمّن</h2>
           </div>
           {[
-            ['01', 'مساعدة قبل الشراء', 'نساعدك على قراءة القدرة والمنافذ والتوافق لاختيار ما يناسب جهازك واستخدامك'],
-            ['02', 'وضوح في كل طلب', 'العلامة والموديل والسعر والتوافر، ثم خيارات الشحن والدفع قبل التأكيد'],
-            ['03', 'متابعة بعد الشراء', 'تتبع طلبك وراجع الإرجاع والضمان حسب الشروط المنشورة مع الاحتفاظ برقم الطلب'],
+            ['01', 'نساعدك تختار', 'نساعدك بخبرة تختار المنتج اللي يناسب جهازك بالضبط.'],
+            ['02', 'منتجات أصلية فقط', 'منتجات فاخرة من براندات عالمية معروفة.'],
+            ['03', 'نوصل لباب بيتك', 'نوصل لجميع المحافظات اليمنية.'],
+            ['04', 'معك حتى بعد الشراء', 'ضمان، خدمة ما بعد البيع، وإمكانية الإرجاع والاستبدال.'],
           ].map(([number, title, text]) => (
             <div className="guided-step" key={number} data-testid={`step-home-confidence-${number}`}>
               <span className="guided-step-number">{number}</span>
