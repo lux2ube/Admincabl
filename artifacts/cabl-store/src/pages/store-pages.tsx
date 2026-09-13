@@ -283,9 +283,22 @@ function GuidedHomePage() {
 }
 
 function CommercialHomePage() {
-  const { catalog, isLoading, isError, formatPrice } = useStore();
+  const { catalog, isLoading, isError } = useStore();
   const products = catalog?.products || [];
   const inStockProducts = useMemo(() => products.filter((product) => product.quantity > 0), [products]);
+  const heroProducts = useMemo(() => {
+    const selected: StoreProduct[] = [];
+    const seenGroups = new Set<string>();
+    for (const product of inStockProducts) {
+      if (!product.images?.[0]) continue;
+      const group = product.category?.slug || product.brandSlug || product.id;
+      if (seenGroups.has(group)) continue;
+      seenGroups.add(group);
+      selected.push(product);
+      if (selected.length === 4) break;
+    }
+    return selected;
+  }, [inStockProducts]);
   const categories = useMemo(
     () => Array.from(new Map(products.filter((product) => product.category).map((product) => [product.category!.slug, product.category!])).values()),
     [products],
@@ -300,12 +313,6 @@ function CommercialHomePage() {
     }, new Map<string, { brand: string; brandSlug: string; product: StoreProduct; count: number }>()).values()),
     [products],
   );
-  const heroProduct = inStockProducts[0];
-  const heroDiscountPrice = heroProduct?.discountPrice;
-  const heroPrice = heroProduct ? (heroDiscountPrice ?? heroProduct.regularPrice) : 0;
-  const heroDiscount = heroProduct && heroDiscountPrice !== null && heroDiscountPrice < heroProduct.regularPrice
-    ? Math.round((1 - heroDiscountPrice / heroProduct.regularPrice) * 100)
-    : 0;
   const [quickBrand, setQuickBrand] = useState('');
   const [quickCategory, setQuickCategory] = useState('');
   const quickMatches = useMemo(
@@ -344,29 +351,26 @@ function CommercialHomePage() {
         <div className="container reference-hero-inner">
           <div className="reference-hero-copy reveal">
             <span className="eyebrow">CABL / اليمن</span>
-            <h1>شحن أوضح.<br /><em>اختيار أذكى.</em></h1>
-            <p>{isLoading ? 'نحمّل الكتالوج الحالي لنعرض لك السعر والتوافر بدقة.' : heroProduct?.shortDescription || (products.length ? 'لا توجد منتجات متاحة حالياً. استعرض الكتالوج لمعرفة الخيارات المنشورة.' : 'لا توجد منتجات منشورة حالياً. استعرض الكتالوج لمعرفة الخيارات المتاحة.')}</p>
-            {heroProduct && (
-              <div className="reference-hero-price">
-                <strong>{formatPrice(heroPrice)}</strong>
-                {heroDiscount > 0 && <del>{formatPrice(heroProduct.regularPrice)}</del>}
-                {heroDiscount > 0 && <span>-{heroDiscount}%</span>}
-              </div>
-            )}
-            <Link href={heroProduct ? productPath(heroProduct) : '/search'} className="reference-hero-cta" data-testid="link-home-hero-cta">
-              {heroProduct ? 'افتح المنتج' : 'افتح الكتالوج'} <ArrowLeft size={16} />
+            <h1>أصلي يعيش معك..<br /><em>وتورّثه لعيالك.</em></h1>
+            <p>منتجات أصلية من علامات تعرفها، مصممة للاستخدام اليومي وتبقى معك.</p>
+            <Link href="/search" className="reference-hero-cta" data-testid="link-home-hero-cta">
+              تسوّق المنتجات <ArrowLeft size={16} />
             </Link>
-            <div className="reference-hero-note"><ShieldCheck size={15} /> السعر والتوافر من الكتالوج الحالي</div>
+            <div className="reference-hero-note"><ShieldCheck size={15} /> اختيارات من كتالوج CABL الحالي</div>
           </div>
           <div className="reference-hero-media reveal">
             {isLoading ? (
               <div className="reference-hero-loading skeleton" data-testid="loading-home-hero" />
-            ) : heroProduct ? (
-              <Link href={productPath(heroProduct)} className="reference-hero-product" data-testid={`link-home-hero-product-${heroProduct.id}`}>
-                <span className="reference-hero-product-mark">{heroProduct.brand}</span>
-                <ProductImage product={heroProduct} className="reference-hero-product-image" />
-                <span className="reference-hero-product-name">{heroProduct.productName}</span>
-              </Link>
+            ) : heroProducts.length ? (
+              <div className="hero-product-collage" aria-label="مجموعة من منتجات CABL">
+                {heroProducts.map((product, index) => (
+                  <Link href={productPath(product)} className={`hero-collage-card hero-collage-card-${index + 1}`} key={product.id} data-testid={`link-home-hero-product-${product.id}`}>
+                    <ProductImage product={product} className="hero-collage-image" />
+                    <span className="hero-collage-brand">{product.brand}</span>
+                  </Link>
+                ))}
+                <span className="hero-collage-wordmark">CABL</span>
+              </div>
             ) : (
               <div className="reference-hero-empty" data-testid="state-home-hero-empty">
                 <Package size={46} color="#1757ee" />

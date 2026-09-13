@@ -329,5 +329,52 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:h
   .guided-home-catalog-results{margin-top:20px}
   .guided-quick-directory{margin-inline:-12px;padding-inline:12px;flex-wrap:nowrap;overflow:auto;white-space:nowrap}
   .guided-quick-directory span{flex:none}
-  .guided-quick-directory a{flex:none}
+   .guided-quick-directory a{flex:none}
+ }
+
+/* Brand-led hero collage */
+.reference-hero-inner{min-height:650px;display:grid;grid-template-columns:.95fr 1.05fr;gap:32px;align-items:center;text-align:initial;padding:56px 0 50px;direction:rtl}
+.reference-hero-copy{align-items:flex-start;text-align:right;max-width:620px}
+.reference-hero-copy h1{font-size:clamp(46px,6.1vw,80px);line-height:1.08;letter-spacing:-.09em;margin:14px 0 18px}
+.reference-hero-copy>p{font-size:16px;line-height:1.9;max-width:520px;margin:0 0 25px}
+.reference-hero-cta{border-radius:15px;padding:15px 25px}
+.reference-hero-note{margin-top:17px}
+.reference-hero-media{width:100%;height:470px;margin:0;display:grid;place-items:center}
+.reference-hero-media:before{width:520px;height:300px;bottom:18px;background:#d8e8f7b8;filter:blur(3px)}
+.hero-product-collage{position:relative;width:min(100%,590px);height:440px;direction:ltr}
+.hero-product-collage:before{content:'';position:absolute;inset:45px 80px 15px;border:1px solid #ffffffaa;border-radius:50%;transform:rotate(-12deg);box-shadow:0 0 0 18px #ffffff28,0 28px 70px #3e68912e}
+.hero-product-collage:after{display:none}
+.hero-collage-card{position:absolute;z-index:5;display:flex;align-items:center;justify-content:center;background:#f8fbff;border:1px solid #d8e7f3;border-radius:24px;box-shadow:0 22px 42px #25486b3d;overflow:hidden;transition:transform .25s,box-shadow .25s}
+.hero-collage-card:hover{z-index:3;box-shadow:0 28px 54px #25486b3d}
+.hero-collage-card-1{left:23%;top:52px;width:54%;height:330px;transform:rotate(-2deg)}
+.hero-collage-card-1:hover{transform:rotate(-2deg) translateY(-6px) scale(1.02)}
+.hero-collage-card-2{right:1%;top:2px;width:32%;height:220px;transform:rotate(7deg)}
+.hero-collage-card-2:hover{transform:rotate(7deg) translateY(-6px) scale(1.03)}
+.hero-collage-card-3{left:1%;bottom:20px;width:34%;height:220px;transform:rotate(-8deg)}
+.hero-collage-card-3:hover{transform:rotate(-8deg) translateY(-6px) scale(1.03)}
+.hero-collage-card-4{right:12%;bottom:-2px;width:37%;height:235px;transform:rotate(5deg)}
+.hero-collage-card-4:hover{transform:rotate(5deg) translateY(-6px) scale(1.03)}
+.hero-collage-image{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;padding:20px 14px 35px;filter:drop-shadow(0 18px 16px #284d7138)}
+.hero-collage-brand{position:absolute;inset:auto 12px 10px;text-align:center;color:#5e7590;font-size:10px;font-weight:900;letter-spacing:.08em}
+.hero-collage-wordmark{position:absolute;z-index:2;right:50%;bottom:36px;transform:translateX(50%);color:#193653;font-size:12px;font-weight:950;letter-spacing:.22em;text-shadow:0 2px 7px #fff}
+
+@media (max-width:767px){
+  .reference-hero-inner{min-height:690px;display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center;padding:40px 0 24px}
+  .reference-hero-copy{align-items:center;text-align:center;max-width:100%}
+  .reference-hero-copy h1{font-size:44px;line-height:1.1;margin:12px 0 14px}
+  .reference-hero-copy>p{font-size:13px;line-height:1.8;max-width:330px;margin-bottom:19px}
+  .reference-hero-cta{padding:13px 22px}
+  .reference-hero-note{justify-content:center;font-size:10px;margin-top:13px}
+  .reference-hero-media{height:320px;margin-top:3px}
+  .hero-product-collage{width:min(100%,390px);height:310px}
+  .hero-product-collage:before{inset:25px 52px 8px}
+  .hero-product-collage:after{inset:45px 78px 35px}
+  .hero-collage-card{border-radius:18px}
+  .hero-collage-card-1{left:23%;top:36px;width:54%;height:230px}
+  .hero-collage-card-2{right:1%;top:0;width:32%;height:154px}
+  .hero-collage-card-3{left:1%;bottom:12px;width:34%;height:155px}
+  .hero-collage-card-4{right:12%;bottom:-2px;width:37%;height:164px}
+  .hero-collage-image{padding:12px 8px 28px}
+  .hero-collage-brand{font-size:8px;inset:auto 8px 7px}
+  .hero-collage-wordmark{bottom:23px;font-size:9px}
 }
