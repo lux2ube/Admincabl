@@ -344,7 +344,7 @@ function CommercialHomePage() {
           <div className="reference-hero-copy reveal">
             <span className="eyebrow">CABL / اليمن</span>
             <h1>أصلي يعيش معك..<br /><em>وتورّثه لعيالك.</em></h1>
-            <p>منتجات أصلية من علامات تعرفها، مصممة للاستخدام اليومي وتبقى معك.</p>
+            <p>منتجات أصلية من براندات تعرفها، تستاهل مكانها على طاولتك.</p>
             <Link href="/search" className="reference-hero-cta" data-testid="link-home-hero-cta">
               تسوّق المنتجات <ArrowLeft size={16} />
             </Link>
