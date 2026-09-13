@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Heart, Menu, Search, ShoppingBag, X, ChevronDown, PackageSearch, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Heart, Menu, Search, ShoppingBag, X, ChevronDown, PackageSearch, MessageCircle } from 'lucide-react';
 import { useStore } from '@/lib/store';
 
 export function StoreShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [location] = useLocation();
-  const { catalog, cartCount, favorites } = useStore();
+  const { catalog, cartCount, favorites, cartProducts, formatPrice } = useStore();
   const categories = useMemo(() => Array.from(new Map((catalog?.products || [])
     .filter((product) => product.category)
     .map((product) => [product.category!.slug, product.category!]))
@@ -43,6 +43,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [mobileOpen]);
+  const cartSubtotal = useMemo(() => cartProducts.reduce((sum, item) => sum + (item.product.discountPrice ?? item.product.regularPrice) * item.quantity, 0), [cartProducts]);
   return <div dir="rtl" className="min-h-[100dvh]">
      <div className="top-strip"><div className="container top-strip-inner"><div className="top-announcement"><span>الوكيل الحصري لشركة Baseus في اليمن</span><a href="https://wa.me/967771106977" target="_blank" rel="noreferrer" className="top-phone" dir="ltr" aria-label="تواصل معنا عبر واتساب على 771106977" data-testid="link-whatsapp"><MessageCircle size={13}/> 771106977</a></div><Link href="/orders" className="phone-link" data-testid="link-track-order"><PackageSearch size={13}/> تتبع طلبك</Link></div></div>
      <header className={`site-header${isScrolled ? ' is-scrolled' : ''}`}>
@@ -67,6 +68,16 @@ export function StoreShell({ children }: { children: ReactNode }) {
     </header>
      {mobileOpen && <div className="mobile-drawer-backdrop" onClick={() => setMobileOpen(false)}><aside className="mobile-drawer" role="dialog" aria-modal="true" aria-label="قائمة CABL" onClick={(event) => event.stopPropagation()}><div className="drawer-head"><span className="brand-cabl">CABL<span className="brand-dot">.</span></span><button onClick={() => setMobileOpen(false)} aria-label="إغلاق القائمة" title="إغلاق القائمة" data-testid="button-close-menu"><X/></button></div><div className="drawer-links">{navItems.map((item) => <Link href={item.href} onClick={() => setMobileOpen(false)} key={item.href} data-testid={`link-mobile-${item.label}`}>{item.label}<ChevronDown size={15}/></Link>)}<Link href="/search?view=favorites" onClick={() => setMobileOpen(false)} key="favorites" data-testid="link-mobile-favorites">المفضلة<Heart size={16}/></Link><Link href="/orders" onClick={() => setMobileOpen(false)} key="orders" data-testid="link-mobile-orders">تتبع طلب سابق<PackageSearch size={16}/></Link></div><div className="drawer-foot">تحتاج مساعدة؟ <Link href="/orders" onClick={() => setMobileOpen(false)}>راجع طلبك</Link></div></aside></div>}
      <main className="page-main">{children}</main>
+      {location !== '/cart' && location !== '/checkout' && <FloatingCartSummary total={cartSubtotal} count={cartCount} />}
       <footer className="site-footer"><div className="container footer-grid"><div className="footer-brand"><span className="brand-cabl light">CABL<span className="brand-dot">.</span></span><p>الأشياء الصغيرة التي تجعل يومك أسهل. بيانات كتالوج واضحة وخطوات شراء مرتبطة بالطلب.</p><Link href="/orders" data-testid="link-footer-phone"><PackageSearch size={15}/> تتبع طلبك</Link></div><div><h3>تسوق</h3><Link href="/search" data-testid="link-footer-all">كل المنتجات</Link>{categories.map((category) => <Link href={`/category/${category.slug}`} key={category.slug} data-testid={`link-footer-category-${category.slug}`}>{category.name}</Link>)}</div><div><h3>خدمة العملاء</h3><Link href="/orders" data-testid="link-footer-orders">تتبع طلبك</Link><Link href="/shipping">الشحن والتوصيل</Link><Link href="/return-policy">الإرجاع والاستبدال</Link><Link href="/faq">الأسئلة الشائعة</Link><Link href="/contact">تواصل معنا</Link></div><div><h3>اعرف أكثر</h3><Link href="/about">عن CABL</Link><Link href="/blog/best-power-bank-yemen">دليل الشراء</Link><Link href="/lab">مركز المواصفات</Link><Link href="/verify">التحقق من الضمان</Link></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} CABL اليمن</span><span>الدفع الآمن يبدأ من معلومات واضحة</span></div></footer>
   </div>;
+}
+
+function FloatingCartSummary({ total, count }: { total: number; count: number }) {
+  const { formatPrice } = useStore();
+  if (count < 1) return null;
+  return <aside className="floating-cart-summary" role="status" aria-live="polite">
+    <div className="floating-cart-copy"><span className="floating-cart-label">السلة الحالية</span><strong>{formatPrice(total)}</strong><small>{count} {count === 1 ? 'منتج' : 'منتجات'}</small></div>
+    <Link href="/cart" className="button button-primary floating-cart-button" data-testid="link-floating-cart">اذهب إلى السلة <ArrowLeft size={15} /></Link>
+  </aside>;
 }
