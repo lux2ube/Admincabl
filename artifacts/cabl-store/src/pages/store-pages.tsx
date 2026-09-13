@@ -300,6 +300,11 @@ function CommercialHomePage() {
     }, new Map<string, { brand: string; brandSlug: string; product: StoreProduct; count: number }>()).values()),
     [products],
   );
+  const heroBrands = useMemo(() => {
+    const vention = brandCollections.find(({ brand }) => brand.toLowerCase().includes('vention'));
+    const remaining = brandCollections.filter(({ brand }) => !vention || brand !== vention.brand);
+    return [...(vention ? [vention] : []), ...remaining].slice(0, 4);
+  }, [brandCollections]);
   const [quickBrand, setQuickBrand] = useState('');
   const [quickCategory, setQuickCategory] = useState('');
   const quickMatches = useMemo(
@@ -383,7 +388,7 @@ function CommercialHomePage() {
                 <circle cx="423" cy="321" r="8" fill="#fff" stroke="#173653" strokeWidth="3" />
               </svg>
               <div className="hero-illustration-brands" aria-hidden="true">
-                {brandCollections.slice(0, 3).map(({ brand }) => <span key={brand}>{brand}</span>)}
+                {heroBrands.map(({ brand }) => <span key={brand}>{brand}</span>)}
               </div>
             </div>
           </div>

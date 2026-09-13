@@ -387,6 +387,7 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:h
 .hero-illustration-brands span:nth-child(1){top:7%;left:13%;transform:rotate(-7deg)}
 .hero-illustration-brands span:nth-child(2){top:15%;right:4%;transform:rotate(6deg)}
 .hero-illustration-brands span:nth-child(3){bottom:10%;left:18%;transform:rotate(4deg)}
+.hero-illustration-brands span:nth-child(4){bottom:7%;right:15%;transform:rotate(-5deg)}
 
 @media (max-width:767px){
   .hero-illustration{width:min(100%,390px);height:310px}
@@ -394,4 +395,5 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:h
   .hero-illustration-brands span:nth-child(1){top:5%;left:6%}
   .hero-illustration-brands span:nth-child(2){top:11%;right:1%}
   .hero-illustration-brands span:nth-child(3){bottom:7%;left:12%}
+  .hero-illustration-brands span:nth-child(4){bottom:4%;right:9%}
 }
