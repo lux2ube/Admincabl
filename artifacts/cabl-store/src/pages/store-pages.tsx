@@ -325,15 +325,17 @@ function CommercialHomePage() {
       const category = categories.find((item) => !used.has(item.slug) && option.match.test(`${item.slug} ${item.name}`));
       if (!category) return [];
       used.add(category.slug);
-      return [{ category, title: option.title, text: option.text, icon: option.icon }];
+      const product = products.find((item) => item.category?.slug === category.slug && item.images?.[0]);
+      return [{ category, title: option.title, text: option.text, icon: option.icon, product }];
     });
     categories.forEach((category) => {
       if (selected.length >= 5 || used.has(category.slug)) return;
       used.add(category.slug);
-       selected.push({ category, title: category.name, text: 'منتجات منشورة في هذا القسم', icon: <Package size={20} /> });
+      const product = products.find((item) => item.category?.slug === category.slug && item.images?.[0]);
+      selected.push({ category, title: category.name, text: 'منتجات منشورة في هذا القسم', icon: <Package size={20} />, product });
     });
     return selected.slice(0, 5);
-  }, [categories]);
+  }, [categories, products]);
   return (
     <div className="guided-home">
       <SEO type="home" />
@@ -418,11 +420,16 @@ function CommercialHomePage() {
             </div>
           ) : needs.length ? (
             <div className="guided-needs-grid">
-              {needs.map(({ category, title, text, icon }) => (
+              {needs.map(({ category, title, text, icon, product }) => (
                 <Link href={`/category/${category.slug}`} className="guided-need-card" key={category.slug} data-testid={`link-home-need-${category.slug}`}>
-                  <span className="guided-need-icon">{icon}</span>
-                  <span className="guided-need-copy"><strong>{title}</strong><small>{text}</small></span>
-                  <span className="guided-need-footer">{category.name} <ArrowLeft size={13} /></span>
+                  <span className="guided-need-media" aria-hidden="true">
+                    {product ? <ProductImage product={product} className="guided-need-product-image" /> : icon}
+                  </span>
+                  <span className="guided-need-content">
+                    <span className="guided-need-icon">{icon}</span>
+                    <span className="guided-need-copy"><strong>{title}</strong><small>{text}</small></span>
+                    <span className="guided-need-footer">{category.name} <ArrowLeft size={13} /></span>
+                  </span>
                 </Link>
               ))}
             </div>
