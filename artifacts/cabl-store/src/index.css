@@ -4,11 +4,20 @@
 @import './editorial-pages.css';
 @custom-variant dark (&:is(.dark *));
 @font-face{font-family:CairoLocal;src:url('/cairovolt/4dccc19ac2b7.woff2') format('woff2');font-style:normal;font-weight:200 800;font-display:swap}
+@font-face{font-family:'IBMPlexSansArabicLocal';src:url('/fonts/ibm-plex-sans-arabic-400.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:'IBMPlexSansArabicLocal';src:url('/fonts/ibm-plex-sans-arabic-500.ttf') format('truetype');font-style:normal;font-weight:500;font-display:swap}
+@font-face{font-family:'IBMPlexSansArabicLocal';src:url('/fonts/ibm-plex-sans-arabic-600.ttf') format('truetype');font-style:normal;font-weight:600;font-display:swap}
+@font-face{font-family:'IBMPlexSansArabicLocal';src:url('/fonts/ibm-plex-sans-arabic-700.ttf') format('truetype');font-style:normal;font-weight:700;font-display:swap}
+@font-face{font-family:'ReadexProLocal';src:url('/fonts/readex-pro-400.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:'ReadexProLocal';src:url('/fonts/readex-pro-500.ttf') format('truetype');font-style:normal;font-weight:500;font-display:swap}
+@font-face{font-family:'ReadexProLocal';src:url('/fonts/readex-pro-600.ttf') format('truetype');font-style:normal;font-weight:600;font-display:swap}
+@font-face{font-family:'ReadexProLocal';src:url('/fonts/readex-pro-700.ttf') format('truetype');font-style:normal;font-weight:700;font-display:swap}
 @theme inline{--font-sans:var(--app-font-sans);--font-mono:var(--app-font-mono);--color-background:hsl(var(--background));--color-foreground:hsl(var(--foreground));--color-primary:hsl(var(--primary));--color-primary-foreground:hsl(var(--primary-foreground));--color-border:hsl(var(--border));--color-muted:hsl(var(--muted));--color-muted-foreground:hsl(var(--muted-foreground))}
-:root{--background:216 33% 97%;--foreground:221 42% 13%;--primary:224 77% 51%;--primary-foreground:0 0% 100%;--accent:190 94% 45%;--accent-foreground:221 42% 13%;--secondary:210 37% 93%;--secondary-foreground:221 42% 13%;--muted:216 24% 92%;--muted-foreground:215 18% 45%;--border:214 27% 86%;--input:214 27% 86%;--ring:190 94% 45%;--card:0 0% 100%;--card-foreground:221 42% 13%;--radius:.9rem;--app-font-sans:CairoLocal,Cairo,Tahoma,system-ui,sans-serif;--app-font-mono:'Space Mono',monospace}
+:root{--background:216 33% 97%;--foreground:221 42% 13%;--primary:224 77% 51%;--primary-foreground:0 0% 100%;--accent:190 94% 45%;--accent-foreground:221 42% 13%;--secondary:210 37% 93%;--secondary-foreground:221 42% 13%;--muted:216 24% 92%;--muted-foreground:215 18% 45%;--border:214 27% 86%;--input:214 27% 86%;--ring:190 94% 45%;--card:0 0% 100%;--card-foreground:221 42% 13%;--radius:.9rem;--app-font-sans:'IBMPlexSansArabicLocal',IBM Plex Sans Arabic,CairoLocal,Cairo,Tahoma,system-ui,sans-serif;--app-font-display:'ReadexProLocal',Readex Pro,IBMPlexSansArabicLocal,sans-serif;--app-font-mono:'Space Mono',monospace}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:hsl(var(--background));color:hsl(var(--foreground));font-family:var(--app-font-sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,h5,h6,.brand-cabl,.eyebrow,.nav-link,.button,.reference-hero-cta,.hero-illustration-brands span{font-family:var(--app-font-display)}
 button,input,select,textarea{font:inherit}
 button,a{touch-action:manipulation}
 a{color:inherit;text-decoration:none}
