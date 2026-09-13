@@ -347,38 +347,40 @@ function CommercialHomePage() {
           </div>
           <div className="reference-hero-media reveal">
             <div className="hero-illustration" aria-label="رسم توضيحي للشحن والطاقة والاتصال">
-              <svg className="hero-illustration-svg" viewBox="0 0 620 450" role="img" aria-label="رسم توضيحي لمنتجات الشحن والطاقة والاتصال">
+              <svg className="hero-illustration-svg" viewBox="0 0 620 450" role="img" aria-label="رسم تجريدي للطاقة والاتصال">
                 <defs>
-                  <linearGradient id="hero-device-gradient" x1="0" x2="1" y1="0" y2="1">
-                    <stop offset="0" stopColor="#ffffff" />
-                    <stop offset="1" stopColor="#d7e9f7" />
+                  <linearGradient id="hero-abstract-blue" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0" stopColor="#1761ed" />
+                    <stop offset="1" stopColor="#64dfe5" />
                   </linearGradient>
-                  <linearGradient id="hero-accent-gradient" x1="0" x2="1" y1="0" y2="1">
-                    <stop offset="0" stopColor="#37d7e3" />
+                  <linearGradient id="hero-abstract-cyan" x1="0" x2="1" y1="1" y2="0">
+                    <stop offset="0" stopColor="#35cbd8" />
                     <stop offset="1" stopColor="#1761ed" />
                   </linearGradient>
-                  <filter id="hero-soft-shadow" x="-30%" y="-30%" width="160%" height="160%">
-                    <feDropShadow dx="0" dy="20" stdDeviation="16" floodColor="#173e68" floodOpacity=".18" />
+                  <radialGradient id="hero-abstract-core">
+                    <stop offset="0" stopColor="#ffffff" />
+                    <stop offset=".55" stopColor="#dff6f8" />
+                    <stop offset="1" stopColor="#a7dce8" stopOpacity="0" />
+                  </radialGradient>
+                  <filter id="hero-abstract-glow" x="-80%" y="-80%" width="260%" height="260%">
+                    <feGaussianBlur stdDeviation="16" />
                   </filter>
                 </defs>
-                <ellipse cx="315" cy="374" rx="220" ry="34" fill="#b9d8ed" opacity=".55" />
-                <path d="M92 214c-50-28-53-92-4-119 46-25 96-1 99 45 3 38-26 63-63 72-30 7-42 28-24 47 19 20 58 23 83 6" fill="none" stroke="#1761ed" strokeWidth="8" strokeLinecap="round" opacity=".8" />
-                <path d="M518 135c56 15 65 71 28 102-33 27-80 17-88-19-7-31 16-55 49-56 24-1 34-17 20-30-12-11-35-13-52-4" fill="none" stroke="#30cbd7" strokeWidth="8" strokeLinecap="round" opacity=".75" />
-                <rect x="173" y="111" width="278" height="188" rx="34" fill="url(#hero-device-gradient)" stroke="#c3dced" strokeWidth="3" filter="url(#hero-soft-shadow)" />
-                <rect x="199" y="137" width="226" height="30" rx="15" fill="#e3f0f9" />
-                <circle cx="222" cy="152" r="6" fill="#36cbd7" />
-                <circle cx="244" cy="152" r="6" fill="#1761ed" opacity=".7" />
-                <rect x="213" y="197" width="82" height="12" rx="6" fill="#b9d3e5" />
-                <rect x="213" y="220" width="128" height="12" rx="6" fill="#d0e2ee" />
-                <rect x="213" y="243" width="102" height="12" rx="6" fill="#d0e2ee" />
-                <path d="M364 205l-23 42h24l-13 35 48-55h-28l19-22z" fill="url(#hero-accent-gradient)" />
-                <rect x="183" y="291" width="258" height="18" rx="9" fill="#b7d2e5" opacity=".8" />
-                <rect x="246" y="309" width="141" height="24" rx="12" fill="#173653" />
-                <text x="316" y="326" textAnchor="middle" fill="#8ee9eb" fontSize="11" fontWeight="800" letterSpacing="3">CABL</text>
-                <circle cx="125" cy="302" r="36" fill="#e5f7f4" stroke="#9bded9" strokeWidth="2" />
-                <path d="M112 302h25m-12-12v24" stroke="#0c8a82" strokeWidth="5" strokeLinecap="round" />
-                <circle cx="496" cy="292" r="38" fill="#fff2dc" stroke="#f1cf8b" strokeWidth="2" />
-                <path d="M496 271v21l15 9" fill="none" stroke="#b06d14" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                <ellipse cx="310" cy="350" rx="220" ry="35" fill="#b8d9ec" opacity=".55" />
+                <circle cx="310" cy="220" r="125" fill="url(#hero-abstract-core)" filter="url(#hero-abstract-glow)" opacity=".85" />
+                <circle cx="310" cy="220" r="135" fill="none" stroke="#ffffff" strokeWidth="1.5" opacity=".85" />
+                <circle cx="310" cy="220" r="176" fill="none" stroke="#ffffff" strokeWidth="1" strokeDasharray="3 15" opacity=".8" />
+                <path d="M91 273c54-8 73-54 105-104 36-57 72-70 111-37 42 36 39 92-4 123-47 34-92 10-107-29" fill="none" stroke="url(#hero-abstract-blue)" strokeWidth="15" strokeLinecap="round" opacity=".9" />
+                <path d="M529 166c-56 8-73 54-105 104-36 57-72 70-111 37-42-36-39-92 4-123 47-34 92-10 107 29" fill="none" stroke="url(#hero-abstract-cyan)" strokeWidth="15" strokeLinecap="round" opacity=".85" />
+                <path d="M173 136c34-54 86-75 137-45 45 26 63 78 39 123-26 49-90 61-133 25" fill="none" stroke="#173653" strokeWidth="3" strokeLinecap="round" strokeDasharray="1 13" opacity=".52" />
+                <path d="M447 304c-34 54-86 75-137 45-45-26-63-78-39-123 26-49 90-61 133-25" fill="none" stroke="#173653" strokeWidth="3" strokeLinecap="round" strokeDasharray="1 13" opacity=".38" />
+                <circle cx="310" cy="220" r="52" fill="#f9fdff" stroke="#cae9f0" strokeWidth="3" />
+                <circle cx="310" cy="220" r="34" fill="url(#hero-abstract-blue)" opacity=".95" />
+                <path d="M319 186l-24 39h21l-9 30 31-42h-20l14-27z" fill="#fff" />
+                <circle cx="116" cy="271" r="12" fill="#fff" stroke="#1761ed" strokeWidth="4" />
+                <circle cx="506" cy="166" r="12" fill="#fff" stroke="#35cbd8" strokeWidth="4" />
+                <circle cx="198" cy="117" r="8" fill="#fff" stroke="#173653" strokeWidth="3" />
+                <circle cx="423" cy="321" r="8" fill="#fff" stroke="#173653" strokeWidth="3" />
               </svg>
               <div className="hero-illustration-brands" aria-hidden="true">
                 {brandCollections.slice(0, 3).map(({ brand }) => <span key={brand}>{brand}</span>)}
