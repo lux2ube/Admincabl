@@ -69,9 +69,14 @@ input:focus,select:focus,textarea:focus{border-color:hsl(var(--accent));box-shad
 .reference-hero-media:before{content:'';position:absolute;width:min(75vw,820px);height:260px;bottom:-95px;border-radius:50%;background:#e9eef8a8;filter:blur(2px)}
 .reference-hero-product{height:100%;width:min(760px,100%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative}
 .reference-hero-product-image{width:min(680px,100%);height:340px;object-fit:contain;filter:drop-shadow(0 28px 24px #1f477445);position:relative;z-index:1}
-.reference-hero-product-mark{position:absolute;top:10px;right:18px;color:#7587a0;font-size:11px;font-weight:800;z-index:2}
-.reference-hero-product-name{position:absolute;bottom:12px;background:#101f3a;color:#fff;border-radius:999px;padding:9px 16px;max-width:80%;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2}
-.reference-hero-empty{height:100%;display:grid;place-items:center}
+.product-image-fallback{display:grid;place-items:center;color:#1757ee;background:#e9eef8;border-radius:50%}
+.reference-hero-product-image.product-image-fallback{width:220px;height:220px}
+.reference-hero-product-mark{position:absolute;top:10px;right:18px;max-width:70%;color:#7587a0;font-size:11px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;z-index:2}
+.reference-hero-product-name{position:absolute;bottom:12px;background:#101f3a;color:#fff;border-radius:16px;padding:9px 16px;max-width:80%;font-size:11px;font-weight:800;line-height:1.4;text-align:center;overflow:hidden;z-index:2}
+.reference-hero-loading{width:min(680px,100%);height:280px;border-radius:28px}
+.reference-hero-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#50627c}
+.reference-hero-empty strong{color:#111d34;font-size:15px}
+.reference-hero-empty span{font-size:11px}
 .guided-hero-product{min-height:390px;position:relative;display:grid;place-items:center}
 .guided-hero-product:before{content:'';position:absolute;width:350px;height:350px;border-radius:50%;background:#c5e9f2;opacity:.7}
 .guided-hero-product-card{position:relative;width:min(420px,100%);height:360px;background:#f9fcff;border:1px solid #d9e7f3;border-radius:23px;display:grid;place-items:center;box-shadow:0 24px 48px #2d5f8730;transform:rotate(-3deg)}

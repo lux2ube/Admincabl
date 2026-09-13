@@ -68,7 +68,12 @@ function NoIndex() {
 }
 
 function ProductImage({ product, className = '' }: { product: StoreProduct; className?: string }) {
-  return <img className={className} src={product.images?.[0]} alt={product.productName} data-testid={`img-detail-${product.id}`}/>;
+  const [imageFailed, setImageFailed] = useState(false);
+  const image = product.images?.[0];
+  if (!image || imageFailed) {
+    return <span className={`${className} product-image-fallback`} role="img" aria-label={product.productName}><Package size={46} /></span>;
+  }
+  return <img className={className} src={image} alt={product.productName} onError={() => setImageFailed(true)} data-testid={`img-detail-${product.id}`}/>;
 }
 
 function BrandCollectionImage({ product, brand }: { product: StoreProduct; brand: string }) {
@@ -101,7 +106,7 @@ function GuidedHomePage() {
     () => Array.from(new Map(products.map((product) => [product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'), product])).values()),
     [products],
   );
-  const heroProduct = inStockProducts[0] || products[0];
+  const heroProduct = inStockProducts[0];
   const categoryFor = (matcher: RegExp) => categories.find((category) => matcher.test(`${category.slug} ${category.name}`)) || categories[0];
   const chargerCategory = categoryFor(/charg|شاحن/i);
   const cableCategory = categoryFor(/cable|كابل/i);
@@ -299,9 +304,12 @@ function CommercialHomePage() {
     }, new Map<string, { brand: string; brandSlug: string; product: StoreProduct; count: number }>()).values()).slice(0, 5),
     [products],
   );
-  const heroProduct = inStockProducts[0] || products[0];
-  const heroPrice = heroProduct ? (heroProduct.discountPrice ?? heroProduct.regularPrice) : 0;
-  const heroDiscount = heroProduct?.discountPrice ? Math.round((1 - heroProduct.discountPrice / heroProduct.regularPrice) * 100) : 0;
+  const heroProduct = inStockProducts[0];
+  const heroDiscountPrice = heroProduct?.discountPrice;
+  const heroPrice = heroProduct ? (heroDiscountPrice ?? heroProduct.regularPrice) : 0;
+  const heroDiscount = heroProduct && heroDiscountPrice !== null && heroDiscountPrice < heroProduct.regularPrice
+    ? Math.round((1 - heroDiscountPrice / heroProduct.regularPrice) * 100)
+    : 0;
   const [finderCategory, setFinderCategory] = useState('all');
   const [finderBudget, setFinderBudget] = useState('all');
   const needs = useMemo(() => {
@@ -346,11 +354,11 @@ function CommercialHomePage() {
           <div className="reference-hero-copy reveal">
             <span className="eyebrow">CABL / اليمن</span>
             <h1>شحن أوضح.<br /><em>اختيار أذكى.</em></h1>
-            <p>{heroProduct?.shortDescription || 'راجع المنتج والسعر والتوافر قبل الإضافة إلى السلة.'}</p>
+            <p>{isLoading ? 'نحمّل الكتالوج الحالي لنعرض لك السعر والتوافر بدقة.' : heroProduct?.shortDescription || (products.length ? 'لا توجد منتجات متاحة حالياً. استعرض الكتالوج لمعرفة الخيارات المنشورة.' : 'لا توجد منتجات منشورة حالياً. استعرض الكتالوج لمعرفة الخيارات المتاحة.')}</p>
             {heroProduct && (
               <div className="reference-hero-price">
                 <strong>{formatPrice(heroPrice)}</strong>
-                {heroProduct.discountPrice && <del>{formatPrice(heroProduct.regularPrice)}</del>}
+                {heroDiscount > 0 && <del>{formatPrice(heroProduct.regularPrice)}</del>}
                 {heroDiscount > 0 && <span>-{heroDiscount}%</span>}
               </div>
             )}
@@ -360,14 +368,20 @@ function CommercialHomePage() {
             <div className="reference-hero-note"><ShieldCheck size={15} /> السعر والتوافر من الكتالوج الحالي</div>
           </div>
           <div className="reference-hero-media reveal">
-            {heroProduct ? (
+            {isLoading ? (
+              <div className="reference-hero-loading skeleton" data-testid="loading-home-hero" />
+            ) : heroProduct ? (
               <Link href={productPath(heroProduct)} className="reference-hero-product" data-testid={`link-home-hero-product-${heroProduct.id}`}>
                 <span className="reference-hero-product-mark">{heroProduct.brand}</span>
                 <ProductImage product={heroProduct} className="reference-hero-product-image" />
                 <span className="reference-hero-product-name">{heroProduct.productName}</span>
               </Link>
             ) : (
-              <div className="reference-hero-empty" data-testid="state-home-hero-empty"><Package size={46} color="#1757ee" /></div>
+              <div className="reference-hero-empty" data-testid="state-home-hero-empty">
+                <Package size={46} color="#1757ee" />
+                <strong>{products.length ? 'لا توجد منتجات متاحة حالياً' : 'لا توجد منتجات منشورة حالياً'}</strong>
+                <span>استعرض الكتالوج للاطلاع على آخر المنتجات.</span>
+              </div>
             )}
           </div>
         </div>
