@@ -420,14 +420,13 @@ function CommercialHomePage() {
             </div>
           ) : needs.length ? (
             <div className="guided-needs-grid">
-              {needs.map(({ category, title, text, icon, product }) => (
+              {needs.map(({ category, title, product }) => (
                 <Link href={`/category/${category.slug}`} className="guided-need-card" key={category.slug} data-testid={`link-home-need-${category.slug}`}>
                   <span className="guided-need-media" aria-hidden="true">
-                    {product ? <ProductImage product={product} className="guided-need-product-image" /> : icon}
+                    {product ? <ProductImage product={product} className="guided-need-product-image" /> : null}
                   </span>
                   <span className="guided-need-content">
-                    <span className="guided-need-icon">{icon}</span>
-                    <span className="guided-need-copy"><strong>{title}</strong><small>{text}</small></span>
+                    <span className="guided-need-copy"><strong>{title}</strong></span>
                     <span className="guided-need-footer">{category.name} <ArrowLeft size={13} /></span>
                   </span>
                 </Link>
