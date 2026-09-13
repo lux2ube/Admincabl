@@ -378,3 +378,20 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:h
   .hero-collage-brand{font-size:8px;inset:auto 8px 7px}
   .hero-collage-wordmark{bottom:23px;font-size:9px}
 }
+
+/* Abstract store illustration for the hero */
+.hero-illustration{position:relative;width:min(100%,590px);height:440px;direction:ltr}
+.hero-illustration-svg{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(0 20px 30px #2e5b8430)}
+.hero-illustration-brands{position:absolute;inset:0;pointer-events:none}
+.hero-illustration-brands span{position:absolute;display:inline-flex;align-items:center;padding:8px 13px;border:1px solid #ffffffd9;border-radius:999px;background:#ffffffb8;color:#3a5b78;font-size:10px;font-weight:900;letter-spacing:.08em;box-shadow:0 10px 20px #32608a1a;backdrop-filter:blur(8px)}
+.hero-illustration-brands span:nth-child(1){top:7%;left:13%;transform:rotate(-7deg)}
+.hero-illustration-brands span:nth-child(2){top:15%;right:4%;transform:rotate(6deg)}
+.hero-illustration-brands span:nth-child(3){bottom:10%;left:18%;transform:rotate(4deg)}
+
+@media (max-width:767px){
+  .hero-illustration{width:min(100%,390px);height:310px}
+  .hero-illustration-brands span{padding:6px 9px;font-size:8px}
+  .hero-illustration-brands span:nth-child(1){top:5%;left:6%}
+  .hero-illustration-brands span:nth-child(2){top:11%;right:1%}
+  .hero-illustration-brands span:nth-child(3){bottom:7%;left:12%}
+}
