@@ -7,7 +7,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [location] = useLocation();
-  const { catalog, cartCount, favorites, cartProducts, formatPrice } = useStore();
+  const { catalog, cartCount, favorites, cartProducts } = useStore();
   const categories = useMemo(() => Array.from(new Map((catalog?.products || [])
     .filter((product) => product.category)
     .map((product) => [product.category!.slug, product.category!]))
