@@ -254,7 +254,7 @@ export function buildCategorySeo(input: CategorySeoInput): SeoResponse {
 }
 
 export function buildBrandSeo(input: BrandSeoInput): SeoResponse {
-  const canonicalPath = `/${input.slug}`;
+  const canonicalPath = `/brand/${input.slug}`;
   const description = input.metaDescription
     || input.seoDescription
     || input.description
