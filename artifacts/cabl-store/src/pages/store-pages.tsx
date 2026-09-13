@@ -394,13 +394,13 @@ function CommercialHomePage() {
         </div>
       </section>
 
-      <section className="guided-quick-access" aria-labelledby="home-quick-access-title">
+      <section className="guided-quick-access guided-home-catalog" aria-labelledby="home-quick-access-title">
         <div className="container">
           <div className="guided-section-header">
             <div>
-              <span className="eyebrow">وصول سريع للكتالوج</span>
-              <h2 id="home-quick-access-title">اختر العلامة والقسم بسهولة</h2>
-              <p>مثلاً: اختر UGREEN ثم الشواحن لعرض النتائج المطابقة مباشرة.</p>
+              <span className="eyebrow">الكتالوج الكامل</span>
+              <h2 id="home-quick-access-title">كل المنتجات في مكان واحد</h2>
+              <p>استخدم أزرار العلامة والقسم لتصفية المنتجات مباشرة داخل الصفحة.</p>
             </div>
             <span className="guided-finder-result-count">{quickMatches.length} منتج مطابق</span>
           </div>
@@ -414,18 +414,18 @@ function CommercialHomePage() {
                 <fieldset className="guided-quick-fieldset">
                   <legend>العلامة التجارية</legend>
                   <div className="guided-finder-options">
-                    <button type="button" className={!quickBrand ? 'is-selected' : ''} onClick={() => setQuickBrand('')}>كل العلامات</button>
+                    <button type="button" aria-pressed={!quickBrand} className={!quickBrand ? 'is-selected' : ''} onClick={() => setQuickBrand('')}>كل العلامات</button>
                     {brandCollections.map(({ brand }) => (
-                      <button type="button" className={quickBrand === brand ? 'is-selected' : ''} key={brand} onClick={() => setQuickBrand(quickBrand === brand ? '' : brand)}>{brand}</button>
+                      <button type="button" aria-pressed={quickBrand === brand} className={quickBrand === brand ? 'is-selected' : ''} key={brand} onClick={() => setQuickBrand(quickBrand === brand ? '' : brand)}>{brand}</button>
                     ))}
                   </div>
                 </fieldset>
                 <fieldset className="guided-quick-fieldset">
                   <legend>القسم</legend>
                   <div className="guided-finder-options">
-                    <button type="button" className={!quickCategory ? 'is-selected' : ''} onClick={() => setQuickCategory('')}>كل الأقسام</button>
+                    <button type="button" aria-pressed={!quickCategory} className={!quickCategory ? 'is-selected' : ''} onClick={() => setQuickCategory('')}>كل الأقسام</button>
                     {categories.map((category) => (
-                      <button type="button" className={quickCategory === category.slug ? 'is-selected' : ''} key={category.slug} onClick={() => setQuickCategory(quickCategory === category.slug ? '' : category.slug)}>{category.name}</button>
+                      <button type="button" aria-pressed={quickCategory === category.slug} className={quickCategory === category.slug ? 'is-selected' : ''} key={category.slug} onClick={() => setQuickCategory(quickCategory === category.slug ? '' : category.slug)}>{category.name}</button>
                     ))}
                   </div>
                 </fieldset>
@@ -435,15 +435,13 @@ function CommercialHomePage() {
                   <strong>{quickBrand || 'كل العلامات'}{quickCategory ? ` · ${categories.find((category) => category.slug === quickCategory)?.name || quickCategory}` : ''}</strong>
                   <span>{quickMatches.length ? 'تظهر النتائج من الكتالوج الحالي فقط.' : 'لا توجد منتجات مطابقة لهذا الاختيار حالياً.'}</span>
                 </div>
-                <Link href={quickSearchHref} className="button button-primary" data-testid="link-home-quick-results">عرض النتائج <ArrowLeft size={16} /></Link>
+              </div>
+              <div className="guided-home-catalog-results">
+                {quickMatches.length > 0 && <div className="guided-home-catalog-results-heading"><span>نتائج التصفية المباشرة</span><strong>{quickMatches.length} منتج</strong></div>}
+                <ProductGrid products={quickMatches} empty="لا توجد منتجات مطابقة لهذا الاختيار حالياً." />
               </div>
             </>
           )}
-          <div className="guided-quick-directory" aria-label="روابط كل الأقسام والعلامات">
-            <span>فتح صفحة مستقلة:</span>
-            {categories.map((category) => <Link href={`/category/${category.slug}`} key={`category-${category.slug}`}>{category.name}</Link>)}
-            {brandCollections.map(({ brand, brandSlug }) => <Link href={brandPath(brandSlug)} key={`brand-${brandSlug}`}>{brand}</Link>)}
-          </div>
         </div>
       </section>
 
@@ -477,20 +475,6 @@ function CommercialHomePage() {
         </div>
       </section>
 
-      <section className="guided-section guided-catalog" aria-labelledby="home-featured-title">
-        <div className="container">
-          <div className="guided-section-header">
-            <div>
-              <span className="eyebrow">من الكتالوج الحالي</span>
-              <h2 id="home-featured-title">منتجات منشورة الآن</h2>
-              <p>راجع السعر والتوافر والتفاصيل قبل اختيار الكمية.</p>
-            </div>
-            <Link href="/search" data-testid="link-home-products-all">استعرض الكتالوج <ArrowLeft size={15} /></Link>
-          </div>
-          {isLoading ? <LoadingCatalog /> : isError ? <CatalogError retry={() => window.location.reload()} /> : <ProductGrid products={featured} empty="لا توجد منتجات منشورة حالياً." />}
-        </div>
-      </section>
-
       <section className="guided-brand-strip" aria-labelledby="home-brands-title">
         <div className="container">
           <div className="guided-section-header">
@@ -510,45 +494,6 @@ function CommercialHomePage() {
               </Link>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="guided-finder" aria-labelledby="home-finder-title">
-        <div className="container">
-          <div className="guided-finder-heading">
-            <div>
-              <span className="eyebrow">مساعد اختيار إرشادي</span>
-              <h2 id="home-finder-title">قل لنا ما تحتاجه</h2>
-              <p>نضيّق البداية حسب القسم والسعر فقط. افتح صفحة المنتج وراجع التوافق قبل الطلب.</p>
-            </div>
-            <span className="guided-finder-result-count">{finderProducts.length} نتائج حالية</span>
-          </div>
-          <div className="guided-finder-controls">
-            <fieldset>
-              <legend>ما القسم الأقرب لاستخدامك؟</legend>
-              <div className="guided-finder-options">
-                <button type="button" className={finderCategory === 'all' ? 'is-selected' : ''} onClick={() => setFinderCategory('all')}>كل الأقسام</button>
-                {categories.slice(0, 5).map((category) => (
-                  <button type="button" className={finderCategory === category.slug ? 'is-selected' : ''} key={category.slug} onClick={() => setFinderCategory(category.slug)}>{category.name}</button>
-                ))}
-              </div>
-            </fieldset>
-            <fieldset>
-              <legend>ما نطاق السعر المريح؟</legend>
-              <div className="guided-finder-options">
-                {[
-                  ['all', 'كل الأسعار'],
-                  ['under-25', `أقل من ${formatPrice(25)}`],
-                  ['25-50', `${formatPrice(25)} – ${formatPrice(50)}`],
-                  ['over-50', `أكثر من ${formatPrice(50)}`],
-                ].map(([value, label]) => (
-                  <button type="button" className={finderBudget === value ? 'is-selected' : ''} key={value} onClick={() => setFinderBudget(value)}>{label}</button>
-                ))}
-              </div>
-            </fieldset>
-          </div>
-          <ProductGrid products={finderProducts} empty="لا توجد نتائج متاحة بهذا الاختيار حالياً." />
-          <p className="guided-finder-note">النتائج مبنية على بيانات القسم والسعر والتوافر الحالي، وليست حكماً على التوافق. راجع تفاصيل المنتج قبل الإضافة.</p>
         </div>
       </section>
 
