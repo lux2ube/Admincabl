@@ -19,17 +19,46 @@ type StoreContextValue = {
   formatPrice: (usd: number) => string;
 };
 const StoreContext = createContext<StoreContextValue | null>(null);
-const readStorage = <T,>(key: string, fallback: T): T => {
-  try { return JSON.parse(localStorage.getItem(key) || '') as T; } catch { return fallback; }
+const readStorage = (key: string): unknown => {
+  try { return JSON.parse(localStorage.getItem(key) || ''); } catch { return null; }
+};
+const normalizeCart = (value: unknown, products: StoreProduct[]): CartLine[] => {
+  if (!Array.isArray(value)) return [];
+  const quantities = new Map<string, number>();
+  for (const item of value) {
+    if (!item || typeof item !== 'object') continue;
+    const line = item as Partial<CartLine>;
+    const product = products.find((candidate) => candidate.id === line.productId);
+    const quantity = Number(line.quantity);
+    if (!product || !Number.isFinite(quantity) || quantity < 1 || product.quantity < 1) continue;
+    quantities.set(product.id, (quantities.get(product.id) || 0) + Math.floor(quantity));
+  }
+  return [...quantities.entries()].map(([productId, quantity]) => ({
+    productId,
+    quantity: Math.min(quantity, products.find((product) => product.id === productId)?.quantity || 1),
+  }));
 };
 export function StoreProvider({ children }: { children: ReactNode }) {
   const query = useGetStoreCatalog();
-  const [cart, setCart] = useState<CartLine[]>(() => readStorage('cabl-cart', []));
-  const [favorites, setFavorites] = useState<string[]>(() => readStorage('cabl-favorites', []));
+  const [cart, setCart] = useState<CartLine[]>(() => {
+    const stored = readStorage('cabl-cart');
+    return Array.isArray(stored) ? stored as CartLine[] : [];
+  });
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    const stored = readStorage('cabl-favorites');
+    return Array.isArray(stored) ? stored.filter((id): id is string => typeof id === 'string') : [];
+  });
   useEffect(() => localStorage.setItem('cabl-cart', JSON.stringify(cart)), [cart]);
   useEffect(() => localStorage.setItem('cabl-favorites', JSON.stringify(favorites)), [favorites]);
   const catalog = query.data;
   const currency = catalog?.currencies.find((item) => item.isDefault) || catalog?.currencies[0];
+  useEffect(() => {
+    if (!catalog) return;
+    setCart((current) => {
+      const normalized = normalizeCart(current, catalog.products);
+      return JSON.stringify(normalized) === JSON.stringify(current) ? current : normalized;
+    });
+  }, [catalog]);
   const cartProducts = useMemo(() => cart.flatMap((line) => {
     const product = catalog?.products.find((item) => item.id === line.productId);
     return product ? [{ product, quantity: line.quantity }] : [];
@@ -55,7 +84,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }),
     removeFromCart: (productId) => setCart((current) => current.filter((line) => line.productId !== productId)),
     toggleFavorite: (productId) => setFavorites((current) => current.includes(productId) ? current.filter((id) => id !== productId) : [...current, productId]),
-    cartProducts, cartCount: cart.reduce((sum, line) => sum + line.quantity, 0), currency,
+    cartProducts, cartCount: cartProducts.reduce((sum, line) => sum + line.quantity, 0), currency,
     formatPrice: (usd) => new Intl.NumberFormat('ar-YE', { style: 'currency', currency: currency?.code || 'USD', maximumFractionDigits: 0 }).format(usd * (currency?.ratePerUsd || 1)),
   };
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
