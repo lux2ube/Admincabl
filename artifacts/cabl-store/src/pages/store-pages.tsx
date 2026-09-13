@@ -1369,6 +1369,8 @@ function PurchaseSteps({ current }: { current: 'cart' | 'checkout' }) {
   </nav>;
 }
 
+const YEMEN_CITIES = ['صنعاء', 'عدن', 'تعز', 'الحديدة', 'إب', 'حضرموت', 'ذمار', 'المكلا', 'سيئون', 'حجة', 'صعدة', 'شبوة', 'مأرب', 'البيضاء', 'لحج', 'أبين', 'عمران', 'المحويت', 'ريمة', 'الضالع', 'الجوف'];
+
 export function CartPage() {
   const { cartProducts, cartCount, formatPrice } = useStore();
   const subtotal = cartProducts.reduce((sum, item) => sum + (item.product.discountPrice ?? item.product.regularPrice) * item.quantity, 0);
@@ -1413,7 +1415,7 @@ export function CheckoutPage() {
   const orderMutation = useCreateStoreOrder();
   const [shippingId, setShippingId] = useState<number | undefined>(catalog?.shippingOptions[0]?.id);
   const [paymentId, setPaymentId] = useState<number | undefined>(catalog?.paymentMethods[0]?.id);
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phoneNumber: '', addressLine1: '', addressLine2: '', city: '', country: 'اليمن', postalCode: '', paymentReference: '', couponCode: '' });
+  const [form, setForm] = useState({ fullName: '', email: '', phoneNumber: '', addressLine1: '', city: 'صنعاء', paymentReference: '', couponCode: '' });
   const [error, setError] = useState('');
   const [couponHint, setCouponHint] = useState('');
   useEffect(() => {
@@ -1433,9 +1435,12 @@ export function CheckoutPage() {
       setError('اختر طريقة الشحن والدفع وتأكد من وجود منتج في السلة.');
       return;
     }
+    const nameParts = form.fullName.trim().split(/\s+/).filter(Boolean);
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || firstName;
     const payload: StoreOrderInput = {
-      customer: { firstName: form.firstName, lastName: form.lastName, email: form.email, phoneNumber: form.phoneNumber },
-      address: { addressLine1: form.addressLine1, addressLine2: form.addressLine2 || null, postalCode: form.postalCode || null, country: form.country, city: form.city, phoneNumber: form.phoneNumber || null },
+      customer: { firstName, lastName, email: form.email, phoneNumber: form.phoneNumber },
+      address: { addressLine1: form.addressLine1, addressLine2: null, postalCode: null, country: 'اليمن', city: form.city, phoneNumber: form.phoneNumber || null },
       items: cartProducts.map((item) => ({ productId: item.product.id, quantity: item.quantity })),
       shippingId,
       paymentMethodId: paymentId,
@@ -1454,23 +1459,24 @@ export function CheckoutPage() {
       <div className="container checkout-page">
         <Breadcrumbs items={[{ label: 'السلة', href: '/cart' }, { label: 'إتمام الشراء' }]} />
         <PurchaseSteps current="checkout" />
-        <PageHeading title="بيانات الطلب" description="خطوتان واضحتان ونراجع كل شيء قبل الإرسال." />
+        <PageHeading title="البيانات والدفع" description="بيانات أقل، طلب أوضح، ونراجع كل شيء قبل الإرسال." />
         <form className="checkout-layout" onSubmit={submit}>
           <div className="checkout-panel">
             <section className="checkout-section">
               <div className="checkout-section-heading"><span className="step-dot">01</span><div><h2>بياناتك</h2><p>نستخدمها لتأكيد الطلب والتواصل معك.</p></div></div>
-              <div className="form-grid"><Field label="الاسم الأول" value={form.firstName} onChange={update('firstName')} required /><Field label="اسم العائلة" value={form.lastName} onChange={update('lastName')} required /><Field label="البريد الإلكتروني" type="email" value={form.email} onChange={update('email')} required /><Field label="رقم الهاتف" value={form.phoneNumber} onChange={update('phoneNumber')} required /></div>
+              <div className="form-grid"><Field label="الاسم الكامل" value={form.fullName} onChange={update('fullName')} required full /><Field label="البريد الإلكتروني" type="email" value={form.email} onChange={update('email')} required /><Field label="رقم الهاتف" type="tel" value={form.phoneNumber} onChange={update('phoneNumber')} required /></div>
             </section>
             <section className="checkout-section">
               <div className="checkout-section-heading"><span className="step-dot">02</span><div><h2>عنوان التوصيل</h2><p>أدخل العنوان الذي سيصل إليه الطلب.</p></div></div>
-              <div className="form-grid"><Field label="العنوان" value={form.addressLine1} onChange={update('addressLine1')} required full /><Field label="العنوان الإضافي" value={form.addressLine2} onChange={update('addressLine2')} full /><Field label="المدينة" value={form.city} onChange={update('city')} required /><Field label="الدولة" value={form.country} onChange={update('country')} required /><Field label="الرمز البريدي" value={form.postalCode} onChange={update('postalCode')} /></div>
+              <div className="form-grid"><Field label="العنوان بالتفصيل" value={form.addressLine1} onChange={update('addressLine1')} required full /><label className="form-field full"><span>المدينة</span><select value={form.city} onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))} required data-testid="select-city">{YEMEN_CITIES.map((city) => <option value={city} key={city}>{city}</option>)}</select></label></div>
             </section>
             <section className="checkout-section">
               <div className="checkout-section-heading"><span className="step-dot">03</span><div><h2>الشحن والدفع</h2><p>خيارات مختصرة، اختر الأنسب لك.</p></div></div>
               <h3 className="choice-label">طريقة الشحن</h3>
               <div className="method-choice-grid">{catalog?.shippingOptions.map((option) => <label className={`method-choice ${shippingId === option.id ? 'selected' : ''}`} key={option.id}><input type="radio" name="shipping" checked={shippingId === option.id} onChange={() => setShippingId(option.id)} data-testid={`input-shipping-${option.id}`} /><span className="method-choice-mark">{shippingId === option.id && <Check size={13} />}</span><span className="method-choice-copy"><strong>{option.name}</strong><small>{option.estimatedDays ? `${option.estimatedDays} أيام تقريباً` : 'تأكيد المدة مع الطلب'}</small></span><b>{option.free ? 'مجاني' : formatPrice(option.charge)}</b></label>)}</div>
               <h3 className="choice-label">طريقة الدفع</h3>
-              <div className="method-choice-grid">{catalog?.paymentMethods.map((method) => <label className={`method-choice ${paymentId === method.id ? 'selected' : ''}`} key={method.id}><input type="radio" name="payment" checked={paymentId === method.id} onChange={() => setPaymentId(method.id)} data-testid={`input-payment-${method.id}`} /><span className="method-choice-mark">{paymentId === method.id && <Check size={13} />}</span><span className="method-choice-copy"><strong>{method.name}</strong><small>{method.description || method.instructions || 'تفاصيل الدفع عند التأكيد'}</small></span><CreditCard size={17} className="method-choice-icon" /></label>)}</div>
+              <div className="payment-select-wrap"><CreditCard size={17} /><select value={paymentId ?? ''} onChange={(event) => setPaymentId(Number(event.target.value))} required data-testid="select-payment-method"><option value="" disabled>اختر طريقة الدفع</option>{catalog?.paymentMethods.map((method) => <option value={method.id} key={method.id}>{method.name}</option>)}</select></div>
+              {selectedPayment && <p className="selected-payment-note">{selectedPayment.description || selectedPayment.instructions || 'تفاصيل الدفع تظهر عند تأكيد الطلب.'}</p>}
               {selectedPayment?.requiresTransactionReference && <div className="method-extra"><Field label="مرجع التحويل" value={form.paymentReference} onChange={update('paymentReference')} full /></div>}
             </section>
             {error && <div className="notice" role="alert" data-testid="status-checkout-error">{error}</div>}
