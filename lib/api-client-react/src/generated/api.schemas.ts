@@ -131,7 +131,7 @@ export interface StoreOrderCustomer {
      * @maxLength 255
      * @pattern ^[^\s@]+@[^\s@]+\.[^\s@]+$
      */
-  email: string;
+   email?: string | null;
   /**
      * @minLength 5
      * @maxLength 40
@@ -287,7 +287,7 @@ export interface NewsletterSubscriptionInput {
      * @maxLength 254
      * @pattern ^[^\s@]+@[^\s@]+\.[^\s@]+$
      */
-  email: string;
+ email?: string;
 }
 
 export type NewsletterSubscriptionStatus = typeof NewsletterSubscriptionStatus[keyof typeof NewsletterSubscriptionStatus];
@@ -427,7 +427,7 @@ export type ListStoreOrdersParams = {
 /**
  * @pattern ^[^\s@]+@[^\s@]+\.[^\s@]+$
  */
-email: string;
+ email?: string;
 /**
  * @minLength 5
  * @maxLength 40

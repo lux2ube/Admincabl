@@ -21,7 +21,7 @@ export interface StoreOrderCustomer {
      * @maxLength 255
      * @pattern ^[^\s@]+@[^\s@]+\.[^\s@]+$
      */
-  email: string;
+  email?: string | null;
   /**
      * @minLength 5
      * @maxLength 40

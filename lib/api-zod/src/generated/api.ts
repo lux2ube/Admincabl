@@ -173,7 +173,7 @@ export const listStoreOrdersQueryPhoneMax = 40;
 
 
 export const ListStoreOrdersQueryParams = zod.object({
-  "email": zod.coerce.string().regex(listStoreOrdersQueryEmailRegExp),
+  "email": zod.coerce.string().regex(listStoreOrdersQueryEmailRegExp).optional(),
   "phone": zod.coerce.string().min(listStoreOrdersQueryPhoneMin).max(listStoreOrdersQueryPhoneMax)
 })
 
@@ -234,7 +234,7 @@ export const CreateStoreOrderBody = zod.object({
   "customer": zod.object({
   "firstName": zod.string().min(createStoreOrderBodyCustomerFirstNameMin).max(createStoreOrderBodyCustomerFirstNameMax),
   "lastName": zod.string().min(createStoreOrderBodyCustomerLastNameMin).max(createStoreOrderBodyCustomerLastNameMax),
-  "email": zod.string().max(createStoreOrderBodyCustomerEmailMax).regex(createStoreOrderBodyCustomerEmailRegExp),
+  "email": zod.string().max(createStoreOrderBodyCustomerEmailMax).regex(createStoreOrderBodyCustomerEmailRegExp).nullable().optional(),
   "phoneNumber": zod.string().min(createStoreOrderBodyCustomerPhoneNumberMin).max(createStoreOrderBodyCustomerPhoneNumberMax)
 }),
   "address": zod.object({

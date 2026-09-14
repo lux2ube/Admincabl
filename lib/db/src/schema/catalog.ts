@@ -246,7 +246,7 @@ export const customersTable = pgTable("customers", {
   firstName: varchar("first_name", { length: 100 }).notNull(),
   lastName: varchar("last_name", { length: 100 }).notNull(),
   phoneNumber: varchar("phone_number", { length: 255 }),
-  email: text("email").notNull().unique(),
+  email: text("email").unique(),
   passwordHash: text("password_hash"),
   active: boolean("active").notNull().default(true),
   registeredAt: timestamp("registered_at", { withTimezone: true }).defaultNow(),

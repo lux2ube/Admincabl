@@ -96,7 +96,6 @@ paths:
       parameters:
         - name: type
           in: query
-          required: true
           schema:
             type: string
             enum: [home, product, category, brand, guide]
@@ -132,15 +131,14 @@ paths:
       tags: [store]
       summary: List a customer's orders using verified contact details
       parameters:
-        - name: email
-          in: query
-          required: true
+         - name: email
+           in: query
           schema:
             type: string
             pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
-        - name: phone
-          in: query
-          required: true
+         - name: phone
+           in: query
+           required: true
           schema:
             type: string
             minLength: 5
@@ -554,14 +552,14 @@ components:
           minLength: 2
           maxLength: 100
         email:
-          type: string
+          type: ["string", "null"]
           pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
           maxLength: 255
         phoneNumber:
           type: string
           minLength: 5
           maxLength: 40
-      required: [firstName, lastName, email, phoneNumber]
+      required: [firstName, lastName, phoneNumber]
     StoreOrderAddress:
       type: object
       properties:

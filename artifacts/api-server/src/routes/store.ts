@@ -609,10 +609,11 @@ router.get("/store/orders", async (req, res): Promise<void> => {
        LEFT JOIN "order_statuses" os ON os."id" = o."order_status_id"
        LEFT JOIN "order_items" oi ON oi."order_id" = o."id"
        LEFT JOIN "product_shippings" ps ON ps."product_id" = oi."product_id" AND ps."shipping_id" = oi."shipping_id"
-       WHERE LOWER(c."email") = LOWER($1) AND c."phone_number" = $2
+        WHERE c."phone_number" = $2
+          AND ($1::text IS NULL OR LOWER(c."email") = LOWER($1))
        GROUP BY o."id", os."status_name", o."created_at"
        ORDER BY o."created_at" DESC NULLS LAST`,
-      [parsed.data.email.trim(), parsed.data.phone.trim()],
+       [parsed.data.email?.trim() || null, parsed.data.phone.trim()],
     );
     res.json(ListStoreOrdersResponse.parse({
       orders: result.rows.map((row) => ({
@@ -640,7 +641,7 @@ router.post("/store/orders", async (req, res): Promise<void> => {
   try {
     await client.query("BEGIN");
     const input = parsed.data;
-    const email = input.customer.email.trim().toLowerCase();
+    const email = input.customer.email?.trim().toLowerCase() || null;
     const phoneNumber = input.customer.phoneNumber.trim();
     const productIds = [...new Set(input.items.map((item) => item.productId))];
 

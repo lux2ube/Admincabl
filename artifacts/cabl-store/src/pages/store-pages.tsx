@@ -1468,7 +1468,7 @@ export function CheckoutPage() {
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || firstName;
     const payload: StoreOrderInput = {
-      customer: { firstName, lastName, email: form.email, phoneNumber: form.phoneNumber },
+      customer: { firstName, lastName, email: form.email.trim() || null, phoneNumber: form.phoneNumber },
       address: { addressLine1: form.addressLine1, addressLine2: null, postalCode: null, country: 'اليمن', city: form.city, phoneNumber: form.phoneNumber || null },
       items: cartProducts.map((item) => ({ productId: item.product.id, quantity: item.quantity })),
       shippingId,
@@ -1493,7 +1493,7 @@ export function CheckoutPage() {
           <div className="checkout-panel">
             <section className="checkout-section">
               <div className="checkout-section-heading"><span className="step-dot">01</span><div><h2>بياناتك</h2><p>نستخدمها لتأكيد الطلب والتواصل معك.</p></div></div>
-              <div className="form-grid"><Field label="الاسم الكامل" value={form.fullName} onChange={update('fullName')} required full /><Field label="البريد الإلكتروني" type="email" value={form.email} onChange={update('email')} required /><Field label="رقم الهاتف" type="tel" value={form.phoneNumber} onChange={update('phoneNumber')} required /></div>
+              <div className="form-grid"><Field label="الاسم الكامل" value={form.fullName} onChange={update('fullName')} required full /><Field label="رقم الهاتف" type="tel" value={form.phoneNumber} onChange={update('phoneNumber')} required /><Field label="البريد الإلكتروني" type="email" value={form.email} onChange={update('email')} optional /></div>
             </section>
             <section className="checkout-section">
               <div className="checkout-section-heading"><span className="step-dot">02</span><div><h2>عنوان التوصيل</h2><p>أدخل العنوان الذي سيصل إليه الطلب.</p></div></div>
@@ -1527,16 +1527,16 @@ export function CheckoutPage() {
   );
 }
 
-function Field({ label, value, onChange, type = 'text', required = false, full = false }: { label: string; value: string; onChange: (event: ChangeEvent<HTMLInputElement>) => void; type?: string; required?: boolean; full?: boolean }) { return <label className={`form-field ${full ? 'full' : ''}`}><span>{label}</span><input type={type} value={value} onChange={onChange} required={required} data-testid={`input-${label}`}/></label>; }
+function Field({ label, value, onChange, type = 'text', required = false, optional = false, full = false }: { label: string; value: string; onChange: (event: ChangeEvent<HTMLInputElement>) => void; type?: string; required?: boolean; optional?: boolean; full?: boolean }) { return <label className={`form-field ${full ? 'full' : ''}`}><span>{label}{optional && <small className="field-optional">اختياري</small>}</span><input type={type} value={value} onChange={onChange} required={required} data-testid={`input-${label}`}/></label>; }
 
 export function OrdersPage() {
   const { formatPrice } = useStore();
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const params = { email, phone };
+   const params = { email: email.trim() || undefined, phone };
   const query = useListStoreOrders(params, { query: { enabled: submitted, queryKey: getListStoreOrdersQueryKey(params) } });
-  return <><NoIndex/><div className="container orders-page"><Breadcrumbs items={[{ label: 'الطلبات' }]}/><PageHeading title="تتبع طلباتك" description="أدخل البريد ورقم الهاتف المستخدمين عند إتمام الشراء."/><div className="lookup-card"><h2>البحث عن طلب</h2><p>نستخدم بياناتك فقط للتحقق من الطلبات المرتبطة بها.</p><form className="lookup-form" onSubmit={(event) => { event.preventDefault(); setSubmitted(true); }}><input type="email" placeholder="البريد الإلكتروني" value={email} onChange={(event) => setEmail(event.target.value)} required data-testid="input-orders-email"/><input placeholder="رقم الهاتف" value={phone} onChange={(event) => setPhone(event.target.value)} required data-testid="input-orders-phone"/><button className="button button-primary" type="submit" data-testid="button-lookup-orders">عرض الطلبات</button></form></div>{submitted && query.isLoading && <LoadingCatalog/>}{submitted && query.isError && <div className="state-panel error-panel"><h3>لم نعثر على الطلبات بهذه البيانات</h3><p>راجع البريد ورقم الهاتف وحاول مرة أخرى.</p></div>}{submitted && query.data?.orders?.length === 0 && <div className="empty-state"><h3>لا توجد طلبات مرتبطة بهذه البيانات</h3><p>يمكنك العودة للمتجر وبدء طلب جديد.</p></div>}{query.data?.orders && query.data.orders.length > 0 && <div className="orders-list">{query.data.orders.map((order) => <div className="order-row" key={order.id} data-testid={`row-order-${order.id}`}><div><strong>طلب #{order.id}</strong><small>{new Date(order.createdAt).toLocaleDateString('ar-YE')}</small></div><span className="status-badge">{order.status}</span><div><strong>{formatPrice(order.total)}</strong><Link href={`/order/${order.id}?phone=${encodeURIComponent(phone)}`} className="button button-quiet" data-testid={`link-order-${order.id}`}>التفاصيل <ChevronLeft size={14}/></Link></div></div>)}</div>}</div></>;
+   return <><NoIndex/><div className="container orders-page"><Breadcrumbs items={[{ label: 'الطلبات' }]}/><PageHeading title="تتبع طلباتك" description="استخدم رقم الهاتف، ويمكنك إضافة البريد الإلكتروني إذا توفر."/><div className="lookup-card"><h2>البحث عن طلب</h2><p>نستخدم رقم الهاتف للتحقق من طلباتك، والبريد يساعد على تضييق النتائج.</p><form className="lookup-form" onSubmit={(event) => { event.preventDefault(); setSubmitted(true); }}><label className="form-field"><span>رقم الهاتف</span><input placeholder="مثلاً: 771106977" value={phone} onChange={(event) => setPhone(event.target.value)} required data-testid="input-orders-phone"/></label><label className="form-field"><span>البريد الإلكتروني <small className="field-optional">اختياري</small></span><input type="email" placeholder="example@email.com" value={email} onChange={(event) => setEmail(event.target.value)} data-testid="input-orders-email"/></label><button className="button button-primary" type="submit" data-testid="button-lookup-orders">عرض الطلبات</button></form></div>{submitted && query.isLoading && <LoadingCatalog/>}{submitted && query.isError && <div className="state-panel error-panel"><h3>لم نعثر على الطلبات بهذه البيانات</h3><p>راجع رقم الهاتف والبريد إن أدخلته ثم حاول مرة أخرى.</p></div>}{submitted && query.data?.orders?.length === 0 && <div className="empty-state"><h3>لا توجد طلبات مرتبطة بهذه البيانات</h3><p>يمكنك العودة للمتجر وبدء طلب جديد.</p></div>}{query.data?.orders && query.data.orders.length > 0 && <div className="orders-list">{query.data.orders.map((order) => <div className="order-row" key={order.id} data-testid={`row-order-${order.id}`}><div><strong>طلب #{order.id}</strong><small>{new Date(order.createdAt).toLocaleDateString('ar-YE')}</small></div><span className="status-badge">{order.status}</span><div><strong>{formatPrice(order.total)}</strong><Link href={`/order/${order.id}?phone=${encodeURIComponent(phone)}`} className="button button-quiet" data-testid={`link-order-${order.id}`}>التفاصيل <ChevronLeft size={14}/></Link></div></div>)}</div>}</div></>;
 }
 
 export function OrderPage() {

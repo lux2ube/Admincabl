@@ -10,7 +10,7 @@ export type ListStoreOrdersParams = {
 /**
  * @pattern ^[^\s@]+@[^\s@]+\.[^\s@]+$
  */
-email: string;
+ email?: string;
 /**
  * @minLength 5
  * @maxLength 40
