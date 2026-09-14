@@ -7,7 +7,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [location] = useLocation();
-  const { catalog, cartCount, favorites, cartProducts } = useStore();
+  const { catalog, cartCount, favorites, cartProducts, currency, setCurrencyCode } = useStore();
   const categories = useMemo(() => Array.from(new Map((catalog?.products || [])
     .filter((product) => product.category)
     .map((product) => [product.category!.slug, product.category!]))
@@ -59,7 +59,8 @@ export function StoreShell({ children }: { children: ReactNode }) {
          return <Link href={item.href} key={item.href} className={`nav-link${isActive ? ' is-active' : ''}`} aria-current={isActive ? 'page' : undefined} data-testid={`link-nav-${item.label}`}>{item.label}{item.label === 'العلامات التجارية' && <ChevronDown size={14}/>}</Link>;
        })}</nav>
         <div className="header-actions">
-          <Link href="/search" className="icon-action" aria-label="البحث" data-testid="link-search"><Search size={20}/></Link>
+           {catalog?.currencies.length ? <label className="currency-switcher"><span>العملة</span><select value={currency?.code || 'YER'} onChange={(event) => setCurrencyCode(event.target.value)} aria-label="اختيار العملة" data-testid="select-header-currency">{catalog.currencies.map((option) => <option value={option.code} key={option.code}>{option.code}</option>)}</select></label> : null}
+           <Link href="/search" className="icon-action" aria-label="البحث" data-testid="link-search"><Search size={20}/></Link>
           <Link href="/orders" className="icon-action orders-action" aria-label="تتبع الطلب" data-testid="link-orders"><PackageSearch size={20}/></Link>
           <Link href="/cart" className="icon-action cart-action" aria-label="السلة" data-testid="link-cart"><ShoppingBag size={20}/>{cartCount > 0 && <b>{cartCount}</b>}</Link>
           <Link href="/search?view=favorites" className="icon-action favorite-action" aria-label="المفضلة" data-testid="link-favorites"><Heart size={20}/>{favorites.length > 0 && <b>{favorites.length}</b>}</Link>

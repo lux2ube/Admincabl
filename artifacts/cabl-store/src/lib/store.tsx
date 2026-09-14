@@ -16,6 +16,7 @@ type StoreContextValue = {
   cartProducts: Array<{ product: StoreProduct; quantity: number }>;
   cartCount: number;
   currency: StoreCatalog['currencies'][number] | undefined;
+  setCurrencyCode: (code: string) => void;
   formatPrice: (usd: number) => string;
 };
 const StoreContext = createContext<StoreContextValue | null>(null);
@@ -48,10 +49,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const stored = readStorage('cabl-favorites');
     return Array.isArray(stored) ? stored.filter((id): id is string => typeof id === 'string') : [];
   });
+  const [currencyCode, setCurrencyCode] = useState(() => localStorage.getItem('cabl-currency') || 'YER');
   useEffect(() => localStorage.setItem('cabl-cart', JSON.stringify(cart)), [cart]);
   useEffect(() => localStorage.setItem('cabl-favorites', JSON.stringify(favorites)), [favorites]);
+  useEffect(() => localStorage.setItem('cabl-currency', currencyCode), [currencyCode]);
   const catalog = query.data;
-  const currency = catalog?.currencies.find((item) => item.isDefault) || catalog?.currencies[0];
+  const currency = catalog?.currencies.find((item) => item.code === currencyCode)
+    || catalog?.currencies.find((item) => item.code === 'YER')
+    || catalog?.currencies.find((item) => item.isDefault)
+    || catalog?.currencies[0];
+  useEffect(() => {
+    if (!catalog?.currencies.length) return;
+    if (catalog.currencies.some((item) => item.code === currencyCode)) return;
+    setCurrencyCode(catalog.currencies.find((item) => item.code === 'YER')?.code || catalog.currencies.find((item) => item.isDefault)?.code || catalog.currencies[0].code);
+  }, [catalog, currencyCode]);
   useEffect(() => {
     if (!catalog) return;
     setCart((current) => {
@@ -84,8 +95,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }),
     removeFromCart: (productId) => setCart((current) => current.filter((line) => line.productId !== productId)),
     toggleFavorite: (productId) => setFavorites((current) => current.includes(productId) ? current.filter((id) => id !== productId) : [...current, productId]),
-    cartProducts, cartCount: cartProducts.reduce((sum, line) => sum + line.quantity, 0), currency,
-    formatPrice: (usd) => new Intl.NumberFormat('ar-YE', { style: 'currency', currency: currency?.code || 'USD', maximumFractionDigits: 0 }).format(usd * (currency?.ratePerUsd || 1)),
+    cartProducts, cartCount: cartProducts.reduce((sum, line) => sum + line.quantity, 0), currency, setCurrencyCode,
+    formatPrice: (usd) => new Intl.NumberFormat('ar-YE', { style: 'currency', currency: currency?.code || 'YER', maximumFractionDigits: 0 }).format(usd * (currency?.ratePerUsd || 1)),
   };
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
