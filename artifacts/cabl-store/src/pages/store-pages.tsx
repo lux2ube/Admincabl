@@ -183,9 +183,7 @@ function GuidedHomePage() {
             <div className="guided-category-grid">
               {categories.slice(0, 5).map((category, index) => (
                 <Link href={`/category/${category.slug}`} className="guided-category-card" key={category.slug} data-testid={`link-home-category-${category.slug}`}>
-                  <span className="guided-category-icon">
-                    {index % 4 === 0 ? <Zap size={18} /> : index % 4 === 1 ? <Smartphone size={18} /> : index % 4 === 2 ? <Package size={18} /> : <Truck size={18} />}
-                  </span>
+                  <span className="guided-category-icon guided-category-c" aria-hidden="true">C</span>
                   <strong>{category.name}</strong>
                   <span>استعرض القسم <ArrowLeft size={13} /></span>
                 </Link>
@@ -351,8 +349,9 @@ function CommercialHomePage() {
             <div className="reference-hero-note"><ShieldCheck size={15} /> اختيارات من كتالوج CABL الحالي</div>
           </div>
           <div className="reference-hero-media reveal">
-            <div className="hero-illustration" aria-label="رسم توضيحي للشحن والطاقة والاتصال">
-              <svg className="hero-illustration-svg" viewBox="0 0 620 450" role="img" aria-label="رسم تجريدي للطاقة والاتصال">
+             <div className="hero-illustration" aria-label="رسم توضيحي للشحن والطاقة والاتصال">
+               <span className="hero-c-watermark" aria-hidden="true">C</span>
+               <svg className="hero-illustration-svg" viewBox="0 0 620 450" role="img" aria-label="رسم تجريدي للطاقة والاتصال">
                 <defs>
                   <linearGradient id="hero-abstract-blue" x1="0" x2="1" y1="0" y2="1">
                     <stop offset="0" stopColor="#1761ed" />
@@ -404,15 +403,15 @@ function CommercialHomePage() {
           </div>
           <div className="guided-path-home-cards">
             {[
-              { number: '01', title: 'نساعدك تختار', text: 'نساعدك بخبرة تختار المنتج اللي يناسب جهازك بالضبط.', icon: <ShieldCheck size={18} /> },
-              { number: '02', title: 'منتجات أصلية فقط', text: 'منتجات فاخرة من براندات عالمية معروفة.', icon: <Package size={18} /> },
-              { number: '03', title: 'نوصل لباب بيتك', text: 'نوصل لجميع المحافظات اليمنية.', icon: <Truck size={18} /> },
-              { number: '04', title: 'معك حتى بعد الشراء', text: 'ضمان، خدمة ما بعد البيع، وإمكانية الإرجاع والاستبدال.', icon: <RefreshCcw size={18} /> },
-            ].map(({ number, title, text, icon }) => (
+              { number: '01', title: 'نساعدك تختار', text: 'نساعدك بخبرة تختار المنتج اللي يناسب جهازك بالضبط.' },
+              { number: '02', title: 'منتجات أصلية فقط', text: 'منتجات فاخرة من براندات عالمية معروفة.' },
+              { number: '03', title: 'نوصل لباب بيتك', text: 'نوصل لجميع المحافظات اليمنية.' },
+              { number: '04', title: 'معك حتى بعد الشراء', text: 'ضمان، خدمة ما بعد البيع، وإمكانية الإرجاع والاستبدال.' },
+            ].map(({ number, title, text }) => (
               <div className="guided-step" key={number} data-testid={`step-home-confidence-${number}`}>
                 <div className="guided-step-head">
                   <span className="guided-step-number">{number}</span>
-                  <span className="guided-step-icon">{icon}</span>
+                  <span className="guided-step-c" aria-hidden="true">C</span>
                 </div>
                 <div className="guided-step-copy"><strong>{title}</strong><span>{text}</span></div>
               </div>

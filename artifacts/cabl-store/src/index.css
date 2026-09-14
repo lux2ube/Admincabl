@@ -166,6 +166,7 @@ html,body,#root{max-width:100%;overflow-x:hidden}
 .guided-step-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .guided-step-number{display:grid;place-items:center;width:29px;height:29px;border:1px solid #72e8ec80;border-radius:50%;color:#72e8ec;font:700 10px var(--app-font-mono);flex:none}
 .guided-step-icon{display:grid;place-items:center;width:39px;height:39px;border-radius:14px;background:#6be0e51c;color:#74ece8}
+.guided-step-c{display:grid;place-items:center;width:39px;height:39px;border:1px solid #73e6e580;border-radius:14px;color:#73e6e5;font:950 27px/1 var(--app-font-display);letter-spacing:-.16em;transform:translateX(-2px)}
 .guided-step-copy strong{display:block;font-size:14px;line-height:1.4}
 .guided-step-copy span{display:block;color:#b6c8dc;font-size:11px;line-height:1.75;margin-top:6px}
 .guided-section{padding:70px 0}
@@ -442,7 +443,9 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:h
 
 /* Abstract store illustration for the hero */
 .hero-illustration{position:relative;width:min(100%,590px);height:440px;direction:ltr}
+.hero-c-watermark{position:absolute;z-index:0;inset:50% auto auto 50%;color:#ffffff8c;font:950 390px/.72 var(--app-font-display);letter-spacing:-.2em;text-shadow:0 20px 35px #1757ee18;transform:translate(-51%,-48%) rotate(-12deg);pointer-events:none}
 .hero-illustration-svg{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(0 20px 30px #2e5b8430)}
+.hero-illustration-brands{z-index:2}
 .hero-illustration-brands{position:absolute;inset:0;pointer-events:none}
 .hero-illustration-brands span{position:absolute;display:inline-flex;align-items:center;padding:8px 13px;border:1px solid #ffffffd9;border-radius:999px;background:#ffffffb8;color:#3a5b78;font-size:10px;font-weight:900;letter-spacing:.08em;box-shadow:0 10px 20px #32608a1a;backdrop-filter:blur(8px)}
 .hero-illustration-brands span:nth-child(1){top:7%;left:13%;transform:rotate(-7deg)}
@@ -481,4 +484,17 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:h
   .header-search-result{padding:8px}
   .currency-switcher{max-width:78px;padding-inline:5px}
   .currency-switcher select{max-width:66px;font-size:9px}
+}
+
+/* CABL graphic language: the C is the recurring frame, crop and loading mark. */
+.product-visual:before{content:'C';position:absolute;z-index:0;inset:-34% auto auto -11%;color:#1757ee12;font:950 190px/.8 var(--app-font-display);letter-spacing:-.2em;transform:rotate(-14deg);pointer-events:none;transition:transform .35s,color .35s}
+.product-card:hover .product-visual:before{color:#1757ee1c;transform:rotate(-7deg) scale(1.06)}
+.guided-category-c{font:950 25px/.8 var(--app-font-display);letter-spacing:-.16em;color:#1757ee}
+.c-loading-mark{width:48px;height:48px;margin:0 auto 18px;border:1px solid #1757ee35;border-radius:16px;display:grid;place-items:center;color:#1757ee;font:950 31px/.8 var(--app-font-display);letter-spacing:-.16em;animation:c-mark-pulse 1.3s ease-in-out infinite}
+.catalog-loading .product-grid{margin-top:0}
+@keyframes c-mark-pulse{0%,100%{opacity:.42;transform:scale(.92) rotate(-8deg)}50%{opacity:1;transform:scale(1) rotate(0)}}
+@media (max-width:767px){
+  .hero-c-watermark{font-size:270px}
+  .guided-step-c{width:35px;height:35px;font-size:24px}
+  .product-visual:before{font-size:150px}
 }
