@@ -409,20 +409,426 @@ const productsSeed = [
   ["00000000-0000-4000-8000-000000000035", "Anker", "باور بنك Anker بسعة 20,000mAh / 30W", "CABL-ANK-PB20K30", 42.00, "باور بنك عالي السعة بقدرة 30W", "https://cdn.shopify.com/s/files/1/0493/9834/9974/files/Black_20_000_mAh-01_3840x.png?v=1732159201", "10000000-0000-4000-8000-000000000001"],
   ["00000000-0000-4000-8000-000000000036", "Anker", "شاحن سيارة Anker بقدرة 30W أو 50W", "CABL-ANK-CAR50", 21.00, "شاحن سيارة سريع متعدد المنافذ", "https://cdn.shopify.com/s/files/1/0493/9834/9974/files/B2735011_ND01_3840x.png?v=1749783207", "10000000-0000-4000-8000-000000000004"],
   ["00000000-0000-4000-8000-000000000037", "Anker", "محور Anker USB-C ‏7 في 1", "CABL-ANK-HUB7", 45.00, "محور USB-C من Anker بسبعة منافذ", "https://cdn.shopify.com/s/files/1/0493/9834/9974/files/image_11_3f856f3b-1d0b-4609-974f-af0ea4ca2d12_3840x.png?v=1764833041", "10000000-0000-4000-8000-000000000005"],
-  ["00000000-0000-4000-8000-000000000038", "UGREEN", "شاحن UGREEN USB-C بقدرة 20W", "CABL-UGR-20W", 13.00, "شاحن USB-C سريع بقدرة 20W", "https://www.ugreen.com/cdn/shop/files/65786.png?v=1762323345&width=300", "10000000-0000-4000-8000-000000000002"],
-  ["00000000-0000-4000-8000-000000000039", "UGREEN", "شاحن UGREEN USB-C بقدرة 30W", "CABL-UGR-30W", 18.00, "شاحن USB-C سريع بقدرة 30W", "https://www.ugreen.com/cdn/shop/files/65786.png?v=1762323345&width=300", "10000000-0000-4000-8000-000000000002"],
-  ["00000000-0000-4000-8000-000000000040", "UGREEN", "شاحن UGREEN Nexode GaN بقدرة 45W", "CABL-UGR-45W", 27.00, "شاحن UGREEN Nexode ثنائي المنافذ بتقنية GaN وقدرة 45W", "https://www.ugreen.com/cdn/shop/files/c25a0e077dd5d91597a8b4d5c6990840.png?v=1762321987&width=300", "10000000-0000-4000-8000-000000000002"],
-  ["00000000-0000-4000-8000-000000000041", "UGREEN", "شاحن UGREEN GaN بقدرة 65W", "CABL-UGR-65W", 36.00, "شاحن UGREEN GaN بقدرة 65W", "https://www.ugreen.com/cdn/shop/files/15817.png?v=1762323446&width=300", "10000000-0000-4000-8000-000000000002"],
-  ["00000000-0000-4000-8000-000000000042", "UGREEN", "كابل UGREEN USB-A إلى USB-C", "CABL-UGR-A2C", 8.00, "كابل UGREEN من USB-A إلى USB-C", "https://www.ugreen.com/cdn/shop/files/5ecbd42ae6b223a53267218ec68a4b9e.png?v=1762322059&width=300", "10000000-0000-4000-8000-000000000003"],
-  ["00000000-0000-4000-8000-000000000043", "UGREEN", "كابل UGREEN USB-C إلى USB-C بقدرة 60W", "CABL-UGR-C2C60", 10.00, "كابل UGREEN USB-C إلى USB-C للشحن السريع بقدرة 60W", "https://www.ugreen.com/cdn/shop/files/b81dd756173ef421d96d0ecc0069022f.png?v=1762322048&width=300", "10000000-0000-4000-8000-000000000003"],
-  ["00000000-0000-4000-8000-000000000044", "UGREEN", "كابل UGREEN USB-C إلى USB-C بقدرة 100W", "CABL-UGR-C2C100", 14.00, "كابل UGREEN USB-C إلى USB-C بقدرة 100W", "https://www.ugreen.com/cdn/shop/files/bab5255d39b70ee3027845fad0648f10.png?v=1762322054&width=300", "10000000-0000-4000-8000-000000000003"],
-  ["00000000-0000-4000-8000-000000000045", "UGREEN", "كابل UGREEN USB-C إلى Lightning", "CABL-UGR-C2L", 12.00, "كابل UGREEN USB-C إلى Lightning", "https://www.ugreen.com/cdn/shop/files/eb6684f5edbb3b8de07faf881b0195ac.png?v=1762322051&width=300", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000038", "UGREEN", "شاحن UGREEN USB-C بثلاثة منافذ 30W", "CABL-UGR-55538", 18.00, "شاحن UGREEN USB-C بثلاثة منافذ وقدرة 30W وتقنية GaN", "https://www.ugreen.com/cdn/shop/files/ab4da9f4776c1d15392b28d3a91da6ca_1cac3ec9-130e-4332-920b-93d8338856cc.webp?v=1766488069&width=1445", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000039", "UGREEN", "شاحن UGREEN Nexode بقدرة 45W مع كابل USB-C قابل للسحب", "CABL-UGR-65312", 27.00, "شاحن UGREEN Nexode بقدرة 45W مع كابل USB-C مدمج قابل للسحب وثلاثة منافذ", "https://www.ugreen.com/cdn/shop/files/f8ba0863af04a5d9472e06ce4058a37d.webp?v=1766052404&width=1445", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000040", "UGREEN", "شاحن UGREEN Nexode بقدرة 65W مع كابل USB-C قابل للسحب", "CABL-UGR-55897", 36.00, "شاحن UGREEN Nexode بقدرة 65W مع كابل USB-C مدمج قابل للسحب وثلاثة منافذ", "https://www.ugreen.com/cdn/shop/files/5c5fe6b6bea7c9b286442ccc68fe5b04.png?v=1762321971&width=1445", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000041", "UGREEN", "شاحن UGREEN Nexode Air USB-C بقدرة 45W", "CABL-UGR-95786", 29.00, "شاحن UGREEN Nexode Air USB-C بقدرة 45W وتقنية GaN مع قابس قابل للطي", "https://www.ugreen.com/cdn/shop/files/X840_95786_a6688d8f-677e-4f59-b366-7875a3642829.webp?v=1781761936&width=1445", "10000000-0000-4000-8000-000000000002"],
+  ["00000000-0000-4000-8000-000000000042", "UGREEN", "كابل UGREEN USB-C إلى USB-C بقدرة 100W و5A مضفر بالنايلون", "CABL-UGR-70429", 14.00, "كابل UGREEN USB-C إلى USB-C بقدرة 100W و5A مع تغليف نايلون مضفر", "https://www.ugreen.com/cdn/shop/files/61SC5ARK_NL.jpg?v=1765189854&width=1445", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000043", "UGREEN", "كابل UGREEN Nexode USB-C قابل للسحب بقدرة 100W", "CABL-UGR-65904", 16.00, "كابل UGREEN Nexode USB-C إلى USB-C قابل للسحب بقدرة 100W", "https://www.ugreen.com/cdn/shop/files/b6067aaf1cc675699f0d45d87d952ae7.webp?v=1766052433&width=1445", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000044", "UGREEN", "كابل UGREEN USB-C إلى USB-C بقدرة 60W — طول 2M", "CABL-UGR-50152", 11.00, "كابل UGREEN USB-C إلى USB-C بقدرة 60W وطول 2 متر ومضفر بالنايلون", "https://uk.ugreen.com/cdn/shop/products/ugreen-usb-c-to-usb-c-60w-charger-cable-braided-50149-937062.png?v=1695723704&width=3840", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000045", "UGREEN", "كابل UGREEN USB-C إلى USB-C بقدرة 60W", "CABL-UGR-50150", 10.00, "كابل UGREEN USB-C إلى USB-C بقدرة 60W ونقل بيانات بسرعة 480Mbps", "https://www.ugreen.com/cdn/shop/files/71U9WVoGotL.jpg?v=1765189892&width=1445", "10000000-0000-4000-8000-000000000003"],
   ["00000000-0000-4000-8000-000000000046", "UGREEN", "باور بنك UGREEN بسعة 10,000mAh", "CABL-UGR-PB10K", 28.00, "باور بنك UGREEN Uno بقدرة 30W وسعة 10,000mAh", "https://www.ugreen.com/cdn/shop/files/0f8988c44c76c157a802a4a21d0032ce.png?v=1762322015&width=300", "10000000-0000-4000-8000-000000000001"],
   ["00000000-0000-4000-8000-000000000047", "UGREEN", "باور بنك UGREEN بسعة 20,000mAh / 30W", "CABL-UGR-PB20K30", 41.00, "باور بنك UGREEN عالي السعة", "https://www.ugreen.com/cdn/shop/files/247309e266dff4f7659607ac05079b41.png?v=1762322020&width=300", "10000000-0000-4000-8000-000000000001"],
-  ["00000000-0000-4000-8000-000000000048", "UGREEN", "شاحن سيارة UGREEN بقدرة 30W", "CABL-UGR-CAR30", 19.00, "شاحن سيارة UGREEN لاسلكي بقدرة 30W", "https://www.ugreen.com/cdn/shop/files/ff27cd7abcb96a42eea60b5ed0980508.png?v=1762322031&width=300", "10000000-0000-4000-8000-000000000004"],
-  ["00000000-0000-4000-8000-000000000049", "UGREEN", "شاحن سيارة UGREEN بقدرة 50W", "CABL-UGR-CAR50", 22.00, "شاحن سيارة UGREEN سريع", "https://www.ugreen.com/cdn/shop/files/ff27cd7abcb96a42eea60b5ed0980508.png?v=1762322031&width=300", "10000000-0000-4000-8000-000000000004"],
+  ["00000000-0000-4000-8000-000000000049", "UGREEN", "كابل UGREEN Uno USB-C إلى USB-C بقدرة 100W مع شاشة LED", "CABL-UGR-35501", 16.00, "كابل UGREEN Uno USB-C إلى USB-C بقدرة 100W مع شاشة LED ذكية", "https://www.ugreen.com/cdn/shop/files/c5959273e9dd2835422af91a621de3aa.webp?v=1766052046&width=1445", "10000000-0000-4000-8000-000000000003"],
+  ["00000000-0000-4000-8000-000000000048", "UGREEN", "شاحن سيارة UGREEN PD سريع بقدرة 60W بمنفذين USB-C", "CABL-UGR-70594", 22.00, "شاحن سيارة UGREEN بقدرة 60W ومنفذين USB-C، يدعم 12–24V", "https://www.ugreen.com/cdn/shop/files/0341a0bcc6a0339889cd1c665d77dd9b.webp?v=1766052447&width=1445", "10000000-0000-4000-8000-000000000004"],
   ["00000000-0000-4000-8000-000000000050", "UGREEN", "محور UGREEN USB-C ‏7 في 1", "CABL-UGR-HUB7", 43.00, "محور UGREEN Revodok Pro USB-C بسبعة منافذ", "https://www.ugreen.com/cdn/shop/files/1795373640d911068a5841b77e48e007.png?v=1762322086&width=300", "10000000-0000-4000-8000-000000000005"],
 ] as const;
+
+const ugreenReplacementProductIds = [
+  "00000000-0000-4000-8000-000000000038",
+  "00000000-0000-4000-8000-000000000039",
+  "00000000-0000-4000-8000-000000000040",
+  "00000000-0000-4000-8000-000000000041",
+  "00000000-0000-4000-8000-000000000042",
+  "00000000-0000-4000-8000-000000000043",
+  "00000000-0000-4000-8000-000000000044",
+  "00000000-0000-4000-8000-000000000045",
+  "00000000-0000-4000-8000-000000000048",
+  "00000000-0000-4000-8000-000000000049",
+] as const;
+
+type UgreenSpecificationSeed = {
+  productId: string;
+  sourceUrl: string;
+  sourceNote: string;
+  maxPowerW: number | null;
+  inputVoltage?: string;
+  weightG?: number;
+  gan?: boolean;
+  portAttribute?: string;
+  ports?: Array<{ name: string; typeSlug: string; maxPowerW?: number; maxVoltageV?: number; maxCurrentA?: number }>;
+  protocols?: string[];
+  profiles?: Array<{ name: string; totalPowerW: number; description: string }>;
+  dimensions?: { lengthMm?: number; widthMm?: number; heightMm?: number; weightG?: number; note: string };
+  protections?: string[];
+  compatibility?: Array<{ categorySlug: string; notes: string }>;
+  warrantyMonths?: number;
+  cable?: {
+    connectorA?: string;
+    connectorB?: string;
+    lengthM?: number;
+    maxPowerW?: number;
+    dataSpeedGbps?: number;
+    usbVersion?: string;
+    eMarker?: boolean;
+    videoSupport?: boolean;
+    material?: string;
+  };
+  carCharger?: {
+    inputVoltageV?: string;
+    maxOutputW?: number;
+    powerDistribution?: string;
+    carCompatibility?: string;
+  };
+};
+
+const ugreenSpecificationSeed: UgreenSpecificationSeed[] = [
+  {
+    productId: "00000000-0000-4000-8000-000000000038",
+    sourceUrl: "https://www.ugreen.com/ar-sa/products/sa-55538",
+    sourceNote: "المصدر الرسمي يذكر PD 3.0، ثلاثة منافذ، أبعاد (44×38×33)±0.5 مم، حماية من الجهد الزائد والسخونة الزائدة والقصر، وضمان 24 شهرًا.",
+    maxPowerW: 30,
+    inputVoltage: "100–240V",
+    gan: true,
+    portAttribute: "USB-C1، USB-C2، USB-A",
+    ports: [
+      { name: "USB-C1", typeSlug: "usb-c", maxPowerW: 30 },
+      { name: "USB-C2", typeSlug: "usb-c" },
+      { name: "USB-A", typeSlug: "usb-a" },
+    ],
+    protocols: ["PD 3.0"],
+    profiles: [{ name: "USB-C PD 3.0", totalPowerW: 30, description: "منفذ USB-C PD 3.0 بقدرة قصوى 30W." }],
+    dimensions: { lengthMm: 44, widthMm: 38, heightMm: 33, note: "التفاوت المنشور ±0.5 مم." },
+    protections: ["الجهد الزائد", "السخونة الزائدة", "الدائرة القصيرة"],
+    compatibility: [{ categorySlug: "phones-tablets", notes: "iPhone 17/16/15/14/13، Samsung Galaxy S25/S24/S23/S22، Xiaomi Redmi Note 14/13/12، POCO X7 Pro/X6 Pro، HONOR X7b/X9c/X6a." }],
+    warrantyMonths: 24,
+  },
+  {
+    productId: "00000000-0000-4000-8000-000000000039",
+    sourceUrl: "https://www.ugreen.com/ar-ae/products/ae-65312",
+    sourceNote: "المصدر الرسمي يذكر ثلاثة منافذ، كابلًا مدمجًا قابلًا للسحب بطول 69 سم، USB-A بقدرة 22.5W، إجمالي 45W، وضمان 24 شهرًا.",
+    maxPowerW: 45,
+    inputVoltage: "240V",
+    gan: true,
+    portAttribute: "USB-C، USB-C2، USB-A",
+    ports: [
+      { name: "USB-C (cable)", typeSlug: "usb-c" },
+      { name: "USB-C2", typeSlug: "usb-c" },
+      { name: "USB-A", typeSlug: "usb-a", maxPowerW: 22.5 },
+    ],
+    protocols: ["PD 3.0", "PPS", "QC4+", "QC3.0", "SCP", "Samsung Super Fast Charging 2.0"],
+    profiles: [{ name: "Total output", totalPowerW: 45, description: "إجمالي خرج الشاحن 45W؛ الكابل المدمج قابل للسحب بطول 69 سم." }],
+    protections: ["Overvoltage", "Overpower", "Undervoltage", "Short-circuit Protection"],
+    compatibility: [{ categorySlug: "phones-tablets", notes: "iPhone Air/17/16/15/14/13، Galaxy S24/S23/S22/S21/S20/S10/S9/S8/Note، Pixel 9/8/7/6." }],
+    warrantyMonths: 24,
+  },
+  {
+    productId: "00000000-0000-4000-8000-000000000040",
+    sourceUrl: "https://www.ugreen.com/products/usa-55897",
+    sourceNote: "صفحة UGREEN الرسمية للمنتج 55897 تذكر إجمالي 65W، ثلاثة منافذ، كابل USB-C بقدرة 60W، منفذ USB-C بقدرة 65W، USB-A بقدرة 22.5W، أبعاد (53×50.9×50.4)±0.5 مم ووزن 195g.",
+    maxPowerW: 65,
+    inputVoltage: "100–240Vac 50/60Hz 1.8A Max",
+    weightG: 195,
+    gan: true,
+    portAttribute: "USB-C cable، USB-C، USB-A",
+    ports: [
+      { name: "USB-C (cable)", typeSlug: "usb-c", maxPowerW: 60, maxCurrentA: 3 },
+      { name: "USB-C", typeSlug: "usb-c", maxPowerW: 65, maxCurrentA: 3.25 },
+      { name: "USB-A", typeSlug: "usb-a", maxPowerW: 22.5 },
+    ],
+    protocols: ["PD3.0/2.0", "PPS", "QC3.0", "QC2.0", "AFC", "SCP", "FCP", "APPLE 2.4A", "SAMSUNG 5V/2A", "BC1.2"],
+    profiles: [
+      { name: "USB-C cable output", totalPowerW: 60, description: "5V/3A، 9V/3A، 12V/3A، 15V/3A، 20V/3A؛ PPS 5–21V/3A." },
+      { name: "USB-C output", totalPowerW: 65, description: "5V/3A، 9V/3A، 12V/3A، 15V/3A، 20V/3.25A؛ PPS 5–11V/4.5A." },
+      { name: "USB-A output", totalPowerW: 22.5, description: "5V/3A، 9V/2A، 12V/1.5A، 10V/2.25A." },
+    ],
+    dimensions: { lengthMm: 53, widthMm: 50.9, heightMm: 50.4, weightG: 195, note: "التفاوت المنشور ±0.5 مم." },
+    protections: ["Overcurrent", "Overvoltage", "Short Circuit Protection", "Overtemperature Protection"],
+    compatibility: [{ categorySlug: "phones-tablets", notes: "هواتف وأجهزة USB-C المتوافقة مع بروتوكولات الشحن المنشورة." }, { categorySlug: "laptops", notes: "أجهزة اللابتوب المتوافقة مع خرج USB-C حتى 65W." }],
+  },
+  {
+    productId: "00000000-0000-4000-8000-000000000041",
+    sourceUrl: "https://www.ugreen.com/en-ae/products/ae-95786",
+    sourceNote: "المصدر الرسمي يذكر خرجًا أقصى 45W، منفذ USB-C واحد، جهد 240V، وتقنيات PD3.2/PD3.0 وPPS وQC وFCP وSCP وAFC وBC1.2 وAVS.",
+    maxPowerW: 45,
+    inputVoltage: "240V",
+    gan: true,
+    portAttribute: "USB-C",
+    ports: [{ name: "USB-C", typeSlug: "usb-c", maxPowerW: 45 }],
+    protocols: ["PD3.2", "PD3.0", "PPS", "QC3.0", "QC2.0", "FCP", "SCP", "AFC", "BC1.2", "APPLE 2.4A", "Galaxy 5V/2A", "AVS"],
+    profiles: [{ name: "USB-C output", totalPowerW: 45, description: "خرج USB-C أقصى 45W." }],
+    protections: ["over-voltage", "under-voltage", "over-temperature", "over-current", "interference", "short-circuit"],
+    compatibility: [{ categorySlug: "phones-tablets", notes: "iPhone 17/16/15/14/13، Galaxy S26/S25/S24/S23، Xiaomi Redmi وMi، HONOR، iPad وMacBook." }, { categorySlug: "laptops", notes: "MacBook Pro وMacBook Air وأجهزة USB-C المتوافقة." }],
+  },
+  {
+    productId: "00000000-0000-4000-8000-000000000042",
+    sourceUrl: "https://www.ugreen.com/ar-ae/products/ae-70429",
+    sourceNote: "المصدر الرسمي يذكر USB 2.0، سرعة 480Mbps، 100W و5A، أطوال 2M، E-marker بمقاومة 56Ω، وعدم دعم الفيديو.",
+    maxPowerW: 100,
+    portAttribute: "USB-C إلى USB-C",
+    protocols: ["PD", "Huawei FCP", "Qualcomm QC 3.0", "Xiaomi Fast Charge"],
+    compatibility: [{ categorySlug: "phones-tablets", notes: "Smartphone، Tablet، iPhone 15/16/17، Samsung Galaxy S25/S24، iPad، Huawei." }, { categorySlug: "laptops", notes: "Laptop، MacBook Pro/Air، Microsoft، Dell." }],
+    warrantyMonths: 24,
+    cable: { connectorA: "USB-C", connectorB: "USB-C", lengthM: 2, maxPowerW: 100, dataSpeedGbps: 0.48, usbVersion: "2.0", eMarker: true, videoSupport: false, material: "aluminum alloy shell, nylon braided" },
+  },
+  {
+    productId: "00000000-0000-4000-8000-000000000043",
+    sourceUrl: "https://www.ugreen.com/en-ae/products/ae-65904",
+    sourceNote: "المصدر الرسمي يذكر 100W، أطوالًا قابلة للضبط من 0.36m إلى 1m، USB 2.0 و480Mbps، PD 3.0، حماية من التيار والحرارة، وضمان 24 شهرًا.",
+    maxPowerW: 100,
+    portAttribute: "USB-C إلى USB-C",
+    protocols: ["PD 3.0"],
+    compatibility: [{ categorySlug: "phones-tablets", notes: "iPhone 17/16/15، Samsung Galaxy S25/S24، Xiaomi، Oppo، Vivo، Switch، PS5، Smart Watch." }, { categorySlug: "laptops", notes: "Dell XPS، Huawei، Chromebook، أجهزة اللابتوب المتوافقة." }],
+    warrantyMonths: 24,
+    cable: { connectorA: "USB-C", connectorB: "USB-C", lengthM: 1, maxPowerW: 100, dataSpeedGbps: 0.48, usbVersion: "USB 2.0", eMarker: true, videoSupport: false, material: "Graphene shielding" },
+  },
+  {
+    productId: "00000000-0000-4000-8000-000000000044",
+    sourceUrl: "https://uk.ugreen.com/products/ugreen-usb-c-to-usb-c-60w-charger-cable",
+    sourceNote: "المصدر الرسمي البريطاني يذكر SKU 50152 لنسخة 6.5ft، قدرة 60W، تيار 3A، USB 2.0، 480Mbps، دعم PD/PPS/BC1.2، تغليف نايلون مضفر وضمان سنتين.",
+    maxPowerW: 60,
+    protocols: ["PD", "PPS", "BC1.2"],
+    compatibility: [{ categorySlug: "phones-tablets", notes: "iPad، Galaxy، Redmi، Huawei، Pixel، OnePlus، Xperia، Moto، وأجهزة USB-C المتوافقة." }, { categorySlug: "laptops", notes: "MacBook، HP، ThinkPad، ASUS، Microsoft Surface، Chromebook." }],
+    warrantyMonths: 24,
+    cable: { connectorA: "USB-C", connectorB: "USB-C", lengthM: 1.98, maxPowerW: 60, dataSpeedGbps: 0.48, usbVersion: "USB 2.0", videoSupport: false, material: "Nylon Braided" },
+  },
+  {
+    productId: "00000000-0000-4000-8000-000000000045",
+    sourceUrl: "https://www.ugreen.com/ar-ae/products/ae-50150",
+    sourceNote: "المصدر الرسمي يذكر 60W، USB-C إلى USB-C، USB 2.0، 480Mbps، مقاومة سحب 56Ω، حماية من التيار والحرارة والقصر وضمان 24 شهرًا.",
+    maxPowerW: 60,
+    protocols: ["PD fast charge", "Huawei FCP", "Qualcomm QC 3.0", "Xiaomi Fast Charge"],
+    compatibility: [{ categorySlug: "phones-tablets", notes: "iPhone، iPad، Galaxy، Huawei، Google Pixel، Xiaomi، GoPro وSwitch." }, { categorySlug: "laptops", notes: "MacBook Pro/Air، Dell XPS، HP Spectre X360." }],
+    warrantyMonths: 24,
+    cable: { connectorA: "USB-C", connectorB: "USB-C", maxPowerW: 60, dataSpeedGbps: 0.48, usbVersion: "2.0", material: "Nylon-Braided & Aluminium Alloy" },
+  },
+  {
+    productId: "00000000-0000-4000-8000-000000000049",
+    sourceUrl: "https://www.ugreen.com/ar-ae/products/ae-35501",
+    sourceNote: "المصدر الرسمي يذكر 100W، USB-C إلى USB-C، 20V/5A، 480Mbps، E-marker، خامة نايلون مزدوج الطبقة وشاشة LED.",
+    maxPowerW: 100,
+    protocols: ["PD"],
+    compatibility: [{ categorySlug: "phones-tablets", notes: "iPhone 17/16/15، Galaxy S25/S24/S23، Pixel، iPad وSwitch." }, { categorySlug: "laptops", notes: "MacBook Pro M3، MacBook Air، ThinkPad، Surface، Dell." }],
+    warrantyMonths: 24,
+    cable: { connectorA: "USB-C", connectorB: "USB-C", maxPowerW: 100, dataSpeedGbps: 0.48, eMarker: true, material: "Aluminum alloy shells, double-layer nylon braided" },
+  },
+  {
+    productId: "00000000-0000-4000-8000-000000000048",
+    sourceUrl: "https://www.ugreen.com/ar-ae/products/ae-70594",
+    sourceNote: "المصدر الرسمي يذكر 12–24V، إجمالي 60W، منفذين USB-C بقدرة 30W لكل منهما، دعم PD/PPS/QC/FCP/AFC وغيرها، حماية من الجهد والقصر والسخونة وضمان 24 شهرًا.",
+    maxPowerW: 60,
+    portAttribute: "USB-C، USB-C",
+    ports: [
+      { name: "USB-C1", typeSlug: "usb-c", maxPowerW: 30 },
+      { name: "USB-C2", typeSlug: "usb-c", maxPowerW: 30 },
+    ],
+    protocols: ["PD3.0", "PD2.0", "PPS", "QC3.0", "QC2.0", "FCP", "AFC", "BC1.2", "DCP", "APPLE 2.4A", "Samsung 5V2A"],
+    profiles: [{ name: "2 × USB-C", totalPowerW: 60, description: "كل منفذ USB-C يخرج 30W بشكل مستقل." }],
+    protections: ["over-voltage", "short-circuit", "overheating"],
+    compatibility: [{ categorySlug: "phones-tablets", notes: "iPhone، Huawei، Samsung، Xiaomi، Drones، Steam Deck، Camera." }, { categorySlug: "car-devices", notes: "متوافق مع السيارات والشاحنات وSUVs بجهد 12–24V." }],
+    warrantyMonths: 24,
+    carCharger: { inputVoltageV: "12–24", maxOutputW: 60, powerDistribution: "كل منفذ USB-C يخرج 30W بشكل مستقل", carCompatibility: "Trucks/SUVs" },
+  },
+];
+
+const ugreenSourceSlug = (value: string) => {
+  const slug = slugify(value).replace(/^-+|-+$/g, "");
+  return `ugreen-${slug || "value"}`;
+};
+
+async function seedUgreenSpecifications() {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const ids = ugreenReplacementProductIds;
+    await client.query(`DELETE FROM "product_attributes" WHERE "product_id" = ANY($1::uuid[])`, [ids]);
+    await client.query(`DELETE FROM "product_warranties" WHERE "product_id" = ANY($1::uuid[])`, [ids]);
+    await client.query(`DELETE FROM "cable_specifications" WHERE "product_id" = ANY($1::uuid[])`, [ids]);
+    await client.query(`DELETE FROM "car_charger_specifications" WHERE "product_id" = ANY($1::uuid[])`, [ids]);
+    await client.query(`DELETE FROM "product_charging_protocols" WHERE "product_id" = ANY($1::uuid[])`, [ids]);
+    await client.query(`DELETE FROM "charger_power_profile_outputs" WHERE "profile_id" IN (SELECT "id" FROM "charger_power_profiles" WHERE "product_id" = ANY($1::uuid[]))`, [ids]);
+    await client.query(`DELETE FROM "charger_power_profiles" WHERE "product_id" = ANY($1::uuid[])`, [ids]);
+    await client.query(`DELETE FROM "charger_ports" WHERE "product_id" = ANY($1::uuid[])`, [ids]);
+    await client.query(`DELETE FROM "product_dimensions" WHERE "product_id" = ANY($1::uuid[])`, [ids]);
+    await client.query(`DELETE FROM "product_protections" WHERE "product_id" = ANY($1::uuid[])`, [ids]);
+    await client.query(`DELETE FROM "product_compatibility" WHERE "product_id" = ANY($1::uuid[])`, [ids]);
+
+    const attributeRows = await client.query<{ id: string; slug: string }>(
+      `SELECT "id", "slug" FROM "attributes" WHERE "slug" = ANY($1::text[])`,
+      [["max_power_w", "gan", "port_type", "input_voltage_v", "weight_g"]],
+    );
+    const attributeIds = new Map(attributeRows.rows.map((row) => [row.slug, row.id]));
+    const portTypes = await client.query<{ id: string; slug: string }>(
+      `SELECT "id", "slug" FROM "port_types" WHERE "slug" = ANY($1::text[])`,
+      [["usb-c", "usb-a"]],
+    );
+    const portTypeIds = new Map(portTypes.rows.map((row) => [row.slug, row.id]));
+    const compatibilityRows = await client.query<{ id: string; slug: string }>(
+      `SELECT "id", "slug" FROM "compatibility_categories" WHERE "slug" = ANY($1::text[])`,
+      [["phones-tablets", "laptops", "car-devices"]],
+    );
+    const compatibilityIds = new Map(compatibilityRows.rows.map((row) => [row.slug, row.id]));
+
+    const protocolNames = [...new Set(ugreenSpecificationSeed.flatMap((item) => item.protocols ?? []))];
+    for (const name of protocolNames) {
+      await client.query(
+        `INSERT INTO "charging_protocols" ("name","slug","active") VALUES ($1,$2,TRUE)
+         ON CONFLICT ("slug") DO UPDATE SET "name" = EXCLUDED."name", "active" = TRUE`,
+        [name, ugreenSourceSlug(name)],
+      );
+    }
+    const protocolRows = await client.query<{ id: string; slug: string }>(
+      `SELECT "id", "slug" FROM "charging_protocols" WHERE "slug" = ANY($1::text[])`,
+      [protocolNames.map(ugreenSourceSlug)],
+    );
+    const protocolIds = new Map(protocolRows.rows.map((row) => [row.slug, row.id]));
+
+    const protectionNames = [...new Set(ugreenSpecificationSeed.flatMap((item) => item.protections ?? []))];
+    for (const name of protectionNames) {
+      await client.query(
+        `INSERT INTO "protection_types" ("name","slug","active") VALUES ($1,$2,TRUE)
+         ON CONFLICT ("slug") DO UPDATE SET "name" = EXCLUDED."name", "active" = TRUE`,
+        [name, ugreenSourceSlug(name)],
+      );
+    }
+    const protectionRows = await client.query<{ id: string; slug: string }>(
+      `SELECT "id", "slug" FROM "protection_types" WHERE "slug" = ANY($1::text[])`,
+      [protectionNames.map(ugreenSourceSlug)],
+    );
+    const protectionIds = new Map(protectionRows.rows.map((row) => [row.slug, row.id]));
+
+    for (const item of ugreenSpecificationSeed) {
+      const addAttribute = async (slug: string, value: { text?: string; number?: number; boolean?: boolean }) => {
+        const attributeId = attributeIds.get(slug);
+        if (!attributeId) return;
+        await client.query(
+          `INSERT INTO "product_attributes" ("product_id","attribute_id","value_text","value_number","value_boolean","source_url","source_note")
+           VALUES ($1,$2,$3,$4,$5,$6,$7)
+           ON CONFLICT ("product_id","attribute_id") DO UPDATE SET
+             "value_text" = EXCLUDED."value_text", "value_number" = EXCLUDED."value_number",
+             "value_boolean" = EXCLUDED."value_boolean", "source_url" = EXCLUDED."source_url",
+             "source_note" = EXCLUDED."source_note", "updated_at" = NOW()`,
+          [item.productId, attributeId, value.text ?? null, value.number ?? null, value.boolean ?? null, item.sourceUrl, item.sourceNote],
+        );
+      };
+      if (item.maxPowerW !== null) await addAttribute("max_power_w", { number: item.maxPowerW });
+      if (item.inputVoltage) await addAttribute("input_voltage_v", { text: item.inputVoltage });
+      if (item.weightG !== undefined) await addAttribute("weight_g", { number: item.weightG });
+      if (item.gan !== undefined) await addAttribute("gan", { boolean: item.gan });
+      if (item.portAttribute) await addAttribute("port_type", { text: item.portAttribute });
+
+      if (item.warrantyMonths) {
+        await client.query(
+          `INSERT INTO "product_warranties" ("product_id","warranty_months","warranty_note","source_url","source_note")
+           VALUES ($1,$2,$3,$4,$5)
+           ON CONFLICT ("product_id") DO UPDATE SET "warranty_months" = EXCLUDED."warranty_months",
+             "warranty_note" = EXCLUDED."warranty_note", "source_url" = EXCLUDED."source_url",
+             "source_note" = EXCLUDED."source_note", "updated_at" = NOW()`,
+          [item.productId, item.warrantyMonths, `${item.warrantyMonths} شهر`, item.sourceUrl, item.sourceNote],
+        );
+      }
+
+      if (item.cable) {
+        await client.query(
+          `INSERT INTO "cable_specifications" ("product_id","connector_a","connector_b","length_m","max_power_w","data_speed_gbps","usb_version","e_marker","video_support","material","source_url","source_note")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+           ON CONFLICT ("product_id") DO UPDATE SET "connector_a"=EXCLUDED."connector_a","connector_b"=EXCLUDED."connector_b",
+             "length_m"=EXCLUDED."length_m","max_power_w"=EXCLUDED."max_power_w","data_speed_gbps"=EXCLUDED."data_speed_gbps",
+             "usb_version"=EXCLUDED."usb_version","e_marker"=EXCLUDED."e_marker","video_support"=EXCLUDED."video_support",
+             "material"=EXCLUDED."material","source_url"=EXCLUDED."source_url","source_note"=EXCLUDED."source_note","updated_at"=NOW()`,
+          [item.productId, item.cable.connectorA ?? null, item.cable.connectorB ?? null, item.cable.lengthM ?? null, item.cable.maxPowerW ?? null, item.cable.dataSpeedGbps ?? null, item.cable.usbVersion ?? null, item.cable.eMarker ?? null, item.cable.videoSupport ?? null, item.cable.material ?? null, item.sourceUrl, item.sourceNote],
+        );
+      }
+
+      if (item.carCharger) {
+        await client.query(
+          `INSERT INTO "car_charger_specifications" ("product_id","input_voltage_v","max_output_w","power_distribution","car_compatibility","source_url","source_note")
+           VALUES ($1,$2,$3,$4,$5,$6,$7)
+           ON CONFLICT ("product_id") DO UPDATE SET "input_voltage_v"=EXCLUDED."input_voltage_v","max_output_w"=EXCLUDED."max_output_w",
+             "power_distribution"=EXCLUDED."power_distribution","car_compatibility"=EXCLUDED."car_compatibility",
+             "source_url"=EXCLUDED."source_url","source_note"=EXCLUDED."source_note","updated_at"=NOW()`,
+          [item.productId, item.carCharger.inputVoltageV ?? null, item.carCharger.maxOutputW ?? null, item.carCharger.powerDistribution ?? null, item.carCharger.carCompatibility ?? null, item.sourceUrl, item.sourceNote],
+        );
+      }
+
+      for (const port of item.ports ?? []) {
+        const portTypeId = portTypeIds.get(port.typeSlug);
+        if (!portTypeId) continue;
+        await client.query(
+          `INSERT INTO "charger_ports" ("product_id","port_name","port_type_id","max_power_w","max_voltage_v","max_current_a","sort_order","source_url","source_note")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+           ON CONFLICT ("product_id","port_name") DO UPDATE SET "port_type_id"=EXCLUDED."port_type_id","max_power_w"=EXCLUDED."max_power_w",
+             "max_voltage_v"=EXCLUDED."max_voltage_v","max_current_a"=EXCLUDED."max_current_a","sort_order"=EXCLUDED."sort_order",
+             "source_url"=EXCLUDED."source_url","source_note"=EXCLUDED."source_note","updated_at"=NOW()`,
+          [item.productId, port.name, portTypeId, port.maxPowerW ?? null, port.maxVoltageV ?? null, port.maxCurrentA ?? null, item.ports?.indexOf(port) ?? 0, item.sourceUrl, item.sourceNote],
+        );
+      }
+
+      const productPorts = await client.query<{ id: string }>(
+        `SELECT "id" FROM "charger_ports" WHERE "product_id" = $1 ORDER BY "sort_order","port_name"`,
+        [item.productId],
+      );
+      for (const name of item.protocols ?? []) {
+        const protocolId = protocolIds.get(ugreenSourceSlug(name));
+        if (!protocolId) continue;
+        await client.query(
+          `INSERT INTO "product_charging_protocols" ("product_id","protocol_id","port_id","source_url","source_note")
+           VALUES ($1,$2,NULL,$3,$4)
+           ON CONFLICT DO NOTHING`,
+          [item.productId, protocolId, item.sourceUrl, item.sourceNote],
+        );
+      }
+      for (const profile of item.profiles ?? []) {
+        const profileRow = await client.query<{ id: string }>(
+          `INSERT INTO "charger_power_profiles" ("product_id","configuration_name","total_power_w","description","sort_order","source_url","source_note")
+           VALUES ($1,$2,$3,$4,$5,$6,$7)
+           ON CONFLICT ("product_id","configuration_name") DO UPDATE SET "total_power_w"=EXCLUDED."total_power_w",
+             "description"=EXCLUDED."description","sort_order"=EXCLUDED."sort_order","source_url"=EXCLUDED."source_url",
+             "source_note"=EXCLUDED."source_note","updated_at"=NOW()
+           RETURNING "id"`,
+          [item.productId, profile.name, profile.totalPowerW, profile.description, item.profiles?.indexOf(profile) ?? 0, item.sourceUrl, item.sourceNote],
+        );
+        const profileId = profileRow.rows[0]?.id;
+        if (profileId && productPorts.rows[0]) {
+          await client.query(
+            `INSERT INTO "charger_power_profile_outputs" ("profile_id","port_id","power_w")
+             VALUES ($1,$2,$3)
+             ON CONFLICT ("profile_id","port_id") DO UPDATE SET "power_w"=EXCLUDED."power_w"`,
+            [profileId, productPorts.rows[0].id, profile.totalPowerW],
+          );
+        }
+      }
+      if (item.dimensions) {
+        await client.query(
+          `INSERT INTO "product_dimensions" ("product_id","length_mm","width_mm","height_mm","weight_g","source_url","source_note")
+           VALUES ($1,$2,$3,$4,$5,$6,$7)
+           ON CONFLICT ("product_id") DO UPDATE SET "length_mm"=EXCLUDED."length_mm","width_mm"=EXCLUDED."width_mm",
+             "height_mm"=EXCLUDED."height_mm","weight_g"=EXCLUDED."weight_g","source_url"=EXCLUDED."source_url",
+             "source_note"=EXCLUDED."source_note","updated_at"=NOW()`,
+          [item.productId, item.dimensions.lengthMm ?? null, item.dimensions.widthMm ?? null, item.dimensions.heightMm ?? null, item.dimensions.weightG ?? null, item.sourceUrl, `${item.sourceNote} ${item.dimensions.note}`],
+        );
+      }
+      for (const name of item.protections ?? []) {
+        const protectionId = protectionIds.get(ugreenSourceSlug(name));
+        if (!protectionId) continue;
+        await client.query(
+          `INSERT INTO "product_protections" ("product_id","protection_id","source_url","source_note")
+           VALUES ($1,$2,$3,$4)
+           ON CONFLICT ("product_id","protection_id") DO UPDATE SET "source_url"=EXCLUDED."source_url","source_note"=EXCLUDED."source_note","updated_at"=NOW()`,
+          [item.productId, protectionId, item.sourceUrl, item.sourceNote],
+        );
+      }
+      for (const compatibility of item.compatibility ?? []) {
+        const compatibilityId = compatibilityIds.get(compatibility.categorySlug);
+        if (!compatibilityId) continue;
+        await client.query(
+          `INSERT INTO "product_compatibility" ("product_id","compatibility_category_id","compatibility_type","notes","source_url","source_note")
+           VALUES ($1,$2,'supported',$3,$4,$5)
+           ON CONFLICT ("product_id","compatibility_category_id") DO UPDATE SET "compatibility_type"='supported',
+             "notes"=EXCLUDED."notes","source_url"=EXCLUDED."source_url","source_note"=EXCLUDED."source_note","updated_at"=NOW()`,
+          [item.productId, compatibilityId, compatibility.notes, item.sourceUrl, item.sourceNote],
+        );
+      }
+    }
+    await client.query("COMMIT");
+    return ugreenSpecificationSeed.length;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
 
 async function seedTable(query: string, values: unknown[], conflict = "DO NOTHING") {
   const result = await pool.query(query, values);
@@ -453,15 +859,30 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
        ('10000000-0000-4000-8000-000000000005','الملحقات','محاور وكابلات العرض والاتصال','images/baseus-hub.svg',TRUE)
        ON CONFLICT ("id") DO NOTHING`, []);
      counts.tags = await seedTable(`INSERT INTO "tags" ("id","tag_name","icon") VALUES (1,'Vention','brand'),(2,'USB-C','cable'),(3,'GaN','bolt'),(4,'Baseus','brand'),(5,'Anker','brand'),(6,'UGREEN','brand') ON CONFLICT ("id") DO NOTHING`, []);
+     const previousUgreenSlugs = await pool.query<{ id: string; slug: string | null }>(
+       `SELECT "id", "slug" FROM "products" WHERE "id" = ANY($1::uuid[])`,
+       [ugreenReplacementProductIds],
+     );
+     const previousSlugByProductId = new Map(previousUgreenSlugs.rows.map((row) => [row.id, row.slug]));
     counts.products = 0;
     for (const [productId, brand, name, sku, price, description, image] of productsSeed) {
       counts.products += await seedTable(
-        `INSERT INTO "products" ("id","brand","product_name","SKU","regular_price","quantity","short_description","product_description","published")
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,TRUE)
-         ON CONFLICT ("id") DO UPDATE SET "brand"=EXCLUDED."brand","product_name"=EXCLUDED."product_name","SKU"=EXCLUDED."SKU","regular_price"=EXCLUDED."regular_price","short_description"=EXCLUDED."short_description","product_description"=EXCLUDED."product_description","published"=TRUE`,
-        [productId, brand, name, sku, price, 25, description, `${name}. منتج أصلي متوفر من CABL، الوكيل الحصري لـ ${brand} في اليمن، مع توصيل داخل اليمن.`],
+         `INSERT INTO "products" ("id","brand","product_name","SKU","slug","regular_price","quantity","short_description","product_description","published")
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,TRUE)
+          ON CONFLICT ("id") DO UPDATE SET "brand"=EXCLUDED."brand","product_name"=EXCLUDED."product_name","SKU"=EXCLUDED."SKU","slug"=EXCLUDED."slug","regular_price"=EXCLUDED."regular_price","short_description"=EXCLUDED."short_description","product_description"=EXCLUDED."product_description","published"=TRUE`,
+         [productId, brand, name, sku, productSlug(name, sku), price, 25, description, `${name}. منتج أصلي متوفر من CABL، الوكيل الحصري لـ ${brand} في اليمن، مع توصيل داخل اليمن.`],
       );
     }
+     for (const [productId, oldSlug] of previousSlugByProductId) {
+       const product = productsSeed.find((seedProduct) => seedProduct[0] === productId);
+       if (product && oldSlug) {
+         await insertSeoRedirect(`/product/${oldSlug}`, `/product/${productSlug(product[2], product[3])}`);
+       }
+     }
+    counts.ugreen_category_cleanup = await seedTable(
+      `DELETE FROM "product_categories" WHERE "product_id" = ANY($1::uuid[])`,
+      [ugreenReplacementProductIds],
+    );
     counts.product_categories = 0;
     for (const product of productsSeed) {
       const categoryId = product[7];
@@ -504,12 +925,14 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
     counts.order_statuses = await seedTable(`INSERT INTO "order_statuses" ("id","status_name","color","privacy") VALUES (1,'جديد','#d6ee42','public'),(2,'قيد التجهيز','#1748bd','public'),(3,'تم الشحن','#efb12a','public'),(4,'مكتمل','#2f9e44','public') ON CONFLICT ("id") DO NOTHING`, []);
     counts.roles = await seedTable(`INSERT INTO "roles" ("id","role_name","privileges") VALUES (1,'مدير المتجر',ARRAY['catalog.read','catalog.write','orders.read','customers.read']) ON CONFLICT ("id") DO NOTHING`, []);
     counts.attributes = await seedTable(
-      `INSERT INTO "attributes" ("id","attribute_name","slug","type","unit","description","is_filterable","is_comparable","is_active") VALUES
+       `INSERT INTO "attributes" ("id","attribute_name","slug","type","unit","description","is_filterable","is_comparable","is_active") VALUES
        ('30000000-0000-4000-8000-000000000001','نوع الاستخدام','use_case','select',NULL,'الاستخدام المنشور للمنتج',FALSE,TRUE,TRUE),
        ('30000000-0000-4000-8000-000000000002','المنفذ','port_type','multiselect',NULL,'أنواع المنافذ المنشورة',TRUE,TRUE,TRUE),
        ('30000000-0000-4000-8000-000000000003','القدرة القصوى','max_power_w','number','W','القدرة القصوى كما يثبتها المصدر',TRUE,TRUE,TRUE),
        ('30000000-0000-4000-8000-000000000004','تقنية GaN','gan','boolean',NULL,'وجود تقنية GaN وفق المصدر',TRUE,TRUE,TRUE),
-       ('30000000-0000-4000-8000-000000000005','السعة','capacity_mah','number','mAh','السعة المعلنة للمنتج',TRUE,TRUE,TRUE)
+        ('30000000-0000-4000-8000-000000000005','السعة','capacity_mah','number','mAh','السعة المعلنة للمنتج',TRUE,TRUE,TRUE),
+        ('30000000-0000-4000-8000-000000000006','جهد الإدخال','input_voltage_v','text','V','جهد الإدخال المنشور للمصدر',FALSE,TRUE,TRUE),
+        ('30000000-0000-4000-8000-000000000007','الوزن','weight_g','number','g','وزن المنتج المنشور للمصدر',FALSE,TRUE,TRUE)
        ON CONFLICT ("id") DO UPDATE SET
          "attribute_name" = EXCLUDED."attribute_name",
          "slug" = EXCLUDED."slug",
@@ -644,6 +1067,7 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
        ON CONFLICT ("id") DO UPDATE SET "name" = EXCLUDED."name", "slug" = EXCLUDED."slug", "active" = EXCLUDED."active"`,
       [],
     );
+    counts.ugreen_specifications = await seedUgreenSpecifications();
     const inserted = Object.values(counts).reduce((sum, count) => sum + count, 0);
     res.json(SeedAdminDataResponse.parse({ seeded: true, inserted, tables: counts }));
   } catch (error) {
