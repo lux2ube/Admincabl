@@ -2,15 +2,16 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
 import { ArrowLeft, Heart, Menu, Search, ShoppingBag, X, ChevronDown, ChevronLeft, PackageSearch, MessageCircle, Tags, Truck, CircleHelp, BookOpen, ShieldCheck, RotateCcw, Mail, MapPin, Zap } from 'lucide-react';
 import { useStore } from '@/lib/store';
+import { productPath } from '@/lib/store-routes';
 
 export function StoreShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { catalog, cartCount, favorites, cartProducts, currency, setCurrencyCode } = useStore();
+  const { formatPrice } = useStore();
   const categories = useMemo(() => Array.from(new Map((catalog?.products || [])
     .filter((product) => product.category)
     .map((product) => [product.category!.slug, product.category!]))
@@ -36,11 +37,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     const [route, queryString] = location.split('?');
     if (route === '/search') setSearchTerm(new URLSearchParams(queryString || '').get('q') || '');
-    if (route !== '/search') setSearchOpen(false);
   }, [location]);
-  useEffect(() => {
-    if (searchOpen) searchInputRef.current?.focus();
-  }, [searchOpen]);
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 12);
     handleScroll();
@@ -56,6 +53,11 @@ export function StoreShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [mobileOpen]);
   const cartSubtotal = useMemo(() => cartProducts.reduce((sum, item) => sum + (item.product.discountPrice ?? item.product.regularPrice) * item.quantity, 0), [cartProducts]);
+  const liveSearchResults = useMemo(() => {
+    const normalized = searchTerm.trim().toLocaleLowerCase('ar');
+    if (!normalized) return [];
+    return (catalog?.products || []).filter((product) => `${product.productName} ${product.brand} ${product.shortDescription || ''}`.toLocaleLowerCase('ar').includes(normalized)).slice(0, 6);
+  }, [catalog, searchTerm]);
   return <div dir="rtl" className="min-h-[100dvh]">
      <div className="top-strip"><div className="container top-strip-inner"><div className="top-announcement"><span>الوكيل الحصري لشركة Baseus في اليمن</span><a href="https://wa.me/967771106977" target="_blank" rel="noreferrer" className="top-phone" dir="ltr" aria-label="تواصل معنا عبر واتساب على 771106977" data-testid="link-whatsapp"><MessageCircle size={13}/> 771106977</a></div><Link href="/orders" className="phone-link" data-testid="link-track-order"><PackageSearch size={13}/> تتبع طلبك</Link></div></div>
      <header className={`site-header${isScrolled ? ' is-scrolled' : ''}`}>
@@ -71,13 +73,13 @@ export function StoreShell({ children }: { children: ReactNode }) {
        })}</nav>
         <div className="header-actions">
             {catalog?.currencies.length ? <label className="currency-switcher"><select value={currency?.code || 'YER'} onChange={(event) => setCurrencyCode(event.target.value)} aria-label="اختيار العملة" data-testid="select-header-currency">{catalog.currencies.map((option) => <option value={option.code} key={option.code}>{option.name}</option>)}</select></label> : null}
-           <button type="button" className={`icon-action${searchOpen ? ' is-active' : ''}`} onClick={() => setSearchOpen((current) => !current)} aria-label={searchOpen ? 'إغلاق البحث' : 'فتح البحث'} aria-expanded={searchOpen} aria-controls="header-search-ribbon" data-testid="button-open-header-search"><Search size={20}/></button>
+           <button type="button" className="icon-action" onClick={() => searchInputRef.current?.focus()} aria-label="التركيز على البحث" data-testid="button-open-header-search"><Search size={20}/></button>
           <Link href="/orders" className="icon-action orders-action" aria-label="تتبع الطلب" data-testid="link-orders"><PackageSearch size={20}/></Link>
           <Link href="/cart" className="icon-action cart-action" aria-label="السلة" data-testid="link-cart"><ShoppingBag size={20}/>{cartCount > 0 && <b>{cartCount}</b>}</Link>
           <Link href="/search?view=favorites" className="icon-action favorite-action" aria-label="المفضلة" data-testid="link-favorites"><Heart size={20}/>{favorites.length > 0 && <b>{favorites.length}</b>}</Link>
         </div>
       </div>
-        {searchOpen && <div className="container search-ribbon" id="header-search-ribbon"><form className="header-search-form" onSubmit={(event) => { event.preventDefault(); const term = searchTerm.trim(); setSearchOpen(false); setLocation(term ? `/search?q=${encodeURIComponent(term)}` : '/search'); }}><Search size={17}/><input ref={searchInputRef} value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="ابحث عن شاحن، كابل، سماعة..." aria-label="بحث المنتجات من الهيدر" data-testid="input-header-search"/><button type="submit" aria-label="تنفيذ البحث" data-testid="button-submit-header-search">بحث</button><button type="button" className="header-search-close" onClick={() => setSearchOpen(false)} aria-label="إغلاق البحث" data-testid="button-close-header-search"><X size={16}/></button></form><span className="ribbon-note">بيانات الكتالوج • أسعار واضحة • خدمة محلية</span></div>}
+        <div className="container search-ribbon" id="header-search-ribbon"><div className="header-search-wrap"><form className="header-search-form" onSubmit={(event) => event.preventDefault()}><Search size={17}/><input ref={searchInputRef} value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="ابحث عن شاحن، كابل، سماعة..." aria-label="بحث المنتجات من الهيدر" data-testid="input-header-search"/>{searchTerm && <button type="button" className="header-search-close" onClick={() => { setSearchTerm(''); searchInputRef.current?.focus(); }} aria-label="مسح البحث" data-testid="button-clear-header-search"><X size={16}/></button>}</form>{searchTerm.trim() && <div className="header-search-results" role="listbox" aria-label="نتائج البحث المباشرة">{liveSearchResults.length ? liveSearchResults.map((product) => <Link href={productPath(product)} className="header-search-result" key={product.id} onClick={() => setSearchTerm('')} role="option" data-testid={`link-live-search-${product.id}`}><img src={product.images?.[0]} alt="" /><span><strong>{product.productName}</strong><small>{product.brand}</small></span><b>{formatPrice(product.discountPrice ?? product.regularPrice)}</b></Link>) : <div className="header-search-empty">لا توجد منتجات مطابقة حالياً.</div>}</div>}</div><span className="ribbon-note">نتائج مباشرة من كتالوج CABL</span></div>}
     </header>
      {mobileOpen && <div className="mobile-drawer-backdrop" onClick={() => setMobileOpen(false)}>
        <aside className="mobile-drawer" role="dialog" aria-modal="true" aria-label="قائمة CABL" onClick={(event) => event.stopPropagation()}>
