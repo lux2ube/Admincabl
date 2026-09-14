@@ -426,7 +426,7 @@ function CommercialHomePage() {
           <div className="guided-needs-header">
             <div>
               <span className="eyebrow">تسوّق حسب الحاجة</span>
-              <h2 id="home-needs-title">ماذا تريد أن تنجز اليوم؟</h2>
+               <h2 id="home-needs-title">ايش ناقص عليك اليوم؟</h2>
               <p>ابدأ من الاستخدام الأقرب لك، ثم قارن المنتجات المنشورة في القسم.</p>
             </div>
             <Link href="/search" className="guided-needs-all" data-testid="link-home-categories-all">كل المنتجات <ArrowLeft size={15} /></Link>
