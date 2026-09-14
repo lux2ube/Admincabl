@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
 import { ArrowLeft, Heart, Menu, Search, ShoppingBag, X, ChevronDown, ChevronLeft, PackageSearch, MessageCircle, Tags, Truck, CircleHelp, BookOpen, ShieldCheck, RotateCcw, Mail, MapPin, Zap } from 'lucide-react';
 import { useStore } from '@/lib/store';
@@ -6,7 +6,10 @@ import { useStore } from '@/lib/store';
 export function StoreShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [location] = useLocation();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [location, setLocation] = useLocation();
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { catalog, cartCount, favorites, cartProducts, currency, setCurrencyCode } = useStore();
   const categories = useMemo(() => Array.from(new Map((catalog?.products || [])
     .filter((product) => product.category)
@@ -30,6 +33,14 @@ export function StoreShell({ children }: { children: ReactNode }) {
     const route = location.split('?')[0];
     if (titles[route]) document.title = titles[route];
   }, [location]);
+  useEffect(() => {
+    const [route, queryString] = location.split('?');
+    if (route === '/search') setSearchTerm(new URLSearchParams(queryString || '').get('q') || '');
+    if (route !== '/search') setSearchOpen(false);
+  }, [location]);
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 12);
     handleScroll();
@@ -59,14 +70,14 @@ export function StoreShell({ children }: { children: ReactNode }) {
          return <Link href={item.href} key={item.href} className={`nav-link${isActive ? ' is-active' : ''}`} aria-current={isActive ? 'page' : undefined} data-testid={`link-nav-${item.label}`}>{item.label}{item.label === 'العلامات التجارية' && <ChevronDown size={14}/>}</Link>;
        })}</nav>
         <div className="header-actions">
-           {catalog?.currencies.length ? <label className="currency-switcher"><span>العملة</span><select value={currency?.code || 'YER'} onChange={(event) => setCurrencyCode(event.target.value)} aria-label="اختيار العملة" data-testid="select-header-currency">{catalog.currencies.map((option) => <option value={option.code} key={option.code}>{option.code}</option>)}</select></label> : null}
-           <Link href="/search" className="icon-action" aria-label="البحث" data-testid="link-search"><Search size={20}/></Link>
+            {catalog?.currencies.length ? <label className="currency-switcher"><select value={currency?.code || 'YER'} onChange={(event) => setCurrencyCode(event.target.value)} aria-label="اختيار العملة" data-testid="select-header-currency">{catalog.currencies.map((option) => <option value={option.code} key={option.code}>{option.name}</option>)}</select></label> : null}
+           <button type="button" className={`icon-action${searchOpen ? ' is-active' : ''}`} onClick={() => setSearchOpen((current) => !current)} aria-label={searchOpen ? 'إغلاق البحث' : 'فتح البحث'} aria-expanded={searchOpen} aria-controls="header-search-ribbon" data-testid="button-open-header-search"><Search size={20}/></button>
           <Link href="/orders" className="icon-action orders-action" aria-label="تتبع الطلب" data-testid="link-orders"><PackageSearch size={20}/></Link>
           <Link href="/cart" className="icon-action cart-action" aria-label="السلة" data-testid="link-cart"><ShoppingBag size={20}/>{cartCount > 0 && <b>{cartCount}</b>}</Link>
           <Link href="/search?view=favorites" className="icon-action favorite-action" aria-label="المفضلة" data-testid="link-favorites"><Heart size={20}/>{favorites.length > 0 && <b>{favorites.length}</b>}</Link>
         </div>
       </div>
-       <div className="container search-ribbon"><Link href="/search" className="search-cta" data-testid="link-search-ribbon"><Search size={18}/><span>ابحث عن شاحن، كابل، سماعة...</span><kbd>⌘ K</kbd></Link><span className="ribbon-note">بيانات الكتالوج • أسعار واضحة • خدمة محلية</span></div>
+        {searchOpen && <div className="container search-ribbon" id="header-search-ribbon"><form className="header-search-form" onSubmit={(event) => { event.preventDefault(); const term = searchTerm.trim(); setSearchOpen(false); setLocation(term ? `/search?q=${encodeURIComponent(term)}` : '/search'); }}><Search size={17}/><input ref={searchInputRef} value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="ابحث عن شاحن، كابل، سماعة..." aria-label="بحث المنتجات من الهيدر" data-testid="input-header-search"/><button type="submit" aria-label="تنفيذ البحث" data-testid="button-submit-header-search">بحث</button><button type="button" className="header-search-close" onClick={() => setSearchOpen(false)} aria-label="إغلاق البحث" data-testid="button-close-header-search"><X size={16}/></button></form><span className="ribbon-note">بيانات الكتالوج • أسعار واضحة • خدمة محلية</span></div>}
     </header>
      {mobileOpen && <div className="mobile-drawer-backdrop" onClick={() => setMobileOpen(false)}>
        <aside className="mobile-drawer" role="dialog" aria-modal="true" aria-label="قائمة CABL" onClick={(event) => event.stopPropagation()}>
