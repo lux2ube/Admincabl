@@ -426,6 +426,10 @@ const productsSeed = [
   ["00000000-0000-4000-8000-000000000052", "Hollyland", "Hollyland LARK M2 Combo", "CABL-HOL-M2-COMBO", 99.00, "ميكروفون لاسلكي Lavalier لصناعة المحتوى، مع نسخة Combo ومخرجين USB-C وLightning حسب التكوين.", "https://store.hollyland.com/cdn/shop/files/6301-lark_m2-clear-001.png?crop=center&height=280&v=1766029688&width=280", "10000000-0000-4000-8000-000000000006"],
   ["00000000-0000-4000-8000-000000000053", "Hollyland", "Hollyland LARK M2", "CABL-HOL-M2", 99.00, "ميكروفون لاسلكي خفيف لصناعة المحتوى والبودكاست والمقابلات، مع صوت عالي الدقة.", "https://store.hollyland.com/cdn/shop/files/6301-lark_m2-clear-001.png?crop=center&height=280&v=1766029688&width=280", "10000000-0000-4000-8000-000000000006"],
   ["00000000-0000-4000-8000-000000000054", "Hollyland", "Hollyland LARK A1", "CABL-HOL-A1", 49.90, "ميكروفون لاسلكي لصناعة المحتوى مع إلغاء ضوضاء ذكي وصوت عالي الدقة.", "https://store.hollyland.com/cdn/shop/files/6108-lark_a1-clear-001.png?crop=center&height=280&v=1766029366&width=280", "10000000-0000-4000-8000-000000000006"],
+  ["00000000-0000-4000-8000-000000000055", "Soundcore", "Soundcore P41i", "CABL-SCO-P41I", 89.99, "سماعات أذن لاسلكية مع علبة شحن للهاتف، وبطارية طويلة للاستخدام اليومي والسفر.", "https://cdn.shopify.com/s/files/1/0501/7678/6607/files/A3937Z22_Product_Image_04_3840x.png?v=1753427170", "10000000-0000-4000-8000-000000000007"],
+  ["00000000-0000-4000-8000-000000000056", "Soundcore", "Soundcore R60i NC", "CABL-SCO-R60I-NC", 49.99, "سماعات أذن لاسلكية من Soundcore للاستخدام اليومي والمكالمات والاستماع المتنقل.", "https://cdn.shopify.com/s/files/1/0516/3761/6830/files/D1202_banner_US_V1.png?v=1764848058", "10000000-0000-4000-8000-000000000007"],
+  ["00000000-0000-4000-8000-000000000057", "Soundcore", "Soundcore R50i NC", "CABL-SCO-R50I-NC", 49.99, "سماعات أذن لاسلكية من Soundcore مع نسخة NC للاستخدام اليومي والمكالمات.", "https://cdn.shopify.com/s/files/1/0516/3761/6830/files/20250715-181408.png?v=1752574504", "10000000-0000-4000-8000-000000000007"],
+  ["00000000-0000-4000-8000-000000000058", "Soundcore", "Soundcore R50i", "CABL-SCO-R50I", 39.99, "سماعات أذن لاسلكية خفيفة من Soundcore للاستخدام اليومي والاستماع المتنقل.", "https://cdn.shopify.com/s/files/1/0516/3761/6830/files/D1202_banner_US_V1.png?v=1764848058", "10000000-0000-4000-8000-000000000007"],
 ] as const;
 
 const ugreenReplacementProductIds = [
@@ -864,6 +868,10 @@ const catalogOfficialSourceUrls: Record<string, string> = {
   "CABL-VEN-PB10KL": "https://ventiontech.com/products/vention-10000mah-power-bank-usb-c-usb-a-with-built-in-cable-22-5w-led-display-type",
   "CABL-VEN-PB10K": "https://ventiontech.com/products/10000mah-power-bank-micro-usb-usb-c-usb-a-usb-a-22-5w",
   "CABL-VEN-PB20K": "https://ventiontech.com/products/20000mah-power-bank",
+  "CABL-SCO-P41I": "https://www.soundcore.com/products/a3937-p41i-ture-wireless-earbuds",
+  "CABL-SCO-R60I-NC": "https://www.soundcore.com/products/a3958-r60i-nc",
+  "CABL-SCO-R50I-NC": "https://www.soundcore.com/products/a3959-p30i",
+  "CABL-SCO-R50I": "https://www.soundcore.com/products/a3949-r50i",
 };
 
 async function seedCatalogSourceUrls() {
@@ -1074,7 +1082,8 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
        ('10000000-0000-4000-8000-000000000003','الكابلات','charging-cables','كابلات شحن ونقل بيانات','كابلات شحن ونقل بيانات | CABL','قارن كابلات USB-C وLightning حسب الطرف والقدرة والطول.','كابلات شحن ونقل بيانات منشورة مع بيانات الموديل والتوافر.','images/vention-cable-100w.jpg',TRUE,TRUE),
        ('10000000-0000-4000-8000-000000000004','السفر والسيارة','travel-adapters','حلول الشحن أثناء التنقل','شواحن السيارة والسفر في اليمن | CABL','حلول شحن للسيارة والسفر مع مقارنة القدرة والمنافذ.','اختر ملحق الشحن المناسب للتنقل بعد مراجعة بيانات المنتج.','images/vention-adapter-65w.jpg',TRUE,TRUE),
        ('10000000-0000-4000-8000-000000000005','الملحقات','phone-accessories','محاور وكابلات العرض والاتصال','ملحقات الهاتف والاتصال | CABL','محاور USB-C وكابلات العرض والملحقات من كتالوج CABL.','ملحقات اتصال منشورة مع روابط الأقسام والمنتجات ذات الصلة.','images/baseus-hub.svg',TRUE,TRUE),
-       ('10000000-0000-4000-8000-000000000006','مايكروفونات لاسلكية','wireless-microphones','ميكروفونات لاسلكية لصناعة المحتوى والمقابلات والبث المباشر','مايكروفونات لاسلكية في اليمن | CABL','قارن ميكروفونات Hollyland اللاسلكية لصناعة المحتوى والمقابلات والبث المباشر.','ميكروفونات لاسلكية منشورة من Hollyland مع روابط الموديلات والمعلومات المعلنة.','https://store.hollyland.com/cdn/shop/files/6108-lark_a1-clear-001.png?crop=center&height=280&v=1766029366&width=280',TRUE,TRUE)
+        ('10000000-0000-4000-8000-000000000006','مايكروفونات لاسلكية','wireless-microphones','ميكروفونات لاسلكية لصناعة المحتوى والمقابلات والبث المباشر','مايكروفونات لاسلكية في اليمن | CABL','قارن ميكروفونات Hollyland اللاسلكية لصناعة المحتوى والمقابلات والبث المباشر.','ميكروفونات لاسلكية منشورة من Hollyland مع روابط الموديلات والمعلومات المعلنة.','https://store.hollyland.com/cdn/shop/files/6108-lark_a1-clear-001.png?crop=center&height=280&v=1766029366&width=280',TRUE,TRUE),
+        ('10000000-0000-4000-8000-000000000007','سماعات أذن لاسلكية','wireless-earbuds','سماعات أذن لاسلكية للاستماع والمكالمات والتنقل','سماعات أذن لاسلكية في اليمن | CABL','قارن سماعات الأذن اللاسلكية حسب الاستخدام والموديل والسعر والتوافر.','سماعات أذن لاسلكية منشورة من Soundcore مع روابط المنتجات والمعلومات المعلنة.','https://cdn.shopify.com/s/files/1/0501/7678/6607/files/A3937Z22_Product_Image_04_3840x.png?v=1753427170',TRUE,TRUE)
        ON CONFLICT ("id") DO UPDATE SET
          "category_name" = EXCLUDED."category_name",
          "slug" = EXCLUDED."slug",
@@ -1093,7 +1102,8 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
          ('70000000-0000-4000-8000-000000000002','Baseus','baseus','منتجات Baseus للشحن والطاقة والاتصال.','منتجات Baseus في اليمن | CABL','تصفح منتجات Baseus المنشورة في كتالوج CABL.','منتجات Baseus للشحن والطاقة والاتصال من الكتالوج الحالي.','TRUE'),
          ('70000000-0000-4000-8000-000000000003','Anker','anker','منتجات Anker للشحن والطاقة والاتصال.','منتجات Anker في اليمن | CABL','تصفح منتجات Anker المنشورة في كتالوج CABL.','منتجات Anker للشحن والطاقة والاتصال من الكتالوج الحالي.','TRUE'),
          ('70000000-0000-4000-8000-000000000004','UGREEN','ugreen','منتجات UGREEN للشحن والطاقة والاتصال.','منتجات UGREEN في اليمن | CABL','تصفح منتجات UGREEN المنشورة في كتالوج CABL.','منتجات UGREEN للشحن والطاقة والاتصال من الكتالوج الحالي.','TRUE'),
-         ('70000000-0000-4000-8000-000000000005','Hollyland','hollyland','ميكروفونات لاسلكية Hollyland لصناعة المحتوى والمقابلات والبث المباشر.','ميكروفونات Hollyland اللاسلكية في اليمن | CABL','قارن ميكروفونات Hollyland اللاسلكية لصناعة المحتوى والمقابلات والبث المباشر.','منتجات Hollyland المنشورة في كتالوج CABL مع روابط الموديلات والبيانات المعلنة.','TRUE')
+          ('70000000-0000-4000-8000-000000000005','Hollyland','hollyland','ميكروفونات لاسلكية Hollyland لصناعة المحتوى والمقابلات والبث المباشر.','ميكروفونات Hollyland اللاسلكية في اليمن | CABL','قارن ميكروفونات Hollyland اللاسلكية لصناعة المحتوى والمقابلات والبث المباشر.','منتجات Hollyland المنشورة في كتالوج CABL مع روابط الموديلات والبيانات المعلنة.','TRUE'),
+          ('70000000-0000-4000-8000-000000000006','Soundcore','soundcore','سماعات أذن لاسلكية من Soundcore للاستماع والمكالمات والتنقل.','سماعات Soundcore اللاسلكية في اليمن | CABL','قارن سماعات Soundcore اللاسلكية المنشورة في كتالوج CABL.','منتجات Soundcore المنشورة مع روابط الموديلات والمعلومات المعلنة.','TRUE')
         ON CONFLICT ("brand_name") DO UPDATE SET
           "slug" = EXCLUDED."slug",
           "description" = EXCLUDED."description",
@@ -1122,7 +1132,7 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
              "short_description"=EXCLUDED."short_description",
              "product_description"=EXCLUDED."product_description",
              "published"=TRUE`,
-          [productId, brand, name, sku, productSlug(name, sku), price, brand === "Hollyland" ? 0 : 25, description, `${name}. منتج منشور من CABL مع توصيل داخل اليمن. راجع بيانات الموديل والتوافر قبل الطلب.`],
+          [productId, brand, name, sku, productSlug(name, sku), price, brand === "Hollyland" || brand === "Soundcore" ? 0 : 25, description, `${name}. منتج منشور من CABL مع توصيل داخل اليمن. راجع بيانات الموديل والتوافر قبل الطلب.`],
       );
     }
      for (const [productId, oldSlug] of previousSlugByProductId) {
@@ -1175,6 +1185,19 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
           "source_url"=EXCLUDED."source_url",
           "source_note"=EXCLUDED."source_note",
           "updated_at"=NOW()`, []);
+      counts.soundcore_attributes = await seedTable(
+        `INSERT INTO "product_attributes"
+          ("product_id","attribute_id","value_text","source_url","source_note")
+         VALUES
+          ('00000000-0000-4000-8000-000000000055','30000000-0000-4000-8000-000000000001','الاستماع اليومي، السفر، شحن الهاتف','https://www.soundcore.com/products/a3937-p41i-ture-wireless-earbuds','تمت مراجعة صفحة Soundcore الرسمية للمنتج.'),
+          ('00000000-0000-4000-8000-000000000056','30000000-0000-4000-8000-000000000001','الاستماع اليومي، المكالمات، التنقل','https://www.soundcore.com/products/a3958-r60i-nc','تمت مراجعة مرجع Soundcore الرسمي للمنتج.'),
+          ('00000000-0000-4000-8000-000000000057','30000000-0000-4000-8000-000000000001','الاستماع اليومي، المكالمات، التنقل','https://www.soundcore.com/products/a3959-p30i','تمت مراجعة صفحة Soundcore الرسمية للموديل A3959.'),
+          ('00000000-0000-4000-8000-000000000058','30000000-0000-4000-8000-000000000001','الاستماع اليومي، المكالمات، التنقل','https://www.soundcore.com/products/a3949-r50i','تمت مراجعة مرجع Soundcore الرسمي للموديل A3949.')
+         ON CONFLICT ("product_id","attribute_id") DO UPDATE SET
+           "value_text"=EXCLUDED."value_text",
+           "source_url"=EXCLUDED."source_url",
+           "source_note"=EXCLUDED."source_note",
+           "updated_at"=NOW()`, []);
      counts.product_shippings = 0;
     for (const [productId] of productsSeed) {
       counts.product_shippings += await seedTable(
