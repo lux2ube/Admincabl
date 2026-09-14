@@ -1480,11 +1480,21 @@ function ProductDetailPage({ slug }: { slug: string }) {
               <QuantityControl value={quantity} onChange={(value) => setQuantity(Math.max(1, Math.min(product.quantity || 1, value)))} testId="quantity-detail"/>
               <button className="button button-primary" onClick={() => addToCart(product.id, quantity)} disabled={product.quantity < 1} data-testid="button-detail-add-cart">أضف إلى السلة <Package size={17}/></button>
             </div>
-            <div className="detail-facts">
-              <div className="fact"><ShieldCheck size={20}/><span>بيانات المنتج موضحة</span></div>
-              <div className="fact"><Truck size={20}/><span>خيارات الشحن تظهر في checkout</span></div>
-              <div className="fact"><Zap size={20}/><span>التوافر من الكتالوج الحالي</span></div>
-              <div className="fact"><Package size={20}/><span>احتفظ برقم الطلب</span></div>
+            <div className="detail-trust" aria-label="ليش تشتري من CABL؟">
+              <div className="detail-trust-heading"><span className="eyebrow">ليش CABL؟</span><strong>اختَر وأنت مطمّن</strong></div>
+              <div className="detail-trust-grid">
+                {[
+                  { number: '01', title: 'نساعدك تختار', text: 'نساعدك بخبرة تختار المنتج اللي يناسب جهازك بالضبط.' },
+                  { number: '02', title: 'منتجات أصلية فقط', text: 'منتجات فاخرة من براندات عالمية معروفة.' },
+                  { number: '03', title: 'نوصل لباب بيتك', text: 'نوصل لجميع المحافظات اليمنية.' },
+                  { number: '04', title: 'معك حتى بعد الشراء', text: 'ضمان، خدمة ما بعد البيع، وإمكانية الإرجاع والاستبدال.' },
+                ].map(({ number, title, text }) => (
+                  <div className="detail-trust-item" key={number}>
+                    <span className="detail-trust-number">{number}</span>
+                    <div><strong>{title}</strong><small>{text}</small></div>
+                  </div>
+                ))}
+              </div>
             </div>
             {product.productNote && <div className="detail-note">{product.productNote}</div>}
           </div>
