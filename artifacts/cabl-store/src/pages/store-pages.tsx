@@ -333,7 +333,7 @@ function CommercialHomePage() {
       const product = products.find((item) => item.category?.slug === category.slug && item.images?.[0]);
       selected.push({ category, title: category.name, text: 'منتجات منشورة في هذا القسم', icon: <Package size={20} />, product });
     });
-    return selected.slice(0, 5);
+     return selected.slice(0, 6);
   }, [categories, products]);
   return (
     <div className="guided-home">
