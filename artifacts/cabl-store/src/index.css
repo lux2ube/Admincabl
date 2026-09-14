@@ -479,4 +479,6 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:h
   .header-search-form{height:34px}
   .header-search-results{top:calc(100% + 5px)}
   .header-search-result{padding:8px}
+  .currency-switcher{max-width:78px;padding-inline:5px}
+  .currency-switcher select{max-width:66px;font-size:9px}
 }

@@ -73,7 +73,6 @@ export function StoreShell({ children }: { children: ReactNode }) {
        })}</nav>
         <div className="header-actions">
             {catalog?.currencies.length ? <label className="currency-switcher"><select value={currency?.code || 'YER'} onChange={(event) => setCurrencyCode(event.target.value)} aria-label="اختيار العملة" data-testid="select-header-currency">{catalog.currencies.map((option) => <option value={option.code} key={option.code}>{option.name}</option>)}</select></label> : null}
-           <button type="button" className="icon-action" onClick={() => searchInputRef.current?.focus()} aria-label="التركيز على البحث" data-testid="button-open-header-search"><Search size={20}/></button>
           <Link href="/orders" className="icon-action orders-action" aria-label="تتبع الطلب" data-testid="link-orders"><PackageSearch size={20}/></Link>
           <Link href="/cart" className="icon-action cart-action" aria-label="السلة" data-testid="link-cart"><ShoppingBag size={20}/>{cartCount > 0 && <b>{cartCount}</b>}</Link>
           <Link href="/search?view=favorites" className="icon-action favorite-action" aria-label="المفضلة" data-testid="link-favorites"><Heart size={20}/>{favorites.length > 0 && <b>{favorites.length}</b>}</Link>
