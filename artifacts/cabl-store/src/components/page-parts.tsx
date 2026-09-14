@@ -1,5 +1,6 @@
 import { Link } from 'wouter';
 import { AlertTriangle, ArrowLeft, ChevronLeft, SlidersHorizontal } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useStore } from '@/lib/store';
 import { ProductGrid } from '@/components/catalog-ui';
 import type { StoreProduct } from '@workspace/api-client-react';
@@ -7,6 +8,21 @@ import type { StoreProduct } from '@workspace/api-client-react';
 export function LoadingCatalog() { return <div className="catalog-loading"><div className="c-loading-mark" aria-label="جارٍ تحميل المنتجات">C</div><div className="product-grid">{Array.from({ length: 8 }).map((_, index) => <div className="product-card skeleton-card" key={index}><div className="skeleton skeleton-image"/><div className="skeleton skeleton-line"/><div className="skeleton skeleton-line short"/></div>)}</div></div>; }
 export function CatalogError({ retry }: { retry: () => void }) { return <div className="state-panel error-panel"><AlertTriangle size={30}/><h3>تعذّر تحميل الكتالوج</h3><p>تحقق من اتصالك وحاول مرة أخرى.</p><button className="button button-primary" onClick={retry} data-testid="button-retry-catalog">إعادة المحاولة</button></div>; }
 export function Breadcrumbs({ items }: { items: Array<{ label: string; href?: string }> }) { return <div className="breadcrumbs"><Link href="/" data-testid="link-breadcrumb-home">الرئيسية</Link>{items.map((item, index) => <span key={`${item.label}-${index}`}><ChevronLeft size={14}/>{item.href ? <Link href={item.href} data-testid={`link-breadcrumb-${index}`}>{item.label}</Link> : <b>{item.label}</b>}</span>)}</div>; }
-export function PageHeading({ eyebrow, title, description, children }: { eyebrow?: string; title: string; description?: string; children?: React.ReactNode }) { return <div className="page-heading"><div><span className="eyebrow">{eyebrow || 'CABL STORE'}</span><h1>{title}</h1>{description && <p>{description}</p>}</div>{children}</div>; }
+export function PageHeading({ eyebrow, title, description, children }: { eyebrow?: string; title: string; description?: string; children?: ReactNode }) {
+  return (
+    <section className="page-heading page-hero" data-testid="section-page-hero">
+      <div className="page-hero-content">
+        <span className="eyebrow">{eyebrow || 'CABL STORE'}</span>
+        <h1>{title}</h1>
+        {description && <p>{description}</p>}
+      </div>
+      <div className="page-hero-mark" aria-hidden="true">
+        <span className="page-hero-mark-letter">C</span>
+        <span className="page-hero-mark-rule">CABL / 01</span>
+      </div>
+      {children && <div className="page-hero-actions">{children}</div>}
+    </section>
+  );
+}
 export function CatalogToolbar({ products, sort, setSort }: { products: StoreProduct[]; sort: string; setSort: (value: string) => void }) { return <div className="catalog-toolbar"><span><b>{products.length}</b> منتج</span><label><SlidersHorizontal size={16}/> ترتيب <select value={sort} onChange={(event) => setSort(event.target.value)} data-testid="select-sort"><option value="featured">الأكثر صلة</option><option value="price-low">السعر: الأقل أولاً</option><option value="price-high">السعر: الأعلى أولاً</option></select></label></div>; }
 export function CTASection() { const { catalog } = useStore(); const brands = Array.from(new Set((catalog?.products || []).map((product) => product.brand))).slice(0, 4); return <section className="cta-section"><div className="container cta-inner"><div><span className="eyebrow cyan">اختيارات محسوبة</span><h2>طاقة أوضح.<br/><em>يوم أسهل.</em></h2><p>ابحث في كتالوج CABL عن القطعة التي تناسبك، بلا حيرة وبلا مبالغة.</p></div><div className="cta-orbit"><div className="orbit-ring"/><div className="orbit-label">CABL<span>.</span></div>{brands.map((brand, index) => <span className={`orbit-chip chip-${index}`} key={brand}>{brand}</span>)}</div><Link href="/search" className="button button-light" data-testid="link-cta-catalog">شاهد الكتالوج <ArrowLeft size={17}/></Link></div></section>; }

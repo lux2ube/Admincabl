@@ -1088,14 +1088,20 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
             { label: brandName, href: `/brand/${brandSlug}` },
             { label: categoryName },
           ]} />
-          <div className="category-landing-copy">
-            <span className="eyebrow">{copy.eyebrow}</span>
-            <h1>{categoryName} {brandName}</h1>
-            <p>{copy.description}</p>
-            <div className="category-landing-actions">
-              <Link className="button button-secondary" href={brandPath(brandSlug)}>كل منتجات {brandName}</Link>
-              <Link className="button button-secondary" href={`/category/${categoryPathSlug}`}>كل {categoryName}</Link>
-              <Link className="button button-primary" href="/search">كل المنتجات <ArrowLeft size={16} /></Link>
+          <div className="category-landing-hero-grid">
+            <div className="category-landing-copy">
+              <span className="eyebrow">{copy.eyebrow}</span>
+              <h1>{categoryName} <em>{brandName}</em></h1>
+              <p>{copy.description}</p>
+              <div className="category-landing-actions">
+                <Link className="button button-secondary" href={brandPath(brandSlug)}>كل منتجات {brandName}</Link>
+                <Link className="button button-secondary" href={`/category/${categoryPathSlug}`}>كل {categoryName}</Link>
+                <Link className="button button-primary" href="/search">كل المنتجات <ArrowLeft size={16} /></Link>
+              </div>
+            </div>
+            <div className="category-hero-rail" aria-label="ملخص العلامة والقسم">
+              <div><span>منتجات القسم</span><strong>{filtered.length}</strong><small>من {brandName}</small></div>
+              <div><span>متاح الآن</span><strong>{filtered.filter((product) => product.quantity > 0).length}</strong><small>توافر الكتالوج</small></div>
             </div>
           </div>
         </div>
@@ -1272,10 +1278,16 @@ function CategoryLandingPage({ slug }: { slug: string }) {
       <div className="category-landing-hero">
         <div className="container">
           <Breadcrumbs items={[{ label: 'الأقسام', href: '/search' }, { label: name }]} />
-          <div className="category-landing-copy">
-            <span className="eyebrow">{copy.eyebrow}</span>
-            <h1>{name}</h1>
-            <p>{description}</p>
+          <div className="category-landing-hero-grid">
+            <div className="category-landing-copy">
+              <span className="eyebrow">{copy.eyebrow}</span>
+              <h1>{name}</h1>
+              <p>{description}</p>
+            </div>
+            <div className="category-hero-rail" aria-label="ملخص القسم">
+              <div><span>منتجات منشورة</span><strong>{categoryProducts.length}</strong><small>من الكتالوج الحالي</small></div>
+              <div><span>متاح الآن</span><strong>{categoryProducts.filter((product) => product.quantity > 0).length}</strong><small>قابل للإضافة للسلة</small></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1443,6 +1455,15 @@ function ProductDetailPage({ slug }: { slug: string }) {
           ...(product.category ? [{ label: product.category.name, href: `/category/${product.category.slug}` }] : []),
           { label: product.productName },
         ]}/>
+        <div className="product-context-strip" data-testid="section-product-context">
+          <div className="product-context-main">
+            <span className="eyebrow">بيانات المنتج من الكتالوج</span>
+            <strong>{product.brand}{product.category ? ` · ${product.category.name}` : ''}</strong>
+          </div>
+          <div className="product-context-item"><span>SKU</span><b dir="ltr">{product.sku}</b></div>
+          <div className="product-context-item"><span>السعر الحالي</span><b>{formatPrice(price)}</b></div>
+          <div className={`product-context-item ${product.quantity > 0 ? 'is-available' : 'is-unavailable'}`}><span>التوافر</span><b>{product.quantity > 0 ? `${product.quantity} قطعة` : 'غير متوفر'}</b></div>
+        </div>
         <div className="product-detail-grid">
           <div className="detail-gallery">
             <div className="detail-main-image"><img src={product.images?.[imageIndex] || product.images?.[0]} alt={product.productName} data-testid="img-product-main"/></div>
