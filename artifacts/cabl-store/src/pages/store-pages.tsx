@@ -413,7 +413,6 @@ function CommercialHomePage() {
               <div className="guided-step" key={number} data-testid={`step-home-confidence-${number}`}>
                 <div className="guided-step-head">
                   <span className="guided-step-number">{number}</span>
-                  <span className="guided-step-c" aria-hidden="true">C</span>
                 </div>
                 <div className="guided-step-copy"><strong>{title}</strong><span>{text}</span></div>
               </div>
