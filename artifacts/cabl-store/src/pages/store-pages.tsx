@@ -1286,16 +1286,17 @@ function SearchFilters({ brands, categories, brand, category, onBrandChange, onC
 }) {
   return <div className="search-filter-content">
     <div className="search-filter-heading">
-      <div><span className="eyebrow">تصفية ذكية</span><h3>تصفح بتركيز</h3></div>
+      <div><span className="eyebrow">تصفية ذكية</span><h3>فلترة الكتالوج</h3></div>
       {(brand || category) && <button type="button" className="filter-clear-button" onClick={onClear} data-testid="button-clear-search-filters">مسح الكل</button>}
+    </div>
+    {brand || category ? <div className="active-filter-summary"><span>اختياراتك</span><div>{category && <button type="button" onClick={() => onCategoryChange('')} data-testid="button-remove-category-filter">{categories.find((item) => item.slug === category)?.name}<X size={12} /></button>}{brand && <button type="button" onClick={() => onBrandChange('')} data-testid="button-remove-brand-filter">{brand}<X size={12} /></button>}</div></div> : <p className="filter-help">ابدأ بالقسم الأقرب لاحتياجك، ثم اختر العلامة التي تفضلها.</p>}
+    <div className="filter-group filter-group-primary">
+      <div className="filter-group-heading"><h4>القسم</h4><span>{categories.length}</span></div>
+      <div className="filter-options">{categories.map((item) => <label className={`filter-check ${category === item.slug ? 'is-selected' : ''}`} key={item.slug}><input type="radio" name="search-category" checked={category === item.slug} onChange={() => onCategoryChange(category === item.slug ? '' : item.slug)} data-testid={`input-filter-category-${item.slug}`} /><span className="filter-check-mark" />{item.name}</label>)}</div>
     </div>
     <div className="filter-group">
       <div className="filter-group-heading"><h4>العلامة التجارية</h4><span>{brands.length}</span></div>
       <div className="filter-options">{brands.map((item) => <label className={`filter-check ${brand === item ? 'is-selected' : ''}`} key={item}><input type="radio" name="search-brand" checked={brand === item} onChange={() => onBrandChange(brand === item ? '' : item)} data-testid={`input-filter-brand-${item}`} /><span className="filter-check-mark" />{item}</label>)}</div>
-    </div>
-    <div className="filter-group">
-      <div className="filter-group-heading"><h4>القسم</h4><span>{categories.length}</span></div>
-      <div className="filter-options">{categories.map((item) => <label className={`filter-check ${category === item.slug ? 'is-selected' : ''}`} key={item.slug}><input type="radio" name="search-category" checked={category === item.slug} onChange={() => onCategoryChange(category === item.slug ? '' : item.slug)} data-testid={`input-filter-category-${item.slug}`} /><span className="filter-check-mark" />{item.name}</label>)}</div>
     </div>
   </div>;
 }
