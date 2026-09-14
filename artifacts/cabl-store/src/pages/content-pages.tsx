@@ -262,8 +262,8 @@ export function ArticlePage() {
   const estimatedCharges = device === 'لابتوب' ? Math.max(0.2, wattHours / 55).toFixed(1) : device === 'تابلت' ? Math.max(0.4, wattHours / 30).toFixed(1) : Math.max(0.5, wattHours / 15).toFixed(1);
   return (
     <>
-      <PageMeta title="دليل اختيار باور بانك" description="دليل CABL لفهم السعة والقدرة والمنافذ قبل شراء باور بانك في اليمن." />
-      <EditorialHero eyebrow="دليل شراء" title="كيف تختار باور بانك يناسب يومك؟" description="لا تبدأ من رقم mAh وحده. قارن الطاقة والمنافذ والخرج والتوافق مع استخدامك الفعلي في اليمن." />
+      <PageMeta title="دليل اختيار خوازن الطاقة (Power Bank)" description="دليل CABL لفهم السعة والقدرة والمنافذ قبل شراء خازن طاقة (Power Bank) في اليمن." />
+      <EditorialHero eyebrow="دليل شراء" title="كيف تختار خازن طاقة يناسب يومك؟" description="لا تبدأ من رقم mAh وحده. قارن الطاقة والمنافذ والخرج والتوافق مع استخدامك الفعلي في اليمن." />
       <EditorialSection eyebrow="قبل الأرقام" title="لماذا تحتاج باور بانك؟">
         <div className="editorial-copy">
           <p>انقطاع الكهرباء والتنقل الطويل والعمل من الهاتف يجعل الطاقة الاحتياطية جزءاً من اليوم. الاختيار الجيد ليس الأكبر دائماً؛ هو المنتج الذي يناسب جهازك ووزنك ومدة الاستخدام التي تحتاجها.</p>
