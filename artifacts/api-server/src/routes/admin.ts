@@ -422,6 +422,10 @@ const productsSeed = [
   ["00000000-0000-4000-8000-000000000049", "UGREEN", "كابل UGREEN Uno USB-C إلى USB-C بقدرة 100W مع شاشة LED", "CABL-UGR-35501", 16.00, "كابل UGREEN Uno USB-C إلى USB-C بقدرة 100W مع شاشة LED ذكية", "https://www.ugreen.com/cdn/shop/files/c5959273e9dd2835422af91a621de3aa.webp?v=1766052046&width=1445", "10000000-0000-4000-8000-000000000003"],
   ["00000000-0000-4000-8000-000000000048", "UGREEN", "شاحن سيارة UGREEN PD سريع بقدرة 60W بمنفذين USB-C", "CABL-UGR-70594", 22.00, "شاحن سيارة UGREEN بقدرة 60W ومنفذين USB-C، يدعم 12–24V", "https://www.ugreen.com/cdn/shop/files/0341a0bcc6a0339889cd1c665d77dd9b.webp?v=1766052447&width=1445", "10000000-0000-4000-8000-000000000004"],
   ["00000000-0000-4000-8000-000000000050", "UGREEN", "محور UGREEN USB-C ‏7 في 1", "CABL-UGR-HUB7", 43.00, "محور UGREEN Revodok Pro USB-C بسبعة منافذ", "https://www.ugreen.com/cdn/shop/files/1795373640d911068a5841b77e48e007.png?v=1762322086&width=300", "10000000-0000-4000-8000-000000000005"],
+  ["00000000-0000-4000-8000-000000000051", "Hollyland", "Hollyland LARK M2S Combo", "CABL-HOL-M2S-COMBO", 114.00, "ميكروفون لاسلكي صغير لصناعة المحتوى والمقابلات والبث المباشر، مع نسخة Combo.", "https://store.hollyland.com/cdn/shop/files/6302-lark_m2s-clear-001.png?crop=center&height=280&v=1766029782&width=280", "10000000-0000-4000-8000-000000000006"],
+  ["00000000-0000-4000-8000-000000000052", "Hollyland", "Hollyland LARK M2 Combo", "CABL-HOL-M2-COMBO", 99.00, "ميكروفون لاسلكي Lavalier لصناعة المحتوى، مع نسخة Combo ومخرجين USB-C وLightning حسب التكوين.", "https://store.hollyland.com/cdn/shop/files/6301-lark_m2-clear-001.png?crop=center&height=280&v=1766029688&width=280", "10000000-0000-4000-8000-000000000006"],
+  ["00000000-0000-4000-8000-000000000053", "Hollyland", "Hollyland LARK M2", "CABL-HOL-M2", 99.00, "ميكروفون لاسلكي خفيف لصناعة المحتوى والبودكاست والمقابلات، مع صوت عالي الدقة.", "https://store.hollyland.com/cdn/shop/files/6301-lark_m2-clear-001.png?crop=center&height=280&v=1766029688&width=280", "10000000-0000-4000-8000-000000000006"],
+  ["00000000-0000-4000-8000-000000000054", "Hollyland", "Hollyland LARK A1", "CABL-HOL-A1", 49.90, "ميكروفون لاسلكي لصناعة المحتوى مع إلغاء ضوضاء ذكي وصوت عالي الدقة.", "https://store.hollyland.com/cdn/shop/files/6108-lark_a1-clear-001.png?crop=center&height=280&v=1766029366&width=280", "10000000-0000-4000-8000-000000000006"],
 ] as const;
 
 const ugreenReplacementProductIds = [
@@ -1062,13 +1066,41 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
       [],
     );
     counts.categories = await seedTable(
-      `INSERT INTO "categories" ("id", "category_name", "category_description", "image_path", "active") VALUES
-       ('10000000-0000-4000-8000-000000000001','باور بانك','حلول طاقة محمولة للاستخدام اليومي','images/vention-powerbank-10k.jpg',TRUE),
-       ('10000000-0000-4000-8000-000000000002','الشواحن','شواحن Vention بتقنية GaN','images/vention-charger-65w.jpg',TRUE),
-       ('10000000-0000-4000-8000-000000000003','الكابلات','كابلات شحن ونقل بيانات','images/vention-cable-100w.jpg',TRUE),
-       ('10000000-0000-4000-8000-000000000004','السفر والسيارة','حلول الشحن أثناء التنقل','images/vention-adapter-65w.jpg',TRUE),
-       ('10000000-0000-4000-8000-000000000005','الملحقات','محاور وكابلات العرض والاتصال','images/baseus-hub.svg',TRUE)
-       ON CONFLICT ("id") DO NOTHING`, []);
+      `INSERT INTO "categories"
+        ("id", "category_name", "slug", "category_description", "seo_title", "meta_description", "seo_description", "image_path", "seo_indexable", "active")
+       VALUES
+       ('10000000-0000-4000-8000-000000000001','باور بانك','power-banks','حلول طاقة محمولة للاستخدام اليومي','باور بانك في اليمن | CABL','قارن باور بانك حسب السعة والقدرة والمنافذ والتوافر في اليمن.','قارن منتجات الباور بانك المنشورة في كتالوج CABL قبل الطلب.','images/vention-powerbank-10k.jpg',TRUE,TRUE),
+       ('10000000-0000-4000-8000-000000000002','الشواحن','chargers','شواحن Vention بتقنية GaN','شواحن سريعة في اليمن | CABL','شواحن USB-C وGaN بقدرات ومنافذ مختلفة من كتالوج CABL.','راجع القدرة والمنافذ والبروتوكولات قبل اختيار الشاحن.','images/vention-charger-65w.jpg',TRUE,TRUE),
+       ('10000000-0000-4000-8000-000000000003','الكابلات','charging-cables','كابلات شحن ونقل بيانات','كابلات شحن ونقل بيانات | CABL','قارن كابلات USB-C وLightning حسب الطرف والقدرة والطول.','كابلات شحن ونقل بيانات منشورة مع بيانات الموديل والتوافر.','images/vention-cable-100w.jpg',TRUE,TRUE),
+       ('10000000-0000-4000-8000-000000000004','السفر والسيارة','travel-adapters','حلول الشحن أثناء التنقل','شواحن السيارة والسفر في اليمن | CABL','حلول شحن للسيارة والسفر مع مقارنة القدرة والمنافذ.','اختر ملحق الشحن المناسب للتنقل بعد مراجعة بيانات المنتج.','images/vention-adapter-65w.jpg',TRUE,TRUE),
+       ('10000000-0000-4000-8000-000000000005','الملحقات','phone-accessories','محاور وكابلات العرض والاتصال','ملحقات الهاتف والاتصال | CABL','محاور USB-C وكابلات العرض والملحقات من كتالوج CABL.','ملحقات اتصال منشورة مع روابط الأقسام والمنتجات ذات الصلة.','images/baseus-hub.svg',TRUE,TRUE),
+       ('10000000-0000-4000-8000-000000000006','مايكروفونات لاسلكية','wireless-microphones','ميكروفونات لاسلكية لصناعة المحتوى والمقابلات والبث المباشر','مايكروفونات لاسلكية في اليمن | CABL','قارن ميكروفونات Hollyland اللاسلكية لصناعة المحتوى والمقابلات والبث المباشر.','ميكروفونات لاسلكية منشورة من Hollyland مع روابط الموديلات والمعلومات المعلنة.','https://store.hollyland.com/cdn/shop/files/6108-lark_a1-clear-001.png?crop=center&height=280&v=1766029366&width=280',TRUE,TRUE)
+       ON CONFLICT ("id") DO UPDATE SET
+         "category_name" = EXCLUDED."category_name",
+         "slug" = EXCLUDED."slug",
+         "category_description" = EXCLUDED."category_description",
+         "seo_title" = EXCLUDED."seo_title",
+         "meta_description" = EXCLUDED."meta_description",
+         "seo_description" = EXCLUDED."seo_description",
+         "image_path" = EXCLUDED."image_path",
+         "seo_indexable" = EXCLUDED."seo_indexable",
+         "active" = EXCLUDED."active"`, []);
+     counts.brands = await seedTable(
+       `INSERT INTO "brands"
+         ("id","brand_name","slug","description","seo_title","meta_description","seo_description","seo_indexable")
+        VALUES
+         ('70000000-0000-4000-8000-000000000001','Vention','vention','منتجات شحن وطاقة من Vention في كتالوج CABL.','منتجات Vention في اليمن | CABL','تصفح منتجات Vention المنشورة في كتالوج CABL.','منتجات Vention للشحن والطاقة والاستخدام اليومي.','TRUE'),
+         ('70000000-0000-4000-8000-000000000002','Baseus','baseus','منتجات Baseus للشحن والطاقة والاتصال.','منتجات Baseus في اليمن | CABL','تصفح منتجات Baseus المنشورة في كتالوج CABL.','منتجات Baseus للشحن والطاقة والاتصال من الكتالوج الحالي.','TRUE'),
+         ('70000000-0000-4000-8000-000000000003','Anker','anker','منتجات Anker للشحن والطاقة والاتصال.','منتجات Anker في اليمن | CABL','تصفح منتجات Anker المنشورة في كتالوج CABL.','منتجات Anker للشحن والطاقة والاتصال من الكتالوج الحالي.','TRUE'),
+         ('70000000-0000-4000-8000-000000000004','UGREEN','ugreen','منتجات UGREEN للشحن والطاقة والاتصال.','منتجات UGREEN في اليمن | CABL','تصفح منتجات UGREEN المنشورة في كتالوج CABL.','منتجات UGREEN للشحن والطاقة والاتصال من الكتالوج الحالي.','TRUE'),
+         ('70000000-0000-4000-8000-000000000005','Hollyland','hollyland','ميكروفونات لاسلكية Hollyland لصناعة المحتوى والمقابلات والبث المباشر.','ميكروفونات Hollyland اللاسلكية في اليمن | CABL','قارن ميكروفونات Hollyland اللاسلكية لصناعة المحتوى والمقابلات والبث المباشر.','منتجات Hollyland المنشورة في كتالوج CABL مع روابط الموديلات والبيانات المعلنة.','TRUE')
+        ON CONFLICT ("brand_name") DO UPDATE SET
+          "slug" = EXCLUDED."slug",
+          "description" = EXCLUDED."description",
+          "seo_title" = EXCLUDED."seo_title",
+          "meta_description" = EXCLUDED."meta_description",
+          "seo_description" = EXCLUDED."seo_description",
+          "seo_indexable" = EXCLUDED."seo_indexable"`, []);
      counts.tags = await seedTable(`INSERT INTO "tags" ("id","tag_name","icon") VALUES (1,'Vention','brand'),(2,'USB-C','cable'),(3,'GaN','bolt'),(4,'Baseus','brand'),(5,'Anker','brand'),(6,'UGREEN','brand') ON CONFLICT ("id") DO NOTHING`, []);
      const previousUgreenSlugs = await pool.query<{ id: string; slug: string | null }>(
        `SELECT "id", "slug" FROM "products" WHERE "id" = ANY($1::uuid[])`,
@@ -1078,10 +1110,19 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
     counts.products = 0;
     for (const [productId, brand, name, sku, price, description, image] of productsSeed) {
       counts.products += await seedTable(
-         `INSERT INTO "products" ("id","brand","product_name","SKU","slug","regular_price","quantity","short_description","product_description","published")
-          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,TRUE)
-          ON CONFLICT ("id") DO UPDATE SET "brand"=EXCLUDED."brand","product_name"=EXCLUDED."product_name","SKU"=EXCLUDED."SKU","slug"=EXCLUDED."slug","regular_price"=EXCLUDED."regular_price","short_description"=EXCLUDED."short_description","product_description"=EXCLUDED."product_description","published"=TRUE`,
-         [productId, brand, name, sku, productSlug(name, sku), price, 25, description, `${name}. منتج أصلي متوفر من CABL، الوكيل الحصري لـ ${brand} في اليمن، مع توصيل داخل اليمن.`],
+          `INSERT INTO "products" ("id","brand","brand_id","product_name","SKU","slug","regular_price","quantity","short_description","product_description","published")
+           VALUES ($1,$2::varchar,(SELECT "id" FROM "brands" WHERE "brand_name" = $2::varchar LIMIT 1),$3,$4,$5,$6,$7,$8,$9,TRUE)
+           ON CONFLICT ("id") DO UPDATE SET
+             "brand"=EXCLUDED."brand",
+             "brand_id"=EXCLUDED."brand_id",
+             "product_name"=EXCLUDED."product_name",
+             "SKU"=EXCLUDED."SKU",
+             "slug"=EXCLUDED."slug",
+             "regular_price"=EXCLUDED."regular_price",
+             "short_description"=EXCLUDED."short_description",
+             "product_description"=EXCLUDED."product_description",
+             "published"=TRUE`,
+          [productId, brand, name, sku, productSlug(name, sku), price, brand === "Hollyland" ? 0 : 25, description, `${name}. منتج منشور من CABL مع توصيل داخل اليمن. راجع بيانات الموديل والتوافر قبل الطلب.`],
       );
     }
      for (const [productId, oldSlug] of previousSlugByProductId) {
@@ -1121,7 +1162,20 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
        ON CONFLICT ("id") DO NOTHING`,
       [],
     );
-    counts.product_shippings = 0;
+     counts.hollyland_attributes = await seedTable(
+       `INSERT INTO "product_attributes"
+         ("product_id","attribute_id","value_text","source_url","source_note")
+        VALUES
+         ('00000000-0000-4000-8000-000000000051','30000000-0000-4000-8000-000000000001','صناعة المحتوى، المقابلات، البث المباشر','https://www.hollyland.com/product/lark-m2s','تمت مراجعة صفحة Hollyland الرسمية للمنتج.'),
+         ('00000000-0000-4000-8000-000000000052','30000000-0000-4000-8000-000000000001','صناعة المحتوى، البودكاست، المقابلات','https://www.hollyland.com/product/lark-m2','تمت مراجعة صفحة Hollyland الرسمية للمنتج.'),
+         ('00000000-0000-4000-8000-000000000053','30000000-0000-4000-8000-000000000001','صناعة المحتوى، البودكاست، المقابلات','https://www.hollyland.com/product/lark-m2','تمت مراجعة صفحة Hollyland الرسمية للمنتج.'),
+         ('00000000-0000-4000-8000-000000000054','30000000-0000-4000-8000-000000000001','صناعة المحتوى، البث المباشر، المقابلات','https://www.hollyland.com/product/lark-a1','تمت مراجعة صفحة Hollyland الرسمية للمنتج.')
+        ON CONFLICT ("product_id","attribute_id") DO UPDATE SET
+          "value_text"=EXCLUDED."value_text",
+          "source_url"=EXCLUDED."source_url",
+          "source_note"=EXCLUDED."source_note",
+          "updated_at"=NOW()`, []);
+     counts.product_shippings = 0;
     for (const [productId] of productsSeed) {
       counts.product_shippings += await seedTable(
         `INSERT INTO "product_shippings" ("product_id","shipping_id","ship_charge","free","estimated_days")

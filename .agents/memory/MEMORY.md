@@ -14,3 +14,4 @@
 - [SEO redirect snapshots](seo-redirect-snapshots.md) — capture old canonical paths before applying catalog slug mutations.
 - [CABL public route split](cabl-public-routes.md) — standalone storefront routes differ from SEO canonical aliases; use each only where its router supports it.
 - [Official catalog sources](official-catalog-sources.md) — only attach manufacturer URLs when the page matches the catalog model; leave generic or ambiguous results unresolved.
+- [Seed SQL parameter typing](seed-sql-parameter-typing.md) — explicitly cast reused PostgreSQL seed parameters when a value and subquery comparison infer conflicting types.

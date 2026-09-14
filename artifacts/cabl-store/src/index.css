@@ -230,6 +230,8 @@ html,body,#root{max-width:100%;overflow-x:hidden}
 .guided-discovery-links a:hover{transform:translateY(-3px);border-color:#b7d0ed}
 .guided-discovery-links strong{font-size:13px;color:#243d61}
 .guided-discovery-links span{display:flex;align-items:center;gap:4px;color:#1757ee;font-size:10px;margin-top:auto}
+ .guided-audio-discovery{background:linear-gradient(135deg,#e9f8fb 0%,#f4f8ff 58%,#eef2ff 100%)}
+ .category-audio-discovery{margin-top:0;border-block:1px solid #dfeaf3}
 .guided-finder{padding:70px 0;background:#eef5fb;border-block:1px solid #dfeaf3}
 .guided-finder-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:24px}
 .guided-finder-heading h2{font-size:32px;letter-spacing:-.07em;margin:7px 0 8px}

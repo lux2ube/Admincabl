@@ -16,7 +16,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
     .filter((product) => product.category)
     .map((product) => [product.category!.slug, product.category!]))
     .values()), [catalog]);
-  const featuredCategories = categories.slice(0, 3);
+  const featuredCategories = categories;
   const navItems = useMemo(() => [
     { label: 'المنتجات', href: '/search' },
     ...featuredCategories.map((category) => ({ label: category.name, href: `/category/${category.slug}` })),

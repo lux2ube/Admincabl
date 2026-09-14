@@ -140,7 +140,7 @@ async function getSitemapPaths() {
 
   const paths = new Set(STATIC_SITEMAP_PATHS);
   for (const row of categories.rows) paths.add(publicCategoryPath(row.slug));
-  for (const row of brands.rows) paths.add(brandPublicPath(row.slug));
+  for (const row of brands.rows) paths.add(`/brand/${row.slug}`);
   for (const row of products.rows) {
     paths.add(productPublicPath({
       brandSlug: row.brand_slug,

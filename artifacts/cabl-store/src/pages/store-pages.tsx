@@ -56,10 +56,10 @@ function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; 
   return null;
 }
 
-function StaticSEO({ title, description, canonicalPath, indexable = true }: { title: string; description: string; canonicalPath?: string; indexable?: boolean }) {
+function StaticSEO({ title, description, canonicalPath, indexable = true, jsonLd }: { title: string; description: string; canonicalPath?: string; indexable?: boolean; jsonLd?: Record<string, unknown> }) {
   useEffect(() => {
-    setSeoHead({ title: `${title} | CABL`, description, canonicalPath, indexable });
-  }, [title, description, canonicalPath, indexable]);
+    setSeoHead({ title: `${title} | CABL`, description, canonicalPath, indexable, jsonLd });
+  }, [title, description, canonicalPath, indexable, jsonLd]);
   return null;
 }
 
@@ -315,6 +315,7 @@ function CommercialHomePage() {
       { match: /(?:^|-)chargers(?:\s|$)|الشواحن|شواحن/i, title: 'تحتاج شاحن سريع؟', text: 'شواحن', icon: <Zap size={20} /> },
       { match: /cable|كابل|وصلة/i, title: 'تحتاج وصلة شحن قوية؟', text: 'كابلات', icon: <Package size={20} /> },
       { match: /power|باور|طاقة|battery|بطار/i, title: 'تحتاج جوالك يبقى شغال طول اليوم؟', text: 'بور بانك', icon: <Zap size={20} /> },
+      { match: /microphone|mic|wireless-microphones|مايك|ميكروفون|صوت/i, title: 'صانع محتوى وتريد صوت احترافي؟', text: 'مايكروفونات لاسلكية', icon: <Headphones size={20} /> },
       { match: /car|سيارة|سفر|travel/i, title: 'تحتاج شحن سريع للسيارة؟', text: 'cars', icon: <Truck size={20} /> },
       { match: /accessor|ملحق|توصيل|connect|adapter/i, title: 'تحتاج توصيل بين أجهزتك؟', text: 'الملحقات', icon: <Package size={20} /> },
     ];
@@ -451,6 +452,33 @@ function CommercialHomePage() {
           ) : (
             <div className="empty-state" data-testid="empty-home-categories"><h3>ستظهر الأقسام مع تحميل الكتالوج</h3></div>
           )}
+        </div>
+      </section>
+
+      <section className="guided-discovery guided-audio-discovery" aria-labelledby="creator-audio-title">
+        <div className="container guided-discovery-inner">
+          <div>
+            <span className="eyebrow">لصنّاع المحتوى</span>
+            <h2 id="creator-audio-title">صانع محتوى وتريد صوت احترافي؟</h2>
+            <p>ابدأ من ميكروفونات Hollyland اللاسلكية، ثم قارن الموديل والتكوين والتوافر قبل الطلب.</p>
+          </div>
+          <div className="guided-discovery-links">
+            <Link href="/category/wireless-microphones">
+              <Headphones size={20} />
+              <strong>مايكروفونات لاسلكية</strong>
+              <span>تصفح القسم <ArrowLeft size={13} /></span>
+            </Link>
+            <Link href="/brand/hollyland">
+              <Package size={20} />
+              <strong>كل منتجات Hollyland</strong>
+              <span>افتح صفحة العلامة <ArrowLeft size={13} /></span>
+            </Link>
+            <Link href="/brand/hollyland/wireless-microphones">
+              <Zap size={20} />
+              <strong>Hollyland للصوت</strong>
+              <span>قارن داخل العلامة <ArrowLeft size={13} /></span>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -1048,10 +1076,38 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
     || brandProducts.find((product) => matchesCategory(product, categorySlug))?.category?.slug
     || categorySlug;
   const description = `${categoryName} من ${brandName} في اليمن. قارن المواصفات والسعر والتوافر قبل الطلب من CABL.`;
+  const canonicalPath = brandCategoryPath(brandSlug, categorySlug);
+  const brandCategoryJsonLd = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        name: `${categoryName} من ${brandName}`,
+        description,
+        url: canonicalPath,
+      },
+      {
+        '@type': 'Brand',
+        name: brandName,
+        url: brandPath(brandSlug),
+      },
+      {
+        '@type': 'ItemList',
+        name: `منتجات ${categoryName} من ${brandName}`,
+        numberOfItems: filtered.length,
+        itemListElement: filtered.map((product, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          url: productPath(product),
+          name: product.productName,
+        })),
+      },
+    ],
+  }), [brandSlug, brandName, canonicalPath, categoryName, description, filtered]);
 
   return (
     <>
-      <StaticSEO title={`${categoryName} ${brandName}`} description={description} canonicalPath={brandCategoryPath(brandSlug, categorySlug)} />
+      <StaticSEO title={`${categoryName} ${brandName}`} description={description} canonicalPath={canonicalPath} jsonLd={brandCategoryJsonLd} />
       <div className="category-landing-hero brand-category-hero">
         <div className="container">
           <Breadcrumbs items={[
@@ -1175,6 +1231,18 @@ const categoryGuideCopy: Record<string, {
       { question: 'كيف أختار بين سماعة أذن وسبيكر؟', answer: 'اختر حسب الخصوصية والمكان وعدد المستمعين وطريقة الاستخدام اليومية.' },
     ],
   },
+  'wireless-microphones': {
+    eyebrow: 'صوت أوضح لصناعة المحتوى',
+    title: 'مايكروفونات لاسلكية لصانع المحتوى',
+    description: 'قارن ميكروفونات Hollyland اللاسلكية لصناعة المحتوى والمقابلات والبث المباشر حسب الموديل والتكوين والتوافر.',
+    selection: 'ابدأ من طريقة التصوير والجهاز الذي ستوصل به المستقبل، ثم راجع التكوين والبيانات المعلنة لكل موديل قبل الطلب. لا تفترض أن كل نسخة من الاسم نفسه تحتوي على نفس المستقبلات أو الملحقات.',
+    tips: ['حدد هل ستصور بكاميرا أو هاتف USB-C أو هاتف Lightning قبل اختيار التكوين.', 'راجع الموديل والنسخة الموجودة في صفحة المنتج، خصوصاً عند مقارنة Combo وMobile.', 'ضع الميكروفون قريباً من مصدر الصوت وتحقق من التثبيت قبل بدء التصوير.', 'استخدم إلغاء الضوضاء حسب المكان، ولا تعتمد عليه بديلاً عن اختيار موقع هادئ.', 'راجع التوافر والشحن والملحقات الظاهرة في checkout قبل تأكيد الطلب.'],
+    faqs: [
+      { question: 'كيف أختار ميكروفوناً لاسلكياً لصناعة المحتوى؟', answer: 'ابدأ بالجهاز وطريقة التصوير، ثم قارن التكوين والمدى والبيانات المعلنة للموديل المحدد.' },
+      { question: 'هل نسخة Combo تناسب كل الأجهزة؟', answer: 'يعتمد ذلك على المستقبلات والملحقات الموجودة في التكوين. راجع اسم النسخة ومخرجاتها قبل الطلب.' },
+      { question: 'هل إلغاء الضوضاء يغني عن المكان الهادئ؟', answer: 'لا. يساعد على تقليل بعض الضوضاء، لكنه لا يلغي أثر المكان أو المسافة أو طريقة التثبيت.' },
+    ],
+  },
 };
 
 function CategoryLandingPage({ slug }: { slug: string }) {
@@ -1235,6 +1303,34 @@ function CategoryLandingPage({ slug }: { slug: string }) {
         title={`${name} المتاحة الآن`}
         empty={`لا توجد منتجات منشورة في قسم ${name} حالياً.`}
       />
+      {slug === 'wireless-microphones' && (
+        <section className="guided-discovery guided-audio-discovery category-audio-discovery" aria-labelledby="category-creator-audio-title">
+          <div className="container guided-discovery-inner">
+            <div>
+              <span className="eyebrow">اختيار حسب الاستخدام</span>
+              <h2 id="category-creator-audio-title">صانع محتوى وتريد صوت احترافي؟</h2>
+              <p>افتح صفحة Hollyland وقارن الموديلات المنشورة، ثم راجع التكوين والتوافر قبل إضافة المنتج إلى السلة.</p>
+            </div>
+            <div className="guided-discovery-links">
+              <Link href="/brand/hollyland">
+                <Package size={20} />
+                <strong>تصفح Hollyland</strong>
+                <span>كل منتجات العلامة <ArrowLeft size={13} /></span>
+              </Link>
+              <Link href="/brand/hollyland/wireless-microphones">
+                <Headphones size={20} />
+                <strong>مقارنة Hollyland</strong>
+                <span>داخل قسم الصوت <ArrowLeft size={13} /></span>
+              </Link>
+              <Link href="/search?brand=Hollyland&category=wireless-microphones">
+                <Scale size={20} />
+                <strong>افتح نتائج الفلترة</strong>
+                <span>راجع المنتجات الأربعة <ArrowLeft size={13} /></span>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
       <EditorialSection eyebrow="كيف تختار؟" title={`دليل اختيار ${name}`}>
         <div className="editorial-copy"><p>{copy.selection}</p></div>
         <div className="numbered-steps category-tip-grid">{copy.tips.map((tip, index) => <div key={tip}><b>{String(index + 1).padStart(2, '0')}</b><p>{tip}</p></div>)}</div>
