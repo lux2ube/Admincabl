@@ -315,6 +315,7 @@ function CommercialHomePage() {
       { match: /(?:^|-)chargers(?:\s|$)|الشواحن|شواحن/i, title: 'تحتاج شاحن سريع؟', text: 'شواحن', icon: <Zap size={20} /> },
       { match: /cable|كابل|وصلة/i, title: 'تحتاج وصلة شحن قوية؟', text: 'كابلات', icon: <Package size={20} /> },
       { match: /power|باور|طاقة|battery|بطار/i, title: 'تحتاج جوالك يبقى شغال طول اليوم؟', text: 'بور بانك', icon: <Zap size={20} /> },
+      { match: /wireless-earbuds|سماعات أذن|سماعات لاسلكية/i, title: 'تحتاج صوت يعدل مزاجك؟', text: 'سماعات أذن لاسلكية', icon: <Headphones size={20} /> },
       { match: /microphone|mic|wireless-microphones|مايك|ميكروفون|صوت/i, title: 'صانع محتوى وتريد صوت احترافي؟', text: 'مايكروفونات لاسلكية', icon: <Headphones size={20} /> },
       { match: /car|سيارة|سفر|travel/i, title: 'تحتاج شحن سريع للسيارة؟', text: 'cars', icon: <Truck size={20} /> },
       { match: /accessor|ملحق|توصيل|connect|adapter/i, title: 'تحتاج توصيل بين أجهزتك؟', text: 'الملحقات', icon: <Package size={20} /> },
