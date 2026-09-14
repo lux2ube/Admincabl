@@ -1508,6 +1508,40 @@ function ProductDetailPage({ slug }: { slug: string }) {
 
 type StoreProductSpecifications = StoreProduct["specifications"];
 
+const specificationSeoLabels: Record<string, string> = {
+  use_case: 'نوع الاستخدام (Use Case)',
+  port_type: 'نوع المنفذ (Port Type)',
+  max_power_w: 'القدرة القصوى (Max Power)',
+  gan: 'تقنية نيتريد الغاليوم (GaN Charging Technology)',
+  capacity_mah: 'السعة (Capacity)',
+  energy_wh: 'الطاقة (Energy)',
+  input_summary: 'مواصفات الإدخال (Input Specifications)',
+  output_summary: 'مواصفات الإخراج (Output Specifications)',
+  max_output_w: 'أقصى قدرة إخراج (Max Output Power)',
+  recharge_time_hours: 'وقت إعادة الشحن (Recharge Time)',
+  wireless_charging: 'الشحن اللاسلكي (Wireless Charging)',
+  display: 'شاشة العرض (Display)',
+  pass_through_charging: 'الشحن أثناء الاستخدام (Pass-through Charging)',
+  connector_a: 'الموصل الأول (Connector A)',
+  connector_b: 'الموصل الثاني (Connector B)',
+  length_m: 'طول الكابل (Cable Length)',
+  data_speed_gbps: 'سرعة نقل البيانات (Data Transfer Speed)',
+  usb_version: 'إصدار USB (USB Version)',
+  e_marker: 'شريحة E-marker (E-marker Chip)',
+  video_support: 'دعم الفيديو (Video Support)',
+  material: 'الخامة (Material)',
+  input_voltage_v: 'جهد الإدخال (Input Voltage)',
+  power_distribution: 'توزيع الطاقة (Power Distribution)',
+  car_compatibility: 'توافق السيارة (Car Compatibility)',
+  warranty_months: 'الضمان (Warranty)',
+  dimensions: 'الأبعاد (Dimensions)',
+  compatibility: 'التوافق (Compatibility)',
+};
+
+function specificationLabel(slug: string, fallback: string) {
+  return specificationSeoLabels[slug] ?? fallback;
+}
+
 function formatSpecificationValue(specs: StoreProductSpecifications, slug: string, unit?: string | null) {
   const attribute = specs.attributes.find((item) => item.slug === slug);
   let value: string | number | boolean | null | undefined = attribute?.values.length
@@ -1554,25 +1588,25 @@ function ProductSpecificationsPanel({ product }: { product: StoreProduct }) {
     if (value === null || value === undefined || value === '') return null;
     return `${typeof value === 'boolean' ? (value ? 'نعم' : 'لا') : value}${unit ? ` ${unit}` : ''}`;
   };
-  return <section className="product-specs-panel" aria-labelledby="product-specs-title">
-    <div className="product-specs-heading"><div><span className="eyebrow">بيانات قابلة للمراجعة</span><h2 id="product-specs-title">المواصفات</h2><p>نظهر فقط القيم المنشورة في كتالوج CABL، من دون تخمين أو ملء فراغات.</p></div>{specs.capabilityLabel && <div className="spec-capability"><b>C</b><span>{specs.capabilityLabel}</span></div>}</div>
+   return <section className="product-specs-panel" aria-labelledby="product-specs-title">
+     <div className="product-specs-heading"><div><span className="eyebrow">بيانات قابلة للمراجعة (Verified Product Data)</span><h2 id="product-specs-title">المواصفات التقنية (Technical Specifications)</h2><p>نظهر فقط القيم المنشورة في كتالوج CABL، من دون تخمين أو ملء فراغات.</p></div>{specs.capabilityLabel && <div className="spec-capability"><b>C</b><span>{specs.capabilityLabel}</span></div>}</div>
     <div className="product-specs-grid">
-      {specs.maxPowerW !== null && <div className="spec-card"><span>القدرة القصوى</span><strong>{specs.maxPowerW} W</strong></div>}
+       {specs.maxPowerW !== null && <div className="spec-card"><span>{specificationLabel('max_power_w', 'القدرة القصوى')}</span><strong>{specs.maxPowerW} W</strong></div>}
       {specs.attributes.map((attribute) => {
         const values = attribute.values.length ? attribute.values.join('، ') : visibleValue(attribute.value, attribute.unit);
-        return values ? <div className="spec-card" key={attribute.slug}><span>{attribute.label}</span><strong>{values}</strong></div> : null;
+         return values ? <div className="spec-card" key={attribute.slug}><span>{specificationLabel(attribute.slug, attribute.label)}</span><strong>{values}</strong></div> : null;
       })}
       {specs.fieldDefinitions.filter((definition) => !['max_power_w', 'dimensions', 'compatibility', 'warranty_months'].includes(definition.slug)).map((definition) => {
         const value = formatSpecificationValue(specs, definition.slug, definition.unit);
-        return value ? <div className="spec-card" key={definition.slug}><span>{definition.label}</span><strong>{value}</strong></div> : null;
+         return value ? <div className="spec-card" key={definition.slug}><span>{specificationLabel(definition.slug, definition.label)}</span><strong>{value}</strong></div> : null;
       })}
-      {specs.warrantyMonths !== null && <div className="spec-card"><span>الضمان</span><strong>{specs.warrantyMonths} شهر</strong>{specs.warrantyNote && <small>{specs.warrantyNote}</small>}</div>}
-      {specs.dimensions && (specs.dimensions.lengthMm !== null || specs.dimensions.widthMm !== null || specs.dimensions.heightMm !== null || specs.dimensions.weightG !== null) && <div className="spec-card"><span>الأبعاد</span><strong>{[specs.dimensions.lengthMm, specs.dimensions.widthMm, specs.dimensions.heightMm].every((value) => value !== null) ? `${specs.dimensions.lengthMm} × ${specs.dimensions.widthMm} × ${specs.dimensions.heightMm} mm` : [specs.dimensions.lengthMm, specs.dimensions.widthMm, specs.dimensions.heightMm].some((value) => value !== null) ? `${specs.dimensions.lengthMm ?? '—'} × ${specs.dimensions.widthMm ?? '—'} × ${specs.dimensions.heightMm ?? '—'} mm` : null}</strong>{specs.dimensions.weightG !== null && <small>{specs.dimensions.weightG} g</small>}</div>}
-      {specs.ports.length > 0 && <div className="spec-card spec-card-wide"><span>المنافذ</span><div className="spec-list">{specs.ports.map((port) => <span key={port.id}><b>{port.name}</b>{port.type}{port.maxPowerW !== null ? ` · ${port.maxPowerW}W` : ''}</span>)}</div></div>}
-      {specs.protocols.length > 0 && <div className="spec-card spec-card-wide"><span>البروتوكولات</span><div className="spec-list">{specs.protocols.map((protocol) => <span key={`${protocol.slug}-${protocol.portId ?? 'all'}`}>{protocol.name}</span>)}</div></div>}
-      {specs.powerProfiles.length > 0 && <div className="spec-card spec-card-wide"><span>توزيع الطاقة</span><div className="spec-list">{specs.powerProfiles.map((profile) => <span key={profile.name}><b>{profile.name}</b>{profile.totalPowerW !== null ? ` · ${profile.totalPowerW}W` : ''}</span>)}</div></div>}
-      {specs.protections.length > 0 && <div className="spec-card spec-card-wide"><span>الحماية</span><div className="spec-list">{specs.protections.map((protection) => <span key={protection.slug}>{protection.name}</span>)}</div></div>}
-      {specs.compatibility.length > 0 && <div className="spec-card spec-card-wide"><span>التوافق</span><div className="spec-list">{specs.compatibility.map((item) => <span key={item.slug}><b>{item.name}</b>{item.type === 'supported' ? 'متوافق' : item.type === 'partially_supported' ? 'متوافق جزئياً' : 'غير موصى به'}</span>)}</div></div>}
+       {specs.warrantyMonths !== null && <div className="spec-card"><span>{specificationLabel('warranty_months', 'الضمان')}</span><strong>{specs.warrantyMonths} شهر</strong>{specs.warrantyNote && <small>{specs.warrantyNote}</small>}</div>}
+       {specs.dimensions && (specs.dimensions.lengthMm !== null || specs.dimensions.widthMm !== null || specs.dimensions.heightMm !== null || specs.dimensions.weightG !== null) && <div className="spec-card"><span>{specificationLabel('dimensions', 'الأبعاد')}</span><strong>{[specs.dimensions.lengthMm, specs.dimensions.widthMm, specs.dimensions.heightMm].every((value) => value !== null) ? `${specs.dimensions.lengthMm} × ${specs.dimensions.widthMm} × ${specs.dimensions.heightMm} mm` : [specs.dimensions.lengthMm, specs.dimensions.widthMm, specs.dimensions.heightMm].some((value) => value !== null) ? `${specs.dimensions.lengthMm ?? '—'} × ${specs.dimensions.widthMm ?? '—'} × ${specs.dimensions.heightMm ?? '—'} mm` : null}</strong>{specs.dimensions.weightG !== null && <small>{specs.dimensions.weightG} g</small>}</div>}
+       {specs.ports.length > 0 && <div className="spec-card spec-card-wide"><span>المنافذ (Ports)</span><div className="spec-list">{specs.ports.map((port) => <span key={port.id}><b>{port.name}</b>{port.type}{port.maxPowerW !== null ? ` · ${port.maxPowerW}W` : ''}</span>)}</div></div>}
+       {specs.protocols.length > 0 && <div className="spec-card spec-card-wide"><span>بروتوكولات الشحن (Charging Protocols)</span><div className="spec-list">{specs.protocols.map((protocol) => <span key={`${protocol.slug}-${protocol.portId ?? 'all'}`}>{protocol.name}</span>)}</div></div>}
+       {specs.powerProfiles.length > 0 && <div className="spec-card spec-card-wide"><span>توزيع الطاقة (Power Distribution)</span><div className="spec-list">{specs.powerProfiles.map((profile) => <span key={profile.name}><b>{profile.name}</b>{profile.totalPowerW !== null ? ` · ${profile.totalPowerW}W` : ''}</span>)}</div></div>}
+       {specs.protections.length > 0 && <div className="spec-card spec-card-wide"><span>الحماية (Protection)</span><div className="spec-list">{specs.protections.map((protection) => <span key={protection.slug}>{protection.name}</span>)}</div></div>}
+       {specs.compatibility.length > 0 && <div className="spec-card spec-card-wide"><span>{specificationLabel('compatibility', 'التوافق')}</span><div className="spec-list">{specs.compatibility.map((item) => <span key={item.slug}><b>{item.name}</b>{item.type === 'supported' ? 'متوافق' : item.type === 'partially_supported' ? 'متوافق جزئياً' : 'غير موصى به'}</span>)}</div></div>}
     </div>
   </section>;
 }
@@ -1590,16 +1624,16 @@ export function ComparePage() {
   const items = comparisonQuery.data?.products ?? localProducts.map((product) => ({ product, comparison: product.specifications }));
   const rows = [
     { label: 'السعر', value: (item: typeof items[number]) => formatPrice(item.product.discountPrice ?? item.product.regularPrice) },
-    { label: 'القدرة القصوى', value: (item: typeof items[number]) => item.comparison.maxPowerW !== null ? `${item.comparison.maxPowerW} W` : null },
-    { label: 'المنافذ', value: (item: typeof items[number]) => item.comparison.ports.length ? item.comparison.ports.map((port) => `${port.name}${port.maxPowerW ? ` · ${port.maxPowerW}W` : ''}`).join('، ') : null },
-    { label: 'البروتوكولات', value: (item: typeof items[number]) => item.comparison.protocols.length ? item.comparison.protocols.map((protocol) => protocol.name).join('، ') : null },
-    { label: 'الأبعاد', value: (item: typeof items[number]) => item.comparison.dimensions ? `${item.comparison.dimensions.lengthMm ?? '—'} × ${item.comparison.dimensions.widthMm ?? '—'} × ${item.comparison.dimensions.heightMm ?? '—'} mm` : null },
-    { label: 'التوافق', value: (item: typeof items[number]) => item.comparison.compatibility.length ? item.comparison.compatibility.map((entry) => entry.name).join('، ') : null },
+     { label: specificationLabel('max_power_w', 'القدرة القصوى'), value: (item: typeof items[number]) => item.comparison.maxPowerW !== null ? `${item.comparison.maxPowerW} W` : null },
+     { label: 'المنافذ (Ports)', value: (item: typeof items[number]) => item.comparison.ports.length ? item.comparison.ports.map((port) => `${port.name}${port.maxPowerW ? ` · ${port.maxPowerW}W` : ''}`).join('، ') : null },
+     { label: 'بروتوكولات الشحن (Charging Protocols)', value: (item: typeof items[number]) => item.comparison.protocols.length ? item.comparison.protocols.map((protocol) => protocol.name).join('، ') : null },
+     { label: specificationLabel('dimensions', 'الأبعاد'), value: (item: typeof items[number]) => item.comparison.dimensions ? `${item.comparison.dimensions.lengthMm ?? '—'} × ${item.comparison.dimensions.widthMm ?? '—'} × ${item.comparison.dimensions.heightMm ?? '—'} mm` : null },
+     { label: specificationLabel('compatibility', 'التوافق'), value: (item: typeof items[number]) => item.comparison.compatibility.length ? item.comparison.compatibility.map((entry) => entry.name).join('، ') : null },
   ];
   const definitions = Array.from(new Map(items.flatMap((item) => item.comparison.fieldDefinitions).map((definition) => [definition.slug, definition])).values())
     .filter((definition) => !['max_power_w', 'dimensions', 'compatibility'].includes(definition.slug));
   rows.push(...definitions.map((definition) => ({
-    label: definition.label,
+     label: specificationLabel(definition.slug, definition.label),
     value: (item: typeof items[number]) => formatSpecificationValue(item.comparison, definition.slug, definition.unit),
   })));
   return <><NoIndex/><div className="container compare-page"><Breadcrumbs items={[{ label: 'مقارنة المنتجات' }]}/><PageHeading eyebrow="قرار أوضح" title="قارن المنتجات جنباً إلى جنب" description="القيم الظاهرة هنا مأخوذة من نفس بيانات المواصفات المستخدمة في صفحة المنتج والفلاتر."/><div className="compare-products">{items.map((item) => <article className="compare-product-card" key={item.product.id}><ProductImage product={item.product}/><span>{item.product.brand}</span><h2>{item.product.productName}</h2><Link href={productPath(item.product)} className="text-link">فتح المنتج <ArrowLeft size={14}/></Link></article>)}</div><div className="comparison-table-wrap"><table className="comparison-table comparison-spec-table"><thead><tr><th>المواصفة</th>{items.map((item) => <th key={item.product.id}>{item.product.productName}</th>)}</tr></thead><tbody>{rows.map((row) => <tr key={row.label}><th>{row.label}</th>{items.map((item) => <td key={item.product.id}>{row.value(item) || <span className="spec-missing">غير منشور</span>}</td>)}</tr>)}</tbody></table></div></div></>;
