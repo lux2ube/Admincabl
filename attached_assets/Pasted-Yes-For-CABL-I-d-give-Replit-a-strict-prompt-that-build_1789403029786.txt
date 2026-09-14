@@ -1,0 +1,678 @@
+Yes. For CABL, I’d give Replit a strict prompt that builds the specification system without polluting the core products table.
+
+Build a production-ready, database-driven Product Specifications System for the CABL e-commerce platform.
+
+PRIMARY OBJECTIVE
+
+Create a flexible specification architecture that allows CABL to store, manage, display, filter, and compare technical specifications for chargers and other electronics.
+
+The system MUST support the 10 core comparison dimensions:
+
+1. Maximum Power
+2. Charging Protocols
+3. Power Distribution
+4. Ports
+5. Charging Technology / GaN
+6. Dimensions & Weight
+7. Protection Systems
+8. Efficiency & Thermal Features
+9. Device Compatibility
+10. Charging Capability
+
+Do NOT solve this by adding dozens of hard-coded specification columns to "products".
+
+Use a normalized relational design with dedicated tables for structured/complex specifications and a controlled attribute system for flexible specifications.
+
+---
+
+1. CORE PRODUCT
+
+Do NOT duplicate existing product information.
+
+Use the existing:
+
+"products.id"
+
+as the foreign-key reference.
+
+Every specification must belong to a product through "product_id".
+
+Use:
+
+- UUID foreign keys where the existing schema uses UUID
+- Proper foreign-key constraints
+- Appropriate indexes
+- "ON DELETE CASCADE" where appropriate
+- Unique constraints to prevent duplicate specifications
+
+Do not rename or modify existing product fields unless absolutely required.
+
+---
+
+2. PRODUCT ATTRIBUTES
+
+Create:
+
+"attributes"
+
+Fields:
+
+id
+name
+slug
+type
+unit
+description
+category_id nullable
+sort_order
+is_filterable
+is_comparable
+is_active
+created_at
+updated_at
+
+Supported "type" values:
+
+text
+number
+boolean
+select
+multiselect
+
+Create:
+
+"product_attributes"
+
+Fields:
+
+id
+product_id
+attribute_id
+value_text
+value_number
+value_boolean
+created_at
+updated_at
+
+Only the appropriate value column should be populated according to the attribute type.
+
+Add:
+
+UNIQUE(product_id, attribute_id)
+
+Do not use one giant JSON field for all specifications.
+
+JSON may only be used where a genuinely nested manufacturer payload must be preserved separately.
+
+---
+
+3. CHARGER PORTS
+
+Create:
+
+"charger_ports"
+
+Fields:
+
+id
+product_id
+port_name
+port_type
+max_power_w
+max_voltage_v
+max_current_a
+sort_order
+created_at
+updated_at
+
+Examples:
+
+USB-C1 | USB-C | 65W
+USB-C2 | USB-C | 30W
+USB-A  | USB-A | 18W
+
+"port_type" must use controlled values rather than arbitrary spelling.
+
+Examples:
+
+USB-C
+USB-A
+AC
+DC
+Lightning
+Micro-USB
+
+Allow future values without requiring a database migration if the architecture supports controlled lookup records.
+
+---
+
+4. CHARGING PROTOCOLS
+
+Create:
+
+"charging_protocols"
+
+Fields:
+
+id
+name
+slug
+description
+is_active
+
+Examples:
+
+USB PD
+PD 3.0
+PD 3.1
+PPS
+QC
+QC 4+
+AFC
+Apple 2.4A
+
+Create junction table:
+
+"product_charging_protocols"
+
+product_id
+protocol_id
+
+Use a composite unique constraint:
+
+UNIQUE(product_id, protocol_id)
+
+If protocol support is port-specific, also support:
+
+port_id nullable
+
+so the system can represent:
+
+USB-C1 → PD 3.1 + PPS
+USB-A  → QC 4+
+
+---
+
+5. POWER DISTRIBUTION
+
+Create:
+
+"charger_power_profiles"
+
+Fields:
+
+id
+product_id
+configuration_name
+total_power_w
+description
+sort_order
+created_at
+updated_at
+
+Examples:
+
+C1 only       | 65W
+C2 only       | 30W
+C1 + C2       | 45W + 20W
+C1 + C2 + A   | 45W + 12W + 10W
+
+Do NOT store power distribution only as a single uncontrolled text field.
+
+Where practical, also create:
+
+"charger_power_profile_outputs"
+
+id
+profile_id
+port_id
+power_w
+
+This allows the system to understand exactly how power is distributed between ports.
+
+---
+
+6. CHARGING TECHNOLOGY
+
+Use the attribute system for technologies such as:
+
+GaN
+GaNFast
+GaN II
+GaN III
+
+Example:
+
+attribute:
+name = Gallium Nitride
+slug = gan
+type = boolean
+
+A product can then have:
+
+gan = true
+
+Do not assume that every future charging technology requires a new column.
+
+---
+
+7. DIMENSIONS & WEIGHT
+
+Create:
+
+"product_dimensions"
+
+Fields:
+
+id
+product_id
+length_mm
+width_mm
+height_mm
+weight_g
+created_at
+updated_at
+
+Do not store dimensions as:
+
+"6 x 5 x 3 cm"
+
+Store numeric values so they can be sorted, compared, filtered, and displayed in different units.
+
+---
+
+8. PROTECTION SYSTEMS
+
+Create:
+
+"protection_types"
+
+Fields:
+
+id
+name
+slug
+description
+is_active
+
+Examples:
+
+Over Voltage Protection
+Over Current Protection
+Over Temperature Protection
+Short Circuit Protection
+Over Power Protection
+Surge Protection
+
+Create:
+
+"product_protections"
+
+product_id
+protection_id
+
+Use a composite unique constraint.
+
+---
+
+9. EFFICIENCY & THERMAL FEATURES
+
+Use structured attributes for measurable values:
+
+efficiency_percent
+maximum_temperature
+standby_power
+
+Use controlled attributes for features:
+
+thermal_management
+temperature_control
+cooling_technology
+
+Do not claim an efficiency percentage unless the manufacturer provides it.
+
+Do not invent technical specifications.
+
+---
+
+10. DEVICE COMPATIBILITY
+
+Create:
+
+"compatibility_categories"
+
+Examples:
+
+iPhone
+Samsung Galaxy
+iPad
+MacBook
+MacBook Air
+MacBook Pro
+Google Pixel
+Nintendo Switch
+Power Bank
+Android Phones
+Tablets
+Laptops
+
+Create:
+
+"product_compatibility"
+
+Fields:
+
+id
+product_id
+compatibility_category_id
+compatibility_type
+notes
+
+Supported values:
+
+supported
+partially_supported
+not_recommended
+
+Where necessary, compatibility should also be protocol/power aware.
+
+Example:
+
+A 20W charger should not automatically be presented as an ideal charger for every laptop merely because USB-C is present.
+
+---
+
+11. CHARGING CAPABILITY
+
+Do not create a misleading field such as:
+
+actual_charging_speed = 65W
+
+because actual charging speed depends on the device.
+
+Instead, derive charging capability from:
+
+maximum_power
+port
+charging_protocol
+PPS
+power_distribution
+device_requirements
+
+The UI may calculate and display statements such as:
+
+Up to 65W output
+
+rather than falsely claiming that every compatible device charges at 65W.
+
+---
+
+12. ADMIN SYSTEM
+
+Create an Admin specification editor.
+
+When Admin selects:
+
+Category = Chargers
+
+show charger-specific fields:
+
+- Maximum Power
+- Ports
+- Charging Protocols
+- Power Distribution
+- GaN
+- Dimensions
+- Weight
+- Protection
+- Efficiency
+- Thermal Features
+- Compatibility
+
+Do NOT show irrelevant charger fields for unrelated categories.
+
+The system must allow new attributes to be created from Admin without requiring code changes.
+
+---
+
+13. COMPARISON ENGINE
+
+Create the database/API structure required for product comparison.
+
+When comparing two or more chargers, normalize specifications into comparable values.
+
+Example:
+
+Product A
+65W
+2 USB-C
+1 USB-A
+PD 3.1
+PPS
+105g
+GaN
+
+Product B
+45W
+1 USB-C
+1 USB-A
+PD 3.0
+PPS
+140g
+GaN
+
+The comparison UI must be able to automatically produce:
+
+Maximum Power
+Ports
+Protocols
+Power Distribution
+GaN
+Weight
+Protection
+Compatibility
+
+Do not compare raw strings when numeric comparison is possible.
+
+For example:
+
+65
+45
+
+must remain numeric values rather than:
+
+"65W"
+"45W"
+
+in the database.
+
+---
+
+14. FILTERING
+
+The same specification data must power category filters.
+
+Examples:
+
+Power: 20W / 30W / 45W / 65W / 100W+
+GaN: Yes
+PPS: Yes
+USB-C ports: 1 / 2 / 3+
+
+Do not maintain a separate manually entered filter database.
+
+Filters must derive from actual product specifications.
+
+---
+
+15. PRODUCT PAGE
+
+The product page must automatically generate the specification section from database data.
+
+Example:
+
+Specifications
+
+Maximum Power       65W
+Technology          GaN
+Ports               2 × USB-C + 1 × USB-A
+Charging Protocols  PD 3.1, PPS, QC
+Weight              105g
+Protection          OVP, OCP, OTP, SCP
+
+Never display empty specification rows.
+
+Never display:
+
+N/A
+Unknown
+—
+
+unless the UX specifically requires it.
+
+If a specification is not provided by the manufacturer, omit it.
+
+---
+
+16. COMPARISON DISPLAY RULES
+
+Use human-readable labels in the frontend but stable slugs internally.
+
+Example:
+
+max_power_w
+
+→
+
+Maximum Power
+
+Do not expose database column names directly to customers.
+
+Units must be stored separately from display text whenever numerical comparison is required.
+
+---
+
+17. DATA VALIDATION
+
+Implement strict validation.
+
+Examples:
+
+power_w > 0
+weight_g > 0
+dimensions > 0
+efficiency_percent BETWEEN 0 AND 100
+
+Prevent:
+
+65W
+"65 watts"
+"about 65"
+
+from being stored in numeric fields.
+
+Normalize manufacturer specifications before saving.
+
+---
+
+18. SOURCE / ACCURACY
+
+Every technical specification must come from a reliable product source.
+
+Never invent:
+
+- charging protocols
+- wattage
+- PPS support
+- GaN generation
+- protection systems
+- compatibility
+- efficiency
+- dimensions
+
+If manufacturer data is unavailable, leave the value empty.
+
+Optionally support:
+
+"specification_source"
+
+and:
+
+"source_url"
+
+for administrator reference.
+
+---
+
+19. PERFORMANCE
+
+Create indexes for:
+
+product_id
+attribute_id
+attribute slug
+numeric specification values
+protocol relationships
+compatibility relationships
+
+Comparison queries must not require loading every product attribute into application memory.
+
+Use SQL/database-level queries where practical.
+
+---
+
+20. DATABASE DESIGN RULE
+
+The final architecture must follow this principle:
+
+products
+   │
+   ├── product_attributes
+   │        └── attributes
+   │
+   ├── charger_ports
+   │
+   ├── product_charging_protocols
+   │        └── charging_protocols
+   │
+   ├── charger_power_profiles
+   │        └── charger_power_profile_outputs
+   │
+   ├── product_dimensions
+   │
+   ├── product_protections
+   │        └── protection_types
+   │
+   └── product_compatibility
+            └── compatibility_categories
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Do not duplicate product data.
+- Do not create a giant "specifications" text column.
+- Do not store all specifications in JSON.
+- Do not hard-code charger specifications into frontend components.
+- Do not create a new database migration every time CABL adds a new specification.
+- Do not invent manufacturer data.
+- Keep numerical values numerical.
+- Keep relationships relational.
+- Make specifications reusable across products.
+- Make specifications usable for product pages, filters, search, and comparison.
+- Make the architecture extensible to power banks, cables, hubs, car chargers, and other CABL categories.
+
+Before implementation, inspect the existing database schema and adapt foreign-key types, naming conventions, timestamps, and existing category/product relationships to the actual project.
+
+Do not break existing functionality.
+
+After implementation, provide:
+
+1. Complete migration/schema changes.
+2. Table relationships.
+3. Indexes and constraints.
+4. Admin data-entry flow.
+5. API/query structure for product specifications.
+6. Product comparison query.
+7. Product filtering query.
+8. Example seed data for 3 chargers.
+9. Verification that all 10 comparison dimensions are represented.
+10. Verification that existing product/category functionality remains intact.
