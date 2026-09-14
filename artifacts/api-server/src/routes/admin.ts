@@ -830,6 +830,126 @@ async function seedUgreenSpecifications() {
   }
 }
 
+const catalogSourcePendingNote = "مستورد من بيانات الكتالوج الحالية؛ يحتاج رابطًا رسميًا للتحقق.";
+
+function firstNumber(text: string, pattern: RegExp) {
+  const match = text.match(pattern);
+  if (!match?.[1]) return null;
+  const value = Number(match[1].replace(/,/g, ""));
+  return Number.isFinite(value) && value > 0 ? value : null;
+}
+
+async function seedCatalogDerivedSpecifications() {
+  const client = await pool.connect();
+  let importedAttributes = 0;
+  let importedModules = 0;
+  const missingSourceProducts: Array<{ sku: string; brand: string; name: string }> = [];
+  try {
+    await client.query("BEGIN");
+    const attributeRows = await client.query<{ id: string; slug: string }>(
+      `SELECT "id", "slug" FROM "attributes"
+       WHERE "slug" = ANY($1::text[])`,
+      [["max_power_w", "gan", "capacity_mah", "port_type"]],
+    );
+    const attributeIds = new Map(attributeRows.rows.map((row) => [row.slug, row.id]));
+    const products = await client.query<{
+      id: string;
+      brand: string;
+      product_name: string;
+      sku: string;
+      short_description: string | null;
+      product_description: string | null;
+      category_slug: string | null;
+    }>(
+      `SELECT p."id", p."brand", p."product_name", p."SKU" AS "sku",
+              p."short_description", p."product_description", c."slug" AS "category_slug"
+       FROM "products" p
+       LEFT JOIN LATERAL (
+         SELECT c1."slug"
+         FROM "product_categories" pc1
+         JOIN "categories" c1 ON c1."id" = pc1."category_id" AND c1."active" = TRUE
+         WHERE pc1."product_id" = p."id"
+         ORDER BY c1."parent_id" NULLS FIRST, c1."category_name"
+         LIMIT 1
+       ) c ON TRUE
+       WHERE p."published" = TRUE`,
+    );
+    const portTypes = await client.query<{ id: string; slug: string }>(
+      `SELECT "id", "slug" FROM "port_types" WHERE "slug" = ANY($1::text[])`,
+      [["usb-c", "usb-a"]],
+    );
+    const portTypeIds = new Map(portTypes.rows.map((row) => [row.slug, row.id]));
+
+    for (const product of products.rows) {
+      const text = `${product.product_name} ${product.short_description ?? ""} ${product.product_description ?? ""}`;
+      if (product.brand !== "UGREEN") {
+        missingSourceProducts.push({ sku: product.sku, brand: product.brand, name: product.product_name });
+      }
+      const maxPowerW = firstNumber(text, /(\d+(?:\.\d+)?)\s*W\b/i);
+      const capacityMah = firstNumber(text, /(\d[\d,]*)\s*mAh\b/i);
+      const gan = /\bGaN\b/i.test(text);
+      const portTokens = [...new Set(text.match(/USB-[A-Z]+|Lightning|C\+C\+A|C\+C|C\+A/gi) ?? [])];
+      const portType = portTokens.length ? portTokens.join("، ") : null;
+      const addAttribute = async (slug: string, value: { text?: string; number?: number; boolean?: boolean }) => {
+        const attributeId = attributeIds.get(slug);
+        if (!attributeId) return;
+        const result = await client.query(
+          `INSERT INTO "product_attributes" ("product_id","attribute_id","value_text","value_number","value_boolean","source_note")
+           VALUES ($1,$2,$3,$4,$5,$6)
+           ON CONFLICT ("product_id","attribute_id") DO NOTHING`,
+          [product.id, attributeId, value.text ?? null, value.number ?? null, value.boolean ?? null, catalogSourcePendingNote],
+        );
+        importedAttributes += result.rowCount ?? 0;
+      };
+      if (maxPowerW !== null) await addAttribute("max_power_w", { number: maxPowerW });
+      if (capacityMah !== null) await addAttribute("capacity_mah", { number: capacityMah });
+      if (gan) await addAttribute("gan", { boolean: true });
+      if (portType) await addAttribute("port_type", { text: portType });
+
+      if (product.category_slug === "charging-cables") {
+        const connectorTokens = text.match(/USB-[A-Z]+|Lightning/gi) ?? [];
+        const connectorA = connectorTokens[0] ?? null;
+        const connectorB = connectorTokens[1] ?? connectorA;
+        const lengthM = firstNumber(text, /(\d+(?:\.\d+)?)\s*(?:M|م)\b/i);
+        const dataSpeedMbps = firstNumber(text, /(\d+(?:\.\d+)?)\s*Mbps\b/i);
+        const usbVersion = text.match(/USB\s*([0-9]+(?:\.[0-9]+)?)/i)?.[1] ? `USB ${text.match(/USB\s*([0-9]+(?:\.[0-9]+)?)/i)?.[1]}` : null;
+        const material = /nylon|نايلون|مضفر/i.test(text) ? "Nylon braided" : null;
+        const cableResult = await client.query(
+          `INSERT INTO "cable_specifications" ("product_id","connector_a","connector_b","length_m","max_power_w","data_speed_gbps","usb_version","material","source_note")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+           ON CONFLICT ("product_id") DO NOTHING`,
+          [product.id, connectorA, connectorB, lengthM, maxPowerW, dataSpeedMbps === null ? null : dataSpeedMbps / 1000, usbVersion, material, catalogSourcePendingNote],
+        );
+        importedModules += cableResult.rowCount ?? 0;
+      } else if (product.category_slug === "power-banks") {
+        const powerBankResult = await client.query(
+          `INSERT INTO "power_bank_specifications" ("product_id","capacity_mah","max_output_w","source_note")
+           VALUES ($1,$2,$3,$4)
+           ON CONFLICT ("product_id") DO NOTHING`,
+          [product.id, capacityMah, maxPowerW, catalogSourcePendingNote],
+        );
+        importedModules += powerBankResult.rowCount ?? 0;
+      } else if (product.category_slug === "travel-adapters" && /سيارة|car/i.test(text)) {
+        const inputVoltage = text.match(/(\d+\s*[-–]\s*\d+)\s*V/i)?.[1]?.replace(/\s+/g, "") ?? null;
+        const carResult = await client.query(
+          `INSERT INTO "car_charger_specifications" ("product_id","input_voltage_v","max_output_w","source_note")
+           VALUES ($1,$2,$3,$4)
+           ON CONFLICT ("product_id") DO NOTHING`,
+          [product.id, inputVoltage, maxPowerW, catalogSourcePendingNote],
+        );
+        importedModules += carResult.rowCount ?? 0;
+      }
+    }
+    await client.query("COMMIT");
+    return { importedAttributes, importedModules, missingSourceProducts };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 async function seedTable(query: string, values: unknown[], conflict = "DO NOTHING") {
   const result = await pool.query(query, values);
   return result.rowCount ?? 0;
