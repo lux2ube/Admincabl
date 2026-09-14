@@ -119,7 +119,83 @@ export interface StoreSpecificationCompatibility {
   notes: string | null;
 }
 
+export type StoreSpecificationDefinitionType = typeof StoreSpecificationDefinitionType[keyof typeof StoreSpecificationDefinitionType];
+
+
+export const StoreSpecificationDefinitionType = {
+  text: 'text',
+  number: 'number',
+  boolean: 'boolean',
+  select: 'select',
+  multiselect: 'multiselect',
+} as const;
+
+export interface StoreSpecificationDefinition {
+  slug: string;
+  label: string;
+  group: string;
+  type: StoreSpecificationDefinitionType;
+  /** @nullable */
+  unit: string | null;
+}
+
+export interface StorePowerBankSpecifications {
+  /** @nullable */
+  capacityMah: number | null;
+  /** @nullable */
+  energyWh: number | null;
+  /** @nullable */
+  inputSummary: string | null;
+  /** @nullable */
+  outputSummary: string | null;
+  /** @nullable */
+  maxOutputW: number | null;
+  /** @nullable */
+  rechargeTimeHours: number | null;
+  /** @nullable */
+  wirelessCharging: boolean | null;
+  /** @nullable */
+  display: boolean | null;
+  /** @nullable */
+  passThroughCharging: boolean | null;
+}
+
+export interface StoreCableSpecifications {
+  /** @nullable */
+  connectorA: string | null;
+  /** @nullable */
+  connectorB: string | null;
+  /** @nullable */
+  lengthM: number | null;
+  /** @nullable */
+  maxPowerW: number | null;
+  /** @nullable */
+  dataSpeedGbps: number | null;
+  /** @nullable */
+  usbVersion: string | null;
+  /** @nullable */
+  eMarker: boolean | null;
+  /** @nullable */
+  videoSupport: boolean | null;
+  /** @nullable */
+  material: string | null;
+}
+
+export interface StoreCarChargerSpecifications {
+  /** @nullable */
+  inputVoltageV: string | null;
+  /** @nullable */
+  maxOutputW: number | null;
+  /** @nullable */
+  powerDistribution: string | null;
+  /** @nullable */
+  carCompatibility: string | null;
+}
+
 export interface StoreSpecifications {
+  /** @nullable */
+  categorySlug: string | null;
+  fieldDefinitions: StoreSpecificationDefinition[];
   attributes: StoreSpecificationAttribute[];
   ports: StoreSpecificationPort[];
   protocols: StoreSpecificationProtocol[];
@@ -127,6 +203,13 @@ export interface StoreSpecifications {
   dimensions: StoreSpecificationDimensions | null;
   protections: StoreSpecificationProtection[];
   compatibility: StoreSpecificationCompatibility[];
+  /** @nullable */
+  warrantyMonths: number | null;
+  /** @nullable */
+  warrantyNote: string | null;
+  powerBank: StorePowerBankSpecifications | null;
+  cable: StoreCableSpecifications | null;
+  carCharger: StoreCarChargerSpecifications | null;
   /** @nullable */
   maxPowerW: number | null;
   /** @nullable */

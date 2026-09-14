@@ -1,5 +1,9 @@
 import { pool } from "@workspace/db";
 import type {
+  StoreCableSpecifications,
+  StoreCarChargerSpecifications,
+  StorePowerBankSpecifications,
+  StoreSpecificationDefinition,
   StoreSpecifications,
   StoreSpecificationAttribute,
   StoreSpecificationCompatibility,
@@ -20,6 +24,8 @@ const numberOrNull = (value: NumericValue) => {
 };
 
 export const emptyStoreSpecifications = (): StoreSpecifications => ({
+  categorySlug: null,
+  fieldDefinitions: [],
   attributes: [],
   ports: [],
   protocols: [],
@@ -27,6 +33,11 @@ export const emptyStoreSpecifications = (): StoreSpecifications => ({
   dimensions: null,
   protections: [],
   compatibility: [],
+  warrantyMonths: null,
+  warrantyNote: null,
+  powerBank: null,
+  cable: null,
+  carCharger: null,
   maxPowerW: null,
   capabilityLabel: null,
 });
@@ -37,7 +48,32 @@ export async function fetchStoreSpecifications(productIds: string[]) {
   );
   if (!productIds.length) return specifications;
 
-  const [attributes, ports, protocols, profiles, outputs, dimensions, protections, compatibility] = await Promise.all([
+  const [categories, definitions, attributes, ports, protocols, profiles, outputs, dimensions, protections, compatibility, warranties, powerBanks, cables, carChargers] = await Promise.all([
+    pool.query<{ product_id: string; slug: string | null }>(
+      `SELECT DISTINCT ON (pc."product_id") pc."product_id", c."slug"
+       FROM "product_categories" pc
+       JOIN "categories" c ON c."id" = pc."category_id" AND c."active" = TRUE
+       WHERE pc."product_id" = ANY($1::uuid[])
+       ORDER BY pc."product_id", c."parent_id" NULLS FIRST, c."category_name"`,
+      [productIds],
+    ),
+    pool.query<{
+      product_id: string;
+      slug: string;
+      label: string;
+      group_name: string;
+      value_type: "text" | "number" | "boolean" | "select" | "multiselect";
+      unit: string | null;
+    }>(
+      `SELECT DISTINCT ON (pc."product_id", sd."id")
+              pc."product_id", sd."slug", sd."label", sd."group_name", sd."value_type", sd."unit"
+       FROM "product_categories" pc
+       JOIN "category_specification_definitions" csd ON csd."category_id" = pc."category_id" AND csd."visible" = TRUE
+       JOIN "specification_definitions" sd ON sd."id" = csd."definition_id" AND sd."active" = TRUE
+       WHERE pc."product_id" = ANY($1::uuid[])
+       ORDER BY pc."product_id", sd."id", sd."sort_order" ASC`,
+      [productIds],
+    ),
     pool.query<{
       product_id: string;
       slug: string | null;
@@ -54,6 +90,10 @@ export async function fetchStoreSpecifications(productIds: string[]) {
        FROM "product_attributes" pa
        JOIN "attributes" a ON a."id" = pa."attribute_id" AND a."is_active" = TRUE
        WHERE pa."product_id" = ANY($1::uuid[])
+         AND (a."category_id" IS NULL OR EXISTS (
+           SELECT 1 FROM "product_categories" pac
+           WHERE pac."product_id" = pa."product_id" AND pac."category_id" = a."category_id"
+         ))
        ORDER BY a."sort_order" ASC, a."attribute_name" ASC`,
       [productIds],
     ),
@@ -150,7 +190,102 @@ export async function fetchStoreSpecifications(productIds: string[]) {
        ORDER BY cc."name" ASC`,
       [productIds],
     ),
+    pool.query<{
+      product_id: string;
+      warranty_months: NumericValue;
+      warranty_note: string | null;
+    }>(
+      `SELECT "product_id", "warranty_months", "warranty_note"
+       FROM "product_warranties"
+       WHERE "product_id" = ANY($1::uuid[])`,
+      [productIds],
+    ),
+    pool.query<{
+      product_id: string;
+      capacity_mah: NumericValue;
+      energy_wh: NumericValue;
+      input_summary: string | null;
+      output_summary: string | null;
+      max_output_w: NumericValue;
+      recharge_time_hours: NumericValue;
+      wireless_charging: boolean | null;
+      display: boolean | null;
+      pass_through_charging: boolean | null;
+    }>(
+      `SELECT "product_id", "capacity_mah", "energy_wh", "input_summary", "output_summary",
+              "max_output_w", "recharge_time_hours", "wireless_charging", "display", "pass_through_charging"
+       FROM "power_bank_specifications"
+       WHERE "product_id" = ANY($1::uuid[])`,
+      [productIds],
+    ),
+    pool.query<{
+      product_id: string;
+      connector_a: string | null;
+      connector_b: string | null;
+      length_m: NumericValue;
+      max_power_w: NumericValue;
+      data_speed_gbps: NumericValue;
+      usb_version: string | null;
+      e_marker: boolean | null;
+      video_support: boolean | null;
+      material: string | null;
+    }>(
+      `SELECT "product_id", "connector_a", "connector_b", "length_m", "max_power_w",
+              "data_speed_gbps", "usb_version", "e_marker", "video_support", "material"
+       FROM "cable_specifications"
+       WHERE "product_id" = ANY($1::uuid[])`,
+      [productIds],
+    ),
+    pool.query<{
+      product_id: string;
+      input_voltage_v: string | null;
+      max_output_w: NumericValue;
+      power_distribution: string | null;
+      car_compatibility: string | null;
+    }>(
+      `SELECT "product_id", "input_voltage_v", "max_output_w", "power_distribution", "car_compatibility"
+       FROM "car_charger_specifications"
+       WHERE "product_id" = ANY($1::uuid[])`,
+      [productIds],
+    ),
   ]);
+
+  const categoryByProduct = new Map(categories.rows.map((row) => [row.product_id, row.slug]));
+  const definitionsByProduct = new Map<string, StoreSpecificationDefinition[]>();
+  for (const row of definitions.rows) {
+    const list = definitionsByProduct.get(row.product_id) ?? [];
+    list.push({ slug: row.slug, label: row.label, group: row.group_name, type: row.value_type, unit: row.unit });
+    definitionsByProduct.set(row.product_id, list);
+  }
+  const warrantyByProduct = new Map(warranties.rows.map((row) => [row.product_id, row]));
+  const powerBankByProduct = new Map<string, StorePowerBankSpecifications>(powerBanks.rows.map((row) => [row.product_id, {
+    capacityMah: numberOrNull(row.capacity_mah),
+    energyWh: numberOrNull(row.energy_wh),
+    inputSummary: row.input_summary,
+    outputSummary: row.output_summary,
+    maxOutputW: numberOrNull(row.max_output_w),
+    rechargeTimeHours: numberOrNull(row.recharge_time_hours),
+    wirelessCharging: row.wireless_charging,
+    display: row.display,
+    passThroughCharging: row.pass_through_charging,
+  }]));
+  const cableByProduct = new Map<string, StoreCableSpecifications>(cables.rows.map((row) => [row.product_id, {
+    connectorA: row.connector_a,
+    connectorB: row.connector_b,
+    lengthM: numberOrNull(row.length_m),
+    maxPowerW: numberOrNull(row.max_power_w),
+    dataSpeedGbps: numberOrNull(row.data_speed_gbps),
+    usbVersion: row.usb_version,
+    eMarker: row.e_marker,
+    videoSupport: row.video_support,
+    material: row.material,
+  }]));
+  const carChargerByProduct = new Map<string, StoreCarChargerSpecifications>(carChargers.rows.map((row) => [row.product_id, {
+    inputVoltageV: row.input_voltage_v,
+    maxOutputW: numberOrNull(row.max_output_w),
+    powerDistribution: row.power_distribution,
+    carCompatibility: row.car_compatibility,
+  }]));
 
   const portsByProduct = new Map<string, StoreSpecificationPort[]>();
   for (const row of ports.rows) {
@@ -236,7 +371,10 @@ export async function fetchStoreSpecifications(productIds: string[]) {
         type: row.compatibility_type,
         notes: row.notes,
       }));
+    const warranty = warrantyByProduct.get(productId);
     specifications.set(productId, {
+      categorySlug: categoryByProduct.get(productId) ?? null,
+      fieldDefinitions: definitionsByProduct.get(productId) ?? [],
       attributes: mappedAttributes,
       ports: portsByProduct.get(productId) ?? [],
       protocols: mappedProtocols,
@@ -244,6 +382,11 @@ export async function fetchStoreSpecifications(productIds: string[]) {
       dimensions: mappedDimensions,
       protections: mappedProtections,
       compatibility: mappedCompatibility,
+      warrantyMonths: warranty ? numberOrNull(warranty.warranty_months) : null,
+      warrantyNote: warranty?.warranty_note ?? null,
+      powerBank: powerBankByProduct.get(productId) ?? null,
+      cable: cableByProduct.get(productId) ?? null,
+      carCharger: carChargerByProduct.get(productId) ?? null,
       maxPowerW,
       capabilityLabel: maxPowerW ? `حتى ${maxPowerW}W` : null,
     });
@@ -258,28 +401,81 @@ export async function fetchStoreSpecificationFilters(categorySlug?: string) {
     ? `JOIN "product_categories" pcf ON pcf."product_id" = pa."product_id"
        JOIN "categories" cf ON cf."id" = pcf."category_id" AND cf."slug" = $1`
     : "";
-  const result = await pool.query<{
+  const [result, moduleResult] = await Promise.all([
+    pool.query<{
     slug: string;
     label: string;
     unit: string | null;
     values: string[];
-  }>(
+    }>(
     `SELECT a."slug", a."attribute_name" AS "label", a."unit",
             ARRAY_AGG(DISTINCT COALESCE(pa."value_text", pa."value_number"::text, pa."value_boolean"::text) ORDER BY COALESCE(pa."value_text", pa."value_number"::text, pa."value_boolean"::text)) AS "values"
      FROM "product_attributes" pa
      JOIN "attributes" a ON a."id" = pa."attribute_id"
      ${categoryJoin}
-     WHERE a."is_active" = TRUE AND a."is_filterable" = TRUE
+       WHERE a."is_active" = TRUE AND a."is_filterable" = TRUE
+         AND (a."category_id" IS NULL OR a."category_id" = cf."id")
      GROUP BY a."slug", a."attribute_name", a."unit", a."sort_order"
      ORDER BY a."sort_order" ASC, a."attribute_name" ASC`,
     params,
-  );
+    ),
+    pool.query<{
+      slug: string;
+      label: string;
+      unit: string | null;
+      values: string[];
+    }>(
+      `SELECT "slug", "label", "unit",
+              ARRAY_AGG(DISTINCT "value" ORDER BY "value") AS "values"
+       FROM (
+         SELECT 'capacity_mah' AS "slug", 'السعة' AS "label", 'mAh' AS "unit", pb."capacity_mah"::text AS "value"
+         FROM "power_bank_specifications" pb
+         ${categorySlug ? `JOIN "product_categories" pcf ON pcf."product_id" = pb."product_id" JOIN "categories" cf ON cf."id" = pcf."category_id" AND cf."slug" = $1` : ""}
+         WHERE pb."capacity_mah" IS NOT NULL
+         UNION ALL
+         SELECT 'energy_wh', 'الطاقة', 'Wh', pb."energy_wh"::text
+         FROM "power_bank_specifications" pb
+         ${categorySlug ? `JOIN "product_categories" pcf ON pcf."product_id" = pb."product_id" JOIN "categories" cf ON cf."id" = pcf."category_id" AND cf."slug" = $1` : ""}
+         WHERE pb."energy_wh" IS NOT NULL
+         UNION ALL
+         SELECT 'max_output_w', 'أقصى خرج', 'W', pb."max_output_w"::text
+         FROM "power_bank_specifications" pb
+         ${categorySlug ? `JOIN "product_categories" pcf ON pcf."product_id" = pb."product_id" JOIN "categories" cf ON cf."id" = pcf."category_id" AND cf."slug" = $1` : ""}
+         WHERE pb."max_output_w" IS NOT NULL
+         UNION ALL
+         SELECT 'length_m', 'الطول', 'm', c."length_m"::text
+         FROM "cable_specifications" c
+         ${categorySlug ? `JOIN "product_categories" pcf ON pcf."product_id" = c."product_id" JOIN "categories" cf ON cf."id" = pcf."category_id" AND cf."slug" = $1` : ""}
+         WHERE c."length_m" IS NOT NULL
+         UNION ALL
+         SELECT 'max_power_w', 'القدرة القصوى', 'W', c."max_power_w"::text
+         FROM "cable_specifications" c
+         ${categorySlug ? `JOIN "product_categories" pcf ON pcf."product_id" = c."product_id" JOIN "categories" cf ON cf."id" = pcf."category_id" AND cf."slug" = $1` : ""}
+         WHERE c."max_power_w" IS NOT NULL
+         UNION ALL
+         SELECT 'data_speed_gbps', 'سرعة نقل البيانات', 'Gbps', c."data_speed_gbps"::text
+         FROM "cable_specifications" c
+         ${categorySlug ? `JOIN "product_categories" pcf ON pcf."product_id" = c."product_id" JOIN "categories" cf ON cf."id" = pcf."category_id" AND cf."slug" = $1` : ""}
+         WHERE c."data_speed_gbps" IS NOT NULL
+         UNION ALL
+         SELECT 'max_output_w', 'أقصى خرج', 'W', cc."max_output_w"::text
+         FROM "car_charger_specifications" cc
+         ${categorySlug ? `JOIN "product_categories" pcf ON pcf."product_id" = cc."product_id" JOIN "categories" cf ON cf."id" = pcf."category_id" AND cf."slug" = $1` : ""}
+         WHERE cc."max_output_w" IS NOT NULL
+       ) values_by_field
+       GROUP BY "slug", "label", "unit"
+       ORDER BY "slug"`,
+      params,
+    ),
+  ]);
+  const merged = new Map<string, { slug: string; label: string; unit: string | null; values: string[] }>();
+  for (const row of [...result.rows, ...moduleResult.rows]) {
+    const current = merged.get(row.slug);
+    merged.set(row.slug, current
+      ? { ...current, values: [...new Set([...current.values, ...row.values].filter(Boolean))].sort() }
+      : { ...row, values: row.values.filter(Boolean) });
+  }
   return {
-    filters: result.rows.filter((row) => row.slug).map((row) => ({
-      slug: row.slug,
-      label: row.label,
-      unit: row.unit,
-      values: row.values.filter(Boolean),
-    })),
+    filters: [...merged.values()].filter((row) => row.slug && row.values.length),
   };
 }

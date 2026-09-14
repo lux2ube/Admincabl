@@ -1398,9 +1398,49 @@ function ProductDetailPage({ slug }: { slug: string }) {
   );
 }
 
+type StoreProductSpecifications = StoreProduct["specifications"];
+
+function formatSpecificationValue(specs: StoreProductSpecifications, slug: string, unit?: string | null) {
+  const attribute = specs.attributes.find((item) => item.slug === slug);
+  let value: string | number | boolean | null | undefined = attribute?.values.length
+    ? attribute.values.join('، ')
+    : attribute?.value;
+  if (slug === 'warranty_months') value = specs.warrantyMonths;
+  if (slug === 'dimensions') {
+    const dimensions = specs.dimensions;
+    value = dimensions && [dimensions.lengthMm, dimensions.widthMm, dimensions.heightMm].some((item) => item !== null)
+      ? `${dimensions.lengthMm ?? '—'} × ${dimensions.widthMm ?? '—'} × ${dimensions.heightMm ?? '—'}`
+      : null;
+  }
+  if (slug === 'compatibility') value = specs.compatibility.length ? specs.compatibility.map((item) => item.name).join('، ') : null;
+  if (slug === 'capacity_mah') value = specs.powerBank?.capacityMah;
+  if (slug === 'energy_wh') value = specs.powerBank?.energyWh;
+  if (slug === 'input_summary') value = specs.powerBank?.inputSummary;
+  if (slug === 'output_summary') value = specs.powerBank?.outputSummary;
+  if (slug === 'max_output_w') value = specs.powerBank?.maxOutputW ?? specs.carCharger?.maxOutputW;
+  if (slug === 'recharge_time_hours') value = specs.powerBank?.rechargeTimeHours;
+  if (slug === 'wireless_charging') value = specs.powerBank?.wirelessCharging;
+  if (slug === 'display') value = specs.powerBank?.display;
+  if (slug === 'pass_through_charging') value = specs.powerBank?.passThroughCharging;
+  if (slug === 'connector_a') value = specs.cable?.connectorA;
+  if (slug === 'connector_b') value = specs.cable?.connectorB;
+  if (slug === 'length_m') value = specs.cable?.lengthM;
+  if (slug === 'data_speed_gbps') value = specs.cable?.dataSpeedGbps;
+  if (slug === 'usb_version') value = specs.cable?.usbVersion;
+  if (slug === 'e_marker') value = specs.cable?.eMarker;
+  if (slug === 'video_support') value = specs.cable?.videoSupport;
+  if (slug === 'material') value = specs.cable?.material;
+  if (slug === 'input_voltage_v') value = specs.carCharger?.inputVoltageV;
+  if (slug === 'power_distribution') value = specs.carCharger?.powerDistribution;
+  if (slug === 'car_compatibility') value = specs.carCharger?.carCompatibility;
+  if (value === null || value === undefined || value === '') return null;
+  const rendered = typeof value === 'boolean' ? (value ? 'نعم' : 'لا') : String(value);
+  return `${rendered}${unit && slug !== 'dimensions' ? ` ${unit}` : ''}`;
+}
+
 function ProductSpecificationsPanel({ product }: { product: StoreProduct }) {
   const specs = product.specifications;
-  const hasContent = specs.attributes.length > 0 || specs.ports.length > 0 || specs.protocols.length > 0 || specs.powerProfiles.length > 0 || specs.dimensions || specs.protections.length > 0 || specs.compatibility.length > 0 || specs.maxPowerW !== null;
+  const hasContent = specs.attributes.length > 0 || specs.ports.length > 0 || specs.protocols.length > 0 || specs.powerProfiles.length > 0 || specs.dimensions || specs.protections.length > 0 || specs.compatibility.length > 0 || specs.maxPowerW !== null || specs.warrantyMonths !== null || specs.powerBank || specs.cable || specs.carCharger;
   if (!hasContent) return null;
   const visibleValue = (value: string | number | boolean | null, unit?: string | null) => {
     if (value === null || value === undefined || value === '') return null;
@@ -1414,6 +1454,11 @@ function ProductSpecificationsPanel({ product }: { product: StoreProduct }) {
         const values = attribute.values.length ? attribute.values.join('، ') : visibleValue(attribute.value, attribute.unit);
         return values ? <div className="spec-card" key={attribute.slug}><span>{attribute.label}</span><strong>{values}</strong></div> : null;
       })}
+      {specs.fieldDefinitions.filter((definition) => !['max_power_w', 'dimensions', 'compatibility', 'warranty_months'].includes(definition.slug)).map((definition) => {
+        const value = formatSpecificationValue(specs, definition.slug, definition.unit);
+        return value ? <div className="spec-card" key={definition.slug}><span>{definition.label}</span><strong>{value}</strong></div> : null;
+      })}
+      {specs.warrantyMonths !== null && <div className="spec-card"><span>الضمان</span><strong>{specs.warrantyMonths} شهر</strong>{specs.warrantyNote && <small>{specs.warrantyNote}</small>}</div>}
       {specs.dimensions && (specs.dimensions.lengthMm !== null || specs.dimensions.widthMm !== null || specs.dimensions.heightMm !== null || specs.dimensions.weightG !== null) && <div className="spec-card"><span>الأبعاد</span><strong>{[specs.dimensions.lengthMm, specs.dimensions.widthMm, specs.dimensions.heightMm].every((value) => value !== null) ? `${specs.dimensions.lengthMm} × ${specs.dimensions.widthMm} × ${specs.dimensions.heightMm} mm` : [specs.dimensions.lengthMm, specs.dimensions.widthMm, specs.dimensions.heightMm].some((value) => value !== null) ? `${specs.dimensions.lengthMm ?? '—'} × ${specs.dimensions.widthMm ?? '—'} × ${specs.dimensions.heightMm ?? '—'} mm` : null}</strong>{specs.dimensions.weightG !== null && <small>{specs.dimensions.weightG} g</small>}</div>}
       {specs.ports.length > 0 && <div className="spec-card spec-card-wide"><span>المنافذ</span><div className="spec-list">{specs.ports.map((port) => <span key={port.id}><b>{port.name}</b>{port.type}{port.maxPowerW !== null ? ` · ${port.maxPowerW}W` : ''}</span>)}</div></div>}
       {specs.protocols.length > 0 && <div className="spec-card spec-card-wide"><span>البروتوكولات</span><div className="spec-list">{specs.protocols.map((protocol) => <span key={`${protocol.slug}-${protocol.portId ?? 'all'}`}>{protocol.name}</span>)}</div></div>}
@@ -1443,6 +1488,12 @@ export function ComparePage() {
     { label: 'الأبعاد', value: (item: typeof items[number]) => item.comparison.dimensions ? `${item.comparison.dimensions.lengthMm ?? '—'} × ${item.comparison.dimensions.widthMm ?? '—'} × ${item.comparison.dimensions.heightMm ?? '—'} mm` : null },
     { label: 'التوافق', value: (item: typeof items[number]) => item.comparison.compatibility.length ? item.comparison.compatibility.map((entry) => entry.name).join('، ') : null },
   ];
+  const definitions = Array.from(new Map(items.flatMap((item) => item.comparison.fieldDefinitions).map((definition) => [definition.slug, definition])).values())
+    .filter((definition) => !['max_power_w', 'dimensions', 'compatibility'].includes(definition.slug));
+  rows.push(...definitions.map((definition) => ({
+    label: definition.label,
+    value: (item: typeof items[number]) => formatSpecificationValue(item.comparison, definition.slug, definition.unit),
+  })));
   return <><NoIndex/><div className="container compare-page"><Breadcrumbs items={[{ label: 'مقارنة المنتجات' }]}/><PageHeading eyebrow="قرار أوضح" title="قارن المنتجات جنباً إلى جنب" description="القيم الظاهرة هنا مأخوذة من نفس بيانات المواصفات المستخدمة في صفحة المنتج والفلاتر."/><div className="compare-products">{items.map((item) => <article className="compare-product-card" key={item.product.id}><ProductImage product={item.product}/><span>{item.product.brand}</span><h2>{item.product.productName}</h2><Link href={productPath(item.product)} className="text-link">فتح المنتج <ArrowLeft size={14}/></Link></article>)}</div><div className="comparison-table-wrap"><table className="comparison-table comparison-spec-table"><thead><tr><th>المواصفة</th>{items.map((item) => <th key={item.product.id}>{item.product.productName}</th>)}</tr></thead><tbody>{rows.map((row) => <tr key={row.label}><th>{row.label}</th>{items.map((item) => <td key={item.product.id}>{row.value(item) || <span className="spec-missing">غير منشور</span>}</td>)}</tr>)}</tbody></table></div></div></>;
 }
 

@@ -5,8 +5,12 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { StoreCableSpecifications } from './storeCableSpecifications';
+import type { StoreCarChargerSpecifications } from './storeCarChargerSpecifications';
+import type { StorePowerBankSpecifications } from './storePowerBankSpecifications';
 import type { StoreSpecificationAttribute } from './storeSpecificationAttribute';
 import type { StoreSpecificationCompatibility } from './storeSpecificationCompatibility';
+import type { StoreSpecificationDefinition } from './storeSpecificationDefinition';
 import type { StoreSpecificationDimensions } from './storeSpecificationDimensions';
 import type { StoreSpecificationPort } from './storeSpecificationPort';
 import type { StoreSpecificationPowerProfile } from './storeSpecificationPowerProfile';
@@ -14,6 +18,9 @@ import type { StoreSpecificationProtection } from './storeSpecificationProtectio
 import type { StoreSpecificationProtocol } from './storeSpecificationProtocol';
 
 export interface StoreSpecifications {
+  /** @nullable */
+  categorySlug: string | null;
+  fieldDefinitions: StoreSpecificationDefinition[];
   attributes: StoreSpecificationAttribute[];
   ports: StoreSpecificationPort[];
   protocols: StoreSpecificationProtocol[];
@@ -21,6 +28,13 @@ export interface StoreSpecifications {
   dimensions: StoreSpecificationDimensions | null;
   protections: StoreSpecificationProtection[];
   compatibility: StoreSpecificationCompatibility[];
+  /** @nullable */
+  warrantyMonths: number | null;
+  /** @nullable */
+  warrantyNote: string | null;
+  powerBank: StorePowerBankSpecifications | null;
+  cable: StoreCableSpecifications | null;
+  carCharger: StoreCarChargerSpecifications | null;
   /** @nullable */
   maxPowerW: number | null;
   /** @nullable */

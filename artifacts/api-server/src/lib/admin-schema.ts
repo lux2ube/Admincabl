@@ -172,6 +172,64 @@ const tables: AdminTable[] = [
     relations: [relation("product_id", "products", "id", "belongs_to", "المنتج"), relation("attribute_id", "attributes", "id", "belongs_to", "الخاصية")],
   },
   {
+    key: "specification_definitions", label: "تعريفات المواصفات", group: "المواصفات", primaryKey: "id",
+    columns: [
+      id(), column("slug", "الرابط المختصر", "text", { nullable: false }), column("label", "اسم الحقل", "text", { nullable: false }),
+      column("group_name", "مجموعة المواصفة", "text", { nullable: false }), column("value_type", "نوع القيمة", "text", { nullable: false }),
+      column("unit", "الوحدة", "text"), column("sort_order", "الترتيب", "number", { nullable: false }),
+      column("filterable", "يظهر في الفلاتر", "boolean", { nullable: false }), column("comparable", "يظهر في المقارنة", "boolean", { nullable: false }),
+      column("active", "نشط", "boolean", { nullable: false }), created(), updated(),
+    ],
+    relations: [relation("id", "category_specification_definitions", "definition_id", "has_many", "ظهور حسب التصنيف")],
+  },
+  {
+    key: "category_specification_definitions", label: "ظهور المواصفات حسب التصنيف", group: "المواصفات", primaryKey: "category_id,definition_id",
+    columns: [
+      column("category_id", "التصنيف", "uuid", { nullable: false, primaryKey: true, references: "categories.id" }),
+      column("definition_id", "تعريف المواصفة", "uuid", { nullable: false, primaryKey: true, references: "specification_definitions.id" }),
+      column("visible", "ظاهر", "boolean", { nullable: false }), created(), updated(),
+    ],
+    relations: [relation("category_id", "categories", "id", "belongs_to", "التصنيف"), relation("definition_id", "specification_definitions", "id", "belongs_to", "تعريف المواصفة")],
+  },
+  {
+    key: "product_warranties", label: "ضمان المنتجات", group: "المواصفات", primaryKey: "id",
+    columns: [
+      id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("warranty_months", "مدة الضمان بالأشهر", "number"),
+      column("warranty_note", "ملاحظة الضمان", "text"), column("source_url", "مصدر المواصفة", "text"), column("source_note", "ملاحظة المصدر", "text"), created(), updated(),
+    ],
+    relations: [relation("product_id", "products", "id", "belongs_to", "المنتج")],
+  },
+  {
+    key: "power_bank_specifications", label: "مواصفات الباور بانك", group: "المواصفات", primaryKey: "id",
+    columns: [
+      id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("capacity_mah", "السعة mAh", "number"),
+      column("energy_wh", "الطاقة Wh", "number"), column("input_summary", "المدخلات", "text"), column("output_summary", "المخرجات", "text"),
+      column("max_output_w", "أقصى خرج W", "number"), column("recharge_time_hours", "وقت إعادة الشحن بالساعات", "number"),
+      column("wireless_charging", "شحن لاسلكي", "boolean"), column("display", "شاشة", "boolean"), column("pass_through_charging", "شحن أثناء التمرير", "boolean"),
+      column("source_url", "مصدر المواصفة", "text"), column("source_note", "ملاحظة المصدر", "text"), created(), updated(),
+    ],
+    relations: [relation("product_id", "products", "id", "belongs_to", "المنتج")],
+  },
+  {
+    key: "cable_specifications", label: "مواصفات الكابلات", group: "المواصفات", primaryKey: "id",
+    columns: [
+      id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("connector_a", "الموصل A", "text"),
+      column("connector_b", "الموصل B", "text"), column("length_m", "الطول m", "number"), column("max_power_w", "القدرة القصوى W", "number"),
+      column("data_speed_gbps", "سرعة البيانات Gbps", "number"), column("usb_version", "إصدار USB", "text"), column("e_marker", "E-marker", "boolean"),
+      column("video_support", "دعم الفيديو", "boolean"), column("material", "الخامة", "text"), column("source_url", "مصدر المواصفة", "text"), column("source_note", "ملاحظة المصدر", "text"), created(), updated(),
+    ],
+    relations: [relation("product_id", "products", "id", "belongs_to", "المنتج")],
+  },
+  {
+    key: "car_charger_specifications", label: "مواصفات شواحن السيارات", group: "المواصفات", primaryKey: "id",
+    columns: [
+      id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("input_voltage_v", "جهد الإدخال V", "text"),
+      column("max_output_w", "أقصى خرج W", "number"), column("power_distribution", "توزيع الطاقة", "text"), column("car_compatibility", "توافق السيارة", "text"),
+      column("source_url", "مصدر المواصفة", "text"), column("source_note", "ملاحظة المصدر", "text"), created(), updated(),
+    ],
+    relations: [relation("product_id", "products", "id", "belongs_to", "المنتج")],
+  },
+  {
     key: "port_types", label: "أنواع المنافذ", group: "المواصفات", primaryKey: "id",
     columns: [id(), column("name", "اسم المنفذ", "text", { nullable: false }), column("slug", "الرابط المختصر", "text", { nullable: false }), column("active", "نشط", "boolean", { nullable: false }), created(), updated()],
     relations: [relation("id", "charger_ports", "port_type_id", "has_many", "منافذ الشواحن")],

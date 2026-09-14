@@ -567,9 +567,86 @@ components:
         notes:
           type: ["string", "null"]
       required: [name, slug, type, notes]
+    StoreSpecificationDefinition:
+      type: object
+      properties:
+        slug:
+          type: string
+        label:
+          type: string
+        group:
+          type: string
+        type:
+          type: string
+          enum: [text, number, boolean, select, multiselect]
+        unit:
+          type: ["string", "null"]
+      required: [slug, label, group, type, unit]
+    StorePowerBankSpecifications:
+      type: object
+      properties:
+        capacityMah:
+          type: ["number", "null"]
+        energyWh:
+          type: ["number", "null"]
+        inputSummary:
+          type: ["string", "null"]
+        outputSummary:
+          type: ["string", "null"]
+        maxOutputW:
+          type: ["number", "null"]
+        rechargeTimeHours:
+          type: ["number", "null"]
+        wirelessCharging:
+          type: ["boolean", "null"]
+        display:
+          type: ["boolean", "null"]
+        passThroughCharging:
+          type: ["boolean", "null"]
+      required: [capacityMah, energyWh, inputSummary, outputSummary, maxOutputW, rechargeTimeHours, wirelessCharging, display, passThroughCharging]
+    StoreCableSpecifications:
+      type: object
+      properties:
+        connectorA:
+          type: ["string", "null"]
+        connectorB:
+          type: ["string", "null"]
+        lengthM:
+          type: ["number", "null"]
+        maxPowerW:
+          type: ["number", "null"]
+        dataSpeedGbps:
+          type: ["number", "null"]
+        usbVersion:
+          type: ["string", "null"]
+        eMarker:
+          type: ["boolean", "null"]
+        videoSupport:
+          type: ["boolean", "null"]
+        material:
+          type: ["string", "null"]
+      required: [connectorA, connectorB, lengthM, maxPowerW, dataSpeedGbps, usbVersion, eMarker, videoSupport, material]
+    StoreCarChargerSpecifications:
+      type: object
+      properties:
+        inputVoltageV:
+          type: ["string", "null"]
+        maxOutputW:
+          type: ["number", "null"]
+        powerDistribution:
+          type: ["string", "null"]
+        carCompatibility:
+          type: ["string", "null"]
+      required: [inputVoltageV, maxOutputW, powerDistribution, carCompatibility]
     StoreSpecifications:
       type: object
       properties:
+        categorySlug:
+          type: ["string", "null"]
+        fieldDefinitions:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreSpecificationDefinition"
         attributes:
           type: array
           items:
@@ -598,11 +675,27 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/StoreSpecificationCompatibility"
+        warrantyMonths:
+          type: ["number", "null"]
+        warrantyNote:
+          type: ["string", "null"]
+        powerBank:
+          oneOf:
+            - $ref: "#/components/schemas/StorePowerBankSpecifications"
+            - type: "null"
+        cable:
+          oneOf:
+            - $ref: "#/components/schemas/StoreCableSpecifications"
+            - type: "null"
+        carCharger:
+          oneOf:
+            - $ref: "#/components/schemas/StoreCarChargerSpecifications"
+            - type: "null"
         maxPowerW:
           type: ["number", "null"]
         capabilityLabel:
           type: ["string", "null"]
-      required: [attributes, ports, protocols, powerProfiles, dimensions, protections, compatibility, maxPowerW, capabilityLabel]
+      required: [categorySlug, fieldDefinitions, attributes, ports, protocols, powerProfiles, dimensions, protections, compatibility, warrantyMonths, warrantyNote, powerBank, cable, carCharger, maxPowerW, capabilityLabel]
     StoreProduct:
       type: object
       properties:

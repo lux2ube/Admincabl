@@ -107,6 +107,14 @@ export const GetStoreCatalogResponse = zod.object({
   "estimatedDays": zod.number().nullable()
 })),
   "specifications": zod.object({
+  "categorySlug": zod.string().nullable(),
+  "fieldDefinitions": zod.array(zod.object({
+  "slug": zod.string(),
+  "label": zod.string(),
+  "group": zod.string(),
+  "type": zod.enum(['text', 'number', 'boolean', 'select', 'multiselect']),
+  "unit": zod.string().nullable()
+})),
   "attributes": zod.array(zod.object({
   "slug": zod.string(),
   "label": zod.string(),
@@ -154,6 +162,36 @@ export const GetStoreCatalogResponse = zod.object({
   "type": zod.enum(['supported', 'partially_supported', 'not_recommended']),
   "notes": zod.string().nullable()
 })),
+  "warrantyMonths": zod.number().nullable(),
+  "warrantyNote": zod.string().nullable(),
+  "powerBank": zod.union([zod.object({
+  "capacityMah": zod.number().nullable(),
+  "energyWh": zod.number().nullable(),
+  "inputSummary": zod.string().nullable(),
+  "outputSummary": zod.string().nullable(),
+  "maxOutputW": zod.number().nullable(),
+  "rechargeTimeHours": zod.number().nullable(),
+  "wirelessCharging": zod.boolean().nullable(),
+  "display": zod.boolean().nullable(),
+  "passThroughCharging": zod.boolean().nullable()
+}),zod.null()]),
+  "cable": zod.union([zod.object({
+  "connectorA": zod.string().nullable(),
+  "connectorB": zod.string().nullable(),
+  "lengthM": zod.number().nullable(),
+  "maxPowerW": zod.number().nullable(),
+  "dataSpeedGbps": zod.number().nullable(),
+  "usbVersion": zod.string().nullable(),
+  "eMarker": zod.boolean().nullable(),
+  "videoSupport": zod.boolean().nullable(),
+  "material": zod.string().nullable()
+}),zod.null()]),
+  "carCharger": zod.union([zod.object({
+  "inputVoltageV": zod.string().nullable(),
+  "maxOutputW": zod.number().nullable(),
+  "powerDistribution": zod.string().nullable(),
+  "carCompatibility": zod.string().nullable()
+}),zod.null()]),
   "maxPowerW": zod.number().nullable(),
   "capabilityLabel": zod.string().nullable()
 })
@@ -225,6 +263,14 @@ export const CompareStoreProductsResponse = zod.object({
   "estimatedDays": zod.number().nullable()
 })),
   "specifications": zod.object({
+  "categorySlug": zod.string().nullable(),
+  "fieldDefinitions": zod.array(zod.object({
+  "slug": zod.string(),
+  "label": zod.string(),
+  "group": zod.string(),
+  "type": zod.enum(['text', 'number', 'boolean', 'select', 'multiselect']),
+  "unit": zod.string().nullable()
+})),
   "attributes": zod.array(zod.object({
   "slug": zod.string(),
   "label": zod.string(),
@@ -272,11 +318,49 @@ export const CompareStoreProductsResponse = zod.object({
   "type": zod.enum(['supported', 'partially_supported', 'not_recommended']),
   "notes": zod.string().nullable()
 })),
+  "warrantyMonths": zod.number().nullable(),
+  "warrantyNote": zod.string().nullable(),
+  "powerBank": zod.union([zod.object({
+  "capacityMah": zod.number().nullable(),
+  "energyWh": zod.number().nullable(),
+  "inputSummary": zod.string().nullable(),
+  "outputSummary": zod.string().nullable(),
+  "maxOutputW": zod.number().nullable(),
+  "rechargeTimeHours": zod.number().nullable(),
+  "wirelessCharging": zod.boolean().nullable(),
+  "display": zod.boolean().nullable(),
+  "passThroughCharging": zod.boolean().nullable()
+}),zod.null()]),
+  "cable": zod.union([zod.object({
+  "connectorA": zod.string().nullable(),
+  "connectorB": zod.string().nullable(),
+  "lengthM": zod.number().nullable(),
+  "maxPowerW": zod.number().nullable(),
+  "dataSpeedGbps": zod.number().nullable(),
+  "usbVersion": zod.string().nullable(),
+  "eMarker": zod.boolean().nullable(),
+  "videoSupport": zod.boolean().nullable(),
+  "material": zod.string().nullable()
+}),zod.null()]),
+  "carCharger": zod.union([zod.object({
+  "inputVoltageV": zod.string().nullable(),
+  "maxOutputW": zod.number().nullable(),
+  "powerDistribution": zod.string().nullable(),
+  "carCompatibility": zod.string().nullable()
+}),zod.null()]),
   "maxPowerW": zod.number().nullable(),
   "capabilityLabel": zod.string().nullable()
 })
 }),
   "comparison": zod.object({
+  "categorySlug": zod.string().nullable(),
+  "fieldDefinitions": zod.array(zod.object({
+  "slug": zod.string(),
+  "label": zod.string(),
+  "group": zod.string(),
+  "type": zod.enum(['text', 'number', 'boolean', 'select', 'multiselect']),
+  "unit": zod.string().nullable()
+})),
   "attributes": zod.array(zod.object({
   "slug": zod.string(),
   "label": zod.string(),
@@ -324,6 +408,36 @@ export const CompareStoreProductsResponse = zod.object({
   "type": zod.enum(['supported', 'partially_supported', 'not_recommended']),
   "notes": zod.string().nullable()
 })),
+  "warrantyMonths": zod.number().nullable(),
+  "warrantyNote": zod.string().nullable(),
+  "powerBank": zod.union([zod.object({
+  "capacityMah": zod.number().nullable(),
+  "energyWh": zod.number().nullable(),
+  "inputSummary": zod.string().nullable(),
+  "outputSummary": zod.string().nullable(),
+  "maxOutputW": zod.number().nullable(),
+  "rechargeTimeHours": zod.number().nullable(),
+  "wirelessCharging": zod.boolean().nullable(),
+  "display": zod.boolean().nullable(),
+  "passThroughCharging": zod.boolean().nullable()
+}),zod.null()]),
+  "cable": zod.union([zod.object({
+  "connectorA": zod.string().nullable(),
+  "connectorB": zod.string().nullable(),
+  "lengthM": zod.number().nullable(),
+  "maxPowerW": zod.number().nullable(),
+  "dataSpeedGbps": zod.number().nullable(),
+  "usbVersion": zod.string().nullable(),
+  "eMarker": zod.boolean().nullable(),
+  "videoSupport": zod.boolean().nullable(),
+  "material": zod.string().nullable()
+}),zod.null()]),
+  "carCharger": zod.union([zod.object({
+  "inputVoltageV": zod.string().nullable(),
+  "maxOutputW": zod.number().nullable(),
+  "powerDistribution": zod.string().nullable(),
+  "carCompatibility": zod.string().nullable()
+}),zod.null()]),
   "maxPowerW": zod.number().nullable(),
   "capabilityLabel": zod.string().nullable()
 })
