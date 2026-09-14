@@ -832,6 +832,97 @@ async function seedUgreenSpecifications() {
 
 const catalogSourcePendingNote = "مستورد من بيانات الكتالوج الحالية؛ يحتاج رابطًا رسميًا للتحقق.";
 
+const catalogOfficialSourceUrls: Record<string, string> = {
+  "CABL-UGR-HUB7": "https://www.ugreen.com/en-ae/products/ae-15214",
+  "CABL-UGR-PB20K30": "https://www.ugreen.com/en-au/products/au-55989",
+  "CABL-UGR-PB10K": "https://www.ugreen.com/en-ae/products/ae-35603",
+  "CABL-ANK-HUB7": "https://www.anker.com/products/a83d2-usb-c-hub-7-in-1",
+  "CABL-ANK-PB20K30": "https://service.anker.com/product-description/a08J1000000YcHbIAK",
+  "CABL-ANK-PB10K": "https://www.anker.com/products/a1637",
+  "CABL-ANK-C2L": "https://www.anker.com/products/a81a7",
+  "CABL-ANK-C2C100": "https://www.anker.com/products/a8758",
+  "CABL-ANK-C2C60": "https://www.anker.com/products/a8753",
+  "CABL-ANK-A2C": "https://www.anker.com/products/a82g2",
+  "CABL-ANK-65W": "https://www.anker.com/eu-en/products/a2663",
+  "CABL-ANK-45W": "https://www.anker.com/products/a2692-45w-usb-c-fast-charger",
+  "CABL-ANK-30W": "https://www.anker.com/products/a2147",
+  "CABL-ANK-20W": "https://www.anker.com/products/a2637-nano-20w-charger",
+  "CABL-BAS-C2C100": "https://www.baseus.com/products/usb-c-to-usb-c-cable-100w",
+  "CABL-BAS-C2C60": "https://www.baseus.com/products/free2pull-mini-retractable-usb-c-cable-60w",
+  "CABL-BAS-PB20K30": "https://www.baseus.com/products/adaman2-power-bank-30w-20000mah-vooc",
+  "CABL-BAS-100W": "https://www.baseus.com/products/gan2-usb-c-fast-charger-100w",
+  "CABL-VEN-TRAVEL65": "https://ventiontech.com/products/3-port-usb-c-c-a-gan-universal-travel-adapter-65w-65w-30w-black",
+  "CABL-VEN-C100": "https://ventiontech.com/products/usb-type-c-to-usb-c-cable-usb-c-pd-100w-60w-fast-charger-for-samsung-s20-macbook-ipad-quick-charge-4-0-usb-c-charge-cord",
+  "CABL-VEN-GAN100": "https://ventiontech.com/products/3-port-usb-c-c-a-gan-charger-100w-100w-30w-eu-plug",
+  "CABL-VEN-GAN70": "https://ventiontech.com/products/3-port-usb-c-c-a-gan-charger-70w-70w-22-5w-eu-plug-gray-1",
+  "CABL-VEN-GAN65": "https://ventiontech.com/products/3-port-usb-c-c-a-gan-charger-65w-65w-60w-eu-plug-black",
+  "CABL-VEN-GAN30K": "https://ventiontech.com/products/2-port-usb-c-a-gan-charger-30w-30w-with-usb-c-to-usb-c-cable",
+  "CABL-VEN-PB10KL": "https://ventiontech.com/products/vention-10000mah-power-bank-usb-c-usb-a-with-built-in-cable-22-5w-led-display-type",
+  "CABL-VEN-PB10K": "https://ventiontech.com/products/10000mah-power-bank-micro-usb-usb-c-usb-a-usb-a-22-5w",
+  "CABL-VEN-PB20K": "https://ventiontech.com/products/20000mah-power-bank",
+};
+
+async function seedCatalogSourceUrls() {
+  const client = await pool.connect();
+  let applied = 0;
+  try {
+    await client.query("BEGIN");
+    for (const [sku, sourceUrl] of Object.entries(catalogOfficialSourceUrls)) {
+      const product = await client.query<{ id: string }>(
+        `SELECT "id" FROM "products" WHERE "SKU" = $1 LIMIT 1`,
+        [sku],
+      );
+      const productId = product.rows[0]?.id;
+      if (!productId) continue;
+      for (const table of [
+        "product_attributes",
+        "cable_specifications",
+        "power_bank_specifications",
+        "car_charger_specifications",
+      ]) {
+        const result = await client.query(
+          `UPDATE "${table}"
+           SET "source_url" = COALESCE("source_url", $2),
+               "source_note" = CASE WHEN "source_url" IS NULL THEN 'تم التحقق من صفحة الشركة الرسمية.' ELSE "source_note" END,
+               "updated_at" = NOW()
+           WHERE "product_id" = $1 AND "source_url" IS NULL`,
+          [productId, sourceUrl],
+        );
+        applied += result.rowCount ?? 0;
+      }
+    }
+    const unresolved = await client.query<{ sku: string; brand: string; name: string }>(
+      `SELECT p."SKU" AS "sku", p."brand", p."product_name" AS "name"
+       FROM "products" p
+       WHERE p."published" = TRUE
+         AND NOT EXISTS (
+           SELECT 1 FROM "product_attributes" pa
+           WHERE pa."product_id" = p."id" AND pa."source_url" IS NOT NULL
+         )
+         AND NOT EXISTS (
+           SELECT 1 FROM "cable_specifications" cs
+           WHERE cs."product_id" = p."id" AND cs."source_url" IS NOT NULL
+         )
+         AND NOT EXISTS (
+           SELECT 1 FROM "power_bank_specifications" pb
+           WHERE pb."product_id" = p."id" AND pb."source_url" IS NOT NULL
+         )
+         AND NOT EXISTS (
+           SELECT 1 FROM "car_charger_specifications" cc
+           WHERE cc."product_id" = p."id" AND cc."source_url" IS NOT NULL
+         )
+       ORDER BY p."brand", p."SKU"`,
+    );
+    await client.query("COMMIT");
+    return { applied, unresolved: unresolved.rows };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 function firstNumber(text: string, pattern: RegExp) {
   const match = text.match(pattern);
   if (!match?.[1]) return null;
@@ -1191,11 +1282,13 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
     const catalogDerived = await seedCatalogDerivedSpecifications();
     counts.catalog_derived_attributes = catalogDerived.importedAttributes;
     counts.catalog_derived_modules = catalogDerived.importedModules;
-    counts.catalog_products_missing_source = catalogDerived.missingSourceProducts.length;
-    if (catalogDerived.missingSourceProducts.length > 0) {
+    const catalogSources = await seedCatalogSourceUrls();
+    counts.catalog_source_urls = catalogSources.applied;
+    counts.catalog_products_missing_source = catalogSources.unresolved.length;
+    if (catalogSources.unresolved.length > 0) {
       req.log.warn(
-        { products: catalogDerived.missingSourceProducts },
-        "Some catalog specifications were imported from existing product fields without official source URLs",
+        { products: catalogSources.unresolved },
+        "Some catalog products still have no verified official source URL",
       );
     }
     const inserted = Object.values(counts).reduce((sum, count) => sum + count, 0);
