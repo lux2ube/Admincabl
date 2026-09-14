@@ -803,16 +803,6 @@ export function ProductEditorial({ product }: { product: StoreProduct }) {
           <div><h3>الشحن والدفع</h3><p>تظهر خيارات الشحن والدفع النشطة في checkout قبل إرسال الطلب.</p></div>
         </div>
       </EditorialSection>
-      <EditorialSection title="المواصفات والتوافق">
-        <div className="comparison-table-wrap"><table className="comparison-table"><tbody>
-          <tr><th>العلامة</th><td>{product.brand}</td></tr>
-          <tr><th>الموديل / SKU</th><td dir="ltr">{product.sku}</td></tr>
-          <tr><th>القسم</th><td>{product.category?.name || 'إكسسوارات'}</td></tr>
-          <tr><th>الحالة</th><td>{product.quantity > 0 ? 'متوفر حسب الكمية المنشورة' : 'غير متوفر حالياً'}</td></tr>
-          <tr><th>البيانات المختبرة</th><td>لم تُعرض نتيجة اختبار مخبري مستقلة في هذه الصفحة.</td></tr>
-        </tbody></table></div>
-        <p className="content-disclaimer">المواصفات المعلنة لا تضمن الأداء نفسه مع كل جهاز. التوافق يحتاج إلى الجهاز والكابل والبروتوكول والحرارة.</p>
-      </EditorialSection>
       <EditorialSection title="نقاط القوة والحدود">
         <div className="info-card-grid">
           <div className="info-card"><Check className="info-card-icon" /><h3>نقطة قوة</h3><p>العلامة والموديل والتوافر والسعر معروضة قبل الإضافة إلى السلة.</p></div>
