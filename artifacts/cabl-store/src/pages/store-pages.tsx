@@ -1525,7 +1525,7 @@ const specificationSeoLabels: Record<string, string> = {
   connector_a: 'الموصل الأول (Connector A)',
   connector_b: 'الموصل الثاني (Connector B)',
   length_m: 'طول الكابل (Cable Length)',
-  data_speed_gbps: 'سرعة نقل البيانات (Data Transfer Speed)',
+  data_speed_gbps: 'نقل البيانات وسرعتها (Data Transfer Speed)',
   usb_version: 'إصدار USB (USB Version)',
   e_marker: 'شريحة E-marker (E-marker Chip)',
   video_support: 'دعم الفيديو (Video Support)',
@@ -1576,8 +1576,11 @@ function formatSpecificationValue(specs: StoreProductSpecifications, slug: strin
   if (slug === 'power_distribution') value = specs.carCharger?.powerDistribution;
   if (slug === 'car_compatibility') value = specs.carCharger?.carCompatibility;
   if (value === null || value === undefined || value === '') return null;
-  const rendered = typeof value === 'boolean' ? (value ? 'نعم' : 'لا') : String(value);
-  return `${rendered}${unit && slug !== 'dimensions' ? ` ${unit}` : ''}`;
+   if (slug === 'data_speed_gbps' && typeof value === 'number') {
+     return `نعم — حتى ${value} Gbps`;
+   }
+   const rendered = typeof value === 'boolean' ? (value ? 'نعم' : 'لا') : String(value);
+   return `${rendered}${unit && slug !== 'dimensions' ? ` ${unit}` : ''}`;
 }
 
 function ProductSpecificationsPanel({ product }: { product: StoreProduct }) {
@@ -1600,6 +1603,7 @@ function ProductSpecificationsPanel({ product }: { product: StoreProduct }) {
         const value = formatSpecificationValue(specs, definition.slug, definition.unit);
          return value ? <div className="spec-card" key={definition.slug}><span>{specificationLabel(definition.slug, definition.label)}</span><strong>{value}</strong></div> : null;
       })}
+       {specs.cable && specs.cable.dataSpeedGbps === null && <div className="spec-card"><span>نقل البيانات (Data Transfer)</span><strong>غير منشور</strong><small>لا نثبت دعم نقل البيانات من نوع الموصل وحده من دون قيمة موثقة.</small></div>}
        {specs.warrantyMonths !== null && <div className="spec-card"><span>{specificationLabel('warranty_months', 'الضمان')}</span><strong>{specs.warrantyMonths} شهر</strong>{specs.warrantyNote && <small>{specs.warrantyNote}</small>}</div>}
        {specs.dimensions && (specs.dimensions.lengthMm !== null || specs.dimensions.widthMm !== null || specs.dimensions.heightMm !== null || specs.dimensions.weightG !== null) && <div className="spec-card"><span>{specificationLabel('dimensions', 'الأبعاد')}</span><strong>{[specs.dimensions.lengthMm, specs.dimensions.widthMm, specs.dimensions.heightMm].every((value) => value !== null) ? `${specs.dimensions.lengthMm} × ${specs.dimensions.widthMm} × ${specs.dimensions.heightMm} mm` : [specs.dimensions.lengthMm, specs.dimensions.widthMm, specs.dimensions.heightMm].some((value) => value !== null) ? `${specs.dimensions.lengthMm ?? '—'} × ${specs.dimensions.widthMm ?? '—'} × ${specs.dimensions.heightMm ?? '—'} mm` : null}</strong>{specs.dimensions.weightG !== null && <small>{specs.dimensions.weightG} g</small>}</div>}
        {specs.ports.length > 0 && <div className="spec-card spec-card-wide"><span>المنافذ (Ports)</span><div className="spec-list">{specs.ports.map((port) => <span key={port.id}><b>{port.name}</b>{port.type}{port.maxPowerW !== null ? ` · ${port.maxPowerW}W` : ''}</span>)}</div></div>}
