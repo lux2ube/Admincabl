@@ -105,7 +105,58 @@ export const GetStoreCatalogResponse = zod.object({
   "charge": zod.number(),
   "free": zod.boolean(),
   "estimatedDays": zod.number().nullable()
+})),
+  "specifications": zod.object({
+  "attributes": zod.array(zod.object({
+  "slug": zod.string(),
+  "label": zod.string(),
+  "type": zod.enum(['text', 'number', 'boolean', 'select', 'multiselect']),
+  "value": zod.union([zod.string(),zod.number(),zod.boolean()]).nullable(),
+  "values": zod.array(zod.string()),
+  "unit": zod.string().nullable(),
+  "sourceUrl": zod.string().nullable()
+})),
+  "ports": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "type": zod.string(),
+  "maxPowerW": zod.number().nullable(),
+  "maxVoltageV": zod.number().nullable(),
+  "maxCurrentA": zod.number().nullable()
+})),
+  "protocols": zod.array(zod.object({
+  "name": zod.string(),
+  "slug": zod.string(),
+  "portId": zod.string().nullable()
+})),
+  "powerProfiles": zod.array(zod.object({
+  "name": zod.string(),
+  "totalPowerW": zod.number().nullable(),
+  "description": zod.string().nullable(),
+  "outputs": zod.array(zod.object({
+  "portId": zod.string(),
+  "powerW": zod.number()
 }))
+})),
+  "dimensions": zod.union([zod.object({
+  "lengthMm": zod.number().nullable(),
+  "widthMm": zod.number().nullable(),
+  "heightMm": zod.number().nullable(),
+  "weightG": zod.number().nullable()
+}),zod.null()]),
+  "protections": zod.array(zod.object({
+  "name": zod.string(),
+  "slug": zod.string()
+})),
+  "compatibility": zod.array(zod.object({
+  "name": zod.string(),
+  "slug": zod.string(),
+  "type": zod.enum(['supported', 'partially_supported', 'not_recommended']),
+  "notes": zod.string().nullable()
+})),
+  "maxPowerW": zod.number().nullable(),
+  "capabilityLabel": zod.string().nullable()
+})
 })),
   "shippingOptions": zod.array(zod.object({
   "id": zod.number(),
@@ -134,6 +185,176 @@ export const GetStoreCatalogResponse = zod.object({
 
 
 /**
+ * @summary Compare published product specifications
+ */
+export const compareStoreProductsQueryProductIdsMin = 73;
+export const compareStoreProductsQueryProductIdsMax = 160;
+
+
+
+export const CompareStoreProductsQueryParams = zod.object({
+  "productIds": zod.coerce.string().min(compareStoreProductsQueryProductIdsMin).max(compareStoreProductsQueryProductIdsMax).describe('Comma-separated product UUIDs, from two to four products')
+})
+
+export const CompareStoreProductsResponse = zod.object({
+  "products": zod.array(zod.object({
+  "product": zod.object({
+  "id": zod.string(),
+  "slug": zod.string(),
+  "brand": zod.string(),
+  "brandSlug": zod.string().nullable(),
+  "productName": zod.string(),
+  "sku": zod.string(),
+  "regularPrice": zod.number(),
+  "discountPrice": zod.number().nullable(),
+  "quantity": zod.number(),
+  "shortDescription": zod.string().nullable(),
+  "productDescription": zod.string().nullable(),
+  "productNote": zod.string().nullable(),
+  "category": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "slug": zod.string()
+}).nullable(),
+  "images": zod.array(zod.string()),
+  "shippingOptions": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "charge": zod.number(),
+  "free": zod.boolean(),
+  "estimatedDays": zod.number().nullable()
+})),
+  "specifications": zod.object({
+  "attributes": zod.array(zod.object({
+  "slug": zod.string(),
+  "label": zod.string(),
+  "type": zod.enum(['text', 'number', 'boolean', 'select', 'multiselect']),
+  "value": zod.union([zod.string(),zod.number(),zod.boolean()]).nullable(),
+  "values": zod.array(zod.string()),
+  "unit": zod.string().nullable(),
+  "sourceUrl": zod.string().nullable()
+})),
+  "ports": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "type": zod.string(),
+  "maxPowerW": zod.number().nullable(),
+  "maxVoltageV": zod.number().nullable(),
+  "maxCurrentA": zod.number().nullable()
+})),
+  "protocols": zod.array(zod.object({
+  "name": zod.string(),
+  "slug": zod.string(),
+  "portId": zod.string().nullable()
+})),
+  "powerProfiles": zod.array(zod.object({
+  "name": zod.string(),
+  "totalPowerW": zod.number().nullable(),
+  "description": zod.string().nullable(),
+  "outputs": zod.array(zod.object({
+  "portId": zod.string(),
+  "powerW": zod.number()
+}))
+})),
+  "dimensions": zod.union([zod.object({
+  "lengthMm": zod.number().nullable(),
+  "widthMm": zod.number().nullable(),
+  "heightMm": zod.number().nullable(),
+  "weightG": zod.number().nullable()
+}),zod.null()]),
+  "protections": zod.array(zod.object({
+  "name": zod.string(),
+  "slug": zod.string()
+})),
+  "compatibility": zod.array(zod.object({
+  "name": zod.string(),
+  "slug": zod.string(),
+  "type": zod.enum(['supported', 'partially_supported', 'not_recommended']),
+  "notes": zod.string().nullable()
+})),
+  "maxPowerW": zod.number().nullable(),
+  "capabilityLabel": zod.string().nullable()
+})
+}),
+  "comparison": zod.object({
+  "attributes": zod.array(zod.object({
+  "slug": zod.string(),
+  "label": zod.string(),
+  "type": zod.enum(['text', 'number', 'boolean', 'select', 'multiselect']),
+  "value": zod.union([zod.string(),zod.number(),zod.boolean()]).nullable(),
+  "values": zod.array(zod.string()),
+  "unit": zod.string().nullable(),
+  "sourceUrl": zod.string().nullable()
+})),
+  "ports": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "type": zod.string(),
+  "maxPowerW": zod.number().nullable(),
+  "maxVoltageV": zod.number().nullable(),
+  "maxCurrentA": zod.number().nullable()
+})),
+  "protocols": zod.array(zod.object({
+  "name": zod.string(),
+  "slug": zod.string(),
+  "portId": zod.string().nullable()
+})),
+  "powerProfiles": zod.array(zod.object({
+  "name": zod.string(),
+  "totalPowerW": zod.number().nullable(),
+  "description": zod.string().nullable(),
+  "outputs": zod.array(zod.object({
+  "portId": zod.string(),
+  "powerW": zod.number()
+}))
+})),
+  "dimensions": zod.union([zod.object({
+  "lengthMm": zod.number().nullable(),
+  "widthMm": zod.number().nullable(),
+  "heightMm": zod.number().nullable(),
+  "weightG": zod.number().nullable()
+}),zod.null()]),
+  "protections": zod.array(zod.object({
+  "name": zod.string(),
+  "slug": zod.string()
+})),
+  "compatibility": zod.array(zod.object({
+  "name": zod.string(),
+  "slug": zod.string(),
+  "type": zod.enum(['supported', 'partially_supported', 'not_recommended']),
+  "notes": zod.string().nullable()
+})),
+  "maxPowerW": zod.number().nullable(),
+  "capabilityLabel": zod.string().nullable()
+})
+}))
+})
+
+
+/**
+ * @summary Get specification filter values from the published catalog
+ */
+export const getStoreSpecificationFiltersQueryCategoryMax = 180;
+
+
+export const getStoreSpecificationFiltersQueryCategoryRegExp = new RegExp('^[a-z0-9-]+$');
+
+
+export const GetStoreSpecificationFiltersQueryParams = zod.object({
+  "category": zod.coerce.string().max(getStoreSpecificationFiltersQueryCategoryMax).regex(getStoreSpecificationFiltersQueryCategoryRegExp).optional()
+})
+
+export const GetStoreSpecificationFiltersResponse = zod.object({
+  "filters": zod.array(zod.object({
+  "slug": zod.string(),
+  "label": zod.string(),
+  "unit": zod.string().nullable(),
+  "values": zod.array(zod.string())
+}))
+})
+
+
+/**
  * @summary Get generated SEO metadata for a public CABL route
  */
 export const getStoreSeoQuerySlugMax = 180;
@@ -143,7 +364,7 @@ export const getStoreSeoQuerySlugRegExp = new RegExp('^[a-z0-9-]+$');
 
 
 export const GetStoreSeoQueryParams = zod.object({
-  "type": zod.enum(['home', 'product', 'category', 'brand', 'guide']),
+  "type": zod.enum(['home', 'product', 'category', 'brand', 'guide']).optional(),
   "slug": zod.coerce.string().max(getStoreSeoQuerySlugMax).regex(getStoreSeoQuerySlugRegExp).optional()
 })
 
@@ -234,7 +455,7 @@ export const CreateStoreOrderBody = zod.object({
   "customer": zod.object({
   "firstName": zod.string().min(createStoreOrderBodyCustomerFirstNameMin).max(createStoreOrderBodyCustomerFirstNameMax),
   "lastName": zod.string().min(createStoreOrderBodyCustomerLastNameMin).max(createStoreOrderBodyCustomerLastNameMax),
-  "email": zod.string().max(createStoreOrderBodyCustomerEmailMax).regex(createStoreOrderBodyCustomerEmailRegExp).nullable().optional(),
+  "email": zod.string().max(createStoreOrderBodyCustomerEmailMax).regex(createStoreOrderBodyCustomerEmailRegExp).nullish(),
   "phoneNumber": zod.string().min(createStoreOrderBodyCustomerPhoneNumberMin).max(createStoreOrderBodyCustomerPhoneNumberMax)
 }),
   "address": zod.object({

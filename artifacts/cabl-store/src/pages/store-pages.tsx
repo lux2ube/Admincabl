@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
-import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, CreditCard, FlaskConical, Headphones, MapPin as MapPinIcon, MessageCircle as MessageCircleIcon, Package, RefreshCcw, Search as SearchIcon, ShieldCheck, SlidersHorizontal, Smartphone, Tag, Truck, X, Zap } from 'lucide-react';
-import { getGetStoreSeoQueryKey, getGetStoreOrderQueryKey, getListStoreOrdersQueryKey, useCreateStoreOrder, useGetStoreOrder, useGetStoreSeo, useListStoreOrders } from '@workspace/api-client-react';
+import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, CreditCard, FlaskConical, Headphones, MapPin as MapPinIcon, MessageCircle as MessageCircleIcon, Package, RefreshCcw, Search as SearchIcon, ShieldCheck, SlidersHorizontal, Smartphone, Tag, Truck, X, Zap, Scale } from 'lucide-react';
+import { getCompareStoreProductsQueryKey, getGetStoreSeoQueryKey, getGetStoreOrderQueryKey, getListStoreOrdersQueryKey, useCompareStoreProducts, useCreateStoreOrder, useGetStoreOrder, useGetStoreSeo, useListStoreOrders } from '@workspace/api-client-react';
 import type { StoreOrderInput, StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
 import { brandCategoryPath, brandPath, productPath } from '@/lib/store-routes';
@@ -1274,21 +1274,27 @@ export function BrandCategoryPage() {
   return <BrandCategoryPageView brandSlug={brandSlug} categorySlug={categorySlug} />;
 }
 
-function SearchFilters({ brands, categories, brand, category, onBrandChange, onCategoryChange, onClear }: {
+function SearchFilters({ brands, categories, powerOptions, protocolOptions, brand, category, power, protocol, onBrandChange, onCategoryChange, onPowerChange, onProtocolChange, onClear }: {
   brands: string[];
   categories: Array<{ slug: string; name: string }>;
+  powerOptions: number[];
+  protocolOptions: string[];
   brand: string;
   category: string;
+  power: string;
+  protocol: string;
   onBrandChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
+  onPowerChange: (value: string) => void;
+  onProtocolChange: (value: string) => void;
   onClear: () => void;
 }) {
   return <div className="search-filter-content">
     <div className="search-filter-heading">
       <div><span className="eyebrow">تصفية ذكية</span><h3>فلترة الكتالوج</h3></div>
-      {(brand || category) && <button type="button" className="filter-clear-button" onClick={onClear} data-testid="button-clear-search-filters">مسح الكل</button>}
+      {(brand || category || power || protocol) && <button type="button" className="filter-clear-button" onClick={onClear} data-testid="button-clear-search-filters">مسح الكل</button>}
     </div>
-    {brand || category ? <div className="active-filter-summary"><span>اختياراتك</span><div>{category && <button type="button" onClick={() => onCategoryChange('')} data-testid="button-remove-category-filter">{categories.find((item) => item.slug === category)?.name}<X size={12} /></button>}{brand && <button type="button" onClick={() => onBrandChange('')} data-testid="button-remove-brand-filter">{brand}<X size={12} /></button>}</div></div> : <p className="filter-help">ابدأ بالقسم الأقرب لاحتياجك، ثم اختر العلامة التي تفضلها.</p>}
+    {brand || category || power || protocol ? <div className="active-filter-summary"><span>اختياراتك</span><div>{category && <button type="button" onClick={() => onCategoryChange('')} data-testid="button-remove-category-filter">{categories.find((item) => item.slug === category)?.name}<X size={12} /></button>}{brand && <button type="button" onClick={() => onBrandChange('')} data-testid="button-remove-brand-filter">{brand}<X size={12} /></button>}{power && <button type="button" onClick={() => onPowerChange('')} data-testid="button-remove-power-filter">+{power}W<X size={12} /></button>}{protocol && <button type="button" onClick={() => onProtocolChange('')} data-testid="button-remove-protocol-filter">{protocol}<X size={12} /></button>}</div></div> : <p className="filter-help">ابدأ بالقسم الأقرب لاحتياجك، ثم اختر العلامة التي تفضلها.</p>}
     <div className="filter-group filter-group-primary">
       <div className="filter-group-heading"><h4>القسم</h4><span>{categories.length}</span></div>
       <div className="filter-options">{categories.map((item) => <label className={`filter-check ${category === item.slug ? 'is-selected' : ''}`} key={item.slug}><input type="radio" name="search-category" checked={category === item.slug} onChange={() => onCategoryChange(category === item.slug ? '' : item.slug)} data-testid={`input-filter-category-${item.slug}`} /><span className="filter-check-mark" />{item.name}</label>)}</div>
@@ -1297,6 +1303,14 @@ function SearchFilters({ brands, categories, brand, category, onBrandChange, onC
       <div className="filter-group-heading"><h4>العلامة التجارية</h4><span>{brands.length}</span></div>
       <div className="filter-options">{brands.map((item) => <label className={`filter-check ${brand === item ? 'is-selected' : ''}`} key={item}><input type="radio" name="search-brand" checked={brand === item} onChange={() => onBrandChange(brand === item ? '' : item)} data-testid={`input-filter-brand-${item}`} /><span className="filter-check-mark" />{item}</label>)}</div>
     </div>
+    {powerOptions.length > 0 && <div className="filter-group">
+      <div className="filter-group-heading"><h4>القدرة القصوى</h4><span>W</span></div>
+      <div className="filter-options">{powerOptions.map((item) => <label className={`filter-check ${power === String(item) ? 'is-selected' : ''}`} key={item}><input type="radio" name="search-power" checked={power === String(item)} onChange={() => onPowerChange(power === String(item) ? '' : String(item))} /><span className="filter-check-mark" />{item}W أو أكثر</label>)}</div>
+    </div>}
+    {protocolOptions.length > 0 && <div className="filter-group">
+      <div className="filter-group-heading"><h4>بروتوكول الشحن</h4><span>{protocolOptions.length}</span></div>
+      <div className="filter-options">{protocolOptions.map((item) => <label className={`filter-check ${protocol === item ? 'is-selected' : ''}`} key={item}><input type="radio" name="search-protocol" checked={protocol === item} onChange={() => onProtocolChange(protocol === item ? '' : item)} /><span className="filter-check-mark" />{item}</label>)}</div>
+    </div>}
   </div>;
 }
 
@@ -1309,19 +1323,25 @@ export function SearchPage() {
   const [term, setTerm] = useState(query.get('q') || '');
   const [brand, setBrand] = useState(query.get('brand') || '');
   const [category, setCategory] = useState(query.get('category') || '');
+  const [power, setPower] = useState(query.get('power') || '');
+  const [protocol, setProtocol] = useState(query.get('protocol') || '');
+  const [compareIds, setCompareIds] = useState<string[]>([]);
   const [sort, setSort] = useState('featured');
   const products = catalog?.products || [];
   const brands = Array.from(new Set(products.map((product) => product.brand)));
   const categories = Array.from(new Map(products.filter((item) => item.category).map((item) => [item.category!.slug, item.category!])).values());
-  const result = useMemo(() => [...products.filter((product) => (!term || `${product.productName} ${product.brand} ${product.shortDescription || ''}`.toLowerCase().includes(term.toLowerCase())) && (!brand || product.brand === brand) && (!category || product.category?.slug === category))].sort((a, b) => sort === 'price-low' ? (a.discountPrice ?? a.regularPrice) - (b.discountPrice ?? b.regularPrice) : sort === 'price-high' ? (b.discountPrice ?? b.regularPrice) - (a.discountPrice ?? a.regularPrice) : 0), [products, term, brand, category, sort]);
+  const powerOptions = Array.from(new Set(products.map((product) => product.specifications.maxPowerW).filter((value): value is number => typeof value === 'number' && value > 0))).sort((a, b) => a - b);
+  const protocolOptions = Array.from(new Set(products.flatMap((product) => product.specifications.protocols.map((item) => item.name)))).sort((a, b) => a.localeCompare(b, 'ar'));
+  const result = useMemo(() => [...products.filter((product) => (!term || `${product.productName} ${product.brand} ${product.shortDescription || ''}`.toLowerCase().includes(term.toLowerCase())) && (!brand || product.brand === brand) && (!category || product.category?.slug === category) && (!power || (product.specifications.maxPowerW ?? 0) >= Number(power)) && (!protocol || product.specifications.protocols.some((item) => item.name === protocol)))].sort((a, b) => sort === 'price-low' ? (a.discountPrice ?? a.regularPrice) - (b.discountPrice ?? b.regularPrice) : sort === 'price-high' ? (b.discountPrice ?? b.regularPrice) - (a.discountPrice ?? a.regularPrice) : 0), [products, term, brand, category, power, protocol, sort]);
   const favoriteProducts = useMemo(() => products.filter((product) => favorites.includes(product.id)), [products, favorites]);
   const brandDirectory = useMemo(() => Array.from(new Map(products.map((product) => [product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'), product.brand])).entries()).sort((a, b) => a[1].localeCompare(b[1], 'ar')), [products]);
-  const activeFilterCount = Number(Boolean(brand)) + Number(Boolean(category));
-  const clearFilters = () => { setBrand(''); setCategory(''); };
+  const activeFilterCount = Number(Boolean(brand)) + Number(Boolean(category)) + Number(Boolean(power)) + Number(Boolean(protocol));
+  const clearFilters = () => { setBrand(''); setCategory(''); setPower(''); setProtocol(''); };
+  const toggleCompare = (productId: string) => setCompareIds((current) => current.includes(productId) ? current.filter((id) => id !== productId) : current.length >= 4 ? current : [...current, productId]);
   const submit = (event: FormEvent) => { event.preventDefault(); setLocation(`/search${term ? `?q=${encodeURIComponent(term)}` : ''}`); };
    if (view === 'brands') return <><NoIndex/><div className="container"><Breadcrumbs items={[{ label: 'العلامات التجارية' }]}/><PageHeading eyebrow="دليل العلامات" title="اختر علامتك المفضلة" description="تصفح المنتجات المنشورة حسب العلامة التجارية."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <div className="brand-directory">{brandDirectory.map(([slug, name]) => <Link href={`/brand/${slug}`} className="brand-directory-card" key={slug} data-testid={`link-brand-directory-${slug}`}><span className="brand-directory-mark">{name.slice(0, 1)}</span><span><strong>{name}</strong><small>{products.filter((product) => (product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-')) === slug).length} منتجات</small></span><ArrowLeft size={17}/></Link>)}</div>}</div></>;
    if (view === 'favorites') return <><NoIndex/><div className="container"><Breadcrumbs items={[{ label: 'المفضلة' }]}/><PageHeading eyebrow="اختياراتك" title="منتجاتك المفضلة" description="المنتجات التي حفظتها على هذا الجهاز تظهر هنا."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <ProductGrid products={favoriteProducts} empty="لم تحفظ أي منتج بعد."/>}</div></>;
-    return <><NoIndex/><div className="container search-page"><Breadcrumbs items={[{ label: 'البحث' }]}/><div className="search-hero"><div className="search-hero-copy"><span className="eyebrow">اكتشف بهدوء</span><h1>ابحث عن قطعتك القادمة</h1><p>النتائج تتحدث من كتالوج CABL مباشرة.</p></div><form className="big-search" onSubmit={submit}><input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="مثلاً: شاحن سريع" aria-label="بحث المنتجات" data-testid="input-search"/><button aria-label="تنفيذ البحث" data-testid="button-submit-search"><SearchIcon size={18}/><span>بحث</span></button></form></div><div className="search-mobile-toolbar"><button type="button" className="search-filter-toggle" onClick={() => setFiltersOpen(true)} data-testid="button-open-search-filters"><SlidersHorizontal size={16}/><span>الفلاتر</span>{activeFilterCount > 0 && <b>{activeFilterCount}</b>}</button><span>{result.length} منتج</span></div><div className="search-layout"><aside className="filter-panel"><SearchFilters brands={brands} categories={categories} brand={brand} category={category} onBrandChange={setBrand} onCategoryChange={setCategory} onClear={clearFilters}/></aside><div className="search-results">{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <><CatalogToolbar products={result} sort={sort} setSort={setSort}/><ProductGrid products={result} empty="لم نجد نتائج بهذا الوصف."/></>}</div></div>{filtersOpen && <div className="search-filter-modal" role="dialog" aria-modal="true" aria-label="فلاتر البحث"><button className="search-filter-backdrop" type="button" aria-label="إغلاق الفلاتر" onClick={() => setFiltersOpen(false)} /><aside className="search-filter-drawer"><div className="search-filter-drawer-head"><div><span className="eyebrow">تحكم بالنتائج</span><h2>فلترة المنتجات</h2></div><button type="button" onClick={() => setFiltersOpen(false)} aria-label="إغلاق الفلاتر"><X size={19}/></button></div><SearchFilters brands={brands} categories={categories} brand={brand} category={category} onBrandChange={setBrand} onCategoryChange={setCategory} onClear={clearFilters}/><button type="button" className="button button-primary search-filter-apply" onClick={() => setFiltersOpen(false)}>عرض النتائج <ArrowLeft size={15}/></button></aside></div>}</div></>;
+     return <><NoIndex/><div className="container search-page"><Breadcrumbs items={[{ label: 'البحث' }]}/><div className="search-hero"><div className="search-hero-copy"><span className="eyebrow">اكتشف بهدوء</span><h1>ابحث عن قطعتك القادمة</h1><p>النتائج تتحدث من كتالوج CABL مباشرة.</p></div><form className="big-search" onSubmit={submit}><input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="مثلاً: شاحن سريع" aria-label="بحث المنتجات" data-testid="input-search"/><button aria-label="تنفيذ البحث" data-testid="button-submit-search"><SearchIcon size={18}/><span>بحث</span></button></form></div><div className="search-mobile-toolbar"><button type="button" className="search-filter-toggle" onClick={() => setFiltersOpen(true)} data-testid="button-open-search-filters"><SlidersHorizontal size={16}/><span>الفلاتر</span>{activeFilterCount > 0 && <b>{activeFilterCount}</b>}</button><span>{result.length} منتج</span></div><div className="search-layout"><aside className="filter-panel"><SearchFilters brands={brands} categories={categories} powerOptions={powerOptions} protocolOptions={protocolOptions} brand={brand} category={category} power={power} protocol={protocol} onBrandChange={setBrand} onCategoryChange={setCategory} onPowerChange={setPower} onProtocolChange={setProtocol} onClear={clearFilters}/></aside><div className="search-results">{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <><CatalogToolbar products={result} sort={sort} setSort={setSort}/>{compareIds.length > 0 && <div className="compare-tray"><div><strong>مقارنة المنتجات</strong><span>{compareIds.length} من 4 منتجات محددة</span></div><div className="compare-tray-actions"><button type="button" className="button button-quiet" onClick={() => setCompareIds([])}>مسح</button>{compareIds.length >= 2 && <Link className="button button-primary" href={`/compare?ids=${compareIds.join(',')}`}><Scale size={15}/> افتح المقارنة</Link>}</div></div>}<ProductGrid products={result} compareIds={compareIds} onToggleCompare={toggleCompare} empty="لم نجد نتائج بهذا الوصف."/></>}</div></div>{filtersOpen && <div className="search-filter-modal" role="dialog" aria-modal="true" aria-label="فلاتر البحث"><button className="search-filter-backdrop" type="button" aria-label="إغلاق الفلاتر" onClick={() => setFiltersOpen(false)} /><aside className="search-filter-drawer"><div className="search-filter-drawer-head"><div><span className="eyebrow">تحكم بالنتائج</span><h2>فلترة المنتجات</h2></div><button type="button" onClick={() => setFiltersOpen(false)} aria-label="إغلاق الفلاتر"><X size={19}/></button></div><SearchFilters brands={brands} categories={categories} powerOptions={powerOptions} protocolOptions={protocolOptions} brand={brand} category={category} power={power} protocol={protocol} onBrandChange={setBrand} onCategoryChange={setCategory} onPowerChange={setPower} onProtocolChange={setProtocol} onClear={clearFilters}/><button type="button" className="button button-primary search-filter-apply" onClick={() => setFiltersOpen(false)}>عرض النتائج <ArrowLeft size={15}/></button></aside></div>}</div></>;
 }
 
 function ProductDetailPage({ slug }: { slug: string }) {
@@ -1367,6 +1387,7 @@ function ProductDetailPage({ slug }: { slug: string }) {
             {product.productNote && <div className="detail-note">{product.productNote}</div>}
           </div>
         </div>
+        <ProductSpecificationsPanel product={product} />
         <div className="detail-mobile-purchase">
           <div><strong>{formatPrice(price)}</strong><span>{product.quantity > 0 ? 'متوفر الآن' : 'غير متوفر'}</span></div>
           <button className="button button-primary" onClick={() => addToCart(product.id, quantity)} disabled={product.quantity < 1} data-testid="button-mobile-detail-add-cart">أضف إلى السلة <Package size={17}/></button>
@@ -1375,6 +1396,54 @@ function ProductDetailPage({ slug }: { slug: string }) {
       </div>
     </>
   );
+}
+
+function ProductSpecificationsPanel({ product }: { product: StoreProduct }) {
+  const specs = product.specifications;
+  const hasContent = specs.attributes.length > 0 || specs.ports.length > 0 || specs.protocols.length > 0 || specs.powerProfiles.length > 0 || specs.dimensions || specs.protections.length > 0 || specs.compatibility.length > 0 || specs.maxPowerW !== null;
+  if (!hasContent) return null;
+  const visibleValue = (value: string | number | boolean | null, unit?: string | null) => {
+    if (value === null || value === undefined || value === '') return null;
+    return `${typeof value === 'boolean' ? (value ? 'نعم' : 'لا') : value}${unit ? ` ${unit}` : ''}`;
+  };
+  return <section className="product-specs-panel" aria-labelledby="product-specs-title">
+    <div className="product-specs-heading"><div><span className="eyebrow">بيانات قابلة للمراجعة</span><h2 id="product-specs-title">المواصفات</h2><p>نظهر فقط القيم المنشورة في كتالوج CABL، من دون تخمين أو ملء فراغات.</p></div>{specs.capabilityLabel && <div className="spec-capability"><b>C</b><span>{specs.capabilityLabel}</span></div>}</div>
+    <div className="product-specs-grid">
+      {specs.maxPowerW !== null && <div className="spec-card"><span>القدرة القصوى</span><strong>{specs.maxPowerW} W</strong></div>}
+      {specs.attributes.map((attribute) => {
+        const values = attribute.values.length ? attribute.values.join('، ') : visibleValue(attribute.value, attribute.unit);
+        return values ? <div className="spec-card" key={attribute.slug}><span>{attribute.label}</span><strong>{values}</strong></div> : null;
+      })}
+      {specs.dimensions && (specs.dimensions.lengthMm !== null || specs.dimensions.widthMm !== null || specs.dimensions.heightMm !== null || specs.dimensions.weightG !== null) && <div className="spec-card"><span>الأبعاد</span><strong>{[specs.dimensions.lengthMm, specs.dimensions.widthMm, specs.dimensions.heightMm].every((value) => value !== null) ? `${specs.dimensions.lengthMm} × ${specs.dimensions.widthMm} × ${specs.dimensions.heightMm} mm` : [specs.dimensions.lengthMm, specs.dimensions.widthMm, specs.dimensions.heightMm].some((value) => value !== null) ? `${specs.dimensions.lengthMm ?? '—'} × ${specs.dimensions.widthMm ?? '—'} × ${specs.dimensions.heightMm ?? '—'} mm` : null}</strong>{specs.dimensions.weightG !== null && <small>{specs.dimensions.weightG} g</small>}</div>}
+      {specs.ports.length > 0 && <div className="spec-card spec-card-wide"><span>المنافذ</span><div className="spec-list">{specs.ports.map((port) => <span key={port.id}><b>{port.name}</b>{port.type}{port.maxPowerW !== null ? ` · ${port.maxPowerW}W` : ''}</span>)}</div></div>}
+      {specs.protocols.length > 0 && <div className="spec-card spec-card-wide"><span>البروتوكولات</span><div className="spec-list">{specs.protocols.map((protocol) => <span key={`${protocol.slug}-${protocol.portId ?? 'all'}`}>{protocol.name}</span>)}</div></div>}
+      {specs.powerProfiles.length > 0 && <div className="spec-card spec-card-wide"><span>توزيع الطاقة</span><div className="spec-list">{specs.powerProfiles.map((profile) => <span key={profile.name}><b>{profile.name}</b>{profile.totalPowerW !== null ? ` · ${profile.totalPowerW}W` : ''}</span>)}</div></div>}
+      {specs.protections.length > 0 && <div className="spec-card spec-card-wide"><span>الحماية</span><div className="spec-list">{specs.protections.map((protection) => <span key={protection.slug}>{protection.name}</span>)}</div></div>}
+      {specs.compatibility.length > 0 && <div className="spec-card spec-card-wide"><span>التوافق</span><div className="spec-list">{specs.compatibility.map((item) => <span key={item.slug}><b>{item.name}</b>{item.type === 'supported' ? 'متوافق' : item.type === 'partially_supported' ? 'متوافق جزئياً' : 'غير موصى به'}</span>)}</div></div>}
+    </div>
+  </section>;
+}
+
+export function ComparePage() {
+  const { catalog, formatPrice } = useStore();
+  const query = new URLSearchParams(window.location.search);
+  const ids = [...new Set((query.get('ids') || '').split(',').map((id) => id.trim()).filter(Boolean))].slice(0, 4);
+  const compareParams = { productIds: ids.join(',') };
+  const comparisonQuery = useCompareStoreProducts(compareParams, { query: { enabled: ids.length >= 2, queryKey: getCompareStoreProductsQueryKey(compareParams) } });
+  const localProducts = catalog?.products.filter((product) => ids.includes(product.id)) ?? [];
+  if (ids.length < 2) return <><NoIndex/><div className="container"><Breadcrumbs items={[{ label: 'مقارنة المنتجات' }]}/><div className="state-panel" style={{ margin: '60px 0' }}><h3>اختر منتجين على الأقل للمقارنة</h3><Link href="/search" className="button button-primary">العودة للكتالوج</Link></div></div></>;
+  if (comparisonQuery.isLoading || !catalog) return <div className="container"><Breadcrumbs items={[{ label: 'مقارنة المنتجات' }]}/><LoadingCatalog/></div>;
+  if (comparisonQuery.isError) return <div className="container"><CatalogError retry={() => comparisonQuery.refetch()}/></div>;
+  const items = comparisonQuery.data?.products ?? localProducts.map((product) => ({ product, comparison: product.specifications }));
+  const rows = [
+    { label: 'السعر', value: (item: typeof items[number]) => formatPrice(item.product.discountPrice ?? item.product.regularPrice) },
+    { label: 'القدرة القصوى', value: (item: typeof items[number]) => item.comparison.maxPowerW !== null ? `${item.comparison.maxPowerW} W` : null },
+    { label: 'المنافذ', value: (item: typeof items[number]) => item.comparison.ports.length ? item.comparison.ports.map((port) => `${port.name}${port.maxPowerW ? ` · ${port.maxPowerW}W` : ''}`).join('، ') : null },
+    { label: 'البروتوكولات', value: (item: typeof items[number]) => item.comparison.protocols.length ? item.comparison.protocols.map((protocol) => protocol.name).join('، ') : null },
+    { label: 'الأبعاد', value: (item: typeof items[number]) => item.comparison.dimensions ? `${item.comparison.dimensions.lengthMm ?? '—'} × ${item.comparison.dimensions.widthMm ?? '—'} × ${item.comparison.dimensions.heightMm ?? '—'} mm` : null },
+    { label: 'التوافق', value: (item: typeof items[number]) => item.comparison.compatibility.length ? item.comparison.compatibility.map((entry) => entry.name).join('، ') : null },
+  ];
+  return <><NoIndex/><div className="container compare-page"><Breadcrumbs items={[{ label: 'مقارنة المنتجات' }]}/><PageHeading eyebrow="قرار أوضح" title="قارن المنتجات جنباً إلى جنب" description="القيم الظاهرة هنا مأخوذة من نفس بيانات المواصفات المستخدمة في صفحة المنتج والفلاتر."/><div className="compare-products">{items.map((item) => <article className="compare-product-card" key={item.product.id}><ProductImage product={item.product}/><span>{item.product.brand}</span><h2>{item.product.productName}</h2><Link href={productPath(item.product)} className="text-link">فتح المنتج <ArrowLeft size={14}/></Link></article>)}</div><div className="comparison-table-wrap"><table className="comparison-table comparison-spec-table"><thead><tr><th>المواصفة</th>{items.map((item) => <th key={item.product.id}>{item.product.productName}</th>)}</tr></thead><tbody>{rows.map((row) => <tr key={row.label}><th>{row.label}</th>{items.map((item) => <td key={item.product.id}>{row.value(item) || <span className="spec-missing">غير منشور</span>}</td>)}</tr>)}</tbody></table></div></div></>;
 }
 
 export function ProductPage() {

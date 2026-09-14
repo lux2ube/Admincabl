@@ -503,8 +503,62 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
     }
     counts.order_statuses = await seedTable(`INSERT INTO "order_statuses" ("id","status_name","color","privacy") VALUES (1,'جديد','#d6ee42','public'),(2,'قيد التجهيز','#1748bd','public'),(3,'تم الشحن','#efb12a','public'),(4,'مكتمل','#2f9e44','public') ON CONFLICT ("id") DO NOTHING`, []);
     counts.roles = await seedTable(`INSERT INTO "roles" ("id","role_name","privileges") VALUES (1,'مدير المتجر',ARRAY['catalog.read','catalog.write','orders.read','customers.read']) ON CONFLICT ("id") DO NOTHING`, []);
-    counts.attributes = await seedTable(`INSERT INTO "attributes" ("id","attribute_name") VALUES ('30000000-0000-4000-8000-000000000001','نوع الاستخدام'),('30000000-0000-4000-8000-000000000002','المنفذ') ON CONFLICT ("id") DO NOTHING`, []);
+    counts.attributes = await seedTable(
+      `INSERT INTO "attributes" ("id","attribute_name","slug","type","unit","description","is_filterable","is_comparable","is_active") VALUES
+       ('30000000-0000-4000-8000-000000000001','نوع الاستخدام','use_case','select',NULL,'الاستخدام المنشور للمنتج',FALSE,TRUE,TRUE),
+       ('30000000-0000-4000-8000-000000000002','المنفذ','port_type','multiselect',NULL,'أنواع المنافذ المنشورة',TRUE,TRUE,TRUE),
+       ('30000000-0000-4000-8000-000000000003','القدرة القصوى','max_power_w','number','W','القدرة القصوى كما يثبتها المصدر',TRUE,TRUE,TRUE),
+       ('30000000-0000-4000-8000-000000000004','تقنية GaN','gan','boolean',NULL,'وجود تقنية GaN وفق المصدر',TRUE,TRUE,TRUE),
+       ('30000000-0000-4000-8000-000000000005','السعة','capacity_mah','number','mAh','السعة المعلنة للمنتج',TRUE,TRUE,TRUE)
+       ON CONFLICT ("id") DO UPDATE SET
+         "attribute_name" = EXCLUDED."attribute_name",
+         "slug" = EXCLUDED."slug",
+         "type" = EXCLUDED."type",
+         "unit" = EXCLUDED."unit",
+         "description" = EXCLUDED."description",
+         "is_filterable" = EXCLUDED."is_filterable",
+         "is_comparable" = EXCLUDED."is_comparable",
+         "is_active" = EXCLUDED."is_active"`,
+      [],
+    );
     counts.attribute_values = await seedTable(`INSERT INTO "attribute_values" ("id","attribute_id","attribute_value") VALUES ('40000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000001','يومي'),('40000000-0000-4000-8000-000000000002','30000000-0000-4000-8000-000000000001','السفر'),('40000000-0000-4000-8000-000000000003','30000000-0000-4000-8000-000000000002','USB-C') ON CONFLICT ("id") DO NOTHING`, []);
+    counts.port_types = await seedTable(
+      `INSERT INTO "port_types" ("id","name","slug","active") VALUES
+       ('50000000-0000-4000-8000-000000000001','USB-C','usb-c',TRUE),
+       ('50000000-0000-4000-8000-000000000002','USB-A','usb-a',TRUE),
+       ('50000000-0000-4000-8000-000000000003','AC','ac',TRUE),
+       ('50000000-0000-4000-8000-000000000004','HDMI','hdmi',TRUE),
+       ('50000000-0000-4000-8000-000000000005','Lightning','lightning',TRUE)
+       ON CONFLICT ("id") DO UPDATE SET "name" = EXCLUDED."name", "slug" = EXCLUDED."slug", "active" = EXCLUDED."active"`,
+      [],
+    );
+    counts.charging_protocols = await seedTable(
+      `INSERT INTO "charging_protocols" ("id","name","slug","active") VALUES
+       ('51000000-0000-4000-8000-000000000001','USB Power Delivery','usb-pd',TRUE),
+       ('51000000-0000-4000-8000-000000000002','Programmable Power Supply','pps',TRUE),
+       ('51000000-0000-4000-8000-000000000003','Quick Charge','quick-charge',TRUE),
+       ('51000000-0000-4000-8000-000000000004','Adaptive Fast Charging','afc',TRUE)
+       ON CONFLICT ("id") DO UPDATE SET "name" = EXCLUDED."name", "slug" = EXCLUDED."slug", "active" = EXCLUDED."active"`,
+      [],
+    );
+    counts.protection_types = await seedTable(
+      `INSERT INTO "protection_types" ("id","name","slug","active") VALUES
+       ('52000000-0000-4000-8000-000000000001','الحماية من زيادة التيار','over-current',TRUE),
+       ('52000000-0000-4000-8000-000000000002','الحماية من زيادة الجهد','over-voltage',TRUE),
+       ('52000000-0000-4000-8000-000000000003','الحماية من الحرارة','over-temperature',TRUE),
+       ('52000000-0000-4000-8000-000000000004','الحماية من القصر','short-circuit',TRUE)
+       ON CONFLICT ("id") DO UPDATE SET "name" = EXCLUDED."name", "slug" = EXCLUDED."slug", "active" = EXCLUDED."active"`,
+      [],
+    );
+    counts.compatibility_categories = await seedTable(
+      `INSERT INTO "compatibility_categories" ("id","name","slug","active") VALUES
+       ('53000000-0000-4000-8000-000000000001','هواتف وأجهزة لوحية','phones-tablets',TRUE),
+       ('53000000-0000-4000-8000-000000000002','حواسيب محمولة','laptops',TRUE),
+       ('53000000-0000-4000-8000-000000000003','أجهزة السيارة','car-devices',TRUE),
+       ('53000000-0000-4000-8000-000000000004','أجهزة الألعاب','gaming-devices',TRUE)
+       ON CONFLICT ("id") DO UPDATE SET "name" = EXCLUDED."name", "slug" = EXCLUDED."slug", "active" = EXCLUDED."active"`,
+      [],
+    );
     const inserted = Object.values(counts).reduce((sum, count) => sum + count, 0);
     res.json(SeedAdminDataResponse.parse({ seeded: true, inserted, tables: counts }));
   } catch (error) {

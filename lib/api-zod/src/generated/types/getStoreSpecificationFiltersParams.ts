@@ -5,13 +5,11 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { GetStoreSeoType } from './getStoreSeoType';
 
-export type GetStoreSeoParams = {
-type?: GetStoreSeoType;
+export type GetStoreSpecificationFiltersParams = {
 /**
  * @maxLength 180
  * @pattern ^[a-z0-9-]+$
  */
-slug?: string;
+category?: string;
 };

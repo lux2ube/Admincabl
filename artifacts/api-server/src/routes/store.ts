@@ -2,15 +2,20 @@ import { Router, type IRouter, type Request } from "express";
 import {
   CreateStoreOrderBody,
   CreateStoreOrderResponse,
+  CompareStoreProductsQueryParams,
+  CompareStoreProductsResponse,
   GetStoreCatalogResponse,
   GetStoreSeoQueryParams,
   GetStoreSeoResponse,
+  GetStoreSpecificationFiltersQueryParams,
+  GetStoreSpecificationFiltersResponse,
   GetStoreOrderParams,
   GetStoreOrderQueryParams,
   GetStoreOrderResponse,
   ListStoreOrdersQueryParams,
   ListStoreOrdersResponse,
 } from "@workspace/api-zod";
+import type { StoreSpecifications } from "@workspace/api-zod";
 import { pool } from "@workspace/db";
 import {
   buildBrandSeo,
@@ -24,6 +29,7 @@ import {
   publicCategoryPath,
   slugify,
 } from "../lib/store-seo";
+import { emptyStoreSpecifications, fetchStoreSpecificationFilters, fetchStoreSpecifications } from "../lib/store-specifications";
 
 const router: IRouter = Router();
 
@@ -269,6 +275,7 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
       category: { id: string; name: string; slug: string } | null;
       images: string[];
       shippingOptions: Array<{ id: number; name: string; charge: number; free: boolean; estimatedDays: number | null }>;
+      specifications: StoreSpecifications;
     }>();
 
     for (const row of result.rows) {
@@ -290,6 +297,7 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
           : null,
         images: [],
         shippingOptions: [],
+        specifications: emptyStoreSpecifications(),
       };
       if (row.image_path && !existing.images.includes(row.image_path)) existing.images.push(row.image_path);
       if (row.shipping_id && row.shipping_name && !existing.shippingOptions.some((option) => option.id === row.shipping_id)) {
@@ -302,6 +310,11 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
         });
       }
       productMap.set(row.id, existing);
+    }
+
+    const specifications = await fetchStoreSpecifications([...productMap.keys()]);
+    for (const [productId, product] of productMap) {
+      product.specifications = specifications.get(productId) ?? emptyStoreSpecifications();
     }
 
     const shippingResult = await pool.query<{
@@ -380,6 +393,110 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
   } catch (error) {
     req.log.error({ err: error }, "Failed to load store catalog");
     res.status(500).json({ error: "تعذر تحميل كتالوج المتجر" });
+  }
+});
+
+router.get("/store/specifications/filters", async (req, res): Promise<void> => {
+  const parsed = GetStoreSpecificationFiltersQueryParams.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ error: "معايير فلترة المواصفات غير صالحة" });
+    return;
+  }
+  try {
+    const filters = await fetchStoreSpecificationFilters(parsed.data.category);
+    res.json(GetStoreSpecificationFiltersResponse.parse(filters));
+  } catch (error) {
+    req.log.error({ err: error }, "Failed to load specification filters");
+    res.status(500).json({ error: "تعذر تحميل فلاتر المواصفات" });
+  }
+});
+
+router.get("/store/specifications/compare", async (req, res): Promise<void> => {
+  const parsed = CompareStoreProductsQueryParams.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ error: "يرجى تحديد منتجين إلى أربعة للمقارنة" });
+    return;
+  }
+  const productIds = [...new Set(parsed.data.productIds.split(",").map((value) => value.trim()).filter(Boolean))];
+  if (productIds.length < 2 || productIds.length > 4 || productIds.some((id) => !/^[0-9a-f-]{36}$/i.test(id))) {
+    res.status(400).json({ error: "يرجى تحديد منتجين إلى أربعة للمقارنة" });
+    return;
+  }
+  try {
+    const result = await pool.query<{
+      id: string;
+      brand: string;
+      brand_slug: string | null;
+      product_name: string;
+      SKU: string;
+      product_slug: string | null;
+      regular_price: string | number;
+      discount_price: string | number | null;
+      quantity: number;
+      short_description: string | null;
+      product_description: string | null;
+      product_note: string | null;
+      category_id: string | null;
+      category_name: string | null;
+      category_slug: string | null;
+      images: string[];
+    }>(
+      `SELECT p."id", COALESCE(b."brand_name", p."brand") AS "brand", b."slug" AS "brand_slug",
+              p."product_name", p."SKU", p."slug" AS "product_slug", p."regular_price", p."discount_price",
+              p."quantity", p."short_description", p."product_description", p."product_note",
+              c."id" AS "category_id", c."category_name", c."slug" AS "category_slug",
+              COALESCE(g."images", ARRAY[]::text[]) AS "images"
+       FROM "products" p
+       LEFT JOIN "brands" b ON b."id" = p."brand_id"
+       LEFT JOIN LATERAL (
+         SELECT c1."id", c1."category_name", c1."slug"
+         FROM "product_categories" pc1
+         JOIN "categories" c1 ON c1."id" = pc1."category_id" AND c1."active" = TRUE
+         WHERE pc1."product_id" = p."id"
+         ORDER BY c1."parent_id" NULLS FIRST, c1."category_name"
+         LIMIT 1
+       ) c ON TRUE
+       LEFT JOIN LATERAL (
+         SELECT ARRAY_AGG(g1."image_path" ORDER BY g1."display_order" ASC) AS "images"
+         FROM "galleries" g1
+         WHERE g1."product_id" = p."id"
+       ) g ON TRUE
+       WHERE p."published" = TRUE AND p."id" = ANY($1::uuid[])`,
+      [productIds],
+    );
+    if (result.rows.length !== productIds.length) {
+      res.status(404).json({ error: "أحد المنتجات غير متاح للمقارنة" });
+      return;
+    }
+    const specifications = await fetchStoreSpecifications(productIds);
+    const products = result.rows.map((row) => {
+      const productSpecifications = specifications.get(row.id) ?? emptyStoreSpecifications();
+      const product = {
+        id: row.id,
+        slug: productSlug(row.product_name, row.SKU, row.product_slug),
+        brand: row.brand,
+        brandSlug: row.brand_slug ?? slugify(row.brand),
+        productName: row.product_name,
+        sku: row.SKU,
+        regularPrice: asNumber(row.regular_price),
+        discountPrice: row.discount_price === null ? null : asNumber(row.discount_price),
+        quantity: row.quantity,
+        shortDescription: row.short_description,
+        productDescription: row.product_description,
+        productNote: row.product_note,
+        category: row.category_id && row.category_name
+          ? { id: row.category_id, name: row.category_name, slug: row.category_slug ?? slugify(row.category_name) }
+          : null,
+        images: row.images ?? [],
+        shippingOptions: [],
+        specifications: productSpecifications,
+      };
+      return { product, comparison: productSpecifications };
+    });
+    res.json(CompareStoreProductsResponse.parse({ products }));
+  } catch (error) {
+    req.log.error({ err: error }, "Failed to compare store products");
+    res.status(500).json({ error: "تعذر تجهيز مقارنة المنتجات" });
   }
 });
 

@@ -26,9 +26,11 @@ import type {
   AdminRowInput,
   AdminRows,
   AdminSeedResult,
+  CompareStoreProductsParams,
   ErrorResponse,
   GetStoreOrderParams,
   GetStoreSeoParams,
+  GetStoreSpecificationFiltersParams,
   HealthStatus,
   ListAdminRowsParams,
   ListStoreOrdersParams,
@@ -40,7 +42,9 @@ import type {
   StoreOrder,
   StoreOrderInput,
   StoreOrders,
-  StoreSeoResponse
+  StoreProductComparison,
+  StoreSeoResponse,
+  StoreSpecificationFilters
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -367,7 +371,175 @@ export function useGetStoreCatalog<TData = Awaited<ReturnType<typeof getStoreCat
 
 
 
-export const getGetStoreSeoUrl = (params: GetStoreSeoParams,) => {
+export const getCompareStoreProductsUrl = (params: CompareStoreProductsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/store/specifications/compare?${stringifiedParams}` : `/api/store/specifications/compare`
+}
+
+/**
+ * @summary Compare published product specifications
+ */
+export const compareStoreProducts = async (params: CompareStoreProductsParams, options?: Parameters<typeof customFetch>[1]): Promise<StoreProductComparison> => {
+
+  return customFetch<StoreProductComparison>(getCompareStoreProductsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getCompareStoreProductsQueryKey = (params?: CompareStoreProductsParams,) => {
+    return [
+    `/api/store/specifications/compare`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getCompareStoreProductsQueryOptions = <TData = Awaited<ReturnType<typeof compareStoreProducts>>, TError = ErrorType<ErrorResponse>>(params: CompareStoreProductsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof compareStoreProducts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCompareStoreProductsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof compareStoreProducts>>> = ({ signal }) => compareStoreProducts(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof compareStoreProducts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type CompareStoreProductsQueryResult = NonNullable<Awaited<ReturnType<typeof compareStoreProducts>>>
+export type CompareStoreProductsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Compare published product specifications
+ */
+
+export function useCompareStoreProducts<TData = Awaited<ReturnType<typeof compareStoreProducts>>, TError = ErrorType<ErrorResponse>>(
+ params: CompareStoreProductsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof compareStoreProducts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getCompareStoreProductsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetStoreSpecificationFiltersUrl = (params?: GetStoreSpecificationFiltersParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/store/specifications/filters?${stringifiedParams}` : `/api/store/specifications/filters`
+}
+
+/**
+ * @summary Get specification filter values from the published catalog
+ */
+export const getStoreSpecificationFilters = async (params?: GetStoreSpecificationFiltersParams, options?: Parameters<typeof customFetch>[1]): Promise<StoreSpecificationFilters> => {
+
+  return customFetch<StoreSpecificationFilters>(getGetStoreSpecificationFiltersUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStoreSpecificationFiltersQueryKey = (params?: GetStoreSpecificationFiltersParams,) => {
+    return [
+    `/api/store/specifications/filters`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetStoreSpecificationFiltersQueryOptions = <TData = Awaited<ReturnType<typeof getStoreSpecificationFilters>>, TError = ErrorType<unknown>>(params?: GetStoreSpecificationFiltersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreSpecificationFilters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStoreSpecificationFiltersQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStoreSpecificationFilters>>> = ({ signal }) => getStoreSpecificationFilters(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStoreSpecificationFilters>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStoreSpecificationFiltersQueryResult = NonNullable<Awaited<ReturnType<typeof getStoreSpecificationFilters>>>
+export type GetStoreSpecificationFiltersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get specification filter values from the published catalog
+ */
+
+export function useGetStoreSpecificationFilters<TData = Awaited<ReturnType<typeof getStoreSpecificationFilters>>, TError = ErrorType<unknown>>(
+ params?: GetStoreSpecificationFiltersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreSpecificationFilters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStoreSpecificationFiltersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetStoreSeoUrl = (params?: GetStoreSeoParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -385,7 +557,7 @@ export const getGetStoreSeoUrl = (params: GetStoreSeoParams,) => {
 /**
  * @summary Get generated SEO metadata for a public CABL route
  */
-export const getStoreSeo = async (params: GetStoreSeoParams, options?: Parameters<typeof customFetch>[1]): Promise<StoreSeoResponse> => {
+export const getStoreSeo = async (params?: GetStoreSeoParams, options?: Parameters<typeof customFetch>[1]): Promise<StoreSeoResponse> => {
 
   return customFetch<StoreSeoResponse>(getGetStoreSeoUrl(params),
   {
@@ -407,7 +579,7 @@ export const getGetStoreSeoQueryKey = (params?: GetStoreSeoParams,) => {
     }
 
 
-export const getGetStoreSeoQueryOptions = <TData = Awaited<ReturnType<typeof getStoreSeo>>, TError = ErrorType<ErrorResponse>>(params: GetStoreSeoParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreSeo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetStoreSeoQueryOptions = <TData = Awaited<ReturnType<typeof getStoreSeo>>, TError = ErrorType<ErrorResponse>>(params?: GetStoreSeoParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreSeo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -434,7 +606,7 @@ export type GetStoreSeoQueryError = ErrorType<ErrorResponse>
  */
 
 export function useGetStoreSeo<TData = Awaited<ReturnType<typeof getStoreSeo>>, TError = ErrorType<ErrorResponse>>(
- params: GetStoreSeoParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreSeo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: GetStoreSeoParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreSeo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

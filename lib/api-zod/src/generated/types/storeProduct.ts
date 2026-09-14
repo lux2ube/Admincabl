@@ -7,6 +7,7 @@
  */
 import type { StoreProductCategory } from './storeProductCategory';
 import type { StoreShippingOption } from './storeShippingOption';
+import type { StoreSpecifications } from './storeSpecifications';
 
 export interface StoreProduct {
   id: string;
@@ -30,4 +31,5 @@ export interface StoreProduct {
   category: StoreProductCategory;
   images: string[];
   shippingOptions: StoreShippingOption[];
+  specifications: StoreSpecifications;
 }

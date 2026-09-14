@@ -29,6 +29,110 @@ export interface StorePaymentMethod {
   requiresTransactionReference: boolean;
 }
 
+export type StoreSpecificationAttributeType = typeof StoreSpecificationAttributeType[keyof typeof StoreSpecificationAttributeType];
+
+
+export const StoreSpecificationAttributeType = {
+  text: 'text',
+  number: 'number',
+  boolean: 'boolean',
+  select: 'select',
+  multiselect: 'multiselect',
+} as const;
+
+export interface StoreSpecificationAttribute {
+  slug: string;
+  label: string;
+  type: StoreSpecificationAttributeType;
+  /** @nullable */
+  value: string | number | boolean | null;
+  values: string[];
+  /** @nullable */
+  unit: string | null;
+  /** @nullable */
+  sourceUrl: string | null;
+}
+
+export interface StoreSpecificationPort {
+  id: string;
+  name: string;
+  type: string;
+  /** @nullable */
+  maxPowerW: number | null;
+  /** @nullable */
+  maxVoltageV: number | null;
+  /** @nullable */
+  maxCurrentA: number | null;
+}
+
+export interface StoreSpecificationProtocol {
+  name: string;
+  slug: string;
+  /** @nullable */
+  portId: string | null;
+}
+
+export interface StoreSpecificationPowerOutput {
+  portId: string;
+  powerW: number;
+}
+
+export interface StoreSpecificationPowerProfile {
+  name: string;
+  /** @nullable */
+  totalPowerW: number | null;
+  /** @nullable */
+  description: string | null;
+  outputs: StoreSpecificationPowerOutput[];
+}
+
+export interface StoreSpecificationDimensions {
+  /** @nullable */
+  lengthMm: number | null;
+  /** @nullable */
+  widthMm: number | null;
+  /** @nullable */
+  heightMm: number | null;
+  /** @nullable */
+  weightG: number | null;
+}
+
+export interface StoreSpecificationProtection {
+  name: string;
+  slug: string;
+}
+
+export type StoreSpecificationCompatibilityType = typeof StoreSpecificationCompatibilityType[keyof typeof StoreSpecificationCompatibilityType];
+
+
+export const StoreSpecificationCompatibilityType = {
+  supported: 'supported',
+  partially_supported: 'partially_supported',
+  not_recommended: 'not_recommended',
+} as const;
+
+export interface StoreSpecificationCompatibility {
+  name: string;
+  slug: string;
+  type: StoreSpecificationCompatibilityType;
+  /** @nullable */
+  notes: string | null;
+}
+
+export interface StoreSpecifications {
+  attributes: StoreSpecificationAttribute[];
+  ports: StoreSpecificationPort[];
+  protocols: StoreSpecificationProtocol[];
+  powerProfiles: StoreSpecificationPowerProfile[];
+  dimensions: StoreSpecificationDimensions | null;
+  protections: StoreSpecificationProtection[];
+  compatibility: StoreSpecificationCompatibility[];
+  /** @nullable */
+  maxPowerW: number | null;
+  /** @nullable */
+  capabilityLabel: string | null;
+}
+
 /**
  * @nullable
  */
@@ -60,6 +164,28 @@ export interface StoreProduct {
   category: StoreProductCategory;
   images: string[];
   shippingOptions: StoreShippingOption[];
+  specifications: StoreSpecifications;
+}
+
+export interface StoreProductComparisonItem {
+  product: StoreProduct;
+  comparison: StoreSpecifications;
+}
+
+export interface StoreProductComparison {
+  products: StoreProductComparisonItem[];
+}
+
+export interface StoreSpecificationFilter {
+  slug: string;
+  label: string;
+  /** @nullable */
+  unit: string | null;
+  values: string[];
+}
+
+export interface StoreSpecificationFilters {
+  filters: StoreSpecificationFilter[];
 }
 
 export interface StoreSeoBreadcrumb {
@@ -129,9 +255,10 @@ export interface StoreOrderCustomer {
   lastName: string;
   /**
      * @maxLength 255
+     * @nullable
      * @pattern ^[^\s@]+@[^\s@]+\.[^\s@]+$
      */
-   email?: string | null;
+  email?: string | null;
   /**
      * @minLength 5
      * @maxLength 40
@@ -287,7 +414,7 @@ export interface NewsletterSubscriptionInput {
      * @maxLength 254
      * @pattern ^[^\s@]+@[^\s@]+\.[^\s@]+$
      */
- email?: string;
+  email: string;
 }
 
 export type NewsletterSubscriptionStatus = typeof NewsletterSubscriptionStatus[keyof typeof NewsletterSubscriptionStatus];
@@ -403,8 +530,25 @@ export interface AdminSeedResult {
   tables: AdminSeedResultTables;
 }
 
+export type CompareStoreProductsParams = {
+/**
+ * Comma-separated product UUIDs, from two to four products
+ * @minLength 73
+ * @maxLength 160
+ */
+productIds: string;
+};
+
+export type GetStoreSpecificationFiltersParams = {
+/**
+ * @maxLength 180
+ * @pattern ^[a-z0-9-]+$
+ */
+category?: string;
+};
+
 export type GetStoreSeoParams = {
-type: GetStoreSeoType;
+type?: GetStoreSeoType;
 /**
  * @maxLength 180
  * @pattern ^[a-z0-9-]+$
@@ -427,7 +571,7 @@ export type ListStoreOrdersParams = {
 /**
  * @pattern ^[^\s@]+@[^\s@]+\.[^\s@]+$
  */
- email?: string;
+email?: string;
 /**
  * @minLength 5
  * @maxLength 40

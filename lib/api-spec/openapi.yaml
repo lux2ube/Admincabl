@@ -88,6 +88,53 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StoreCatalog"
+  /store/specifications/compare:
+    get:
+      operationId: compareStoreProducts
+      tags: [store]
+      summary: Compare published product specifications
+      parameters:
+        - name: productIds
+          in: query
+          required: true
+          description: Comma-separated product UUIDs, from two to four products
+          schema:
+            type: string
+            minLength: 73
+            maxLength: 160
+      responses:
+        "200":
+          description: Comparable product specifications
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoreProductComparison"
+        "400":
+          description: Invalid product IDs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /store/specifications/filters:
+    get:
+      operationId: getStoreSpecificationFilters
+      tags: [store]
+      summary: Get specification filter values from the published catalog
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+            maxLength: 180
+      responses:
+        "200":
+          description: Live filter values
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoreSpecificationFilters"
   /store/seo:
     get:
       operationId: getStoreSeo
@@ -131,14 +178,14 @@ paths:
       tags: [store]
       summary: List a customer's orders using verified contact details
       parameters:
-         - name: email
-           in: query
+        - name: email
+          in: query
           schema:
             type: string
             pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
-         - name: phone
-           in: query
-           required: true
+        - name: phone
+          in: query
+          required: true
           schema:
             type: string
             minLength: 5
@@ -418,6 +465,144 @@ components:
         requiresTransactionReference:
           type: boolean
       required: [id, name, description, accountName, accountNumber, instructions, iconKey, requiresTransactionReference]
+    StoreSpecificationAttribute:
+      type: object
+      properties:
+        slug:
+          type: string
+        label:
+          type: string
+        type:
+          type: string
+          enum: [text, number, boolean, select, multiselect]
+        value:
+          type: ["string", "number", "boolean", "null"]
+        values:
+          type: array
+          items:
+            type: string
+        unit:
+          type: ["string", "null"]
+        sourceUrl:
+          type: ["string", "null"]
+      required: [slug, label, type, value, values, unit, sourceUrl]
+    StoreSpecificationPort:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        maxPowerW:
+          type: ["number", "null"]
+        maxVoltageV:
+          type: ["number", "null"]
+        maxCurrentA:
+          type: ["number", "null"]
+      required: [id, name, type, maxPowerW, maxVoltageV, maxCurrentA]
+    StoreSpecificationProtocol:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        portId:
+          type: ["string", "null"]
+      required: [name, slug, portId]
+    StoreSpecificationPowerOutput:
+      type: object
+      properties:
+        portId:
+          type: string
+        powerW:
+          type: number
+      required: [portId, powerW]
+    StoreSpecificationPowerProfile:
+      type: object
+      properties:
+        name:
+          type: string
+        totalPowerW:
+          type: ["number", "null"]
+        description:
+          type: ["string", "null"]
+        outputs:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreSpecificationPowerOutput"
+      required: [name, totalPowerW, description, outputs]
+    StoreSpecificationDimensions:
+      type: object
+      properties:
+        lengthMm:
+          type: ["number", "null"]
+        widthMm:
+          type: ["number", "null"]
+        heightMm:
+          type: ["number", "null"]
+        weightG:
+          type: ["number", "null"]
+      required: [lengthMm, widthMm, heightMm, weightG]
+    StoreSpecificationProtection:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+      required: [name, slug]
+    StoreSpecificationCompatibility:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        type:
+          type: string
+          enum: [supported, partially_supported, not_recommended]
+        notes:
+          type: ["string", "null"]
+      required: [name, slug, type, notes]
+    StoreSpecifications:
+      type: object
+      properties:
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreSpecificationAttribute"
+        ports:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreSpecificationPort"
+        protocols:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreSpecificationProtocol"
+        powerProfiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreSpecificationPowerProfile"
+        dimensions:
+          oneOf:
+            - $ref: "#/components/schemas/StoreSpecificationDimensions"
+            - type: "null"
+        protections:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreSpecificationProtection"
+        compatibility:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreSpecificationCompatibility"
+        maxPowerW:
+          type: ["number", "null"]
+        capabilityLabel:
+          type: ["string", "null"]
+      required: [attributes, ports, protocols, powerProfiles, dimensions, protections, compatibility, maxPowerW, capabilityLabel]
     StoreProduct:
       type: object
       properties:
@@ -463,7 +648,47 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/StoreShippingOption"
-      required: [id, slug, brand, brandSlug, productName, sku, regularPrice, discountPrice, quantity, shortDescription, productDescription, productNote, category, images, shippingOptions]
+        specifications:
+          $ref: "#/components/schemas/StoreSpecifications"
+      required: [id, slug, brand, brandSlug, productName, sku, regularPrice, discountPrice, quantity, shortDescription, productDescription, productNote, category, images, shippingOptions, specifications]
+    StoreProductComparisonItem:
+      type: object
+      properties:
+        product:
+          $ref: "#/components/schemas/StoreProduct"
+        comparison:
+          $ref: "#/components/schemas/StoreSpecifications"
+      required: [product, comparison]
+    StoreProductComparison:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreProductComparisonItem"
+      required: [products]
+    StoreSpecificationFilter:
+      type: object
+      properties:
+        slug:
+          type: string
+        label:
+          type: string
+        unit:
+          type: ["string", "null"]
+        values:
+          type: array
+          items:
+            type: string
+      required: [slug, label, unit, values]
+    StoreSpecificationFilters:
+      type: object
+      properties:
+        filters:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreSpecificationFilter"
+      required: [filters]
     StoreSeoBreadcrumb:
       type: object
       properties:

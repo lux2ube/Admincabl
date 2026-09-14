@@ -148,7 +148,13 @@ const tables: AdminTable[] = [
   },
   {
     key: "attributes", label: "الخصائص", group: "الكتالوج", primaryKey: "id",
-    columns: [id(), column("attribute_name", "اسم الخاصية", "text", { nullable: false }), created(), updated()],
+    columns: [
+      id(), column("attribute_name", "اسم الخاصية", "text", { nullable: false }), column("slug", "الرابط المختصر", "text"),
+      column("type", "نوع القيمة", "text", { nullable: false }), column("unit", "الوحدة", "text"), column("description", "الوصف", "text"),
+      column("category_id", "التصنيف", "uuid", { references: "categories.id" }), column("sort_order", "الترتيب", "number", { nullable: false }),
+      column("is_filterable", "يظهر في الفلاتر", "boolean", { nullable: false }), column("is_comparable", "يظهر في المقارنة", "boolean", { nullable: false }),
+      column("is_active", "نشط", "boolean", { nullable: false }), created(), updated(),
+    ],
     relations: [relation("id", "attribute_values", "attribute_id", "has_many", "قيم الخاصية"), relation("id", "product_attributes", "attribute_id", "has_many", "منتجات الخاصية")],
   },
   {
@@ -157,9 +163,73 @@ const tables: AdminTable[] = [
     relations: [relation("attribute_id", "attributes", "id", "belongs_to", "الخاصية"), relation("id", "variant_attribute_values", "attribute_value_id", "has_many", "قيم المتغيرات")],
   },
   {
-    key: "product_attributes", label: "ربط المنتجات بالخصائص", group: "العلاقات", primaryKey: "product_id,attribute_id",
-    columns: [column("product_id", "المنتج", "uuid", { nullable: false, primaryKey: true, references: "products.id" }), column("attribute_id", "الخاصية", "uuid", { nullable: false, primaryKey: true, references: "attributes.id" })],
+    key: "product_attributes", label: "قيم مواصفات المنتجات", group: "المواصفات", primaryKey: "id",
+    columns: [
+      id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("attribute_id", "الخاصية", "uuid", { nullable: false, references: "attributes.id" }),
+      column("value_text", "القيمة النصية", "text"), column("value_number", "القيمة الرقمية", "number"), column("value_boolean", "القيمة المنطقية", "boolean"),
+      column("source_url", "مصدر المواصفة", "text"), column("source_note", "ملاحظة المصدر", "text"), created(), updated(),
+    ],
     relations: [relation("product_id", "products", "id", "belongs_to", "المنتج"), relation("attribute_id", "attributes", "id", "belongs_to", "الخاصية")],
+  },
+  {
+    key: "port_types", label: "أنواع المنافذ", group: "المواصفات", primaryKey: "id",
+    columns: [id(), column("name", "اسم المنفذ", "text", { nullable: false }), column("slug", "الرابط المختصر", "text", { nullable: false }), column("active", "نشط", "boolean", { nullable: false }), created(), updated()],
+    relations: [relation("id", "charger_ports", "port_type_id", "has_many", "منافذ الشواحن")],
+  },
+  {
+    key: "charger_ports", label: "منافذ الشواحن", group: "المواصفات", primaryKey: "id",
+    columns: [
+      id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("port_name", "اسم المنفذ", "text", { nullable: false }),
+      column("port_type_id", "نوع المنفذ", "uuid", { nullable: false, references: "port_types.id" }), column("max_power_w", "القدرة القصوى W", "number"),
+      column("max_voltage_v", "الجهد الأقصى V", "number"), column("max_current_a", "التيار الأقصى A", "number"), column("sort_order", "الترتيب", "number", { nullable: false }),
+      column("source_url", "مصدر المواصفة", "text"), column("source_note", "ملاحظة المصدر", "text"), created(), updated(),
+    ],
+    relations: [relation("product_id", "products", "id", "belongs_to", "المنتج"), relation("port_type_id", "port_types", "id", "belongs_to", "نوع المنفذ")],
+  },
+  {
+    key: "charging_protocols", label: "بروتوكولات الشحن", group: "المواصفات", primaryKey: "id",
+    columns: [id(), column("name", "اسم البروتوكول", "text", { nullable: false }), column("slug", "الرابط المختصر", "text", { nullable: false }), column("description", "الوصف", "text"), column("active", "نشط", "boolean", { nullable: false }), created(), updated()],
+    relations: [relation("id", "product_charging_protocols", "protocol_id", "has_many", "بروتوكولات المنتجات")],
+  },
+  {
+    key: "product_charging_protocols", label: "بروتوكولات المنتجات", group: "المواصفات", primaryKey: "id",
+    columns: [id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("protocol_id", "البروتوكول", "uuid", { nullable: false, references: "charging_protocols.id" }), column("port_id", "المنفذ", "uuid", { references: "charger_ports.id" }), column("source_url", "مصدر المواصفة", "text"), column("source_note", "ملاحظة المصدر", "text"), created(), updated()],
+    relations: [relation("product_id", "products", "id", "belongs_to", "المنتج"), relation("protocol_id", "charging_protocols", "id", "belongs_to", "البروتوكول"), relation("port_id", "charger_ports", "id", "belongs_to", "المنفذ")],
+  },
+  {
+    key: "charger_power_profiles", label: "توزيع الطاقة", group: "المواصفات", primaryKey: "id",
+    columns: [id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("configuration_name", "اسم التوزيع", "text", { nullable: false }), column("total_power_w", "إجمالي القدرة W", "number"), column("description", "الوصف", "text"), column("sort_order", "الترتيب", "number", { nullable: false }), column("source_url", "مصدر المواصفة", "text"), column("source_note", "ملاحظة المصدر", "text"), created(), updated()],
+    relations: [relation("product_id", "products", "id", "belongs_to", "المنتج"), relation("id", "charger_power_profile_outputs", "profile_id", "has_many", "مخارج توزيع الطاقة")],
+  },
+  {
+    key: "charger_power_profile_outputs", label: "مخارج توزيع الطاقة", group: "المواصفات", primaryKey: "id",
+    columns: [id(), column("profile_id", "توزيع الطاقة", "uuid", { nullable: false, references: "charger_power_profiles.id" }), column("port_id", "المنفذ", "uuid", { nullable: false, references: "charger_ports.id" }), column("power_w", "القدرة W", "number", { nullable: false }), created(), updated()],
+    relations: [relation("profile_id", "charger_power_profiles", "id", "belongs_to", "توزيع الطاقة"), relation("port_id", "charger_ports", "id", "belongs_to", "المنفذ")],
+  },
+  {
+    key: "product_dimensions", label: "أبعاد المنتجات", group: "المواصفات", primaryKey: "id",
+    columns: [id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("length_mm", "الطول mm", "number"), column("width_mm", "العرض mm", "number"), column("height_mm", "الارتفاع mm", "number"), column("weight_g", "الوزن g", "number"), column("source_url", "مصدر المواصفة", "text"), column("source_note", "ملاحظة المصدر", "text"), created(), updated()],
+    relations: [relation("product_id", "products", "id", "belongs_to", "المنتج")],
+  },
+  {
+    key: "protection_types", label: "أنواع الحماية", group: "المواصفات", primaryKey: "id",
+    columns: [id(), column("name", "اسم الحماية", "text", { nullable: false }), column("slug", "الرابط المختصر", "text", { nullable: false }), column("description", "الوصف", "text"), column("active", "نشط", "boolean", { nullable: false }), created(), updated()],
+    relations: [relation("id", "product_protections", "protection_id", "has_many", "حمايات المنتجات")],
+  },
+  {
+    key: "product_protections", label: "حمايات المنتجات", group: "المواصفات", primaryKey: "id",
+    columns: [id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("protection_id", "نوع الحماية", "uuid", { nullable: false, references: "protection_types.id" }), column("source_url", "مصدر المواصفة", "text"), column("source_note", "ملاحظة المصدر", "text"), created(), updated()],
+    relations: [relation("product_id", "products", "id", "belongs_to", "المنتج"), relation("protection_id", "protection_types", "id", "belongs_to", "نوع الحماية")],
+  },
+  {
+    key: "compatibility_categories", label: "فئات التوافق", group: "المواصفات", primaryKey: "id",
+    columns: [id(), column("name", "اسم الفئة", "text", { nullable: false }), column("slug", "الرابط المختصر", "text", { nullable: false }), column("active", "نشط", "boolean", { nullable: false }), created(), updated()],
+    relations: [relation("id", "product_compatibility", "compatibility_category_id", "has_many", "توافق المنتجات")],
+  },
+  {
+    key: "product_compatibility", label: "توافق المنتجات", group: "المواصفات", primaryKey: "id",
+    columns: [id(), column("product_id", "المنتج", "uuid", { nullable: false, references: "products.id" }), column("compatibility_category_id", "فئة التوافق", "uuid", { nullable: false, references: "compatibility_categories.id" }), column("compatibility_type", "نوع التوافق", "text", { nullable: false }), column("notes", "ملاحظات", "text"), column("source_url", "مصدر المواصفة", "text"), column("source_note", "ملاحظة المصدر", "text"), created(), updated()],
+    relations: [relation("product_id", "products", "id", "belongs_to", "المنتج"), relation("compatibility_category_id", "compatibility_categories", "id", "belongs_to", "فئة التوافق")],
   },
   {
     key: "variants", label: "متغيرات المنتجات", group: "الكتالوج", primaryKey: "id",
@@ -286,4 +356,4 @@ const tables: AdminTable[] = [
 export const adminTables = tables;
 export const adminTableMap = new Map(tables.map((table) => [table.key, table]));
 
-export const adminGroups = ["الكتالوج", "العلاقات", "الشحن", "العملاء", "المبيعات", "الموظفون", "المحتوى", "التواصل", "النظام"];
+export const adminGroups = ["الكتالوج", "المواصفات", "العلاقات", "الشحن", "العملاء", "المبيعات", "الموظفون", "المحتوى", "التواصل", "النظام"];

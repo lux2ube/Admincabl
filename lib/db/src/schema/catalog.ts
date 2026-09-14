@@ -1,5 +1,7 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   date,
   integer,
   jsonb,
@@ -86,15 +88,27 @@ export const productCategoriesTable = pgTable(
 export const attributesTable = pgTable("attributes", {
   id: uuid("id").defaultRandom().primaryKey(),
   attributeName: varchar("attribute_name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 180 }),
+  attributeType: varchar("type", { length: 24 }).notNull().default("text"),
+  unit: varchar("unit", { length: 32 }),
+  description: text("description"),
+  categoryId: uuid("category_id").references(() => categoriesTable.id, { onDelete: "set null" }),
+  sortOrder: integer("sort_order").notNull().default(0),
+  isFilterable: boolean("is_filterable").notNull().default(false),
+  isComparable: boolean("is_comparable").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   createdBy: uuid("created_by"),
   updatedBy: uuid("updated_by"),
-});
+}, (table) => [
+  uniqueIndex("attributes_slug_unique").on(table.slug),
+  check("attributes_type_check", sql`"type" IN ('text', 'number', 'boolean', 'select', 'multiselect')`),
+]);
 
 export const attributeValuesTable = pgTable("attribute_values", {
   id: uuid("id").defaultRandom().primaryKey(),
-  attributeId: uuid("attribute_id").notNull(),
+  attributeId: uuid("attribute_id").notNull().references(() => attributesTable.id, { onDelete: "cascade" }),
   attributeValue: varchar("attribute_value", { length: 255 }).notNull(),
   color: varchar("color", { length: 50 }),
 });
@@ -102,10 +116,21 @@ export const attributeValuesTable = pgTable("attribute_values", {
 export const productAttributesTable = pgTable(
   "product_attributes",
   {
-    productId: uuid("product_id").notNull(),
-    attributeId: uuid("attribute_id").notNull(),
+    id: uuid("id").defaultRandom().primaryKey(),
+    productId: uuid("product_id").notNull().references(() => productsTable.id, { onDelete: "cascade" }),
+    attributeId: uuid("attribute_id").notNull().references(() => attributesTable.id, { onDelete: "cascade" }),
+    valueText: text("value_text"),
+    valueNumber: numeric("value_number", { precision: 12, scale: 4 }),
+    valueBoolean: boolean("value_boolean"),
+    sourceUrl: text("source_url"),
+    sourceNote: text("source_note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
-  (table) => [primaryKey({ columns: [table.productId, table.attributeId] })],
+  (table) => [
+    uniqueIndex("product_attributes_product_attribute_unique").on(table.productId, table.attributeId),
+    check("product_attributes_one_value_check", sql`num_nonnulls("value_text", "value_number", "value_boolean") <= 1`),
+  ],
 );
 
 export const variantsTable = pgTable("variants", {
