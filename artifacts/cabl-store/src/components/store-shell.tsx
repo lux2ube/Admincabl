@@ -3,6 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { ArrowLeft, Heart, Menu, Search, ShoppingBag, X, ChevronDown, ChevronLeft, PackageSearch, MessageCircle, Tags, Truck, CircleHelp, BookOpen, ShieldCheck, RotateCcw, Mail, MapPin, Zap } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { productPath } from '@/lib/store-routes';
+import { seoKeywordClusters } from '@/lib/seo-keywords';
 
 export function StoreShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -58,6 +59,24 @@ export function StoreShell({ children }: { children: ReactNode }) {
     if (!normalized) return [];
     return (catalog?.products || []).filter((product) => `${product.productName} ${product.brand} ${product.shortDescription || ''}`.toLocaleLowerCase('ar').includes(normalized)).slice(0, 6);
   }, [catalog, searchTerm]);
+  const peopleAlsoSearchClusters = useMemo(() => {
+    const route = location.split('?')[0];
+    const product = (catalog?.products || []).find((item) => productPath(item) === route);
+    const categorySlug = route.startsWith('/category/')
+      ? route.slice('/category/'.length)
+      : product?.category?.slug;
+    const publicCategoryMap: Record<string, string> = {
+      cables: 'charging-cables',
+      'hubs-adapters': 'phone-accessories',
+      'car-accessories': 'travel-adapters',
+    };
+    const current = seoKeywordClusters.find((cluster) => cluster.slug === route.slice('/guides/'.length))
+      || seoKeywordClusters.find((cluster) => cluster.categorySlug === (publicCategoryMap[categorySlug || ''] || categorySlug));
+    return current
+      ? [current, ...seoKeywordClusters.filter((cluster) => cluster.slug !== current.slug)].slice(0, 4)
+      : seoKeywordClusters.slice(0, 4);
+  }, [catalog, location]);
+  const hidePeopleAlsoSearch = ['/cart', '/checkout', '/orders'].some((path) => location === path || location.startsWith(`${path}/`));
   return <div dir="rtl" className="min-h-[100dvh]">
      <div className="top-strip"><div className="container top-strip-inner"><div className="top-announcement"><span>الوكيل الحصري لشركة Baseus في اليمن</span><a href="https://wa.me/967771106977" target="_blank" rel="noreferrer" className="top-phone" dir="ltr" aria-label="تواصل معنا عبر واتساب على 771106977" data-testid="link-whatsapp"><MessageCircle size={13}/> 771106977</a></div><Link href="/orders" className="phone-link" data-testid="link-track-order"><PackageSearch size={13}/> تتبع طلبك</Link></div></div>
      <header className={`site-header${isScrolled ? ' is-scrolled' : ''}`}>
@@ -118,6 +137,21 @@ export function StoreShell({ children }: { children: ReactNode }) {
      </div>}
      <main className="page-main">{children}</main>
       {location !== '/cart' && location !== '/checkout' && <FloatingCartSummary total={cartSubtotal} count={cartCount} />}
+       {!hidePeopleAlsoSearch && <section className="people-search-section" aria-labelledby="people-also-search-title">
+         <div className="container">
+           <div className="people-search-heading">
+             <div><span className="eyebrow">بحث مرتبط</span><h2 id="people-also-search-title">الناس تبحث أيضاً عن</h2></div>
+             <p>موضوعات قريبة تساعدك تصل إلى القسم أو دليل الشراء المناسب من الكتالوج.</p>
+           </div>
+           <div className="people-search-grid">
+             {peopleAlsoSearchClusters.map((cluster) => <Link href={`/guides/${cluster.slug}`} className="people-search-card" key={cluster.slug}>
+               <strong>{cluster.primaryTerm}</strong>
+               <span>{cluster.searchThemes.slice(0, 3).join(' · ')}</span>
+               <small>افتح الدليل <ArrowLeft size={13} /></small>
+             </Link>)}
+           </div>
+         </div>
+       </section>}
       <footer className="site-footer"><div className="container footer-grid"><div className="footer-brand"><span className="brand-cabl light">CABL<span className="brand-dot">.</span></span><p>الأشياء الصغيرة التي تجعل يومك أسهل. بيانات كتالوج واضحة وخطوات شراء مرتبطة بالطلب.</p><Link href="/orders" data-testid="link-footer-phone"><PackageSearch size={15}/> تتبع طلبك</Link></div><div><h3>تسوق</h3><Link href="/search" data-testid="link-footer-all">كل المنتجات</Link>{categories.map((category) => <Link href={`/category/${category.slug}`} key={category.slug} data-testid={`link-footer-category-${category.slug}`}>{category.name}</Link>)}</div><div><h3>خدمة العملاء</h3><Link href="/orders" data-testid="link-footer-orders">تتبع طلبك</Link><Link href="/shipping">الشحن والتوصيل</Link><Link href="/return-policy">الإرجاع والاستبدال</Link><Link href="/faq">الأسئلة الشائعة</Link><Link href="/contact">تواصل معنا</Link></div><div><h3>اعرف أكثر</h3><Link href="/about">عن CABL</Link><Link href="/blog/best-power-bank-yemen">دليل الشراء</Link><Link href="/lab">مركز المواصفات</Link><Link href="/verify">التحقق من الضمان</Link></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} CABL اليمن</span><span>الدفع الآمن يبدأ من معلومات واضحة</span></div></footer>
   </div>;
 }

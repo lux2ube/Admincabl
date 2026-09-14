@@ -5,10 +5,11 @@ import { getCompareStoreProductsQueryKey, getGetStoreSeoQueryKey, getGetStoreOrd
 import type { StoreOrderInput, StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
 import { brandCategoryPath, brandPath, productPath } from '@/lib/store-routes';
+import { getSeoKeywordCluster, seoKeywordClusters } from '@/lib/seo-keywords';
 import { setSeoHead } from '@/lib/seo-head';
 import { Breadcrumbs, CTASection, CatalogError, CatalogToolbar, LoadingCatalog, PageHeading } from '@/components/page-parts';
 import { CartLine, ProductGrid, QuantityControl } from '@/components/catalog-ui';
-import { EditorialSection, FAQList, InfoCards, ProductEditorial } from '@/pages/content-pages';
+import { EditorialSection, FAQList, InfoCards, ProductEditorial, mergeFaqItems } from '@/pages/content-pages';
 
 function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; slug?: string }) {
   const [location, navigate] = useLocation();
@@ -783,6 +784,17 @@ function guideKeyForCategory(categorySlug: string) {
   return categorySlug;
 }
 
+function keywordClusterForCategory(categorySlug: string) {
+  const normalizedSlug = categorySlug === 'cables'
+    ? 'charging-cables'
+    : categorySlug === 'hubs-adapters'
+      ? 'phone-accessories'
+      : categorySlug === 'car-accessories'
+        ? 'travel-adapters'
+        : categorySlug;
+  return seoKeywordClusters.find((cluster) => cluster.categorySlug === normalizedSlug);
+}
+
 type CategoryPriceBand = {
   id: string;
   min: number;
@@ -1127,7 +1139,7 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
         ]} />
       </EditorialSection>
       <EditorialSection title={`أسئلة شائعة عن ${categoryName} ${brandName}`}>
-        <FAQList items={copy.faqs} />
+        <FAQList items={mergeFaqItems(copy.faqs, keywordClusterForCategory(categorySlug)?.faqs.slice(0, 2) || [])} />
       </EditorialSection>
       <EditorialSection title="روابط مرتبطة">
         <div className="category-related-links">
@@ -1341,7 +1353,7 @@ function CategoryLandingPage({ slug }: { slug: string }) {
         ]} />
       </EditorialSection>
       <EditorialSection title="أسئلة شائعة">
-        <FAQList items={copy.faqs} />
+        <FAQList items={mergeFaqItems(copy.faqs, keywordClusterForCategory(slug)?.faqs.slice(0, 2) || [])} />
       </EditorialSection>
       <EditorialSection title="روابط مرتبطة">
         <div className="category-related-links">

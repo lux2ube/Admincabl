@@ -82,6 +82,15 @@ export function FAQList({ items }: { items: Array<{ question: string; answer: st
   );
 }
 
+export function mergeFaqItems(...groups: Array<Array<{ question: string; answer: string }>>) {
+  const seen = new Set<string>();
+  return groups.flat().filter((item) => {
+    if (seen.has(item.question)) return false;
+    seen.add(item.question);
+    return true;
+  });
+}
+
 function EditorialHero({
   eyebrow,
   title,
@@ -901,6 +910,7 @@ export function CollectionEditorial({
 export function ProductEditorial({ product }: { product: StoreProduct }) {
   const { catalog } = useStore();
   const related = (catalog?.products || []).filter((item) => item.id !== product.id && (item.category?.slug === product.category?.slug || item.brand === product.brand)).slice(0, 4);
+  const keywordFaqs = seoKeywordClusters.find((cluster) => cluster.categorySlug === product.category?.slug)?.faqs.slice(0, 2) || [];
   return (
     <>
       <EditorialSection eyebrow="تفاصيل الاستخدام" title="الخلاصة العملية">
@@ -925,12 +935,12 @@ export function ProductEditorial({ product }: { product: StoreProduct }) {
         {related.length ? <ProductGrid products={related} empty="لا توجد منتجات مرتبطة حالياً." /> : <p className="empty-state">لا توجد منتجات مرتبطة منشورة حالياً.</p>}
       </EditorialSection>
       <EditorialSection title="أسئلة عن هذا المنتج">
-        <FAQList items={[
+        <FAQList items={mergeFaqItems([
           { question: 'هل القدرة المعلنة تعني أن جهازي سيشحن بنفس السرعة؟', answer: 'لا. الجهاز والكابل والبروتوكول والحرارة تحدد القدرة الفعلية.' },
           { question: 'هل المنتج متوفر الآن؟', answer: product.quantity > 0 ? `نعم، الكمية المنشورة حالياً ${product.quantity} قطعة.` : 'غير متوفر حالياً حسب الكمية المنشورة.' },
           { question: 'أين أجد السعر النهائي؟', answer: 'السعر الحالي يظهر في الصفحة والسلة، وتضاف رسوم الشحن عند اختيار طريقة الشحن.' },
           { question: 'هل توجد مراجعات؟', answer: 'لا نعرض مراجعات مصطنعة. ستظهر فقط المراجعات المسجلة في مصدر البيانات عند توفرها.' },
-        ]} />
+        ], keywordFaqs)} />
       </EditorialSection>
     </>
   );
