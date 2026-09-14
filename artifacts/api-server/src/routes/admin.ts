@@ -1188,6 +1188,16 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
       [],
     );
     counts.ugreen_specifications = await seedUgreenSpecifications();
+    const catalogDerived = await seedCatalogDerivedSpecifications();
+    counts.catalog_derived_attributes = catalogDerived.importedAttributes;
+    counts.catalog_derived_modules = catalogDerived.importedModules;
+    counts.catalog_products_missing_source = catalogDerived.missingSourceProducts.length;
+    if (catalogDerived.missingSourceProducts.length > 0) {
+      req.log.warn(
+        { products: catalogDerived.missingSourceProducts },
+        "Some catalog specifications were imported from existing product fields without official source URLs",
+      );
+    }
     const inserted = Object.values(counts).reduce((sum, count) => sum + count, 0);
     res.json(SeedAdminDataResponse.parse({ seeded: true, inserted, tables: counts }));
   } catch (error) {
