@@ -79,6 +79,14 @@ const orderId = () => {
 const SITEMAP_URL_LIMIT = 50_000;
 const STATIC_SITEMAP_PATHS = [
   "/",
+  "/guides",
+  "/guides/chargers-yemen",
+  "/guides/charging-cables-yemen",
+  "/guides/power-banks-yemen",
+  "/guides/hubs-adapters-yemen",
+  "/guides/travel-car-charging-yemen",
+  "/guides/wireless-earbuds-yemen",
+  "/guides/wireless-microphones-yemen",
   "/about",
   "/blog/best-power-bank-yemen",
   "/locations/yemen",
@@ -106,7 +114,7 @@ function publicSiteOrigin(req: Request) {
 }
 
 async function getSitemapPaths() {
-  const [categories, brands, products, guides] = await Promise.all([
+  const [categories, brands, products, guides, brandCategories] = await Promise.all([
     pool.query<{ slug: string }>(
       `SELECT "slug" FROM "categories"
        WHERE "active" = TRUE AND "seo_indexable" = TRUE
@@ -136,11 +144,23 @@ async function getSitemapPaths() {
        WHERE "published" = TRUE AND "seo_indexable" = TRUE
          AND "slug" IS NOT NULL AND BTRIM("slug") <> ''`,
     ),
+    pool.query<{ brand_slug: string; category_slug: string }>(
+      `SELECT DISTINCT b."slug" AS "brand_slug", c."slug" AS "category_slug"
+       FROM "products" p
+       JOIN "brands" b ON b."id" = p."brand_id" AND b."seo_indexable" = TRUE
+       JOIN "product_categories" pc ON pc."product_id" = p."id"
+       JOIN "categories" c ON c."id" = pc."category_id"
+         AND c."active" = TRUE AND c."seo_indexable" = TRUE
+       WHERE p."published" = TRUE
+         AND b."slug" IS NOT NULL AND BTRIM(b."slug") <> ''
+         AND c."slug" IS NOT NULL AND BTRIM(c."slug") <> ''`,
+    ),
   ]);
 
   const paths = new Set(STATIC_SITEMAP_PATHS);
   for (const row of categories.rows) paths.add(publicCategoryPath(row.slug));
   for (const row of brands.rows) paths.add(`/brand/${row.slug}`);
+  for (const row of brandCategories.rows) paths.add(`/${row.brand_slug}${publicCategoryPath(row.category_slug)}`);
   for (const row of products.rows) {
     paths.add(productPublicPath({
       brandSlug: row.brand_slug,

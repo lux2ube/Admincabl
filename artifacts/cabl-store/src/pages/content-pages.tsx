@@ -19,6 +19,7 @@ import { Link, useParams } from 'wouter';
 import type { StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
 import { productPath } from '@/lib/store-routes';
+import { getSeoKeywordCluster, seoKeywordClusters } from '@/lib/seo-keywords';
 import { setSeoHead } from '@/lib/seo-head';
 import { Breadcrumbs, CTASection, CatalogError, LoadingCatalog, PageHeading } from '@/components/page-parts';
 import { ProductGrid } from '@/components/catalog-ui';
@@ -736,6 +737,113 @@ export function HomeImportedSections({ products }: { products: StoreProduct[] })
           { question: 'هل السعر يشمل الشحن؟', answer: 'السعر يظهر للمنتج، وتظهر رسوم الشحن بعد اختيار العنوان والطريقة في checkout.' },
         ]} />
       </EditorialSection>
+    </>
+  );
+}
+
+function guideProducts(products: StoreProduct[], categorySlug: string) {
+  return products.filter((product) => product.category?.slug === categorySlug);
+}
+
+export function SeoGuidesIndexPage() {
+  return (
+    <>
+      <PageMeta
+        title="أدلة شراء الشحن والطاقة والإكسسوارات في اليمن"
+        description="أدلة CABL العملية لاختيار الشواحن والتوصيلات وخوازن الطاقة والملحقات والصوتيات من المنتجات المنشورة في اليمن."
+        canonicalPath="/guides"
+      />
+      <EditorialHero
+        eyebrow="دليل CABL في اليمن"
+        title="أدلة شراء مبنية على الكتالوج"
+        description="ابدأ من الاستخدام الذي تبحث عنه، ثم قارن المنتجات المنشورة والمواصفات والتوافر قبل الطلب."
+      />
+      <EditorialSection title="اختر موضوع البحث">
+        <div className="info-card-grid">
+          {seoKeywordClusters.map((cluster) => (
+            <Link className="info-card" href={`/guides/${cluster.slug}`} key={cluster.slug}>
+              <span className="eyebrow">{cluster.primaryTerm}</span>
+              <h3>{cluster.h1}</h3>
+              <p>{cluster.intro}</p>
+              <span className="text-link">افتح الدليل <ArrowLeft size={14} /></span>
+            </Link>
+          ))}
+        </div>
+      </EditorialSection>
+      <EditorialSection title="كيف نغطي البحث؟">
+        <div className="editorial-copy">
+          <p>نستخدم عبارات البحث العربية والإنجليزية الشائعة كخريطة للتنقل، لكننا لا ننشئ صفحة إلا عندما يكون لها قسم أو منتجات وبيانات قابلة للمراجعة داخل كتالوج CABL.</p>
+        </div>
+      </EditorialSection>
+    </>
+  );
+}
+
+export function SeoGuidePage() {
+  const { slug = '' } = useParams<{ slug: string }>();
+  const cluster = getSeoKeywordCluster(slug);
+  const { catalog, isLoading, isError } = useStore();
+
+  if (!cluster) {
+    return (
+      <>
+        <PageMeta title="الدليل غير موجود" description="هذا الدليل غير متاح حالياً." canonicalPath={`/guides/${slug}`} indexable={false} />
+        <div className="container">
+          <Breadcrumbs items={[{ label: 'أدلة الشراء', href: '/guides' }, { label: 'غير موجود' }]} />
+          <div className="state-panel" style={{ margin: '50px 0' }}>
+            <h1>الدليل غير موجود</h1>
+            <Link href="/guides" className="button button-primary">كل أدلة الشراء</Link>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  const products = guideProducts(catalog?.products || [], cluster.categorySlug);
+  const brands = Array.from(new Map(products.map((product) => [product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'), product.brand])).entries());
+  const titleWithoutBrand = cluster.title.replace(/\s*\|\s*CABL\s*$/, '');
+
+  return (
+    <>
+      <PageMeta title={titleWithoutBrand} description={cluster.description} canonicalPath={`/guides/${cluster.slug}`} />
+      <EditorialHero eyebrow="دليل شراء في اليمن" title={cluster.h1} description={cluster.intro}>
+        <div className="inline-actions">
+          <Link href={`/category/${cluster.categorySlug}`} className="button button-primary">تصفح القسم <ArrowLeft size={16} /></Link>
+          <Link href="/search" className="button button-secondary">ابحث في الكتالوج <ArrowLeft size={16} /></Link>
+        </div>
+      </EditorialHero>
+      <EditorialSection eyebrow="تغطية البحث" title={`${cluster.primaryTerm} والعبارات المرتبطة`}>
+        <div className="keyword-pill-list" aria-label="موضوعات الدليل">
+          {cluster.searchThemes.map((theme) => <span key={theme}>{theme}</span>)}
+        </div>
+        <div className="editorial-copy">
+          <p>تظهر هنا العبارات كموضوعات مرتبطة بما يقدمه هذا القسم، بينما القرار النهائي يعتمد على مواصفات وتوافر المنتج المحدد.</p>
+        </div>
+      </EditorialSection>
+      <EditorialSection title={`منتجات ${cluster.primaryTerm} المنشورة الآن`}>
+        {isLoading ? <LoadingCatalog /> : isError ? <CatalogError retry={() => window.location.reload()} /> : (
+          <>
+            <div className="catalog-guide-summary"><strong>{products.length}</strong><span>منتجات في القسم · {products.filter((product) => product.quantity > 0).length} متاح الآن</span></div>
+            <ProductGrid products={products} empty={`لا توجد منتجات منشورة في قسم ${cluster.primaryTerm} حالياً.`} />
+          </>
+        )}
+      </EditorialSection>
+      <EditorialSection title={`كيف تختار ${cluster.primaryTerm}؟`}>
+        <div className="numbered-steps">
+          {cluster.steps.map((step, index) => <div key={step.title}><b>{String(index + 1).padStart(2, '0')}</b><h3>{step.title}</h3><p>{step.text}</p></div>)}
+        </div>
+      </EditorialSection>
+      <EditorialSection title={`أسئلة شائعة عن ${cluster.primaryTerm}`}>
+        <FAQList items={cluster.faqs} />
+      </EditorialSection>
+      <EditorialSection title="روابط مرتبطة من الكتالوج">
+        <div className="category-related-links">
+          <Link href={`/category/${cluster.categorySlug}`}><Package /><strong>كل منتجات {cluster.primaryTerm}</strong><span>افتح صفحة القسم والفلترة الحالية.</span><ArrowLeft size={15} /></Link>
+          {brands.slice(0, 4).map(([brandSlug, brand]) => <Link href={`/brand/${brandSlug}`} key={brandSlug}><ShieldCheck /><strong>منتجات {brand}</strong><span>تصفح منتجات العلامة المنشورة.</span><ArrowLeft size={15} /></Link>)}
+          <Link href="/shipping"><Truck /><strong>الشحن والتوصيل</strong><span>راجع الرسوم والمدة قبل تأكيد الطلب.</span><ArrowLeft size={15} /></Link>
+        </div>
+      </EditorialSection>
+      <CTASection />
     </>
   );
 }

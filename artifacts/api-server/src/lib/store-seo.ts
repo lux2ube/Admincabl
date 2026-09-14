@@ -68,6 +68,37 @@ type GuideSeoInput = {
 const HOME_TITLE = "CABL | منتجات الشحن والطاقة والإكسسوارات";
 const HOME_DESCRIPTION = "تسوق منتجات الشحن والطاقة والإكسسوارات من كتالوج CABL، مع أسعار ومخزون وخيارات شحن مأخوذة من المتجر.";
 
+const categorySeoProfiles: Record<string, { title: string; description: string }> = {
+  chargers: {
+    title: "شواحن الجوال والشحن السريع في اليمن | CABL",
+    description: "قارن شواحن الجوال وUSB-C وPD المتاحة في كتالوج CABL داخل اليمن، مع مواصفات المنتج والسعر والتوافر قبل الطلب.",
+  },
+  "charging-cables": {
+    title: "كابلات وتوصيلات الشحن في اليمن | CABL",
+    description: "استكشف توصيلات الشحن المنشورة في CABL حسب USB-C وLightning والقدرة ونقل البيانات عندما تكون هذه القيم موثقة للموديل.",
+  },
+  "power-banks": {
+    title: "خوازن الطاقة والباور بانك في اليمن | CABL",
+    description: "قارن خوازن الطاقة والباور بانك المتاحة في اليمن حسب السعة والقدرة والمنافذ والخصائص المنشورة للموديل.",
+  },
+  "phone-accessories": {
+    title: "وصلات ومحاور وملحقات الأجهزة في اليمن | CABL",
+    description: "تصفح وصلات ومحاور وملحقات الأجهزة المنشورة في CABL، وقارن المنافذ والقدرة والتوافق والسعر قبل الطلب.",
+  },
+  "travel-adapters": {
+    title: "شواحن السيارة وملحقات السفر في اليمن | CABL",
+    description: "قارن شواحن السيارة وملحقات السفر المنشورة في كتالوج CABL حسب القدرة والمنافذ والتوافق والتوافر داخل اليمن.",
+  },
+  "wireless-earbuds": {
+    title: "سماعات الأذن اللاسلكية في اليمن | CABL",
+    description: "قارن سماعات الأذن اللاسلكية المنشورة في اليمن حسب الموديل والاستخدام والمكالمات والخصائص المعلنة.",
+  },
+  "wireless-microphones": {
+    title: "الميكروفونات اللاسلكية لصناع المحتوى في اليمن | CABL",
+    description: "استكشف الميكروفونات اللاسلكية المنشورة في اليمن، وقارن التكوين والمستقبلات والتوافق قبل الطلب من CABL.",
+  },
+};
+
 const categoryPublicPaths: Record<string, string> = {
   chargers: "chargers",
   "charging-cables": "cables",
@@ -131,9 +162,9 @@ function productDisplayName(brand: string, productName: string) {
 }
 
 function productDescription(input: ProductSeoInput, displayName: string) {
-  return input.shortDescription
-    || input.productDescription
-    || `${displayName} من كتالوج CABL مع خيارات الشحن المتاحة في المتجر.`;
+  const detail = input.shortDescription || input.productDescription;
+  const base = detail ? `${displayName}: ${detail}` : `${displayName} من كتالوج CABL.`;
+  return `${base} راجع المواصفات والسعر والتوافر قبل الطلب داخل اليمن.`;
 }
 
 function breadcrumbs(items: Breadcrumb[]) {
@@ -228,15 +259,17 @@ export function buildProductSeo(input: ProductSeoInput): SeoResponse {
 
 export function buildCategorySeo(input: CategorySeoInput): SeoResponse {
   const canonicalPath = publicCategoryPath(input.slug);
+  const keywordProfile = categorySeoProfiles[input.slug];
   const description = input.metaDescription
     || input.seoDescription
     || input.description
+    || keywordProfile?.description
     || `${input.name} من كتالوج CABL مع خيارات الشحن المتاحة.`;
 
   return {
     entityType: "category",
     slug: input.slug,
-    title: input.seoTitle || `${input.name} | CABL`,
+    title: input.seoTitle || keywordProfile?.title || `${input.name} | CABL`,
     h1: input.name,
     description,
     canonicalPath,
@@ -258,7 +291,7 @@ export function buildBrandSeo(input: BrandSeoInput): SeoResponse {
   const description = input.metaDescription
     || input.seoDescription
     || input.description
-    || `منتجات ${input.name} من كتالوج CABL مع خيارات الشحن المتاحة.`;
+    || `منتجات ${input.name} في اليمن من كتالوج CABL، مع صفحات الموديلات والمواصفات والسعر والتوافر قبل الطلب.`;
 
   return {
     entityType: "brand",
