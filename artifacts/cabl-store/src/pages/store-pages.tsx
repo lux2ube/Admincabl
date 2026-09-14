@@ -455,33 +455,6 @@ function CommercialHomePage() {
         </div>
       </section>
 
-      <section className="guided-discovery guided-audio-discovery" aria-labelledby="creator-audio-title">
-        <div className="container guided-discovery-inner">
-          <div>
-            <span className="eyebrow">لصنّاع المحتوى</span>
-            <h2 id="creator-audio-title">صانع محتوى وتريد صوت احترافي؟</h2>
-            <p>ابدأ من ميكروفونات Hollyland اللاسلكية، ثم قارن الموديل والتكوين والتوافر قبل الطلب.</p>
-          </div>
-          <div className="guided-discovery-links">
-            <Link href="/category/wireless-microphones">
-              <Headphones size={20} />
-              <strong>مايكروفونات لاسلكية</strong>
-              <span>تصفح القسم <ArrowLeft size={13} /></span>
-            </Link>
-            <Link href="/brand/hollyland">
-              <Package size={20} />
-              <strong>كل منتجات Hollyland</strong>
-              <span>افتح صفحة العلامة <ArrowLeft size={13} /></span>
-            </Link>
-            <Link href="/brand/hollyland/wireless-microphones">
-              <Zap size={20} />
-              <strong>Hollyland للصوت</strong>
-              <span>قارن داخل العلامة <ArrowLeft size={13} /></span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
       <section className="guided-quick-access guided-home-catalog" aria-labelledby="home-quick-access-title">
         <div className="container">
           <div className="guided-section-header">
