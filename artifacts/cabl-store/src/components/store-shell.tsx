@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
-import { ArrowLeft, Heart, Menu, Search, ShoppingBag, X, ChevronDown, ChevronLeft, PackageSearch, MessageCircle, Tags, Truck, CircleHelp, BookOpen, ShieldCheck, RotateCcw, Mail } from 'lucide-react';
+import { ArrowLeft, Heart, Menu, Search, ShoppingBag, X, ChevronDown, ChevronLeft, PackageSearch, MessageCircle, Tags, Truck, CircleHelp, BookOpen, ShieldCheck, RotateCcw, Mail, MapPin, Zap } from 'lucide-react';
 import { useStore } from '@/lib/store';
 
 export function StoreShell({ children }: { children: ReactNode }) {
@@ -93,7 +93,11 @@ export function StoreShell({ children }: { children: ReactNode }) {
              <Link href="/faq" onClick={() => setMobileOpen(false)} className="drawer-menu-link" data-testid="link-mobile-faq"><span className="drawer-menu-icon"><CircleHelp size={17}/></span><span>الأسئلة الشائعة</span><ChevronLeft size={16}/></Link>
              <Link href="/return-policy" onClick={() => setMobileOpen(false)} className="drawer-menu-link" data-testid="link-mobile-returns"><span className="drawer-menu-icon"><RotateCcw size={17}/></span><span>الإرجاع والاستبدال</span><ChevronLeft size={16}/></Link>
              <Link href="/contact" onClick={() => setMobileOpen(false)} className="drawer-menu-link" data-testid="link-mobile-contact"><span className="drawer-menu-icon"><Mail size={17}/></span><span>تواصل معنا</span><ChevronLeft size={16}/></Link>
+             <Link href="/blog/best-power-bank-yemen" onClick={() => setMobileOpen(false)} className="drawer-menu-link" data-testid="link-mobile-guide"><span className="drawer-menu-icon"><BookOpen size={17}/></span><span>دليل الشراء</span><ChevronLeft size={16}/></Link>
              <Link href="/lab" onClick={() => setMobileOpen(false)} className="drawer-menu-link" data-testid="link-mobile-lab"><span className="drawer-menu-icon"><ShieldCheck size={17}/></span><span>مركز المواصفات</span><ChevronLeft size={16}/></Link>
+             <Link href="/verify" onClick={() => setMobileOpen(false)} className="drawer-menu-link" data-testid="link-mobile-verify"><span className="drawer-menu-icon"><ShieldCheck size={17}/></span><span>التحقق من الضمان</span><ChevronLeft size={16}/></Link>
+             <Link href="/solutions/slow-car-charging" onClick={() => setMobileOpen(false)} className="drawer-menu-link" data-testid="link-mobile-solution"><span className="drawer-menu-icon"><Zap size={17}/></span><span>حلول الشحن اليومية</span><ChevronLeft size={16}/></Link>
+             <Link href="/locations/yemen" onClick={() => setMobileOpen(false)} className="drawer-menu-link" data-testid="link-mobile-location"><span className="drawer-menu-icon"><MapPin size={17}/></span><span>نطاق التوصيل في اليمن</span><ChevronLeft size={16}/></Link>
            </section>
          </div>
          <div className="drawer-foot"><MessageCircle size={16}/><span>تحتاج مساعدة؟ <Link href="/contact" onClick={() => setMobileOpen(false)}>تواصل معنا</Link></span></div>
