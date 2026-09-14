@@ -564,3 +564,29 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:h
   .detail-trust-item{padding:7px}
   .detail-trust-item small{font-size:8px;line-height:1.35}
 }
+
+/* Mobile readability overrides: keep the compact layout without shrinking Arabic text. */
+@media (max-width:767px){
+  .product-context-strip{grid-template-columns:1fr 1fr;gap:0;padding:12px;margin-bottom:18px}
+  .product-context-main{grid-column:1/-1;min-width:0;padding-bottom:11px;margin-bottom:9px}
+  .product-context-main strong{display:block;font-size:12px;line-height:1.5}
+  .product-context-item{min-width:0;padding:6px 8px}
+  .product-context-item span{display:block;font-size:10px;line-height:1.4}
+  .product-context-item b{display:block;font-size:12px;line-height:1.5;white-space:normal;overflow-wrap:anywhere}
+  .product-specs-heading h2{font-size:24px}
+  .product-specs-heading p{font-size:11px;line-height:1.7}
+  .product-specs-grid{grid-template-columns:1fr;gap:8px}
+  .spec-card,.spec-card-wide{grid-column:auto;min-height:0;padding:12px}
+  .spec-card>span{margin-bottom:7px;font-size:11px;line-height:1.5}
+  .spec-card>strong{font-size:14px;line-height:1.65}
+  .spec-card small{font-size:11px;line-height:1.55}
+  .spec-list{gap:6px}
+  .spec-list span{padding:7px 9px;font-size:11px;line-height:1.45}
+  .detail-trust-heading .eyebrow{font-size:10px}
+  .detail-trust-heading strong{font-size:13px}
+  .detail-trust-grid{gap:7px}
+  .detail-trust-item{min-height:58px;padding:9px;gap:8px}
+  .detail-trust-number{width:24px;height:24px;font-size:9px}
+  .detail-trust-item strong{font-size:11px;line-height:1.45}
+  .detail-trust-item small{font-size:10px;line-height:1.55}
+}
