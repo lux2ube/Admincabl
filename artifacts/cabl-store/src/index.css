@@ -82,7 +82,6 @@ input:focus,select:focus,textarea:focus{border-color:hsl(var(--accent));box-shad
   .currency-switcher{height:36px;padding:0 6px}
   .currency-switcher span{display:none}
   .currency-switcher select{font-size:10px}
-}
   .purchase-steps{width:100%;justify-content:space-between;gap:5px;margin:8px 0 18px;font-size:9px}.purchase-steps i{width:12px}.purchase-steps b{width:23px;height:23px}
   .cart-panel,.summary-panel{padding:15px}.checkout-panel{padding:19px 16px}.cart-layout,.checkout-layout{gap:14px}.cart-summary{position:static}.cart-line{grid-template-columns:58px minmax(0,1fr) 30px;grid-template-rows:auto auto;align-items:start;column-gap:10px;padding:15px 0}.cart-line img{grid-column:1;grid-row:1 / span 2}.cart-line-copy{grid-column:2;grid-row:1;min-width:0}.cart-line .quantity-control{grid-column:2;grid-row:2;justify-self:start;margin-top:9px}.cart-line .remove-button{grid-column:3;grid-row:1;padding:4px}.cart-line-copy a{font-size:12px;line-height:1.5}
   .checkout-section-heading h2{font-size:16px}.method-choice-grid{grid-template-columns:1fr}.method-choice{padding:10px}.method-choice-copy small{max-width:190px}
