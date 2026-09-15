@@ -95,14 +95,46 @@ function absoluteJsonLd(value) {
   return value;
 }
 
-async function getJson(endpoint) {
+async function fetchJson(endpoint) {
   try {
     const response = await fetch(`${apiBase}${endpoint}`);
-    if (!response.ok) return null;
-    return await response.json();
-  } catch {
-    return null;
+    if (!response.ok) {
+      return { value: null, error: `HTTP ${response.status} ${response.statusText}` };
+    }
+    try {
+      return { value: await response.json(), error: null };
+    } catch (error) {
+      return { value: null, error: `invalid JSON (${error instanceof Error ? error.message : String(error)})` };
+    }
+  } catch (error) {
+    return { value: null, error: error instanceof Error ? error.message : String(error) };
   }
+}
+
+async function getJson(endpoint) {
+  return (await fetchJson(endpoint)).value;
+}
+
+async function getRequiredJson(endpoint, routePath) {
+  const result = await fetchJson(endpoint);
+  if (result.error || result.value === null || result.value === undefined) {
+    throw new Error(`Required prerender data unavailable for ${routePath}: ${apiBase}${endpoint} (${result.error || "empty response"})`);
+  }
+  return result.value;
+}
+
+function requireProductSeo(value, endpoint, routePath) {
+  if (
+    !value
+    || typeof value !== "object"
+    || typeof value.title !== "string"
+    || typeof value.h1 !== "string"
+    || typeof value.description !== "string"
+    || typeof value.canonicalPath !== "string"
+  ) {
+    throw new Error(`Required prerender data unavailable for ${routePath}: ${apiBase}${endpoint} (response is missing product SEO fields)`);
+  }
+  return value;
 }
 
 function breadcrumbJsonLd(page, canonicalPath) {
@@ -316,7 +348,10 @@ async function main() {
     canonicalPath: mountedPath(routePath),
   }]));
 
-  const catalog = await getJson("/store/catalog");
+  const catalog = await getRequiredJson("/store/catalog", "catalog");
+  if (!Array.isArray(catalog.products)) {
+    throw new Error(`Required prerender data unavailable for catalog: ${apiBase}/store/catalog (response does not contain a products array)`);
+  }
   for (const routePath of Object.keys(guidePages)) {
     const slug = routePath.split("/").filter(Boolean).at(-1);
     const seo = await getJson(`/store/seo?type=guide&slug=${encodeURIComponent(slug)}`);
@@ -333,7 +368,7 @@ async function main() {
     });
   }
 
-  const products = catalog?.products || [];
+  const products = catalog.products;
   const categories = new Map(products.filter((product) => product.category).map((product) => [product.category.slug, product.category]));
   for (const category of categories.values()) {
     const seo = await getJson(`/store/seo?type=category&slug=${encodeURIComponent(category.slug)}`);
@@ -393,17 +428,18 @@ async function main() {
     });
   }
   for (const product of products) {
-    const seo = await getJson(`/store/seo?type=product&slug=${encodeURIComponent(product.slug)}`);
     const routePath = productPath(product);
+    const seoEndpoint = `/store/seo?type=product&slug=${encodeURIComponent(product.slug)}`;
+    const seo = requireProductSeo(await getRequiredJson(seoEndpoint, routePath), seoEndpoint, routePath);
     const relatedProducts = products
       .filter((item) => item.slug !== product.slug && item.category?.slug === product.category?.slug)
       .sort((a, b) => Number(b.brandSlug === product.brandSlug) - Number(a.brandSlug === product.brandSlug))
       .slice(0, 6);
     routes.set(routePath, {
-      ...(seo || {}),
-      title: seo?.title || `${product.productName} | CABL`,
-      h1: seo?.h1 || product.productName,
-      description: seo?.description || `${product.productName} من كتالوج CABL داخل اليمن.`,
+      ...seo,
+      title: seo.title,
+      h1: seo.h1,
+      description: seo.description,
       canonicalPath: mountedPath(routePath),
       entityType: "product",
       product,
