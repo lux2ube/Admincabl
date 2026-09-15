@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route, Router as WouterRouter, Switch, useLocation, useParams } from 'wouter';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { StoreShell } from '@/components/store-shell';
+import { WebMcpTools } from '@/components/webmcp-tools';
 import { StoreProvider } from '@/lib/store';
 import NotFound from '@/pages/not-found';
 
@@ -84,7 +85,7 @@ function Router() {
 }
 
 function App() {
-  return <QueryClientProvider client={queryClient}><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><StoreProvider><Router/></StoreProvider></WouterRouter></QueryClientProvider>;
+  return <QueryClientProvider client={queryClient}><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><StoreProvider><WebMcpTools/><Router/></StoreProvider></WouterRouter></QueryClientProvider>;
 }
 
 export default App;

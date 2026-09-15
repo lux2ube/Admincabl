@@ -29,7 +29,7 @@ function CatalogProductImage({ product }: { product: StoreProduct }) {
   if (!image || imageFailed) {
     return <span className="catalog-image-fallback" role="img" aria-label={product.productName}><Package size={42} /></span>;
   }
-  return <img src={catalogImageUrl(image, 320)} srcSet={catalogImageSrcSet(image, [160, 320, 480])} sizes="(max-width: 767px) 50vw, 25vw" alt={product.productName} loading="lazy" decoding="async" onError={() => setImageFailed(true)} data-testid={`img-product-${product.id}`} />;
+  return <img src={catalogImageUrl(image, 320)} srcSet={catalogImageSrcSet(image, [160, 320, 480])} sizes="(max-width: 767px) 50vw, 25vw" width={320} height={320} alt={product.productName} loading="lazy" decoding="async" onError={() => setImageFailed(true)} data-testid={`img-product-${product.id}`} />;
 }
 
 export function ProductGrid({ products, empty = 'لا توجد منتجات مطابقة حالياً.', compareIds, onToggleCompare }: { products: StoreProduct[]; empty?: string; compareIds?: string[]; onToggleCompare?: (productId: string) => void }) {
@@ -45,7 +45,7 @@ export function CartLine({ product, quantity }: { product: StoreProduct; quantit
   const image = product.images?.[0];
   return <article className="cart-line" data-testid={`row-cart-${product.id}`}>
     <Link className="cart-line-visual" href={productPath(product)} data-testid={`link-cart-product-${product.id}`}>
-      {image ? <img src={catalogImageUrl(image, 240)} srcSet={catalogImageSrcSet(image, [160, 240, 320])} sizes="72px" alt={product.productName} loading="lazy" decoding="async"/> : <span className="catalog-image-fallback" role="img" aria-label={product.productName}><Package size={34}/></span>}
+      {image ? <img src={catalogImageUrl(image, 240)} srcSet={catalogImageSrcSet(image, [160, 240, 320])} sizes="72px" width={240} height={240} alt={product.productName} loading="lazy" decoding="async"/> : <span className="catalog-image-fallback" role="img" aria-label={product.productName}><Package size={34}/></span>}
       <span>في السلة</span>
     </Link>
     <div className="cart-line-copy">
