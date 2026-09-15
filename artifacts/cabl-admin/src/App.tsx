@@ -352,13 +352,13 @@ function RelationField({
   label,
   testId,
 }: {
-  column: { type: string; nullable: boolean; references: string };
+  column: { type: string; nullable: boolean; references: string | null };
   value: unknown;
   onChange: (value: unknown) => void;
   label: ReactNode;
   testId: string;
 }) {
-  const [targetTable, targetColumn] = column.references.split('.');
+  const [targetTable, targetColumn] = (column.references ?? '').split('.');
   const params = useMemo(() => ({ limit: 100, offset: 0 }), [targetTable]);
   const query = useListAdminRows(targetTable, params, {
     query: { enabled: Boolean(targetTable && targetColumn), queryKey: getListAdminRowsQueryKey(targetTable, params) },
