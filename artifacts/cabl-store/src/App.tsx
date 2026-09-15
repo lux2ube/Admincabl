@@ -1,11 +1,11 @@
 import { type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Route, Router as WouterRouter, Switch, useLocation } from 'wouter';
+import { Route, Router as WouterRouter, Switch, useLocation, useParams } from 'wouter';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { StoreShell } from '@/components/store-shell';
 import { StoreProvider } from '@/lib/store';
 import NotFound from '@/pages/not-found';
-import { BrandCategoryPage, BrandPage, CanonicalProductPage, CartPage, CategoryPage, CheckoutPage, ComparePage, HomePage, OrderPage, OrdersPage, ProductPage, SearchPage } from '@/pages/store-pages';
+import { BrandCategoryPage, BrandPage, CanonicalProductPage, CartPage, CategoryPage, CategoryPageForSlug, CheckoutPage, ComparePage, HomePage, OrderPage, OrdersPage, ProductPage, SearchPage } from '@/pages/store-pages';
 import { AboutPage, ArticlePage, ContactPage, FAQPage, LabPage, LocationPage, ReturnPage, SeoGuidePage, SeoGuidesIndexPage, ShippingPage, SolutionPage, VerifyPage } from '@/pages/content-pages';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } });
@@ -13,6 +13,17 @@ const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30
 function RoutedErrorBoundary({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   return <ErrorBoundary resetKey={location}>{children}</ErrorBoundary>;
+}
+
+const publicCategoryAliases: Record<string, string> = {
+  cables: 'charging-cables',
+  'hubs-adapters': 'phone-accessories',
+  'car-accessories': 'travel-adapters',
+};
+
+function PublicCategoryPage() {
+  const { categorySlug = '' } = useParams<{ categorySlug: string }>();
+  return <CategoryPageForSlug slug={publicCategoryAliases[categorySlug] || categorySlug} />;
 }
 
 function Router() {
@@ -41,6 +52,7 @@ function Router() {
     <Route path="/return-policy" component={ReturnPage}/>
     <Route path="/faq" component={FAQPage}/>
     <Route path="/contact" component={ContactPage}/>
+    <Route path="/:categorySlug" component={PublicCategoryPage}/>
     <Route path="/:brandSlug/:categorySlug" component={BrandCategoryPage}/>
     <Route component={NotFound}/>
   </Switch></RoutedErrorBoundary></StoreShell>;

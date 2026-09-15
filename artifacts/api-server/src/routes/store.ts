@@ -168,7 +168,7 @@ async function getSitemapPaths() {
       productSlug: row.slug,
     }));
   }
-  for (const row of guides.rows) paths.add(row.canonical_path || `/guide/${row.slug}`);
+  for (const row of guides.rows) paths.add(guidePublicPath(row.slug, row.canonical_path));
   return [...paths].filter((path) => path.startsWith("/") && !path.includes("?") && !path.includes("#"));
 }
 
@@ -180,6 +180,10 @@ function sitemapXml(origin: string, basePath: string, paths: string[]) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths
     .map((path) => `  <url><loc>${xmlEscape(sitemapUrl(origin, basePath, path))}</loc></url>`)
     .join("\n")}\n</urlset>\n`;
+}
+
+function guidePublicPath(slug: string, canonicalPath: string | null) {
+  return (canonicalPath || `/guides/${slug}`).replace(/^\/guide\//, "/guides/");
 }
 
 function sitemapIndexXml(origin: string, basePath: string, chunkCount: number) {

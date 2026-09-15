@@ -314,7 +314,7 @@ export function buildBrandSeo(input: BrandSeoInput): SeoResponse {
 }
 
 export function buildGuideSeo(input: GuideSeoInput): SeoResponse {
-  const canonicalPath = input.canonicalPath || `/guide/${input.slug}`;
+  const canonicalPath = (input.canonicalPath || `/guides/${input.slug}`).replace(/^\/guide\//, "/guides/");
   const description = input.metaDescription || input.description || input.title;
 
   return {
@@ -325,7 +325,7 @@ export function buildGuideSeo(input: GuideSeoInput): SeoResponse {
     description,
     canonicalPath,
     indexable: input.indexable,
-    breadcrumbs: breadcrumbs([{ name: "أدلة الشراء", path: "/guides/" }, { name: input.h1, path: canonicalPath }]),
+    breadcrumbs: breadcrumbs([{ name: "أدلة الشراء", path: "/guides" }, { name: input.h1, path: canonicalPath }]),
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "Article",

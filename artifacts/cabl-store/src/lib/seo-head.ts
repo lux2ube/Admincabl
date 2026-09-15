@@ -16,6 +16,17 @@ export function canonicalUrl(path: string) {
   return `${window.location.origin}${basePath()}${normalizedPath}`;
 }
 
+export function absoluteJsonLd(value: unknown): unknown {
+  if (typeof value === 'string') {
+    return value.startsWith('/') ? canonicalUrl(value) : value;
+  }
+  if (Array.isArray(value)) return value.map(absoluteJsonLd);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, absoluteJsonLd(item)]));
+  }
+  return value;
+}
+
 function currentRoutePath() {
   const path = window.location.pathname;
   const prefix = basePath();

@@ -67,6 +67,31 @@ export function InfoCards({ items }: { items: Array<{ icon: ReactNode; title: st
 }
 
 export function FAQList({ items }: { items: Array<{ question: string; answer: string }> }) {
+  useEffect(() => {
+    const id = 'cabl-faq-jsonld';
+    const existing = document.getElementById(id);
+    if (!items.length) {
+      existing?.remove();
+      return;
+    }
+    const script = (existing as HTMLScriptElement | null) || document.createElement('script');
+    script.id = id;
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: items.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer },
+      })),
+    });
+    if (!existing) document.head.appendChild(script);
+    return () => {
+      if (document.getElementById(id) === script) script.remove();
+    };
+  }, [items]);
+
   return (
     <div className="faq-list">
       {items.map((item) => (

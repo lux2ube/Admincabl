@@ -6,7 +6,7 @@ import type { StoreOrderInput, StoreProduct } from '@workspace/api-client-react'
 import { useStore } from '@/lib/store';
 import { brandCategoryPath, brandPath, productPath } from '@/lib/store-routes';
 import { getSeoKeywordCluster, seoKeywordClusters } from '@/lib/seo-keywords';
-import { setSeoHead } from '@/lib/seo-head';
+import { absoluteJsonLd, setSeoHead } from '@/lib/seo-head';
 import { Breadcrumbs, CTASection, CatalogError, CatalogToolbar, LoadingCatalog, PageHeading } from '@/components/page-parts';
 import { CartLine, ProductGrid, QuantityControl } from '@/components/catalog-ui';
 import { EditorialSection, FAQList, InfoCards, ProductEditorial, mergeFaqItems } from '@/pages/content-pages';
@@ -32,9 +32,9 @@ function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; 
       canonicalPath: data.canonicalPath,
       indexable: data.indexable,
       image: Array.isArray(data.jsonLd?.image) ? String(data.jsonLd.image[0]) : typeof data.jsonLd?.image === 'string' ? data.jsonLd.image : undefined,
-      jsonLd: (() => {
+        jsonLd: (() => {
         if (!data.breadcrumbs.length || data.entityType === 'home') return data.jsonLd;
-        const primary = { ...data.jsonLd };
+          const primary = { ...absoluteJsonLd(data.jsonLd) as Record<string, unknown> };
         delete primary['@context'];
         return {
           '@context': 'https://schema.org',
@@ -46,7 +46,7 @@ function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; 
                 '@type': 'ListItem',
                 position: index + 1,
                 name: item.name,
-                item: item.path,
+                item: absoluteJsonLd(item.path),
               })),
             },
           ],
@@ -1371,6 +1371,10 @@ function CategoryLandingPage({ slug }: { slug: string }) {
 
 export function CategoryPage() {
   const { slug = '' } = useParams<{ slug: string }>();
+  return <CategoryLandingPage slug={slug} />;
+}
+
+export function CategoryPageForSlug({ slug }: { slug: string }) {
   return <CategoryLandingPage slug={slug} />;
 }
 export function BrandPage() { const { slug = '' } = useParams<{ slug: string }>(); return <BrandStorefrontPage slug={slug}/>; }
