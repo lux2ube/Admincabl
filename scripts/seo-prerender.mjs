@@ -194,6 +194,43 @@ function renderProductList(products) {
   }).join("")}</ul></section>`;
 }
 
+const protectionDisplayLabels = {
+  interference: "الحماية من التشويش الكهربائي",
+  "ugreen-interference": "الحماية من التشويش الكهربائي",
+  "over-current": "الحماية من زيادة التيار",
+  overcurrent: "الحماية من زيادة التيار",
+  "ugreen-over-current": "الحماية من زيادة التيار",
+  "ugreen-overcurrent": "الحماية من زيادة التيار",
+  "over-temperature": "الحماية من ارتفاع الحرارة",
+  overtemperature: "الحماية من ارتفاع الحرارة",
+  overheating: "الحماية من ارتفاع الحرارة",
+  "overtemperature-protection": "الحماية من ارتفاع الحرارة",
+  "ugreen-over-temperature": "الحماية من ارتفاع الحرارة",
+  "ugreen-overtemperature": "الحماية من ارتفاع الحرارة",
+  "ugreen-overheating": "الحماية من ارتفاع الحرارة",
+  "ugreen-overtemperature-protection": "الحماية من ارتفاع الحرارة",
+  "over-voltage": "الحماية من زيادة الجهد",
+  overvoltage: "الحماية من زيادة الجهد",
+  "ugreen-over-voltage": "الحماية من زيادة الجهد",
+  "ugreen-overvoltage": "الحماية من زيادة الجهد",
+  "under-voltage": "الحماية من انخفاض الجهد",
+  undervoltage: "الحماية من انخفاض الجهد",
+  "ugreen-under-voltage": "الحماية من انخفاض الجهد",
+  "ugreen-undervoltage": "الحماية من انخفاض الجهد",
+  "short-circuit": "الحماية من قصر الدائرة",
+  "short-circuit-protection": "الحماية من قصر الدائرة",
+  "ugreen-short-circuit": "الحماية من قصر الدائرة",
+  "ugreen-short-circuit-protection": "الحماية من قصر الدائرة",
+  overpower: "الحماية من زيادة القدرة",
+  "ugreen-overpower": "الحماية من زيادة القدرة",
+};
+
+function protectionLabel(protection) {
+  const slug = String(protection?.slug || "").toLowerCase();
+  const name = String(protection?.name || "").toLowerCase();
+  return protectionDisplayLabels[slug] || protectionDisplayLabels[name] || protection.name;
+}
+
 function renderProductSpecifications(product) {
   const specifications = product?.specifications;
   if (!specifications) return "";
@@ -209,6 +246,7 @@ function renderProductSpecifications(product) {
     ...(specifications.maxPowerW ? [`<li><strong>القدرة القصوى:</strong> ${escapeHtml(String(specifications.maxPowerW))}W</li>`] : []),
     ...(specifications.capabilityLabel ? [`<li><strong>القدرة:</strong> ${escapeHtml(specifications.capabilityLabel)}</li>`] : []),
     ...(specifications.compatibility || []).map((item) => `<li><strong>التوافق:</strong> ${escapeHtml(item.name || item.label || String(item))}</li>`),
+    ...(specifications.protections?.length ? [`<li><strong>أنظمة الحماية:</strong> ${specifications.protections.map(protectionLabel).map(escapeHtml).join("، ")}</li>`] : []),
   ].filter(Boolean);
   return rows.length ? `<section><h2>المواصفات المنشورة</h2><ul class="seo-product-specifications">${rows.join("")}</ul></section>` : "";
 }
