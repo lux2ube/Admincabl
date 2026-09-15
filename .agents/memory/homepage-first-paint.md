@@ -7,4 +7,4 @@ The homepage hero is presentation-first content and must render without waiting 
 
 **Why:** Catalog responses can take seconds in the current environment, and delaying the first visible brand message makes the storefront feel broken even when the API succeeds.
 
-**How to apply:** Keep hero copy and decorative artwork static, avoid loading animations on the hero, and do not gate its first render on product/category data.
+**How to apply:** Keep hero copy and decorative artwork static, avoid loading animations on the hero, and do not gate its first render on product/category data. If the app shell has not hydrated yet, use a tiny inline-styled fallback with a descriptive SEO heading rather than an unstyled text page.
