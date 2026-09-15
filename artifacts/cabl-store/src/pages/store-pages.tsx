@@ -284,7 +284,7 @@ function GuidedHomePage() {
 }
 
 function CommercialHomePage() {
-  const { catalog, isLoading, isError } = useStore();
+  const { catalog, isLoading, isError, homeCategory, selectHomeCategory } = useStore();
   const products = catalog?.products || [];
   const inStockProducts = useMemo(() => products.filter((product) => product.quantity > 0), [products]);
   const categories = catalog?.categories || [];
@@ -303,7 +303,18 @@ function CommercialHomePage() {
     return [...(vention ? [vention] : []), ...remaining].slice(0, 4);
   }, [brandCollections]);
   const [quickBrand, setQuickBrand] = useState('');
-  const [quickCategory, setQuickCategory] = useState('');
+  const [quickCategory, setQuickCategory] = useState(homeCategory || 'chargers');
+  useEffect(() => {
+    setQuickCategory(homeCategory || 'chargers');
+  }, [homeCategory]);
+  const chooseCategory = (category: string) => {
+    setQuickCategory(category);
+    selectHomeCategory(category);
+  };
+  const chooseAllCategories = () => {
+    setQuickCategory('');
+    selectHomeCategory(null);
+  };
   const quickMatches = useMemo(
     () => products.filter((product) => (!quickBrand || product.brand === quickBrand) && (!quickCategory || product.category?.slug === quickCategory)),
     [products, quickBrand, quickCategory],
@@ -483,9 +494,9 @@ function CommercialHomePage() {
                 <fieldset className="guided-quick-fieldset">
                   <legend>القسم</legend>
                   <div className="guided-finder-options">
-                    <button type="button" aria-pressed={!quickCategory} className={!quickCategory ? 'is-selected' : ''} onClick={() => setQuickCategory('')}>كل الأقسام</button>
+                    <button type="button" aria-pressed={!quickCategory} className={!quickCategory ? 'is-selected' : ''} onClick={chooseAllCategories}>كل الأقسام</button>
                     {categories.map((category) => (
-                      <button type="button" aria-pressed={quickCategory === category.slug} className={quickCategory === category.slug ? 'is-selected' : ''} key={category.slug} onClick={() => setQuickCategory(quickCategory === category.slug ? '' : category.slug)}>{category.name}</button>
+                      <button type="button" aria-pressed={quickCategory === category.slug} className={quickCategory === category.slug ? 'is-selected' : ''} key={category.slug} onClick={() => chooseCategory(category.slug)}>{category.name}</button>
                     ))}
                   </div>
                 </fieldset>

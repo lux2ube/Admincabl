@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useGetStoreCatalog } from '@workspace/api-client-react';
 import type { StoreCatalog, StoreProduct } from '@workspace/api-client-react';
 import { useLocation } from 'wouter';
@@ -19,6 +19,8 @@ type StoreContextValue = {
   currency: StoreCatalog['currencies'][number] | undefined;
   setCurrencyCode: (code: string) => void;
   formatPrice: (usd: number) => string;
+  homeCategory: string | null;
+  selectHomeCategory: (category: string | null) => void;
 };
 const StoreContext = createContext<StoreContextValue | null>(null);
 const readStorage = (key: string): unknown => {
@@ -44,8 +46,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
   const routePath = (location.startsWith(basePath) ? location.slice(basePath.length) : location).split('?')[0] || '/';
-  const catalogParams = routePath === '/' ? { category: 'chargers' } : undefined;
+  const [homeCategory, setHomeCategory] = useState<string | null>('chargers');
+  const previousRoute = useRef(routePath);
+  useEffect(() => {
+    if (routePath === '/' && previousRoute.current !== '/') setHomeCategory('chargers');
+    previousRoute.current = routePath;
+  }, [routePath]);
+  const catalogParams = routePath === '/' && homeCategory ? { category: homeCategory } : undefined;
   const query = useGetStoreCatalog(catalogParams);
+  const [homeProducts, setHomeProducts] = useState<StoreProduct[]>([]);
+  useEffect(() => {
+    if (routePath !== '/' || !query.data) return;
+    setHomeProducts((current) => {
+      const products = new Map(current.map((product) => [product.id, product]));
+      query.data.products.forEach((product) => products.set(product.id, product));
+      const merged = [...products.values()];
+      return merged.length === current.length && merged.every((product, index) => product === current[index]) ? current : merged;
+    });
+  }, [query.data, routePath]);
   const [cart, setCart] = useState<CartLine[]>(() => {
     const stored = readStorage('cabl-cart');
     return Array.isArray(stored) ? stored as CartLine[] : [];
@@ -58,7 +76,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => localStorage.setItem('cabl-cart', JSON.stringify(cart)), [cart]);
   useEffect(() => localStorage.setItem('cabl-favorites', JSON.stringify(favorites)), [favorites]);
   useEffect(() => localStorage.setItem('cabl-currency', currencyCode), [currencyCode]);
-  const catalog = query.data;
+  const catalog = useMemo(() => {
+    if (!query.data) return undefined;
+    if (routePath !== '/') return query.data;
+    const products = new Map(homeProducts.map((product) => [product.id, product]));
+    query.data.products.forEach((product) => products.set(product.id, product));
+    return { ...query.data, products: [...products.values()] };
+  }, [homeProducts, query.data, routePath]);
   const currency = catalog?.currencies.find((item) => item.code === currencyCode)
     || catalog?.currencies.find((item) => item.code === 'YER')
     || catalog?.currencies.find((item) => item.isDefault)
@@ -69,18 +93,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCurrencyCode(catalog.currencies.find((item) => item.code === 'YER')?.code || catalog.currencies.find((item) => item.isDefault)?.code || catalog.currencies[0].code);
   }, [catalog, currencyCode]);
   useEffect(() => {
-    if (!catalog) return;
+    if (!catalog || (routePath === '/' && homeCategory)) return;
     setCart((current) => {
       const normalized = normalizeCart(current, catalog.products);
       return JSON.stringify(normalized) === JSON.stringify(current) ? current : normalized;
     });
-  }, [catalog]);
+  }, [catalog, homeCategory, routePath]);
   const cartProducts = useMemo(() => cart.flatMap((line) => {
     const product = catalog?.products.find((item) => item.id === line.productId);
     return product ? [{ product, quantity: line.quantity }] : [];
   }), [cart, catalog]);
   const value: StoreContextValue = {
-    catalog, isLoading: query.isLoading, isError: query.isError, cart, favorites,
+    catalog, isLoading: query.isLoading || query.isFetching, isError: query.isError, cart, favorites,
     addToCart: (productId, quantity = 1) => setCart((current) => {
       const existing = current.find((line) => line.productId === productId);
       const product = catalog?.products.find((item) => item.id === productId);
@@ -101,6 +125,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     removeFromCart: (productId) => setCart((current) => current.filter((line) => line.productId !== productId)),
     toggleFavorite: (productId) => setFavorites((current) => current.includes(productId) ? current.filter((id) => id !== productId) : [...current, productId]),
     cartProducts, cartCount: cartProducts.reduce((sum, line) => sum + line.quantity, 0), currency, setCurrencyCode,
+    homeCategory,
+    selectHomeCategory: (category) => {
+      if (routePath === '/') setHomeCategory(category);
+    },
     formatPrice: (usd) => {
       const code = currency?.code || 'YER';
       const converted = usd * (currency?.ratePerUsd || 1);
