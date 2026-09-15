@@ -89,6 +89,12 @@ export const GetStoreCatalogQueryParams = zod.object({
   "category": zod.coerce.string().max(getStoreCatalogQueryCategoryMax).regex(getStoreCatalogQueryCategoryRegExp).optional().describe('Optional category slug used to load a smaller catalog slice')
 })
 
+export const getStoreCatalogResponseCategoriesItemProductCountMin = 0;
+
+export const getStoreCatalogResponseBrandsItemProductCountMin = 0;
+
+
+
 export const GetStoreCatalogResponse = zod.object({
   "products": zod.array(zod.object({
   "id": zod.string(),
@@ -205,6 +211,18 @@ export const GetStoreCatalogResponse = zod.object({
   "maxPowerW": zod.number().nullable(),
   "capabilityLabel": zod.string().nullable()
 })
+})),
+  "categories": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "slug": zod.string(),
+  "productCount": zod.number().min(getStoreCatalogResponseCategoriesItemProductCountMin)
+})),
+  "brands": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "slug": zod.string(),
+  "productCount": zod.number().min(getStoreCatalogResponseBrandsItemProductCountMin)
 })),
   "shippingOptions": zod.array(zod.object({
   "id": zod.number(),

@@ -832,6 +832,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/StoreProduct"
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreCatalogCategory"
+        brands:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreCatalogBrand"
         shippingOptions:
           type: array
           items:
@@ -844,7 +852,33 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/StoreCurrency"
-      required: [products, shippingOptions, paymentMethods, currencies]
+      required: [products, categories, brands, shippingOptions, paymentMethods, currencies]
+    StoreCatalogCategory:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        productCount:
+          type: number
+          minimum: 0
+      required: [id, name, slug, productCount]
+    StoreCatalogBrand:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        productCount:
+          type: number
+          minimum: 0
+      required: [id, name, slug, productCount]
     StoreCurrency:
       type: object
       properties:

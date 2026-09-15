@@ -13,10 +13,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { catalog, cartCount, favorites, cartProducts, currency, setCurrencyCode } = useStore();
   const { formatPrice } = useStore();
-  const categories = useMemo(() => Array.from(new Map((catalog?.products || [])
-    .filter((product) => product.category)
-    .map((product) => [product.category!.slug, product.category!]))
-    .values()), [catalog]);
+  const categories = useMemo(() => catalog?.categories || [], [catalog]);
   const featuredCategories = categories;
   const navItems = useMemo(() => [
     { label: 'المنتجات', href: '/search' },

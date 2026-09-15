@@ -43,6 +43,8 @@ export * from './quoteRequestStatus';
 export * from './storeCableSpecifications';
 export * from './storeCarChargerSpecifications';
 export * from './storeCatalog';
+export * from './storeCatalogBrand';
+export * from './storeCatalogCategory';
 export * from './storeCurrency';
 export * from './storeOrder';
 export * from './storeOrderAddress';

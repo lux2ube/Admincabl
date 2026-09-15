@@ -77,10 +77,12 @@ function ProductImage({ product, className = '' }: { product: StoreProduct; clas
   return <img className={className} src={image} alt={product.productName} onError={() => setImageFailed(true)} data-testid={`img-detail-${product.id}`}/>;
 }
 
-function BrandCollectionImage({ product, brand }: { product: StoreProduct; brand: string }) {
+function BrandCollectionImage({ product, brand }: { product?: StoreProduct; brand: string }) {
   const [failed, setFailed] = useState(false);
   return <span className="brand-collection-image">
-    {failed ? <span className="brand-collection-fallback" aria-hidden="true">{brand.slice(0, 1)}</span> : <img src={product.images?.[0]} alt="" loading="lazy" onError={() => setFailed(true)} />}
+    {failed || !product?.images?.[0]
+      ? <span className="brand-collection-fallback" aria-hidden="true">{brand.slice(0, 1)}</span>
+      : <img src={product.images[0]} alt="" loading="lazy" onError={() => setFailed(true)} />}
   </span>;
 }
 
@@ -285,19 +287,15 @@ function CommercialHomePage() {
   const { catalog, isLoading, isError } = useStore();
   const products = catalog?.products || [];
   const inStockProducts = useMemo(() => products.filter((product) => product.quantity > 0), [products]);
-  const categories = useMemo(
-    () => Array.from(new Map(products.filter((product) => product.category).map((product) => [product.category!.slug, product.category!])).values()),
-    [products],
-  );
+  const categories = catalog?.categories || [];
   const brandCollections = useMemo(
-    () => Array.from(products.reduce((groups, product) => {
-      const key = product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-');
-      const current = groups.get(key) || { brand: product.brand, brandSlug: key, product, count: 0 };
-      current.count += 1;
-      groups.set(key, current);
-      return groups;
-    }, new Map<string, { brand: string; brandSlug: string; product: StoreProduct; count: number }>()).values()),
-    [products],
+    () => (catalog?.brands || []).map((brand) => ({
+      brand: brand.name,
+      brandSlug: brand.slug,
+      product: products.find((product) => product.brandSlug === brand.slug),
+      count: brand.productCount,
+    })),
+    [catalog, products],
   );
   const heroBrands = useMemo(() => {
     const vention = brandCollections.find(({ brand }) => brand.toLowerCase().includes('vention'));
@@ -1452,18 +1450,23 @@ export function SearchPage() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [sort, setSort] = useState('featured');
   const products = catalog?.products || [];
-  const brands = Array.from(new Set(products.map((product) => product.brand)));
-  const categories = Array.from(new Map(products.filter((item) => item.category).map((item) => [item.category!.slug, item.category!])).values());
+  const brands = (catalog?.brands || []).map((brand) => brand.name);
+  const categories = catalog?.categories || [];
   const powerOptions = Array.from(new Set(products.map((product) => product.specifications.maxPowerW).filter((value): value is number => typeof value === 'number' && value > 0))).sort((a, b) => a - b);
   const protocolOptions = Array.from(new Set(products.flatMap((product) => product.specifications.protocols.map((item) => item.name)))).sort((a, b) => a.localeCompare(b, 'ar'));
   const result = useMemo(() => [...products.filter((product) => (!term || `${product.productName} ${product.brand} ${product.shortDescription || ''}`.toLowerCase().includes(term.toLowerCase())) && (!brand || product.brand === brand) && (!category || product.category?.slug === category) && (!power || (product.specifications.maxPowerW ?? 0) >= Number(power)) && (!protocol || product.specifications.protocols.some((item) => item.name === protocol)))].sort((a, b) => sort === 'price-low' ? (a.discountPrice ?? a.regularPrice) - (b.discountPrice ?? b.regularPrice) : sort === 'price-high' ? (b.discountPrice ?? b.regularPrice) - (a.discountPrice ?? a.regularPrice) : 0), [products, term, brand, category, power, protocol, sort]);
   const favoriteProducts = useMemo(() => products.filter((product) => favorites.includes(product.id)), [products, favorites]);
-  const brandDirectory = useMemo(() => Array.from(new Map(products.map((product) => [product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-'), product.brand])).entries()).sort((a, b) => a[1].localeCompare(b[1], 'ar')), [products]);
+  const brandDirectory = useMemo(
+    () => (catalog?.brands || [])
+      .map((brand) => [brand.slug, brand.name, brand.productCount] as const)
+      .sort((a, b) => a[1].localeCompare(b[1], 'ar')),
+    [catalog],
+  );
   const activeFilterCount = Number(Boolean(brand)) + Number(Boolean(category)) + Number(Boolean(power)) + Number(Boolean(protocol));
   const clearFilters = () => { setBrand(''); setCategory(''); setPower(''); setProtocol(''); };
   const toggleCompare = (productId: string) => setCompareIds((current) => current.includes(productId) ? current.filter((id) => id !== productId) : current.length >= 4 ? current : [...current, productId]);
   const submit = (event: FormEvent) => { event.preventDefault(); setLocation(`/search${term ? `?q=${encodeURIComponent(term)}` : ''}`); };
-   if (view === 'brands') return <><NoIndex/><div className="container"><Breadcrumbs items={[{ label: 'العلامات التجارية' }]}/><PageHeading eyebrow="دليل العلامات" title="اختر علامتك المفضلة" description="تصفح المنتجات المنشورة حسب العلامة التجارية."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <div className="brand-directory">{brandDirectory.map(([slug, name]) => <Link href={`/brand/${slug}`} className="brand-directory-card" key={slug} data-testid={`link-brand-directory-${slug}`}><span className="brand-directory-mark">{name.slice(0, 1)}</span><span><strong>{name}</strong><small>{products.filter((product) => (product.brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-')) === slug).length} منتجات</small></span><ArrowLeft size={17}/></Link>)}</div>}</div></>;
+   if (view === 'brands') return <><NoIndex/><div className="container"><Breadcrumbs items={[{ label: 'العلامات التجارية' }]}/><PageHeading eyebrow="دليل العلامات" title="اختر علامتك المفضلة" description="تصفح المنتجات المنشورة حسب العلامة التجارية."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <div className="brand-directory">{brandDirectory.map(([slug, name, productCount]) => <Link href={`/brand/${slug}`} className="brand-directory-card" key={slug} data-testid={`link-brand-directory-${slug}`}><span className="brand-directory-mark">{name.slice(0, 1)}</span><span><strong>{name}</strong><small>{productCount} منتجات</small></span><ArrowLeft size={17}/></Link>)}</div>}</div></>;
    if (view === 'favorites') return <><NoIndex/><div className="container"><Breadcrumbs items={[{ label: 'المفضلة' }]}/><PageHeading eyebrow="اختياراتك" title="منتجاتك المفضلة" description="المنتجات التي حفظتها على هذا الجهاز تظهر هنا."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <ProductGrid products={favoriteProducts} empty="لم تحفظ أي منتج بعد."/>}</div></>;
      return <><NoIndex/><div className="container search-page"><Breadcrumbs items={[{ label: 'البحث' }]}/><div className="search-hero"><div className="search-hero-copy"><span className="eyebrow">اكتشف بهدوء</span><h1>ابحث عن قطعتك القادمة</h1><p>النتائج تتحدث من كتالوج CABL مباشرة.</p></div><form className="big-search" onSubmit={submit}><input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="مثلاً: شاحن سريع" aria-label="بحث المنتجات" data-testid="input-search"/><button aria-label="تنفيذ البحث" data-testid="button-submit-search"><SearchIcon size={18}/><span>بحث</span></button></form></div><div className="search-mobile-toolbar"><button type="button" className="search-filter-toggle" onClick={() => setFiltersOpen(true)} data-testid="button-open-search-filters"><SlidersHorizontal size={16}/><span>الفلاتر</span>{activeFilterCount > 0 && <b>{activeFilterCount}</b>}</button><span>{result.length} منتج</span></div><div className="search-layout"><aside className="filter-panel"><SearchFilters brands={brands} categories={categories} powerOptions={powerOptions} protocolOptions={protocolOptions} brand={brand} category={category} power={power} protocol={protocol} onBrandChange={setBrand} onCategoryChange={setCategory} onPowerChange={setPower} onProtocolChange={setProtocol} onClear={clearFilters}/></aside><div className="search-results">{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <><CatalogToolbar products={result} sort={sort} setSort={setSort}/>{compareIds.length > 0 && <div className="compare-tray"><div><strong>مقارنة المنتجات</strong><span>{compareIds.length} من 4 منتجات محددة</span></div><div className="compare-tray-actions"><button type="button" className="button button-quiet" onClick={() => setCompareIds([])}>مسح</button>{compareIds.length >= 2 && <Link className="button button-primary" href={`/compare?ids=${compareIds.join(',')}`}><Scale size={15}/> افتح المقارنة</Link>}</div></div>}<ProductGrid products={result} compareIds={compareIds} onToggleCompare={toggleCompare} empty="لم نجد نتائج بهذا الوصف."/></>}</div></div>{filtersOpen && <div className="search-filter-modal" role="dialog" aria-modal="true" aria-label="فلاتر البحث"><button className="search-filter-backdrop" type="button" aria-label="إغلاق الفلاتر" onClick={() => setFiltersOpen(false)} /><aside className="search-filter-drawer"><div className="search-filter-drawer-head"><div><span className="eyebrow">تحكم بالنتائج</span><h2>فلترة المنتجات</h2></div><button type="button" onClick={() => setFiltersOpen(false)} aria-label="إغلاق الفلاتر"><X size={19}/></button></div><SearchFilters brands={brands} categories={categories} powerOptions={powerOptions} protocolOptions={protocolOptions} brand={brand} category={category} power={power} protocol={protocol} onBrandChange={setBrand} onCategoryChange={setCategory} onPowerChange={setPower} onProtocolChange={setProtocol} onClear={clearFilters}/><button type="button" className="button button-primary search-filter-apply" onClick={() => setFiltersOpen(false)}>عرض النتائج <ArrowLeft size={15}/></button></aside></div>}</div></>;
 }

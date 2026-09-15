@@ -302,6 +302,22 @@ export interface StoreSeoResponse {
   jsonLd: StoreSeoResponseJsonLd;
 }
 
+export interface StoreCatalogCategory {
+  id: string;
+  name: string;
+  slug: string;
+  /** @minimum 0 */
+  productCount: number;
+}
+
+export interface StoreCatalogBrand {
+  id: string;
+  name: string;
+  slug: string;
+  /** @minimum 0 */
+  productCount: number;
+}
+
 export interface StoreCurrency {
   code: string;
   name: string;
@@ -311,6 +327,8 @@ export interface StoreCurrency {
 
 export interface StoreCatalog {
   products: StoreProduct[];
+  categories: StoreCatalogCategory[];
+  brands: StoreCatalogBrand[];
   shippingOptions: StoreShippingOption[];
   paymentMethods: StorePaymentMethod[];
   currencies: StoreCurrency[];

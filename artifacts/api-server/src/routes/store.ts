@@ -360,6 +360,58 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
       product.specifications = specifications.get(productId) ?? emptyStoreSpecifications();
     }
 
+    const categoriesResult = await pool.query<{
+      id: string;
+      name: string;
+      slug: string;
+      product_count: number;
+    }>(`
+      SELECT
+        c."id",
+        c."category_name" AS "name",
+        c."slug",
+        COUNT(DISTINCT p."id")::int AS "product_count"
+      FROM "categories" c
+      JOIN "product_categories" pc ON pc."category_id" = c."id"
+      JOIN "products" p ON p."id" = pc."product_id" AND p."published" = TRUE
+      WHERE c."active" = TRUE
+        AND c."slug" IS NOT NULL
+        AND BTRIM(c."slug") <> ''
+      GROUP BY c."id", c."category_name", c."slug"
+      ORDER BY c."category_name" ASC
+    `);
+    const categories = categoriesResult.rows.map((category) => ({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      productCount: category.product_count,
+    }));
+
+    const brandsResult = await pool.query<{
+      id: string;
+      name: string;
+      slug: string;
+      product_count: number;
+    }>(`
+      SELECT
+        b."id",
+        b."brand_name" AS "name",
+        b."slug",
+        COUNT(DISTINCT p."id")::int AS "product_count"
+      FROM "brands" b
+      JOIN "products" p ON p."brand_id" = b."id" AND p."published" = TRUE
+      WHERE b."slug" IS NOT NULL
+        AND BTRIM(b."slug") <> ''
+      GROUP BY b."id", b."brand_name", b."slug"
+      ORDER BY b."brand_name" ASC
+    `);
+    const brands = brandsResult.rows.map((brand) => ({
+      id: brand.id,
+      name: brand.name,
+      slug: brand.slug,
+      productCount: brand.product_count,
+    }));
+
     const shippingResult = await pool.query<{
       id: number;
       name: string;
@@ -428,6 +480,8 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
 
     const response = GetStoreCatalogResponse.parse({
       products: [...productMap.values()],
+      categories,
+      brands,
       shippingOptions,
       paymentMethods,
       currencies,

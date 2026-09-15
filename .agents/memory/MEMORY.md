@@ -17,3 +17,4 @@
 - [Seed SQL parameter typing](seed-sql-parameter-typing.md) — explicitly cast reused PostgreSQL seed parameters when a value and subquery comparison infer conflicting types.
 - [Crawlable CABL HTML](crawlable-cabl-html.md) — static CABL builds need catalog-backed route HTML and deduplicated head metadata before SPA hydration.
 - [RTL mobile flex sizing](rtl-mobile-flex-sizing.md) — column layouts need stretch alignment explicitly or `align-items: start` can shrink cards and create side gutters.
+- [Build environment requirements](build-environment-requirements.md) — Vite artifact builds validate PORT and BASE_PATH even without starting a server.
