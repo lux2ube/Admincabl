@@ -1579,37 +1579,74 @@ function ProductDetailPage({ slug }: { slug: string }) {
 type StoreProductSpecifications = StoreProduct["specifications"];
 
 const specificationSeoLabels: Record<string, string> = {
-  use_case: 'نوع الاستخدام (Use Case)',
-  port_type: 'نوع المنفذ (Port Type)',
-  max_power_w: 'القدرة القصوى (Max Power)',
-  gan: 'تقنية نيتريد الغاليوم (GaN Charging Technology)',
-  capacity_mah: 'السعة (Capacity)',
-  energy_wh: 'الطاقة (Energy)',
-  input_summary: 'مواصفات الإدخال (Input Specifications)',
-  output_summary: 'مواصفات الإخراج (Output Specifications)',
-  max_output_w: 'أقصى قدرة إخراج (Max Output Power)',
-  recharge_time_hours: 'وقت إعادة الشحن (Recharge Time)',
-  wireless_charging: 'الشحن اللاسلكي (Wireless Charging)',
-  display: 'شاشة العرض (Display)',
-  pass_through_charging: 'الشحن أثناء الاستخدام (Pass-through Charging)',
-  connector_a: 'الموصل الأول (Connector A)',
-  connector_b: 'الموصل الثاني (Connector B)',
-  length_m: 'طول الكابل (Cable Length)',
-  data_speed_gbps: 'نقل البيانات وسرعتها (Data Transfer Speed)',
-  usb_version: 'إصدار USB (USB Version)',
-  e_marker: 'شريحة E-marker (E-marker Chip)',
-  video_support: 'دعم الفيديو (Video Support)',
-  material: 'الخامة (Material)',
-  input_voltage_v: 'جهد الإدخال (Input Voltage)',
-  power_distribution: 'توزيع الطاقة (Power Distribution)',
-  car_compatibility: 'توافق السيارة (Car Compatibility)',
-  warranty_months: 'الضمان (Warranty)',
-  dimensions: 'الأبعاد (Dimensions)',
-  compatibility: 'التوافق (Compatibility)',
+  use_case: 'نوع الاستخدام',
+  port_type: 'نوع المنفذ',
+  max_power_w: 'القدرة القصوى',
+  gan: 'تقنية GaN للشحن السريع',
+  capacity_mah: 'السعة',
+  energy_wh: 'الطاقة',
+  input_summary: 'مواصفات الإدخال',
+  output_summary: 'مواصفات الإخراج',
+  max_output_w: 'أقصى قدرة إخراج',
+  recharge_time_hours: 'وقت إعادة الشحن',
+  wireless_charging: 'الشحن اللاسلكي',
+  display: 'شاشة العرض',
+  pass_through_charging: 'الشحن أثناء الاستخدام',
+  connector_a: 'الموصل الأول',
+  connector_b: 'الموصل الثاني',
+  length_m: 'طول الكابل',
+  data_speed_gbps: 'سرعة نقل البيانات',
+  usb_version: 'إصدار USB',
+  e_marker: 'شريحة E-marker',
+  video_support: 'دعم الفيديو',
+  material: 'الخامة',
+  input_voltage_v: 'جهد الإدخال',
+  power_distribution: 'توزيع الطاقة',
+  car_compatibility: 'توافق السيارة',
+  warranty_months: 'الضمان',
+  dimensions: 'الأبعاد',
+  compatibility: 'التوافق',
 };
 
 function specificationLabel(slug: string, fallback: string) {
   return specificationSeoLabels[slug] ?? fallback;
+}
+
+const protectionDisplayLabels: Record<string, string> = {
+  interference: 'الحماية من التشويش الكهربائي',
+  'ugreen-interference': 'الحماية من التشويش الكهربائي',
+  'over-current': 'الحماية من زيادة التيار',
+  overcurrent: 'الحماية من زيادة التيار',
+  'ugreen-over-current': 'الحماية من زيادة التيار',
+  'ugreen-overcurrent': 'الحماية من زيادة التيار',
+  'over-temperature': 'الحماية من ارتفاع الحرارة',
+  overtemperature: 'الحماية من ارتفاع الحرارة',
+  overheating: 'الحماية من ارتفاع الحرارة',
+  'overtemperature-protection': 'الحماية من ارتفاع الحرارة',
+  'ugreen-over-temperature': 'الحماية من ارتفاع الحرارة',
+  'ugreen-overtemperature': 'الحماية من ارتفاع الحرارة',
+  'ugreen-overheating': 'الحماية من ارتفاع الحرارة',
+  'ugreen-overtemperature-protection': 'الحماية من ارتفاع الحرارة',
+  'over-voltage': 'الحماية من زيادة الجهد',
+  overvoltage: 'الحماية من زيادة الجهد',
+  'ugreen-over-voltage': 'الحماية من زيادة الجهد',
+  'ugreen-overvoltage': 'الحماية من زيادة الجهد',
+  'under-voltage': 'الحماية من انخفاض الجهد',
+  undervoltage: 'الحماية من انخفاض الجهد',
+  'ugreen-under-voltage': 'الحماية من انخفاض الجهد',
+  'ugreen-undervoltage': 'الحماية من انخفاض الجهد',
+  'short-circuit': 'الحماية من قصر الدائرة',
+  'short-circuit-protection': 'الحماية من قصر الدائرة',
+  'ugreen-short-circuit': 'الحماية من قصر الدائرة',
+  'ugreen-short-circuit-protection': 'الحماية من قصر الدائرة',
+  overpower: 'الحماية من زيادة القدرة',
+  'ugreen-overpower': 'الحماية من زيادة القدرة',
+};
+
+function protectionLabel(protection: StoreProductSpecifications['protections'][number]) {
+  return protectionDisplayLabels[protection.slug.toLowerCase()]
+    ?? protectionDisplayLabels[protection.name.toLowerCase()]
+    ?? protection.name;
 }
 
 function formatSpecificationValue(specs: StoreProductSpecifications, slug: string, unit?: string | null) {
@@ -1673,13 +1710,13 @@ function ProductSpecificationsPanel({ product }: { product: StoreProduct }) {
         const value = formatSpecificationValue(specs, definition.slug, definition.unit);
           return value ? <div className="spec-card product-attribute-card" key={definition.slug}><span>{specificationLabel(definition.slug, definition.label)}</span><strong>{value}</strong></div> : null;
       })}
-       {specs.cable && specs.cable.dataSpeedGbps === null && <div className="spec-card product-attribute-card"><span>نقل البيانات (Data Transfer)</span><strong>غير منشور</strong><small>لا نثبت دعم نقل البيانات من نوع الموصل وحده من دون قيمة موثقة.</small></div>}
+      {specs.cable && specs.cable.dataSpeedGbps === null && <div className="spec-card product-attribute-card"><span>نقل البيانات</span><strong>غير منشور</strong><small>لا نثبت دعم نقل البيانات من نوع الموصل وحده من دون قيمة موثقة.</small></div>}
        {specs.warrantyMonths !== null && <div className="spec-card product-attribute-card"><span>{specificationLabel('warranty_months', 'الضمان')}</span><strong>{specs.warrantyMonths} شهر</strong>{specs.warrantyNote && <small>{specs.warrantyNote}</small>}</div>}
        {specs.dimensions && (specs.dimensions.lengthMm !== null || specs.dimensions.widthMm !== null || specs.dimensions.heightMm !== null || specs.dimensions.weightG !== null) && <div className="spec-card product-attribute-card"><span>{specificationLabel('dimensions', 'الأبعاد')}</span><strong>{[specs.dimensions.lengthMm, specs.dimensions.widthMm, specs.dimensions.heightMm].every((value) => value !== null) ? `${specs.dimensions.lengthMm} × ${specs.dimensions.widthMm} × ${specs.dimensions.heightMm} mm` : [specs.dimensions.lengthMm, specs.dimensions.widthMm, specs.dimensions.heightMm].some((value) => value !== null) ? `${specs.dimensions.lengthMm ?? '—'} × ${specs.dimensions.widthMm ?? '—'} × ${specs.dimensions.heightMm ?? '—'} mm` : null}</strong>{specs.dimensions.weightG !== null && <small>{specs.dimensions.weightG} g</small>}</div>}
-       {specs.ports.length > 0 && <div className="spec-card spec-card-wide product-attribute-card"><span>المنافذ (Ports)</span><div className="spec-list">{specs.ports.map((port) => <span key={port.id}><b>{port.name}</b>{port.type}{port.maxPowerW !== null ? ` · ${port.maxPowerW}W` : ''}</span>)}</div></div>}
-       {specs.protocols.length > 0 && <div className="spec-card spec-card-wide product-attribute-card"><span>بروتوكولات الشحن (Charging Protocols)</span><div className="spec-list">{specs.protocols.map((protocol) => <span key={`${protocol.slug}-${protocol.portId ?? 'all'}`}>{protocol.name}</span>)}</div></div>}
-       {specs.powerProfiles.length > 0 && <div className="spec-card spec-card-wide product-attribute-card"><span>توزيع الطاقة (Power Distribution)</span><div className="spec-list">{specs.powerProfiles.map((profile) => <span key={profile.name}><b>{profile.name}</b>{profile.totalPowerW !== null ? ` · ${profile.totalPowerW}W` : ''}</span>)}</div></div>}
-       {specs.protections.length > 0 && <div className="spec-card spec-card-wide product-attribute-card"><span>الحماية (Protection)</span><div className="spec-list">{specs.protections.map((protection) => <span key={protection.slug}>{protection.name}</span>)}</div></div>}
+      {specs.ports.length > 0 && <div className="spec-card spec-card-wide product-attribute-card"><span>المنافذ</span><div className="spec-list">{specs.ports.map((port) => <span key={port.id}><b>{port.name}</b>{port.type}{port.maxPowerW !== null ? ` · ${port.maxPowerW}W` : ''}</span>)}</div></div>}
+      {specs.protocols.length > 0 && <div className="spec-card spec-card-wide product-attribute-card"><span>بروتوكولات الشحن</span><div className="spec-list">{specs.protocols.map((protocol) => <span key={`${protocol.slug}-${protocol.portId ?? 'all'}`}>{protocol.name}</span>)}</div></div>}
+      {specs.powerProfiles.length > 0 && <div className="spec-card spec-card-wide product-attribute-card"><span>توزيع الطاقة</span><div className="spec-list">{specs.powerProfiles.map((profile) => <span key={profile.name}><b>{profile.name}</b>{profile.totalPowerW !== null ? ` · ${profile.totalPowerW}W` : ''}</span>)}</div></div>}
+      {specs.protections.length > 0 && <div className="spec-card spec-card-wide product-attribute-card"><span>أنظمة الحماية</span><div className="spec-list">{specs.protections.map((protection) => <span key={protection.slug}>{protectionLabel(protection)}</span>)}</div></div>}
        {specs.compatibility.length > 0 && <div className="spec-card spec-card-wide product-attribute-card"><span>{specificationLabel('compatibility', 'التوافق')}</span><div className="spec-list">{specs.compatibility.map((item) => <span key={item.slug}><b>{item.name}</b>{item.type === 'supported' ? 'متوافق' : item.type === 'partially_supported' ? 'متوافق جزئياً' : 'غير موصى به'}</span>)}</div></div>}
     </div>
   </section>;
@@ -1699,10 +1736,11 @@ export function ComparePage() {
   const rows = [
     { label: 'السعر', value: (item: typeof items[number]) => formatPrice(item.product.discountPrice ?? item.product.regularPrice) },
      { label: specificationLabel('max_power_w', 'القدرة القصوى'), value: (item: typeof items[number]) => item.comparison.maxPowerW !== null ? `${item.comparison.maxPowerW} W` : null },
-     { label: 'المنافذ (Ports)', value: (item: typeof items[number]) => item.comparison.ports.length ? item.comparison.ports.map((port) => `${port.name}${port.maxPowerW ? ` · ${port.maxPowerW}W` : ''}`).join('، ') : null },
-     { label: 'بروتوكولات الشحن (Charging Protocols)', value: (item: typeof items[number]) => item.comparison.protocols.length ? item.comparison.protocols.map((protocol) => protocol.name).join('، ') : null },
+    { label: 'المنافذ', value: (item: typeof items[number]) => item.comparison.ports.length ? item.comparison.ports.map((port) => `${port.name}${port.maxPowerW ? ` · ${port.maxPowerW}W` : ''}`).join('، ') : null },
+    { label: 'بروتوكولات الشحن', value: (item: typeof items[number]) => item.comparison.protocols.length ? item.comparison.protocols.map((protocol) => protocol.name).join('، ') : null },
      { label: specificationLabel('dimensions', 'الأبعاد'), value: (item: typeof items[number]) => item.comparison.dimensions ? `${item.comparison.dimensions.lengthMm ?? '—'} × ${item.comparison.dimensions.widthMm ?? '—'} × ${item.comparison.dimensions.heightMm ?? '—'} mm` : null },
      { label: specificationLabel('compatibility', 'التوافق'), value: (item: typeof items[number]) => item.comparison.compatibility.length ? item.comparison.compatibility.map((entry) => entry.name).join('، ') : null },
+    { label: 'أنظمة الحماية', value: (item: typeof items[number]) => item.comparison.protections.length ? item.comparison.protections.map(protectionLabel).join('، ') : null },
   ];
   const definitions = Array.from(new Map(items.flatMap((item) => item.comparison.fieldDefinitions).map((definition) => [definition.slug, definition])).values())
     .filter((definition) => !['max_power_w', 'dimensions', 'compatibility'].includes(definition.slug));
