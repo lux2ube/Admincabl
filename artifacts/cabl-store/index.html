@@ -17,32 +17,51 @@
     <style>
       :root{background:#f4f8fd}
       html,body{margin:0;min-height:100%;background:#f4f8fd}
-      #boot-loader{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;overflow:hidden;background:linear-gradient(145deg,#f7fbff 0%,#eaf3ff 52%,#dcecff 100%);color:#14213d;font-family:Arial,"Tahoma",sans-serif;direction:rtl;opacity:1;visibility:visible;transition:opacity .38s ease,visibility .38s ease}
-      #boot-loader:before,#boot-loader:after{content:"";position:absolute;border:1px solid #1757ee1c;border-radius:50%;pointer-events:none}
-      #boot-loader:before{width:min(560px,125vw);height:min(560px,125vw);transform:translate(-24%,20%);box-shadow:0 0 0 42px #1757ee06,0 0 0 86px #1757ee04}
-      #boot-loader:after{width:280px;height:280px;transform:translate(38%,-35%);border-color:#12bfdc2b}
+      #boot-loader{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;overflow:hidden;background:#07111f;color:#fff;font-family:Arial,"Tahoma",sans-serif;direction:rtl;opacity:1;visibility:visible;transition:opacity .38s ease,visibility .38s ease}
+      #boot-loader:before,#boot-loader:after{content:"";position:absolute;border:1px solid #5fe8ff24;border-radius:50%;pointer-events:none}
+      #boot-loader:before{width:min(820px,125vw);height:min(820px,125vw);left:-16vw;bottom:-44vw;box-shadow:0 0 0 1px #1757ee14,0 0 0 72px #1757ee0b,0 0 0 148px #1757ee07}
+      #boot-loader:after{width:420px;height:420px;right:-150px;top:-180px;border-color:#ff82402b;box-shadow:0 0 100px #ff5c271c}
       #boot-loader.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
-      .boot-loader-card{position:relative;z-index:1;width:min(290px,calc(100% - 48px));padding:31px 25px 26px;border:1px solid #ffffffd9;border-radius:25px;background:#ffffffc9;box-shadow:0 22px 60px #1b4d7d1c;text-align:center;backdrop-filter:blur(16px)}
-      .boot-loader-mark{position:relative;display:grid;place-items:center;width:70px;height:70px;margin:0 auto 18px;border:1px solid #1757ee35;border-radius:22px;background:#edf5ff;color:#1757ee;font-size:43px;font-weight:900;letter-spacing:-.16em;line-height:1;box-shadow:0 10px 24px #1757ee1c}
-      .boot-loader-mark:after{content:"";position:absolute;inset:7px;border:1px dashed #12bfdc80;border-radius:17px;animation:boot-loader-spin 5s linear infinite}
-      .boot-loader-card h1{margin:0;color:#14213d;font-size:20px;letter-spacing:-.05em}
-      .boot-loader-card p{margin:7px 0 20px;color:#71819b;font-size:11px}
-      .boot-loader-track{height:5px;overflow:hidden;border-radius:99px;background:#dce8f5}
-      .boot-loader-track span{display:block;width:42%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#1757ee,#12bfdc);animation:boot-loader-progress 1.35s ease-in-out infinite}
-      .boot-loader-note{display:block;margin-top:11px;color:#9aa8b9;font-size:9px}
+      .boot-loader-card{position:relative;z-index:1;width:min(930px,calc(100% - 32px));min-height:510px;overflow:hidden;border:1px solid #ffffff20;border-radius:38px;background:linear-gradient(135deg,#ffffff12,#ffffff06);box-shadow:0 35px 100px #00000052, inset 0 1px #ffffff1f;backdrop-filter:blur(18px)}
+      .boot-loader-card:before{content:"";position:absolute;inset:12px;border:1px solid #ffffff0d;border-radius:30px;pointer-events:none}
+      .boot-loader-content{position:relative;z-index:2;width:47%;margin-inline-start:auto;padding:76px 72px 64px 42px;text-align:right}
+      .boot-loader-kicker{display:inline-flex;align-items:center;gap:8px;margin-bottom:24px;color:#66e3f4;font-size:11px;font-weight:800;letter-spacing:.15em}
+      .boot-loader-kicker:before{content:"";width:24px;height:2px;border-radius:10px;background:#ff7143;box-shadow:0 0 14px #ff7143}
+      .boot-loader-mark{display:grid;place-items:center;width:58px;height:58px;margin-bottom:22px;border:1px solid #5fe8ff5c;border-radius:20px;background:linear-gradient(145deg,#146cf0,#16bcd0);color:#fff;font-size:32px;font-weight:900;letter-spacing:-.16em;line-height:1;box-shadow:0 14px 35px #0756dd66}
+      .boot-loader-card h1{max-width:400px;margin:0;color:#fff;font-size:clamp(29px,4.2vw,54px);font-weight:950;line-height:1.12;letter-spacing:-.07em}
+      .boot-loader-card h1 span{display:block;color:#5fe8ff}
+      .boot-loader-card p{max-width:280px;margin:18px 0 32px;color:#aec2d6;font-size:13px;line-height:1.8}
+      .boot-loader-track{width:min(250px,100%);height:5px;overflow:hidden;border-radius:99px;background:#ffffff1c}
+      .boot-loader-track span{display:block;width:42%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ff7143,#5fe8ff);box-shadow:0 0 16px #5fe8ff;animation:boot-loader-progress 1.35s ease-in-out infinite}
+      .boot-loader-note{display:block;margin-top:13px;color:#7f9bb5;font-size:10px}
+      .boot-loader-art{position:absolute;z-index:1;left:-25px;bottom:-76px;width:min(57%,550px);filter:drop-shadow(0 25px 28px #00000066)}
+      .boot-loader-art:before{content:"";position:absolute;z-index:-1;width:74%;aspect-ratio:1;left:13%;top:13%;border-radius:50%;background:#1f9dd830;box-shadow:0 0 0 22px #5fe8ff0b,0 0 90px 38px #1a80d63d}
+      .boot-loader-art img{display:block;width:100%;height:auto}
+      .boot-loader-badge{position:absolute;right:12%;top:25%;display:flex;align-items:center;gap:8px;padding:11px 14px;border:1px solid #ffffff26;border-radius:99px;background:#07111fcc;color:#d8f8ff;font-size:11px;box-shadow:0 12px 25px #00000030;transform:rotate(-7deg)}
+      .boot-loader-badge i{width:7px;height:7px;border-radius:50%;background:#ff7143;box-shadow:0 0 12px #ff7143}
       @keyframes boot-loader-progress{0%{transform:translateX(245%)}100%{transform:translateX(-245%)}}
-      @keyframes boot-loader-spin{to{transform:rotate(360deg)}}
+      @keyframes boot-loader-float{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-10px) rotate(1deg)}}
+      .boot-loader-art img{animation:boot-loader-float 4s ease-in-out infinite}
       @media (prefers-reduced-motion:reduce){#boot-loader,#boot-loader *{animation:none!important;transition:none!important}}
+      @media (max-width:680px){.boot-loader-card{min-height:620px;border-radius:30px}.boot-loader-content{width:auto;margin:0;padding:42px 30px 0;text-align:center}.boot-loader-kicker{margin-bottom:18px}.boot-loader-kicker:before{display:none}.boot-loader-mark{margin:0 auto 18px}.boot-loader-card h1{margin-inline:auto;font-size:clamp(30px,10vw,43px)}.boot-loader-card p{margin:14px auto 24px}.boot-loader-track{margin-inline:auto}.boot-loader-art{left:50%;bottom:-64px;width:86%;transform:translateX(-50%)}.boot-loader-art img{animation-name:boot-loader-float-mobile}.boot-loader-badge{top:20%;right:9%;font-size:10px}}
+      @keyframes boot-loader-float-mobile{0%,100%{transform:translate(-50%,0) rotate(-1deg)}50%{transform:translate(-50%,-8px) rotate(1deg)}}
     </style>
   </head>
   <body>
-    <div id="boot-loader" role="status" aria-live="polite" aria-label="جارٍ تحميل متجر CABL">
+    <div id="boot-loader" role="status" aria-live="polite" aria-label="ومعانا شواحن وبطارياااات">
       <div class="boot-loader-card">
-        <div class="boot-loader-mark" aria-hidden="true">C</div>
-        <h1>نجهّز لك المتجر</h1>
-        <p>نحمّل الكتالوج والأسعار الحالية</p>
-        <div class="boot-loader-track" aria-hidden="true"><span></span></div>
-        <small class="boot-loader-note">لحظات ونبدأ</small>
+        <div class="boot-loader-content">
+          <div class="boot-loader-kicker">CABL / اليمن</div>
+          <div class="boot-loader-mark" aria-hidden="true">C</div>
+          <h1>ومعانا شواحن <span>وبطارياااات</span></h1>
+          <p>اختيارات واضحة وطاقة تكمل يومك، من أول لحظة تفتح فيها CABL.</p>
+          <div class="boot-loader-track" aria-hidden="true"><span></span></div>
+          <small class="boot-loader-note">جاهزين لك</small>
+        </div>
+        <div class="boot-loader-art" aria-hidden="true">
+          <img src="%BASE_URL%loading-avatar.png" alt="" />
+          <span class="boot-loader-badge"><i></i> طاقة على طول</span>
+        </div>
       </div>
     </div>
     <div id="root"></div>
