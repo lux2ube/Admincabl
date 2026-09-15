@@ -79,6 +79,16 @@ export const SubscribeNewsletterResponse = zod.object({
 /**
  * @summary Get the published CABL catalog
  */
+export const getStoreCatalogQueryCategoryMax = 180;
+
+
+export const getStoreCatalogQueryCategoryRegExp = new RegExp('^[a-z0-9-]+$');
+
+
+export const GetStoreCatalogQueryParams = zod.object({
+  "category": zod.coerce.string().max(getStoreCatalogQueryCategoryMax).regex(getStoreCatalogQueryCategoryRegExp).optional().describe('Optional category slug used to load a smaller catalog slice')
+})
+
 export const GetStoreCatalogResponse = zod.object({
   "products": zod.array(zod.object({
   "id": zod.string(),

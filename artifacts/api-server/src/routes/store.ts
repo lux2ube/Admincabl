@@ -5,6 +5,7 @@ import {
   CompareStoreProductsQueryParams,
   CompareStoreProductsResponse,
   GetStoreCatalogResponse,
+  GetStoreCatalogQueryParams,
   GetStoreSeoQueryParams,
   GetStoreSeoResponse,
   GetStoreSpecificationFiltersQueryParams,
@@ -249,6 +250,11 @@ router.get("/store/sitemap-:part.xml", async (req, res): Promise<void> => {
 });
 
 router.get("/store/catalog", async (req, res): Promise<void> => {
+  const parsed = GetStoreCatalogQueryParams.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ error: "معامل القسم غير صالح" });
+    return;
+  }
   try {
     const result = await pool.query<ProductRow>(`
       SELECT
@@ -282,8 +288,19 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
       LEFT JOIN "product_shippings" ps ON ps."product_id" = p."id"
       LEFT JOIN "shippings" s ON s."id" = ps."shipping_id" AND s."active" = TRUE
       WHERE p."published" = TRUE
+        AND (
+          $1::text IS NULL
+          OR EXISTS (
+            SELECT 1
+            FROM "product_categories" pc_filter
+            JOIN "categories" c_filter ON c_filter."id" = pc_filter."category_id"
+              AND c_filter."active" = TRUE
+            WHERE pc_filter."product_id" = p."id"
+              AND c_filter."slug" = $1::text
+          )
+        )
       ORDER BY p."created_at" DESC NULLS LAST, p."product_name" ASC, g."display_order" ASC
-    `);
+    `, [parsed.data.category ?? null]);
 
     const productMap = new Map<string, {
       id: string;

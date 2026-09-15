@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useGetStoreCatalog } from '@workspace/api-client-react';
 import type { StoreCatalog, StoreProduct } from '@workspace/api-client-react';
+import { useLocation } from 'wouter';
 
 export type CartLine = { productId: string; quantity: number };
 type StoreContextValue = {
@@ -40,7 +41,11 @@ const normalizeCart = (value: unknown, products: StoreProduct[]): CartLine[] => 
   }));
 };
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const query = useGetStoreCatalog();
+  const [location] = useLocation();
+  const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const routePath = (location.startsWith(basePath) ? location.slice(basePath.length) : location).split('?')[0] || '/';
+  const catalogParams = routePath === '/' ? { category: 'chargers' } : undefined;
+  const query = useGetStoreCatalog(catalogParams);
   const [cart, setCart] = useState<CartLine[]>(() => {
     const stored = readStorage('cabl-cart');
     return Array.isArray(stored) ? stored as CartLine[] : [];

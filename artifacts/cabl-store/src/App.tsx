@@ -59,7 +59,7 @@ function Router() {
 }
 
 function App() {
-  return <QueryClientProvider client={queryClient}><StoreProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><Router/></WouterRouter></StoreProvider></QueryClientProvider>;
+  return <QueryClientProvider client={queryClient}><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><StoreProvider><Router/></StoreProvider></WouterRouter></QueryClientProvider>;
 }
 
 export default App;

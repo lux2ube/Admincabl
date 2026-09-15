@@ -28,6 +28,7 @@ import type {
   AdminSeedResult,
   CompareStoreProductsParams,
   ErrorResponse,
+  GetStoreCatalogParams,
   GetStoreOrderParams,
   GetStoreSeoParams,
   GetStoreSpecificationFiltersParams,
@@ -294,20 +295,27 @@ export const useSubscribeNewsletter = <TError = ErrorType<ErrorResponse>,
       return useMutation(getSubscribeNewsletterMutationOptions(options));
     }
 
-export const getGetStoreCatalogUrl = () => {
+export const getGetStoreCatalogUrl = (params?: GetStoreCatalogParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/store/catalog`
+  return stringifiedParams.length > 0 ? `/api/store/catalog?${stringifiedParams}` : `/api/store/catalog`
 }
 
 /**
  * @summary Get the published CABL catalog
  */
-export const getStoreCatalog = async ( options?: Parameters<typeof customFetch>[1]): Promise<StoreCatalog> => {
+export const getStoreCatalog = async (params?: GetStoreCatalogParams, options?: Parameters<typeof customFetch>[1]): Promise<StoreCatalog> => {
 
-  return customFetch<StoreCatalog>(getGetStoreCatalogUrl(),
+  return customFetch<StoreCatalog>(getGetStoreCatalogUrl(params),
   {
     ...options,
     method: 'GET'
@@ -320,23 +328,23 @@ export const getStoreCatalog = async ( options?: Parameters<typeof customFetch>[
 
 
 
-export const getGetStoreCatalogQueryKey = () => {
+export const getGetStoreCatalogQueryKey = (params?: GetStoreCatalogParams,) => {
     return [
-    `/api/store/catalog`
+    `/api/store/catalog`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetStoreCatalogQueryOptions = <TData = Awaited<ReturnType<typeof getStoreCatalog>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreCatalog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetStoreCatalogQueryOptions = <TData = Awaited<ReturnType<typeof getStoreCatalog>>, TError = ErrorType<unknown>>(params?: GetStoreCatalogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreCatalog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetStoreCatalogQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetStoreCatalogQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStoreCatalog>>> = ({ signal }) => getStoreCatalog({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStoreCatalog>>> = ({ signal }) => getStoreCatalog(params, { signal, ...requestOptions });
 
 
 
@@ -354,11 +362,11 @@ export type GetStoreCatalogQueryError = ErrorType<unknown>
  */
 
 export function useGetStoreCatalog<TData = Awaited<ReturnType<typeof getStoreCatalog>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreCatalog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: GetStoreCatalogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStoreCatalog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetStoreCatalogQueryOptions(options)
+  const queryOptions = getGetStoreCatalogQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

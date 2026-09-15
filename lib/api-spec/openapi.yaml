@@ -81,6 +81,15 @@ paths:
       operationId: getStoreCatalog
       tags: [store]
       summary: Get the published CABL catalog
+      parameters:
+        - name: category
+          in: query
+          required: false
+          description: Optional category slug used to load a smaller catalog slice
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+            maxLength: 180
       responses:
         "200":
           description: Published products with gallery and shipping options

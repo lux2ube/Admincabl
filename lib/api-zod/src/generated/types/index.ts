@@ -25,6 +25,7 @@ export * from './adminTable';
 export * from './adminTableCount';
 export * from './compareStoreProductsParams';
 export * from './errorResponse';
+export * from './getStoreCatalogParams';
 export * from './getStoreOrderParams';
 export * from './getStoreSeoParams';
 export * from './getStoreSeoType';

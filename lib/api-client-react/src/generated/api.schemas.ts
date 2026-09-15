@@ -613,6 +613,15 @@ export interface AdminSeedResult {
   tables: AdminSeedResultTables;
 }
 
+export type GetStoreCatalogParams = {
+/**
+ * Optional category slug used to load a smaller catalog slice
+ * @maxLength 180
+ * @pattern ^[a-z0-9-]+$
+ */
+category?: string;
+};
+
 export type CompareStoreProductsParams = {
 /**
  * Comma-separated product UUIDs, from two to four products
