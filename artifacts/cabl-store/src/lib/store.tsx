@@ -96,7 +96,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     removeFromCart: (productId) => setCart((current) => current.filter((line) => line.productId !== productId)),
     toggleFavorite: (productId) => setFavorites((current) => current.includes(productId) ? current.filter((id) => id !== productId) : [...current, productId]),
     cartProducts, cartCount: cartProducts.reduce((sum, line) => sum + line.quantity, 0), currency, setCurrencyCode,
-    formatPrice: (usd) => new Intl.NumberFormat('ar-YE', { style: 'currency', currency: currency?.code || 'YER', maximumFractionDigits: 0 }).format(usd * (currency?.ratePerUsd || 1)),
+    formatPrice: (usd) => {
+      const code = currency?.code || 'YER';
+      const converted = usd * (currency?.ratePerUsd || 1);
+      const displayStep = code === 'YER' ? 100 : code === 'SAR' ? 1 : 1;
+      const displayAmount = code === 'YER'
+        ? Math.floor(converted / displayStep) * displayStep
+        : code === 'SAR'
+          ? Math.floor(converted)
+          : converted;
+      return new Intl.NumberFormat('ar-YE', { style: 'currency', currency: code, maximumFractionDigits: 0 }).format(displayAmount);
+    },
   };
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
