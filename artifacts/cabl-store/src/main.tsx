@@ -19,8 +19,20 @@ createRoot(document.getElementById('root')!, {
 );
 
 if (bootLoader) {
-  window.requestAnimationFrame(() => {
+  const bootImage = bootLoader.querySelector('img');
+  const imageReady = !bootImage || bootImage.complete
+    ? Promise.resolve()
+    : new Promise<void>((resolve) => {
+      bootImage.addEventListener('load', () => resolve(), { once: true });
+      bootImage.addEventListener('error', () => resolve(), { once: true });
+    });
+  const minimumDisplayTime = new Promise<void>((resolve) => {
+    window.setTimeout(resolve, 900);
+  });
+  Promise.all([imageReady, minimumDisplayTime]).then(() => {
+    window.requestAnimationFrame(() => {
     bootLoader.classList.add('is-hidden');
     window.setTimeout(() => bootLoader.remove(), 450);
+    });
   });
 }
