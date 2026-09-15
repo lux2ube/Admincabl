@@ -6,6 +6,7 @@ import { StoreShell } from '@/components/store-shell';
 import { WebMcpTools } from '@/components/webmcp-tools';
 import { StoreProvider } from '@/lib/store';
 import NotFound from '@/pages/not-found';
+import { HomePage } from '@/pages/store-pages';
 
 const BrandCategoryPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.BrandCategoryPage })));
 const BrandPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.BrandPage })));
@@ -15,7 +16,6 @@ const CategoryPage = lazy(() => import('@/pages/store-pages').then((module) => (
 const CategoryPageForSlug = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.CategoryPageForSlug })));
 const CheckoutPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.CheckoutPage })));
 const ComparePage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.ComparePage })));
-const HomePage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.HomePage })));
 const OrderPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.OrderPage })));
 const OrdersPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.OrdersPage })));
 const ProductPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.ProductPage })));

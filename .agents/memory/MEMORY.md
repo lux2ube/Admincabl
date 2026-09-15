@@ -21,3 +21,4 @@
 - [PageSpeed preview versus production](pagespeed-preview-vs-production.md) — final Lighthouse scores require the published/static artifact, not the Vite preview URL.
 - [Supabase data migration](supabase-data-migration.md) — legacy PostgreSQL copies need column-qualified inserts because physical column order can differ after schema push.
 - [WebMCP availability](webmcp-availability.md) — WebMCP is experimental; feature-detect the browser API and keep registrations abortable and read-only by default.
+- [Homepage first paint](homepage-first-paint.md) — keep the storefront hero independent of catalog latency and route-level lazy loading.
