@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, BookOpen as BookOpenIcon, Check, ChevronLeft, Cr
 import { getCompareStoreProductsQueryKey, getGetStoreSeoQueryKey, getGetStoreOrderQueryKey, getListStoreOrdersQueryKey, useCompareStoreProducts, useCreateStoreOrder, useGetStoreOrder, useGetStoreSeo, useListStoreOrders } from '@workspace/api-client-react';
 import type { StoreOrderInput, StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
-import { brandCategoryPath, brandPath, productPath } from '@/lib/store-routes';
+import { brandCategoryPath, brandPath, catalogImageSrcSet, catalogImageUrl, productPath } from '@/lib/store-routes';
 import { getSeoKeywordCluster, seoKeywordClusters } from '@/lib/seo-keywords';
 import { absoluteJsonLd, setSeoHead } from '@/lib/seo-head';
 import { Breadcrumbs, CTASection, CatalogError, CatalogToolbar, LoadingCatalog, PageHeading } from '@/components/page-parts';
@@ -68,13 +68,25 @@ function NoIndex() {
   return <StaticSEO title="CABL" description="صفحة تنقل داخل متجر CABL." indexable={false} />;
 }
 
-function ProductImage({ product, className = '' }: { product: StoreProduct; className?: string }) {
+function ProductImage({
+  product,
+  className = '',
+  loading = 'lazy',
+  fetchPriority = 'auto',
+  sizes = '100vw',
+}: {
+  product: StoreProduct;
+  className?: string;
+  loading?: 'eager' | 'lazy';
+  fetchPriority?: 'high' | 'low' | 'auto';
+  sizes?: string;
+}) {
   const [imageFailed, setImageFailed] = useState(false);
   const image = product.images?.[0];
   if (!image || imageFailed) {
     return <span className={`${className} product-image-fallback`} role="img" aria-label={product.productName}><Package size={46} /></span>;
   }
-  return <img className={className} src={image} alt={product.productName} onError={() => setImageFailed(true)} data-testid={`img-detail-${product.id}`}/>;
+  return <img className={className} src={catalogImageUrl(image, 640)} srcSet={catalogImageSrcSet(image)} sizes={sizes} alt={product.productName} loading={loading} fetchPriority={fetchPriority} decoding="async" onError={() => setImageFailed(true)} data-testid={`img-detail-${product.id}`}/>;
 }
 
 function BrandCollectionImage({ product, brand }: { product?: StoreProduct; brand: string }) {
@@ -82,7 +94,7 @@ function BrandCollectionImage({ product, brand }: { product?: StoreProduct; bran
   return <span className="brand-collection-image">
     {failed || !product?.images?.[0]
       ? <span className="brand-collection-fallback" aria-hidden="true">{brand.slice(0, 1)}</span>
-      : <img src={product.images[0]} alt="" loading="lazy" onError={() => setFailed(true)} />}
+      : <img src={catalogImageUrl(product.images[0], 320)} srcSet={catalogImageSrcSet(product.images[0], [160, 320, 480])} sizes="160px" alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} />}
   </span>;
 }
 
@@ -134,7 +146,7 @@ function GuidedHomePage() {
             {heroProduct ? (
               <Link href={productPath(heroProduct)} className="guided-hero-product-card" data-testid={`link-home-hero-product-${heroProduct.id}`}>
                 <span className="guided-hero-index">01 / الكتالوج</span>
-                <ProductImage product={heroProduct} className="guided-hero-product-image" />
+                <ProductImage product={heroProduct} className="guided-hero-product-image" loading="lazy" fetchPriority="low" sizes="(max-width: 767px) 330px, 420px" />
                 <span className="guided-hero-product-label">
                   <span>{heroProduct.brand}</span>
                   <strong>{heroProduct.productName}</strong>
@@ -351,7 +363,7 @@ function CommercialHomePage() {
 
       <section className="reference-hero">
         <div className="container reference-hero-inner">
-          <div className="reference-hero-copy reveal">
+          <div className="reference-hero-copy">
             <span className="eyebrow">CABL / اليمن</span>
             <h1>أصلي يعيش معك..<br /><em>وتورّثه لعيالك.</em></h1>
             <p>منتجات أصلية من براندات تعرفها، تستاهل مكانها على طاولتك.</p>
@@ -360,7 +372,7 @@ function CommercialHomePage() {
             </Link>
             <div className="reference-hero-note"><ShieldCheck size={15} /> اختيارات من كتالوج CABL الحالي</div>
           </div>
-          <div className="reference-hero-media reveal">
+          <div className="reference-hero-media">
              <div className="hero-illustration" aria-label="رسم توضيحي للشحن والطاقة والاتصال">
                <span className="hero-c-watermark" aria-hidden="true">C</span>
                <svg className="hero-illustration-svg" viewBox="0 0 620 450" role="img" aria-label="رسم تجريدي للطاقة والاتصال">
@@ -450,7 +462,7 @@ function CommercialHomePage() {
               {needs.map(({ category, title, product }) => (
                 <Link href={`/category/${category.slug}`} className="guided-need-card" key={category.slug} data-testid={`link-home-need-${category.slug}`}>
                   <span className="guided-need-media" aria-hidden="true">
-                    {product ? <ProductImage product={product} className="guided-need-product-image" /> : null}
+                    {product ? <ProductImage product={product} className="guided-need-product-image" sizes="180px" /> : null}
                   </span>
                   <span className="guided-need-content">
                     <span className="guided-need-copy"><strong>{title}</strong></span>
