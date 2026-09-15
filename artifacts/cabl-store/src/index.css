@@ -675,7 +675,7 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:h
 
 /* Product cards should lead with the price; stock is only communicated by the action state. */
 .product-decision-meta{min-height:0;margin:3px 0 5px}
-.product-meta strong{font-size:18px;font-weight:900;letter-spacing:-.035em;color:#102b52}
+.product-meta strong{font-size:18px;font-weight:900;letter-spacing:-.035em;color:#1456e8;text-shadow:0 1px 0 #1456e81a}
 .product-meta>div{display:flex;align-items:baseline;gap:7px;min-width:0}
 .product-meta del{font-size:10px}
 .cart-line-price strong{font-size:15px;font-weight:900}
