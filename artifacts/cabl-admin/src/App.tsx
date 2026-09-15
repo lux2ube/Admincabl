@@ -291,8 +291,19 @@ function RelationValue({ value, reference }: { value: unknown; reference: string
     ? Object.keys(match).find((key) => /(^|_)(name|title|email|code)$/.test(key) || key.endsWith('_name'))
     : undefined;
   return <span data-testid={`relation-value-${targetTable}-${String(value)}`} title={`${reference}: ${rawValue}`}>
-    {match && displayColumn ? `${displayValue(match[displayColumn])} · ` : ''}{rawValue}
+    {match ? `${relationOptionLabel(match, displayColumn)} · ` : ''}{rawValue}
   </span>;
+}
+
+function relationOptionLabel(row: Row, preferredColumn?: string) {
+  if (preferredColumn && row[preferredColumn] !== undefined && row[preferredColumn] !== null) {
+    return displayValue(row[preferredColumn]);
+  }
+  const firstName = row.first_name;
+  const lastName = row.last_name;
+  if (firstName || lastName) return `${String(firstName ?? '')} ${String(lastName ?? '')}`.trim();
+  const displayColumn = Object.keys(row).find((key) => /(^|_)(name|title|email|code|label)$/.test(key) || key.endsWith('_name'));
+  return displayColumn ? displayValue(row[displayColumn]) : displayValue(row.id);
 }
 
 function RowDialog({ table, row, onClose, onSaved }: { table: AdminTableLike; row: Row | null; onClose: () => void; onSaved: () => void }) {
@@ -329,8 +340,50 @@ function Field({ column, value, onChange }: { column: { key: string; label: stri
   const testId = `input-field-${column.key}`;
   const label = <label htmlFor={testId} className="mb-2 flex items-center justify-between text-[11px] font-bold text-primary"><span>{column.label}{!column.nullable && <span className="ml-1 text-accent">*</span>}</span><span className="mono text-[9px] font-normal text-muted-foreground">{column.type}</span></label>;
   if (column.type === 'boolean') return <div className="sm:col-span-1"><span className="mb-2 flex items-center justify-between text-[11px] font-bold text-primary">{column.label}<span className="mono text-[9px] font-normal text-muted-foreground">boolean</span></span><button type="button" id={testId} data-testid={testId} aria-pressed={Boolean(value)} onClick={() => onChange(!value)} className={`flex h-11 w-full items-center justify-between rounded-xl border px-3 text-xs font-semibold ${value ? 'border-secondary bg-secondary text-secondary-foreground' : 'border-input bg-background text-muted-foreground'}`}><span>{value ? 'Enabled' : 'Disabled'}</span><span className={`h-5 w-9 rounded-full p-0.5 transition-colors ${value ? 'bg-secondary-foreground' : 'bg-muted-foreground/30'}`}><span className={`block h-4 w-4 rounded-full bg-card transition-transform ${value ? 'translate-x-4' : ''}`} /></span></button></div>;
+  if (column.references) return <RelationField column={column} value={value} onChange={onChange} label={label} testId={testId} />;
   const textValue = value === undefined || value === null ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value);
   return <div className="sm:col-span-1">{label}{column.type === 'json' || column.type === 'array' ? <textarea id={testId} data-testid={testId} value={textValue} onChange={(event) => onChange(event.target.value)} placeholder={column.type === 'array' ? '["value"]' : '{"key":"value"}'} rows={3} className="focus-ring w-full resize-y rounded-xl border border-input bg-background px-3 py-2.5 text-xs outline-none placeholder:text-muted-foreground/55" /> : <input id={testId} data-testid={testId} type={column.type === 'number' ? 'number' : column.type === 'date' ? 'date' : 'text'} value={textValue} onChange={(event) => onChange(event.target.value)} placeholder={column.references ? `References ${column.references}` : `Enter ${column.label.toLowerCase()}`} className="focus-ring h-11 w-full rounded-xl border border-input bg-background px-3 text-xs outline-none placeholder:text-muted-foreground/55" />}</div>;
+}
+
+function RelationField({
+  column,
+  value,
+  onChange,
+  label,
+  testId,
+}: {
+  column: { type: string; nullable: boolean; references: string };
+  value: unknown;
+  onChange: (value: unknown) => void;
+  label: ReactNode;
+  testId: string;
+}) {
+  const [targetTable, targetColumn] = column.references.split('.');
+  const params = useMemo(() => ({ limit: 100, offset: 0 }), [targetTable]);
+  const query = useListAdminRows(targetTable, params, {
+    query: { enabled: Boolean(targetTable && targetColumn), queryKey: getListAdminRowsQueryKey(targetTable, params) },
+  });
+  const options = (query.data?.rows ?? []) as Row[];
+  const selectedValue = value === null || value === undefined ? '' : String(value);
+
+  return <div className="sm:col-span-1">
+    {label}
+    <select
+      id={testId}
+      data-testid={testId}
+      value={selectedValue}
+      disabled={query.isLoading || query.isError}
+      onChange={(event) => onChange(event.target.value === '' ? (column.nullable ? null : '') : event.target.value)}
+      className="focus-ring h-11 w-full rounded-xl border border-input bg-background px-3 text-xs outline-none disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {column.nullable && <option value="">— None —</option>}
+      {query.isLoading && <option value="">Loading linked records…</option>}
+      {query.isError && <option value="">Unable to load linked records</option>}
+      {!query.isLoading && !query.isError && options.length === 0 && <option value="">No linked records available</option>}
+      {options.map((option) => <option key={String(option[targetColumn])} value={String(option[targetColumn])}>{relationOptionLabel(option, Object.keys(option).find((key) => key !== targetColumn && /(^|_)(name|title|email|code|label)$/.test(key) || key.endsWith('_name')))}</option>)}
+    </select>
+    <p className="mt-1.5 text-[10px] text-muted-foreground">{column.references}</p>
+  </div>;
 }
 
 function OrdersPage() {
