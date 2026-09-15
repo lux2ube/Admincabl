@@ -42,5 +42,20 @@ export function QuantityControl({ value, onChange, testId }: { value: number; on
 
 export function CartLine({ product, quantity }: { product: StoreProduct; quantity: number }) {
   const { formatPrice, updateCart, removeFromCart } = useStore();
-  return <div className="cart-line" data-testid={`row-cart-${product.id}`}><img src={product.images?.[0]} alt={product.productName}/><div className="cart-line-copy"><Link href={productPath(product)} data-testid={`link-cart-product-${product.id}`}>{product.productName}</Link><span>{product.brand}</span><strong>{formatPrice((product.discountPrice ?? product.regularPrice) * quantity)}</strong></div><QuantityControl value={quantity} onChange={(value) => updateCart(product.id, value)} testId={`quantity-${product.id}`}/><button className="remove-button" onClick={() => removeFromCart(product.id)} aria-label="حذف المنتج" data-testid={`button-remove-${product.id}`}><Trash2 size={17}/></button></div>;
+  const image = product.images?.[0];
+  return <article className="cart-line" data-testid={`row-cart-${product.id}`}>
+    <Link className="cart-line-visual" href={productPath(product)} data-testid={`link-cart-product-${product.id}`}>
+      {image ? <img src={image} alt={product.productName}/> : <span className="catalog-image-fallback" role="img" aria-label={product.productName}><Package size={34}/></span>}
+      <span>في السلة</span>
+    </Link>
+    <div className="cart-line-copy">
+      <span className="cart-line-brand">{product.brand}</span>
+      <Link href={productPath(product)} data-testid={`link-cart-product-name-${product.id}`}>{product.productName}</Link>
+      <div className="cart-line-price"><strong>{formatPrice((product.discountPrice ?? product.regularPrice) * quantity)}</strong><small>{formatPrice(product.discountPrice ?? product.regularPrice)} للقطعة</small></div>
+    </div>
+    <div className="cart-line-actions">
+      <QuantityControl value={quantity} onChange={(value) => updateCart(product.id, value)} testId={`quantity-${product.id}`}/>
+      <button className="remove-button" onClick={() => removeFromCart(product.id)} aria-label={`حذف ${product.productName} من السلة`} data-testid={`button-remove-${product.id}`}><Trash2 size={16}/><span>حذف</span></button>
+    </div>
+  </article>;
 }

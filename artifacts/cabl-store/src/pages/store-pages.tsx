@@ -1690,9 +1690,9 @@ export function CanonicalProductPage() {
 
 function PurchaseSteps({ current }: { current: 'cart' | 'checkout' }) {
   return <nav className="purchase-steps" aria-label="خطوات الشراء">
-    <span className={current === 'cart' ? 'is-current' : 'is-done'}><b>01</b> السلة</span>
+    <Link href="/cart" className={current === 'cart' ? 'is-current' : 'is-done'} aria-current={current === 'cart' ? 'step' : undefined}><b>01</b> السلة</Link>
     <i />
-    <span className={current === 'checkout' ? 'is-current' : ''}><b>02</b> البيانات والدفع</span>
+    <Link href="/checkout" className={current === 'checkout' ? 'is-current' : ''} aria-current={current === 'checkout' ? 'step' : undefined}><b>02</b> البيانات والدفع</Link>
     <i />
     <span><b>03</b> تأكيد الطلب</span>
   </nav>;
