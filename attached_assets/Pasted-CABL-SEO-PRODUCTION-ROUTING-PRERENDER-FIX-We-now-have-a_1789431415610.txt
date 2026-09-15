@@ -1,0 +1,565 @@
+CABL SEO PRODUCTION ROUTING + PRERENDER FIX
+
+We now have a completed audit proving that the current system is NOT production-ready.
+
+DO NOT make a superficial fix.
+DO NOT simply add more rewrites.
+DO NOT hide the problem with a generic SPA fallback.
+
+Implement the smallest maintainable architecture that makes the existing build-time prerendering actually work in production.
+
+==================================================
+1. PRIMARY ROOT CAUSE
+==================================================
+
+The build already generates route-specific HTML files such as:
+
+dist/public/category/wireless-microphones/index.html
+
+However, production clean URLs currently return:
+
+dist/public/index.html
+
+because the production static configuration uses a catch-all:
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+Therefore:
+
+/cabl-store/category/wireless-microphones
+
+currently returns the homepage shell instead of the generated route HTML.
+
+FIX THIS.
+
+The clean production URL MUST resolve to the correct generated prerendered HTML file.
+
+==================================================
+2. DO NOT CHANGE FRAMEWORK
+==================================================
+
+Do NOT migrate to Next.js.
+Do NOT replace React.
+Do NOT introduce SSR infrastructure unless absolutely required.
+
+Use the existing:
+
+React
++
+Vite
++
+build-time prerendering
++
+static production artifact
+
+architecture.
+
+The goal is to make the existing prerender system actually serve correctly.
+
+==================================================
+3. FIRST: CHOOSE ONE URL ARCHITECTURE
+==================================================
+
+This is mandatory.
+
+Choose ONE canonical public URL convention for CABL.
+
+Because the application is mounted under:
+
+/cabl-store/
+
+the preferred convention is:
+
+/cabl-store/category/:categorySlug
+/cabl-store/brand/:brandSlug
+/cabl-store/:brandSlug/:categorySlug
+/cabl-store/:brandSlug/:categorySlug/:productSlug
+/cabl-store/guides/:guideSlug
+/cabl-store/locations/:locationSlug
+
+Do NOT maintain multiple competing canonical URL systems.
+
+The following must NOT represent the same canonical page:
+
+/category/wireless-microphones
+/cabl-store/category/wireless-microphones
+/cabl-store/wireless-microphones
+/wireless-microphones
+
+Choose the canonical mounted convention above.
+
+==================================================
+4. ALIGN EVERYTHING TO THAT URL
+==================================================
+
+The same canonical URL must be used by:
+
+- React Router
+- prerender output
+- canonical tags
+- sitemap
+- internal links
+- breadcrumbs
+- JSON-LD
+- API SEO responses
+- redirects
+- acceptance tests
+
+For example:
+
+Category:
+
+/cabl-store/category/wireless-microphones
+
+Brand:
+
+/cabl-store/brand/anker
+
+Brand × Category:
+
+/cabl-store/anker/chargers
+
+Product:
+
+/cabl-store/soundcore/wireless-earbuds/soundcore-r50i-cabl-sco-r50i
+
+Guide:
+
+/cabl-store/guides/chargers-yemen
+
+Location:
+
+/cabl-store/locations/yemen
+
+==================================================
+5. FIX PRODUCTION STATIC ROUTING
+==================================================
+
+The production static server must resolve generated route HTML BEFORE the SPA fallback.
+
+For example:
+
+/cabl-store/category/wireless-microphones
+
+must resolve to the generated HTML corresponding to:
+
+dist/public/category/wireless-microphones/index.html
+
+Do not return dist/public/index.html for a valid prerendered public route.
+
+The fallback to index.html may only be used for actual client-side application routes that are intentionally not prerendered.
+
+Do NOT allow the SPA fallback to override existing prerendered HTML.
+
+IMPORTANT:
+
+Verify the actual Replit artifact/static serving behavior.
+
+Do not assume Vite Preview behavior is identical to the deployed artifact.
+
+==================================================
+6. PRERENDER OUTPUT MUST BE COMPLETE ENOUGH FOR SEO
+==================================================
+
+Do not generate only:
+
+<title>
+<h1>
+short description
+
+The raw HTML for public SEO pages must contain meaningful page-specific content.
+
+CATEGORY raw HTML should include:
+
+- page title
+- meta description
+- canonical
+- H1
+- category introduction
+- actual published product names
+- actual product links
+- relevant brand links
+- useful category information
+- relevant internal links
+- breadcrumbs
+- appropriate CollectionPage schema
+- ItemList where products are visibly listed
+- FAQPage only when visible FAQ content exists
+
+PRODUCT raw HTML should include:
+
+- product name
+- brand
+- category
+- description
+- specifications available in catalog
+- price when available
+- availability when verified
+- product URL
+- image
+- Product schema
+- Offer schema when supported
+- BreadcrumbList
+
+BRAND raw HTML should include:
+
+- brand name
+- brand description
+- published products
+- product links
+- relevant categories
+- Brand schema
+
+BRAND × CATEGORY raw HTML should include:
+
+- brand
+- category
+- actual matching products
+- product links
+- CollectionPage
+- Brand
+- ItemList when applicable
+- BreadcrumbList
+
+GUIDE raw HTML should contain the actual guide content used by the public page.
+
+Do NOT maintain a separate hardcoded guide content source that can drift from the React page.
+
+==================================================
+7. HYDRATION / INITIAL HTML
+==================================================
+
+Investigate how React starts after prerendering.
+
+If the prerendered HTML is used as the initial DOM, React should hydrate it rather than unnecessarily destroying the page and rebuilding it.
+
+Do not blindly replace prerendered HTML with a blank loading state.
+
+The user must NOT see:
+
+white screen
+→ tiny SEO text
+→ delay
+→ full page
+
+Instead:
+
+complete useful HTML
+→ immediate visual page
+→ React hydration
+→ interactive page
+
+If the current architecture uses createRoot() in a way that destroys the prerendered DOM, determine whether hydrateRoot() is appropriate.
+
+Only change this if required by the actual implementation.
+
+==================================================
+8. FIX UNKNOWN ROUTES
+==================================================
+
+These MUST NOT return homepage HTTP 200:
+
+/cabl-store/category/does-not-exist
+/cabl-store/brand/does-not-exist
+/cabl-store/does-not-exist/does-not-exist
+/cabl-store/guides/does-not-exist
+
+Return:
+
+HTTP 404
+
+for genuinely nonexistent public entities.
+
+Do not allow a generic React route such as:
+
+/category/:slug
+
+to automatically become an indexable page when the slug does not exist.
+
+Validate the entity before rendering.
+
+==================================================
+9. CANONICAL RULE
+==================================================
+
+Every valid indexable page must have exactly ONE canonical.
+
+The canonical MUST equal the chosen public URL.
+
+For example:
+
+Requested:
+
+/cabl-store/category/wireless-microphones
+
+Canonical:
+
+/cabl-store/category/wireless-microphones
+
+Sitemap:
+
+/cabl-store/category/wireless-microphones
+
+Internal links:
+
+/cabl-store/category/wireless-microphones
+
+JSON-LD URLs:
+
+/cabl-store/category/wireless-microphones
+
+No conflicting versions.
+
+==================================================
+10. SITEMAP
+==================================================
+
+Regenerate sitemap from the same canonical URL builder used by the application.
+
+Do not manually construct URLs differently from the router.
+
+Every sitemap URL must satisfy:
+
+HTTP 200
++
+indexable
++
+page-specific raw HTML
++
+self-canonical
++
+not a soft 404
+
+Unknown/unpublished/non-indexable entities must never enter sitemap.
+
+==================================================
+11. STRUCTURED DATA
+==================================================
+
+Fix structured data so it matches the actual visible/raw content.
+
+Required where appropriate:
+
+Product
+Offer
+CollectionPage
+Brand
+Article
+FAQPage
+BreadcrumbList
+ItemList
+
+Do not generate schema for information that is not actually supported.
+
+Fix Product Brand URLs.
+
+If the actual brand route is:
+
+/cabl-store/brand/soundcore
+
+do NOT generate:
+
+/soundcore
+
+Use absolute canonical URLs consistently.
+
+==================================================
+12. METADATA
+==================================================
+
+Every indexable page must have exactly:
+
+1 title
+1 meta description
+1 canonical
+1 robots directive when needed
+1 appropriate JSON-LD set
+
+Fix duplicated:
+
+og:title
+og:description
+og:url
+
+Make Twitter metadata page-specific.
+
+Do not leave homepage metadata inside route-specific prerendered HTML.
+
+==================================================
+13. TRAILING SLASHES
+==================================================
+
+Choose one policy.
+
+Recommended:
+
+NO trailing slash.
+
+Therefore:
+
+/cabl-store/category/wireless-microphones
+
+is canonical.
+
+The trailing slash version:
+
+/cabl-store/category/wireless-microphones/
+
+must redirect to the canonical version or otherwise be consistently normalized.
+
+Do not allow both versions to independently return 200 indexable pages.
+
+==================================================
+14. PRODUCTION ACCEPTANCE TESTS
+==================================================
+
+Create/extend automated tests.
+
+The tests MUST request the actual production HTTP URLs.
+
+Do NOT only inspect:
+
+dist/public/*.html
+
+Test actual HTTP responses.
+
+Representative routes:
+
+/cabl-store/
+/cabl-store/category/wireless-microphones
+/cabl-store/brand/anker
+/cabl-store/anker/chargers
+/cabl-store/soundcore/wireless-earbuds/soundcore-r50i-cabl-sco-r50i
+/cabl-store/guides/chargers-yemen
+/cabl-store/locations/yemen
+
+For every valid route verify:
+
+HTTP 200
+title is page-specific
+H1 is page-specific
+canonical exists
+canonical equals requested canonical URL
+page-specific content exists
+homepage H1 does not appear incorrectly
+JSON-LD exists where appropriate
+no duplicate canonical
+no duplicate title
+no duplicate metadata
+route is not SPA fallback
+
+==================================================
+15. NEGATIVE TESTS
+==================================================
+
+Test:
+
+/cabl-store/category/this-category-does-not-exist
+
+/cabl-store/brand/this-brand-does-not-exist
+
+/cabl-store/guides/this-guide-does-not-exist
+
+These must return:
+
+HTTP 404
+
+and must NOT return homepage HTML.
+
+==================================================
+16. MOST IMPORTANT PRODUCTION TEST
+==================================================
+
+After implementation:
+
+START THE ACTUAL PRODUCTION ARTIFACT.
+
+Do NOT rely only on:
+
+vite dev
+vite preview
+source inspection
+
+Request:
+
+/cabl-store/category/wireless-microphones
+
+using HTTP.
+
+Verify the returned HTML itself.
+
+The response MUST contain:
+
+مايكروفونات لاسلكية
+
+and category-specific content.
+
+It MUST NOT contain the homepage H1:
+
+شحن أوضح. يوم أسهل.
+
+as the primary page H1.
+
+Repeat for product, brand, brand/category, guide and location routes.
+
+==================================================
+17. FINAL REPORT
+==================================================
+
+After implementation, report:
+
+### Production routing
+PASS/FAIL
+
+### Raw HTML
+PASS/FAIL
+
+### Prerendering
+PASS/FAIL
+
+### Hydration
+PASS/FAIL
+
+### Canonicals
+PASS/FAIL
+
+### Sitemap
+PASS/FAIL
+
+### 404 handling
+PASS/FAIL
+
+### Structured data
+PASS/FAIL
+
+### Category SEO
+PASS/FAIL
+
+### Product SEO
+PASS/FAIL
+
+### Brand SEO
+PASS/FAIL
+
+### Brand × Category SEO
+PASS/FAIL
+
+### Production readiness
+Choose exactly:
+
+NOT READY
+READY WITH CRITICAL FIXES
+READY FOR LIMITED INDEXING
+SEO-READY
+
+IMPORTANT:
+
+Do not declare SEO-READY merely because build files exist.
+
+SEO-READY means the actual deployed HTTP URLs return the correct page-specific crawlable HTML.
+
+Do not stop after fixing the build.
+
+Verify the final production HTTP behavior.
