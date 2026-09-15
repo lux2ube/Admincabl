@@ -28,8 +28,8 @@ if (!basePath) {
 const devSeoPages: Record<string, { title: string; h1: string; description: string }> = {
   '/': {
     title: 'CABL | منتجات الشحن والطاقة والإكسسوارات',
-    h1: 'شحن أوضح. يوم أسهل.',
-    description: 'تسوق منتجات الشحن والطاقة والإكسسوارات من كتالوج CABL، مع أسعار ومخزون وخيارات شحن مأخوذة من المتجر.',
+    h1: 'شواحن وتوصيلات وخوازن طاقة في اليمن',
+    description: 'تسوّق شواحن الجوال وتوصيلات الشحن وخوازن الطاقة وإكسسوارات التقنية في اليمن، مع أسعار وتوافر وخيارات شحن واضحة من كتالوج CABL.',
   },
   '/chargers': {
     title: 'شواحن الجوال والشحن السريع في اليمن | CABL',
@@ -112,6 +112,20 @@ function escapeSeoHtml(value: string) {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 }
 
+function renderLoadingShell(page: { h1: string; description: string }) {
+  return `<div class="cabl-loading-shell" role="status" aria-live="polite">
+    <div class="cabl-loading-brand" aria-label="CABL اليمن">
+      <span class="cabl-loading-mark" aria-hidden="true">C</span>
+      <span class="cabl-loading-wordmark">CABL <b>اليمن</b></span>
+    </div>
+    <div class="cabl-loading-line" aria-hidden="true"><i></i></div>
+    <p class="cabl-loading-status">جارٍ تجهيز المتجر</p>
+    <h1>${escapeSeoHtml(page.h1)}</h1>
+    <p class="cabl-loading-description">${escapeSeoHtml(page.description)}</p>
+    <noscript>فعّل JavaScript لفتح متجر CABL وتصفح المنتجات.</noscript>
+  </div>`;
+}
+
 function mountedPath() {
   return basePath.replace(/\/+$/, '');
 }
@@ -168,8 +182,25 @@ function seoHtmlPlugin() {
         .replace(/<meta property="og:[^"]*"[^>]*\/?>/g, '')
         .replace(/<meta name="twitter:[^"]*"[^>]*\/?>/g, '')
         .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, '')
-        .replace('</head>', `<link rel="canonical" href="${escapeSeoHtml(canonical)}" /><meta property="og:title" content="${escapeSeoHtml(page.title)}" /><meta property="og:description" content="${escapeSeoHtml(page.description)}" /><meta property="og:url" content="${escapeSeoHtml(canonical)}" /><meta property="og:locale" content="ar_YE" /><meta property="og:site_name" content="CABL" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="${escapeSeoHtml(page.title)}" /><meta name="twitter:description" content="${escapeSeoHtml(page.description)}" /><script type="application/ld+json">${schema}</script></head>`)
-        .replace('<div id="root"></div>', `<div id="root"><main><h1>${escapeSeoHtml(page.h1)}</h1><p>${escapeSeoHtml(page.description)}</p></main></div>`);
+        .replace('</head>', `<link rel="canonical" href="${escapeSeoHtml(canonical)}" /><meta property="og:title" content="${escapeSeoHtml(page.title)}" /><meta property="og:description" content="${escapeSeoHtml(page.description)}" /><meta property="og:url" content="${escapeSeoHtml(canonical)}" /><meta property="og:locale" content="ar_YE" /><meta property="og:site_name" content="CABL" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="${escapeSeoHtml(page.title)}" /><meta name="twitter:description" content="${escapeSeoHtml(page.description)}" /><script type="application/ld+json">${schema}</script><style>
+          :root { color-scheme: light; font-family: Arial, "IBM Plex Sans Arabic", sans-serif; background: #f7faff; }
+          * { box-sizing: border-box; }
+          body { margin: 0; min-width: 320px; background: linear-gradient(145deg, #f7faff 0%, #edf5ff 100%); color: #14213d; }
+          .cabl-loading-shell { min-height: 100vh; padding: 28px 24px 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+          .cabl-loading-brand { display: inline-flex; align-items: center; gap: 10px; direction: ltr; }
+          .cabl-loading-mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 14px; background: #1757ee; color: #fff; font-size: 24px; font-weight: 800; box-shadow: 0 10px 24px #1757ee2e; }
+          .cabl-loading-wordmark { color: #14213d; font-size: 20px; font-weight: 800; letter-spacing: .04em; }
+          .cabl-loading-wordmark b { margin-left: 5px; color: #11a9c4; font-size: 12px; letter-spacing: 0; }
+          .cabl-loading-line { width: min(190px, 55vw); height: 4px; margin: 32px 0 18px; overflow: hidden; border-radius: 99px; background: #d8e7fb; }
+          .cabl-loading-line i { display: block; width: 42%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #1757ee, #11c2db); animation: cabl-loading 1.25s ease-in-out infinite; }
+          .cabl-loading-status { margin: 0; color: #50709b; font-size: 13px; font-weight: 700; }
+          .cabl-loading-shell h1 { max-width: 620px; margin: 18px 0 8px; color: #14213d; font-size: clamp(22px, 5vw, 34px); line-height: 1.35; }
+          .cabl-loading-description { max-width: 560px; margin: 0; color: #7184a0; font-size: 14px; line-height: 1.9; }
+          .cabl-loading-shell noscript { max-width: 560px; margin-top: 22px; color: #b05d35; font-size: 12px; line-height: 1.7; }
+          @keyframes cabl-loading { 0% { transform: translateX(145%); } 45%, 65% { transform: translateX(70%); } 100% { transform: translateX(-145%); } }
+          @media (prefers-reduced-motion: reduce) { .cabl-loading-line i { animation: none; margin-left: 29%; } }
+        </style></head>`)
+        .replace('<div id="root"></div>', `<div id="root">${renderLoadingShell(page)}</div>`);
     },
   };
 }
