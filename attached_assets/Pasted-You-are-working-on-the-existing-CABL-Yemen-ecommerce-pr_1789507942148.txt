@@ -1,0 +1,619 @@
+You are working on the existing CABL Yemen ecommerce project.
+
+DO NOT redesign the store.
+DO NOT invent products.
+DO NOT invent database fields.
+DO NOT change the existing database schema unless absolutely required and explicitly justified.
+DO NOT hardcode SEO data for one product.
+Fix the product-page SEO architecture so it works automatically for ALL products.
+
+TARGET TEST PRODUCT:
+https://bd978fea-6450-4cb6-926d-4ce9ecb1a69d-00-2sedaix00mccl.sisko.replit.dev/cabl-store/ugreen/chargers/shahn-ugreen-nexode-air-usb-c-bqdrh-45w-cabl-ugr-95786
+
+CURRENT PROBLEM:
+The crawled HTML is exposing an internal/slug-like string as the page title and H1:
+
+"shahn ugreen nexode air usb c bqdrh 45w cabl ugr 95786"
+
+The current crawled page also exposes only minimal fallback text and says:
+"فعّل JavaScript لفتح متجر CABL وتصفح المنتجات."
+
+This means the product data/SEO content is not being correctly rendered into the initial HTML/prerendered output.
+
+PRIMARY OBJECTIVE:
+Make every indexable CABL product page generate complete, accurate, product-specific SEO HTML from the existing database.
+
+==================================================
+
+1. FIRST: AUDIT THE EXISTING IMPLEMENTATION
+   ==================================================
+
+Before changing anything, inspect:
+
+- Supabase/database schema
+- product table(s)
+- brand relationships
+- category relationships
+- existing slug generation
+- existing SEO fields
+- product page component
+- route handling
+- metadata generation
+- canonical generation
+- sitemap generation
+- JSON-LD/schema generation
+- SSR/prerender implementation
+- vite.config.ts
+- scripts/seo-prerender.mjs
+- current build command
+- public/static output
+- existing rewrite/fallback configuration
+
+Find the ACTUAL source of truth currently used for product names, slugs, prices, brands, categories and SEO.
+
+Do not assume field names.
+
+Use the existing schema exactly.
+
+==================================================
+2. DATABASE MUST BE THE SOURCE OF TRUTH
+
+For every product page:
+
+Database
+→ product data
+→ SEO/meta generation
+→ page HTML
+→ prerendered HTML
+→ sitemap
+→ canonical
+→ JSON-LD
+
+Do NOT create separate hardcoded product SEO objects in React.
+
+If SEO fields already exist in the database, use them.
+
+If SEO fields do not exist, determine whether the current architecture already supports generated SEO values from existing product data.
+
+Do not add database columns just because it is convenient.
+
+If adding fields is genuinely necessary, STOP and report exactly:
+
+- existing schema
+- missing field
+- why it is required
+- proposed field
+  before changing the schema.
+
+==================================================
+3. PRODUCT TITLE / H1
+
+The product's actual human-readable product name must be used.
+
+Never expose:
+
+- slug fragments
+- transliterated internal names
+- product IDs
+- database IDs
+- "cabl-..."
+- URL-safe strings
+- encoded names
+
+as the visible H1 or HTML title.
+
+For the target product, the product title should be human-readable, for example:
+
+"شاحن UGREEN Nexode Air USB-C 45W"
+
+Do not blindly overwrite the database value if the database already contains a better official/product name.
+
+Use the existing product name from the database.
+
+H1:
+[PRODUCT NAME]
+
+HTML title:
+[PRODUCT NAME] | CABL اليمن
+
+Do not keyword stuff.
+
+The title must be unique per product and descriptive.
+
+==================================================
+4. META DESCRIPTION
+
+Generate/use a product-specific meta description.
+
+It should naturally include relevant information already available in the database, such as:
+
+- product name
+- brand
+- product type
+- important specification
+- CABL/Yemen context
+
+Example for the target product:
+
+"شاحن UGREEN Nexode Air USB-C بقدرة 45 واط من CABL. تعرّف على المواصفات والتوافق والسعر والتوفر وخيارات الشحن داخل اليمن."
+
+Do not copy this exact sentence to every product.
+
+Generate it dynamically from actual product data.
+
+Never invent technical specifications.
+
+==================================================
+5. CANONICAL URL
+
+Every indexable product page must have:
+
+<link rel="canonical" href="[EXACT PRODUCT CANONICAL URL]" />Rules:
+
+- canonical must be self-referencing
+- canonical must match the actual public product URL
+- canonical must match the URL used in internal links
+- canonical must match the URL submitted to sitemap
+- no accidental /category/ mismatch
+- no old route mismatch
+- no localhost
+- no Replit development URL in production canonical
+- no query parameters unless intentionally canonical
+- respect the existing /cabl-store/ base path
+
+Do not change URL structure unless necessary.
+
+If changing an existing product URL is necessary, implement a proper 301 redirect strategy and update:
+
+- internal links
+- sitemap
+- canonical
+- structured data
+- prerendered paths
+
+Never create broken old URLs.
+
+==================================================
+6. PRODUCT JSON-LD
+
+Every indexable product page must output valid Product structured data in the INITIAL HTML/prerendered HTML.
+
+Use actual database values.
+
+At minimum, when data exists:
+
+@context
+@type: Product
+name
+image
+description
+sku
+brand
+offers
+
+Offer should use actual:
+
+price
+priceCurrency
+availability
+url
+
+Do NOT invent:
+
+- ratings
+- reviewCount
+- aggregateRating
+- GTIN
+- MPN
+- shipping values
+- return values
+
+Only output properties for which real data exists.
+
+If the existing database contains valid identifiers such as SKU/MPN/GTIN, map them correctly.
+
+If not present, omit them.
+
+Validate that JSON-LD is actually present in the generated HTML, not only injected after hydration.
+
+==================================================
+7. BREADCRUMBS
+
+Generate a crawlable breadcrumb structure based on the real hierarchy:
+
+Home
+→ Brand
+→ Category
+→ Product
+
+Example:
+
+الرئيسية
+يوجرين
+الشواحن
+شاحن UGREEN Nexode Air USB-C 45W
+
+Use real database relationships.
+
+Do not hardcode "UGREEN" or "الشواحن".
+
+Also generate BreadcrumbList JSON-LD if the current architecture supports structured data.
+
+==================================================
+8. PRODUCT PAGE CONTENT
+
+The initial HTML must contain meaningful product content.
+
+At minimum render server/prerender side:
+
+H1
+product description
+brand
+category
+price
+availability
+main specifications
+product image/alt text
+purchase information
+shipping information if available
+returns/warranty information if available
+related products
+
+The page must NOT depend entirely on JavaScript for Googlebot to understand the product.
+
+The current fallback:
+
+"فعّل JavaScript لفتح متجر CABL وتصفح المنتجات."
+
+must NOT be the only meaningful content in the crawled HTML.
+
+==================================================
+9. PRODUCT SPECIFICATIONS
+
+Use only real product data.
+
+For example, if the database contains:
+
+45W
+USB-C
+GaN
+PD
+PPS
+single port
+
+render those specifications.
+
+If a specification does not exist in the database, do not invent it.
+
+Do not generate fake technical specifications from the product name.
+
+==================================================
+10. INTERNAL LINKING
+
+Every product page should have crawlable HTML links to relevant existing pages:
+
+- brand page
+- category page
+- parent category
+- related products
+- relevant store pages
+
+Use normal <a href=""> links.
+
+Do not rely exclusively on JavaScript click handlers.
+
+Do not generate irrelevant links.
+
+==================================================
+11. IMAGE SEO
+
+For the main product image:
+
+- use actual database/product image
+- meaningful alt text
+- do not use slug-only alt text
+- do not use "image", "product", "photo" as generic alt text
+
+Example:
+
+alt="شاحن UGREEN Nexode Air USB-C 45W"
+
+Use the actual product name dynamically.
+
+==================================================
+12. PRERENDER / STATIC BUILD
+
+This is CRITICAL.
+
+The current project uses a build/prerender architecture.
+
+Inspect and fix:
+
+vite.config.ts
+scripts/seo-prerender.mjs
+routing
+build output
+static HTML generation
+
+The final generated file for every indexable product route must contain actual product HTML.
+
+For example:
+
+dist/public/[product-route]/index.html
+
+must contain:
+
+<title>...</title>
+<meta name="description" ...>
+<link rel="canonical" ...>
+<h1>...</h1>
+product content
+Product JSON-LD
+Breadcrumb JSON-LDDo NOT merely generate the React shell and expect Google to execute JavaScript.
+
+==================================================
+13. ROUTE RESOLUTION
+
+The prerenderer must obtain the real product from the database using the actual route/slug.
+
+Do not use a hardcoded list containing only one product.
+
+The process should conceptually be:
+
+get all published/indexable products
+→ resolve canonical route
+→ fetch product data
+→ render product page
+→ generate metadata
+→ generate JSON-LD
+→ write static HTML
+
+Existing unpublished/deleted/draft/noindex products must not be generated as indexable pages.
+
+==================================================
+14. 404 HANDLING
+
+Invalid product URLs must NOT render the homepage as a fake product page.
+
+For an unknown product:
+
+return a real 404 response where the hosting architecture permits it.
+
+If static hosting limitations prevent a true HTTP 404, at minimum:
+
+- render a real Not Found page
+- noindex it
+- do not output Product JSON-LD
+- do not output product canonical
+- do not include it in sitemap
+
+Never turn unknown product URLs into the homepage.
+
+==================================================
+15. SITEMAP
+
+Product sitemap entries must come from the same canonical URL source used by product pages.
+
+For every indexable product:
+
+sitemap URL
+
+internal product link
+
+canonical URL
+
+structured-data Offer URL
+
+They must be identical.
+
+Do not generate sitemap URLs from a different route builder.
+
+Exclude:
+
+draft
+deleted
+unpublished
+noindex
+invalid products
+
+Do not create duplicate URLs.
+
+==================================================
+16. SEO DATA ARCHITECTURE
+
+Create/use ONE centralized SEO generation layer.
+
+Conceptually:
+
+getProductSEO(product)
+
+returns:
+
+{
+title,
+description,
+canonicalUrl,
+h1,
+robots,
+ogTitle,
+ogDescription,
+ogImage,
+structuredData
+}
+
+But adapt this to the project's existing architecture rather than blindly creating this exact function.
+
+The same canonical data must be consumed by:
+
+- React product page
+- prerenderer
+- metadata
+- JSON-LD
+- sitemap
+- internal links
+
+There must be ONE source of truth for URL construction.
+
+==================================================
+17. URL SLUGS
+
+Do not automatically change existing URLs just because they are not perfect.
+
+First determine whether the current slug is already indexed/used.
+
+For NEW products, generate clean, stable, readable slugs.
+
+Prefer:
+
+nexode-air-usb-c-45w-95786
+
+over transliterated Arabic fragments or internal database strings.
+
+However:
+
+DO NOT create duplicate URLs for the same product.
+
+DO NOT change existing URLs without redirect/canonical/sitemap handling.
+
+==================================================
+18. OPEN GRAPH
+
+Generate dynamically:
+
+og:title
+og:description
+og:url
+og:image
+
+from the same product SEO source.
+
+Do not hardcode one product's metadata.
+
+==================================================
+19. NO SEO KEYWORD STUFFING
+
+Do NOT add lists such as:
+
+شاحن
+شاحن جوال
+شاحن سريع
+شاحن تايب سي
+شاحن USB-C
+شاحن أصلي
+شاحن 45 واط
+...
+
+unless they naturally belong in visible useful content.
+
+The goal is a useful product page, not keyword stuffing.
+
+Use the real product name and real specifications.
+
+==================================================
+20. VALIDATION — DO NOT STOP AFTER CODING
+
+After implementation, run the complete build.
+
+Then inspect the GENERATED STATIC HTML of the target product.
+
+Do NOT rely only on the browser rendering.
+
+Verify the raw generated HTML contains:
+
+1. correct <title>
+2. correct meta description
+3. self-referencing canonical
+4. correct H1
+5. product description
+6. product price
+7. availability
+8. brand
+9. specifications
+10. Product JSON-LD
+11. Breadcrumb JSON-LD
+12. Open Graph tags
+13. crawlable internal links
+
+Then test at least 5 different existing products from different brands/categories.
+
+Do not test only the UGREEN product.
+
+==================================================
+21. AUTOMATED SEO TEST
+
+Create or extend an automated validation script if the project already has a suitable testing pattern.
+
+For every indexable product route verify:
+
+- status/render success
+- exactly one meaningful H1
+- title exists
+- title is not the slug
+- description exists
+- canonical exists
+- canonical equals expected route
+- Product JSON-LD exists
+- Product JSON-LD name equals actual product name
+- Product JSON-LD price equals actual product price
+- Product JSON-LD brand equals actual brand
+- sitemap contains the same canonical URL
+- generated HTML contains real product content
+- no "enable JavaScript" fallback as the primary product content
+- unknown product does not become homepage content
+
+FAIL the build if these conditions are violated.
+
+==================================================
+22. IMPORTANT: DO NOT BREAK EXISTING CABL
+
+Preserve:
+
+- existing UI
+- existing product data
+- existing prices
+- existing images
+- existing Supabase connection
+- existing categories
+- existing brands
+- existing cart
+- existing checkout
+- existing design system
+- existing business logic
+
+This task is primarily an SEO/data-rendering architecture fix.
+
+Do not perform unrelated refactoring.
+
+==================================================
+23. FINAL REPORT
+
+After completing the implementation, report:
+
+A. Root cause
+B. Files changed
+C. Database tables/fields used
+D. Product SEO architecture
+E. URL/canonical architecture
+F. Prerender solution
+G. JSON-LD implementation
+H. Sitemap behavior
+I. 404 behavior
+J. Test results
+
+For the target product, show the FINAL generated values:
+
+TITLE:
+H1:
+META DESCRIPTION:
+CANONICAL:
+PRODUCT URL:
+BRAND:
+SKU:
+PRICE:
+AVAILABILITY:
+
+Also show the path of the generated static HTML file.
+
+Most importantly:
+
+Do not tell me "SEO is fixed" unless you have inspected the generated HTML and verified the final output.
