@@ -3,8 +3,6 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
-import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
-
 const rawPort = process.env.PORT;
 
 if (!rawPort) {
@@ -151,7 +149,10 @@ function seoHtmlPlugin() {
     name: 'cabl-seo-html',
     transformIndexHtml(html: string, context: { originalUrl?: string }) {
       const page = devSeoPage(context.originalUrl || '/');
-      const canonical = `${mountedPath()}${page.route === '/' ? '' : page.route}`;
+      const relativeCanonical = `${mountedPath()}${page.route === '/' ? '' : page.route}`;
+      const origin = process.env.PUBLIC_SITE_ORIGIN
+        || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : '');
+      const canonical = `${origin}${relativeCanonical}`;
       const schema = JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'WebPage',
@@ -179,17 +180,6 @@ export default defineConfig({
     seoHtmlPlugin(),
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== 'production' &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import('@replit/vite-plugin-cartographer').then((m) =>
-            m.cartographer({
-              root: path.resolve(import.meta.dirname, '..'),
-            }),
-          ),
-        ]
-      : []),
   ],
   resolve: {
     alias: {
@@ -207,12 +197,14 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, 'dist/public'),
     emptyOutDir: true,
+    sourcemap: true,
   },
   server: {
     port,
     strictPort: true,
     host: '0.0.0.0',
     allowedHosts: true,
+    hmr: false,
     fs: {
       strict: true,
     },
