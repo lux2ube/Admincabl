@@ -5,6 +5,7 @@ const root = process.cwd();
 const distDir = path.resolve(root, "dist/public");
 const apiBase = (process.env.SEO_PRERENDER_API_URL || "http://127.0.0.1:8080/api").replace(/\/$/, "");
 const basePath = (process.env.BASE_PATH || "/cabl-store/").replace(/\/+$/, "");
+const prerenderConcurrency = Math.max(1, Math.min(12, Number.parseInt(process.env.SEO_PRERENDER_CONCURRENCY || "6", 10) || 6));
 
 const guidePages = {
   "/guides/chargers-yemen": {
@@ -121,6 +122,24 @@ async function getRequiredJson(endpoint, routePath) {
     throw new Error(`Required prerender data unavailable for ${routePath}: ${apiBase}${endpoint} (${result.error || "empty response"})`);
   }
   return result.value;
+}
+
+async function mapWithConcurrency(items, worker) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const workerCount = Math.min(prerenderConcurrency, items.length);
+
+  async function runWorker() {
+    while (true) {
+      const index = nextIndex;
+      nextIndex += 1;
+      if (index >= items.length) return;
+      results[index] = await worker(items[index], index);
+    }
+  }
+
+  await Promise.all(Array.from({ length: workerCount }, () => runWorker()));
+  return results;
 }
 
 function requireProductSeo(value, endpoint, routePath) {
@@ -352,11 +371,11 @@ async function main() {
   if (!Array.isArray(catalog.products)) {
     throw new Error(`Required prerender data unavailable for catalog: ${apiBase}/store/catalog (response does not contain a products array)`);
   }
-  for (const routePath of Object.keys(guidePages)) {
+  const guideRoutes = await mapWithConcurrency(Object.keys(guidePages), async (routePath) => {
     const slug = routePath.split("/").filter(Boolean).at(-1);
     const seo = await getJson(`/store/seo?type=guide&slug=${encodeURIComponent(slug)}`);
     const fallback = guidePages[routePath];
-    routes.set(routePath, {
+    return [routePath, {
       ...fallback,
       ...(seo || {}),
       title: seo?.title || fallback.title,
@@ -365,17 +384,18 @@ async function main() {
       canonicalPath: mountedPath(routePath),
       entityType: "guide",
       entity: { type: "guide", content: seo?.jsonLd?.articleBody || "" },
-    });
-  }
+    }];
+  });
+  for (const [routePath, page] of guideRoutes) routes.set(routePath, page);
 
   const products = catalog.products;
   const categories = new Map(products.filter((product) => product.category).map((product) => [product.category.slug, product.category]));
-  for (const category of categories.values()) {
+  const categoryRoutes = await mapWithConcurrency([...categories.values()], async (category) => {
     const seo = await getJson(`/store/seo?type=category&slug=${encodeURIComponent(category.slug)}`);
     const routePath = `/category/${category.slug}`;
     const categoryProducts = products.filter((product) => product.category?.slug === category.slug);
     const brands = Array.from(new Map(categoryProducts.map((product) => [product.brandSlug, { slug: product.brandSlug, name: product.brand }])).values());
-    routes.set(routePath, {
+    return [routePath, {
       ...(seo || {}),
       title: seo?.title || `${category.name} في اليمن | CABL`,
       h1: seo?.h1 || category.name,
@@ -383,15 +403,18 @@ async function main() {
       canonicalPath: mountedPath(routePath),
       entityType: "category",
       entity: { type: "category", products: categoryProducts, brands, productPath, brandPath: (slug) => `/brand/${slug}` },
-    });
-  }
-  for (const brand of new Map(products.map((product) => [product.brandSlug, product.brand])).entries()) {
-    const [brandSlug, brandName] = brand;
+    }];
+  });
+  for (const [routePath, page] of categoryRoutes) routes.set(routePath, page);
+
+  const brands = [...new Map(products.map((product) => [product.brandSlug, product.brand])).entries()];
+  const brandRoutes = await mapWithConcurrency(brands, async ([brandSlug, brandName]) => {
     const seo = await getJson(`/store/seo?type=brand&slug=${encodeURIComponent(brandSlug)}`);
     const brandProducts = products.filter((product) => product.brandSlug === brandSlug);
     const brands = [];
     const entityCategories = Array.from(new Map(brandProducts.filter((product) => product.category).map((product) => [product.category.slug, product.category])).values());
-    routes.set(`/brand/${brandSlug}`, {
+    const routePath = `/brand/${brandSlug}`;
+    return [routePath, {
       ...(seo || {}),
       title: seo?.title || `منتجات ${brandName} في اليمن | CABL`,
       h1: seo?.h1 || `منتجات ${brandName}`,
@@ -399,8 +422,9 @@ async function main() {
       canonicalPath: mountedPath(`/brand/${brandSlug}`),
       entityType: "brand",
       entity: { type: "brand", products: brandProducts, categories: entityCategories, brands, productPath, brandPath: (slug) => `/brand/${slug}` },
-    });
-  }
+    }];
+  });
+  for (const [routePath, page] of brandRoutes) routes.set(routePath, page);
   const brandCategories = new Map();
   for (const product of products) {
     if (!product.brandSlug || !product.category?.slug) continue;
@@ -427,7 +451,7 @@ async function main() {
       },
     });
   }
-  for (const product of products) {
+  const productRoutes = await mapWithConcurrency(products, async (product) => {
     const routePath = productPath(product);
     const seoEndpoint = `/store/seo?type=product&slug=${encodeURIComponent(product.slug)}`;
     const seo = requireProductSeo(await getRequiredJson(seoEndpoint, routePath), seoEndpoint, routePath);
@@ -435,7 +459,7 @@ async function main() {
       .filter((item) => item.slug !== product.slug && item.category?.slug === product.category?.slug)
       .sort((a, b) => Number(b.brandSlug === product.brandSlug) - Number(a.brandSlug === product.brandSlug))
       .slice(0, 6);
-    routes.set(routePath, {
+    return [routePath, {
       ...seo,
       title: seo.title,
       h1: seo.h1,
@@ -444,8 +468,9 @@ async function main() {
       entityType: "product",
       product,
       entity: { type: "product", product, relatedProducts, productPath, brandPath: (slug) => `/brand/${slug}` },
-    });
-  }
+    }];
+  });
+  for (const [routePath, page] of productRoutes) routes.set(routePath, page);
 
   for (const [routePath, page] of routes) {
     const outputPath = routePath === "/"
