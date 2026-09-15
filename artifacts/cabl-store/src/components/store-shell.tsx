@@ -37,6 +37,33 @@ export function StoreShell({ children }: { children: ReactNode }) {
     if (route === '/search') setSearchTerm(new URLSearchParams(queryString || '').get('q') || '');
   }, [location]);
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hash = window.location.hash;
+    if (!hash) {
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    let attempts = 0;
+    let frame = 0;
+    const scrollToHash = () => {
+      const id = decodeURIComponent(hash.slice(1));
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ block: 'start' });
+        return;
+      }
+      if (attempts < 10) {
+        attempts += 1;
+        frame = window.requestAnimationFrame(scrollToHash);
+      }
+    };
+    frame = window.requestAnimationFrame(scrollToHash);
+    return () => window.cancelAnimationFrame(frame);
+  }, [location]);
+  useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 12);
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
