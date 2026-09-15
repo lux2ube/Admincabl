@@ -19,3 +19,4 @@
 - [RTL mobile flex sizing](rtl-mobile-flex-sizing.md) — column layouts need stretch alignment explicitly or `align-items: start` can shrink cards and create side gutters.
 - [Build environment requirements](build-environment-requirements.md) — Vite artifact builds validate PORT and BASE_PATH even without starting a server.
 - [PageSpeed preview versus production](pagespeed-preview-vs-production.md) — final Lighthouse scores require the published/static artifact, not the Vite preview URL.
+- [Supabase data migration](supabase-data-migration.md) — legacy PostgreSQL copies need column-qualified inserts because physical column order can differ after schema push.
