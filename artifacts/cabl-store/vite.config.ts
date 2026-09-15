@@ -88,6 +88,26 @@ const devSeoPages: Record<string, { title: string; h1: string; description: stri
     h1: 'ميكروفونات لاسلكية لصناع المحتوى في اليمن',
     description: 'دليل مقارنة الميكروفونات اللاسلكية المنشورة في CABL.',
   },
+  '/locations/yemen': {
+    title: 'التوصيل داخل اليمن | CABL',
+    h1: 'راجع خيارات الشحن حسب محافظتك',
+    description: 'راجع خيارات الشحن الحالية قبل تأكيد طلبك إلى المحافظة التي تختارها.',
+  },
+  '/about': {
+    title: 'من نحن | CABL',
+    h1: 'من نحن',
+    description: 'تعرف على CABL وطريقة اختيار المنتجات وخدمة العملاء في اليمن.',
+  },
+  '/shipping': {
+    title: 'الشحن والتوصيل داخل اليمن | CABL',
+    h1: 'الشحن والتوصيل داخل اليمن',
+    description: 'معلومات الشحن والتوصيل داخل اليمن من CABL، مع مراجعة الرسوم والمدة في checkout.',
+  },
+  '/return-policy': {
+    title: 'سياسة الإرجاع والاستبدال | CABL',
+    h1: 'سياسة الإرجاع والاستبدال',
+    description: 'راجع شروط الإرجاع والاستبدال في CABL قبل تأكيد طلبك.',
+  },
 };
 
 function escapeSeoHtml(value: string) {
@@ -143,7 +163,11 @@ function seoHtmlPlugin() {
       return html
         .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeSeoHtml(page.title)}</title>`)
         .replace(/<meta name="description" content="[^"]*"\s*\/?>/, `<meta name="description" content="${escapeSeoHtml(page.description)}" />`)
-        .replace('</head>', `<link rel="canonical" href="${escapeSeoHtml(canonical)}" /><meta property="og:title" content="${escapeSeoHtml(page.title)}" /><meta property="og:description" content="${escapeSeoHtml(page.description)}" /><meta property="og:url" content="${escapeSeoHtml(canonical)}" /><meta property="og:locale" content="ar_YE" /><meta property="og:site_name" content="CABL" /><script type="application/ld+json">${schema}</script></head>`)
+        .replace(/<link rel="canonical" href="[^"]*"\s*\/?>/g, '')
+        .replace(/<meta property="og:[^"]*"[^>]*\/?>/g, '')
+        .replace(/<meta name="twitter:[^"]*"[^>]*\/?>/g, '')
+        .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, '')
+        .replace('</head>', `<link rel="canonical" href="${escapeSeoHtml(canonical)}" /><meta property="og:title" content="${escapeSeoHtml(page.title)}" /><meta property="og:description" content="${escapeSeoHtml(page.description)}" /><meta property="og:url" content="${escapeSeoHtml(canonical)}" /><meta property="og:locale" content="ar_YE" /><meta property="og:site_name" content="CABL" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="${escapeSeoHtml(page.title)}" /><meta name="twitter:description" content="${escapeSeoHtml(page.description)}" /><script type="application/ld+json">${schema}</script></head>`)
         .replace('<div id="root"></div>', `<div id="root"><main><h1>${escapeSeoHtml(page.h1)}</h1><p>${escapeSeoHtml(page.description)}</p></main></div>`);
     },
   };

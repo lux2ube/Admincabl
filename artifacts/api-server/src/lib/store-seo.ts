@@ -65,6 +65,14 @@ type GuideSeoInput = {
   indexable: boolean;
 };
 
+export const STORE_BASE_PATH = "/cabl-store";
+
+export function mountedStorePath(path: string) {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  if (normalized === STORE_BASE_PATH || normalized.startsWith(`${STORE_BASE_PATH}/`)) return normalized;
+  return `${STORE_BASE_PATH}${normalized === "/" ? "" : normalized}`;
+}
+
 const HOME_TITLE = "CABL | منتجات الشحن والطاقة والإكسسوارات";
 const HOME_DESCRIPTION = "تسوق منتجات الشحن والطاقة والإكسسوارات من كتالوج CABL، مع أسعار ومخزون وخيارات شحن مأخوذة من المتجر.";
 
@@ -99,24 +107,12 @@ const categorySeoProfiles: Record<string, { title: string; description: string }
   },
 };
 
-const categoryPublicPaths: Record<string, string> = {
-  chargers: "chargers",
-  "charging-cables": "cables",
-  cables: "cables",
-  "power-banks": "power-banks",
-  "wireless-chargers": "wireless-chargers",
-  "car-chargers": "car-accessories",
-  "car-accessories": "car-accessories",
-  "phone-accessories": "hubs-adapters",
-  "hubs-adapters": "hubs-adapters",
-};
-
 export function publicCategoryPath(slug: string | null) {
-  return slug ? `/${categoryPublicPaths[slug] ?? slug}` : "/categories/";
+  return mountedStorePath(slug ? `/category/${slug}` : "/categories/");
 }
 
 export function brandPublicPath(slug: string) {
-  return `/${slug}`;
+  return mountedStorePath(`/brand/${slug}`);
 }
 
 export function productPublicPath({
@@ -129,8 +125,8 @@ export function productPublicPath({
   productSlug: string;
 }) {
   return brandSlug && categorySlug
-    ? `${brandPublicPath(brandSlug)}${publicCategoryPath(categorySlug)}/${productSlug}`
-    : `/product/${productSlug}`;
+    ? mountedStorePath(`/${brandSlug}/${categorySlug}/${productSlug}`)
+    : mountedStorePath(`/product/${productSlug}`);
 }
 
 const arabicLetters = new Map([
@@ -243,7 +239,7 @@ export function buildProductSeo(input: ProductSeoInput): SeoResponse {
       sku: input.sku,
       url: canonicalPath,
       ...(input.image ? { image: [input.image] } : {}),
-       brand: { "@type": "Brand", name: input.brand, url: `/${input.brandSlug}` },
+        brand: { "@type": "Brand", name: input.brand, url: brandPublicPath(input.brandSlug) },
       offers: {
         "@type": "Offer",
         url: canonicalPath,
@@ -314,7 +310,9 @@ export function buildBrandSeo(input: BrandSeoInput): SeoResponse {
 }
 
 export function buildGuideSeo(input: GuideSeoInput): SeoResponse {
-  const canonicalPath = (input.canonicalPath || `/guides/${input.slug}`).replace(/^\/guide\//, "/guides/");
+  const canonicalPath = mountedStorePath((input.canonicalPath || `/guides/${input.slug}`)
+    .replace(/^\/cabl-store/, "")
+    .replace(/^\/guide\//, "/guides/"));
   const description = input.metaDescription || input.description || input.title;
 
   return {

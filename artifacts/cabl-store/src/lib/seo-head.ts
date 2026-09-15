@@ -13,7 +13,11 @@ function basePath() {
 
 export function canonicalUrl(path: string) {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return `${window.location.origin}${basePath()}${normalizedPath}`;
+  const mount = basePath();
+  const mountedPath = normalizedPath === mount || normalizedPath.startsWith(`${mount}/`)
+    ? normalizedPath
+    : `${mount}${normalizedPath === '/' ? '' : normalizedPath}`;
+  return `${window.location.origin}${mountedPath || '/'}`;
 }
 
 export function absoluteJsonLd(value: unknown): unknown {

@@ -19,9 +19,6 @@ build = [ "pnpm", "--filter", "@workspace/cabl-store", "run", "build" ]
 serve = "static"
 publicDir = "artifacts/cabl-store/dist/public"
 
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
 
 [services.env]
 PORT = "25770"

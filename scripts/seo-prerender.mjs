@@ -73,18 +73,15 @@ const staticPages = {
   "/verify": { title: "التحقق من بيانات المنتج | CABL", h1: "تحقق من بيانات المنتج", description: "راجع رقم الموديل والبيانات المنشورة قبل الشراء من CABL." },
 };
 
-const categoryAliases = {
-  "charging-cables": "cables",
-  "phone-accessories": "hubs-adapters",
-  "travel-adapters": "car-accessories",
-};
-
-function publicCategoryPath(slug) {
-  return `/${categoryAliases[slug] || slug}`;
+function mountedPath(routePath) {
+  const normalized = routePath.startsWith("/") ? routePath : `/${routePath}`;
+  return normalized === basePath || normalized.startsWith(`${basePath}/`)
+    ? normalized
+    : `${basePath}${normalized === "/" ? "" : normalized}`;
 }
 
 function absoluteUrl(routePath) {
-  return `${basePath}${routePath === "/" ? "" : routePath}` || "/";
+  return mountedPath(routePath) || "/";
 }
 
 function escapeHtml(value) {
@@ -108,7 +105,22 @@ async function getJson(endpoint) {
   }
 }
 
-function pageJsonLd(page, canonicalPath, extra = []) {
+function breadcrumbJsonLd(page, canonicalPath) {
+  const items = page.breadcrumbs?.length
+    ? page.breadcrumbs
+    : [{ name: "الرئيسية", path: "/" }, { name: page.h1, path: canonicalPath }];
+  return {
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: absoluteUrl(item.path),
+    })),
+  };
+}
+
+function pageJsonLd(page, canonicalPath, entity = null) {
   const graph = [
     {
       "@type": "WebPage",
@@ -119,8 +131,24 @@ function pageJsonLd(page, canonicalPath, extra = []) {
       inLanguage: "ar-YE",
     },
     ...(page.jsonLd ? [absoluteJsonLd(page.jsonLd)] : []),
-    ...extra,
+    breadcrumbJsonLd(page, canonicalPath),
   ];
+  if (entity?.products?.length) {
+    graph.push({
+      "@type": "ItemList",
+      name: `منتجات ${page.h1}`,
+      numberOfItems: entity.products.length,
+      itemListElement: entity.products.map((product, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: product.productName,
+        url: absoluteUrl(entity.productPath(product)),
+      })),
+    });
+  }
+  if (entity?.type === "brand-category" && entity.brandName) {
+    graph.push({ "@type": "Brand", name: entity.brandName, url: absoluteUrl(entity.brandPath) });
+  }
   return { "@context": "https://schema.org", "@graph": graph };
 }
 
@@ -142,74 +170,165 @@ function faqJsonLd(page) {
   };
 }
 
+function renderTextContent(value) {
+  return String(value || "")
+    .split(/\n{2,}/)
+    .map((paragraph) => `<p>${escapeHtml(paragraph.trim())}</p>`)
+    .join("");
+}
+
+function productPath(product) {
+  return product.brandSlug && product.category?.slug
+    ? `/${product.brandSlug}/${product.category.slug}/${product.slug}`
+    : `/product/${product.slug}`;
+}
+
+function renderProductList(products) {
+  if (!Array.isArray(products)) return "";
+  if (!products?.length) return `<p class="empty-state">لا توجد منتجات منشورة في هذه المجموعة حالياً.</p>`;
+  return `<section aria-labelledby="published-products"><h2 id="published-products">المنتجات المنشورة</h2><ul class="seo-product-list">${products.map((product) => {
+    const path = productPath(product);
+    const price = product.discountPrice ?? product.regularPrice;
+    const description = product.shortDescription || product.productDescription || "بيانات المنتج المنشورة في كتالوج CABL.";
+    return `<li><a href="${escapeHtml(absoluteUrl(path))}"><strong>${escapeHtml(product.productName)}</strong></a><span>${escapeHtml(product.brand)} · ${escapeHtml(product.category?.name || "منتج")}</span><p>${escapeHtml(description)}</p><span>${product.quantity > 0 ? "متوفر حسب الكتالوج الحالي" : "غير متوفر حالياً"} · ${escapeHtml(String(price))} USD</span></li>`;
+  }).join("")}</ul></section>`;
+}
+
 function renderBody(page, routePath, entity = null) {
   const links = [
     `<a href="${escapeHtml(absoluteUrl("/guides"))}">أدلة الشراء</a>`,
     `<a href="${escapeHtml(absoluteUrl("/search"))}">الكتالوج</a>`,
     `<a href="${escapeHtml(absoluteUrl("/shipping"))}">الشحن والتوصيل</a>`,
   ].join(" · ");
-  const details = entity?.product
-    ? `<p><strong>العلامة:</strong> ${escapeHtml(entity.product.brand)} · <strong>SKU:</strong> ${escapeHtml(entity.product.sku)} · <strong>الحالة:</strong> ${entity.product.quantity > 0 ? "متوفر حسب الكتالوج الحالي" : "غير متوفر حالياً"}</p>`
+  const entityProducts = entity?.products || (entity?.product ? [entity.product] : null);
+  const relatedBrands = (entity?.brands || []).slice(0, 8).map((brand) =>
+    `<li><a href="${escapeHtml(absoluteUrl(`/brand/${brand.slug}`))}">${escapeHtml(brand.name)}</a></li>`,
+  ).join("");
+  const product = entity?.product;
+  const productDetails = product
+    ? `<section><h2>بيانات المنتج</h2><p><strong>العلامة:</strong> <a href="${escapeHtml(absoluteUrl(`/brand/${product.brandSlug}`))}">${escapeHtml(product.brand)}</a> · <strong>الفئة:</strong> <a href="${escapeHtml(absoluteUrl(`/category/${product.category?.slug || ""}`))}">${escapeHtml(product.category?.name || "المنتجات")}</a></p><p><strong>SKU:</strong> ${escapeHtml(product.sku)} · <strong>السعر:</strong> ${escapeHtml(String(product.discountPrice ?? product.regularPrice))} USD · <strong>الحالة:</strong> ${product.quantity > 0 ? "متوفر حسب الكتالوج الحالي" : "غير متوفر حالياً"}</p>${product.specifications?.attributes?.length ? `<ul>${product.specifications.attributes.map((attribute) => `<li>${escapeHtml(attribute.label)}: ${escapeHtml(attribute.value || attribute.values?.join("، ") || "غير منشور")}</li>`).join("")}</ul>` : ""}</section>`
     : "";
-  const terms = page.terms ? `<p><strong>موضوعات مرتبطة:</strong> ${escapeHtml(page.terms)}</p>` : "";
-  return `<header><a href="${escapeHtml(absoluteUrl("/"))}">CABL اليمن</a><nav>${links}</nav></header><main><p>دليل CABL في اليمن</p><h1>${escapeHtml(page.h1)}</h1><p>${escapeHtml(page.description)}</p>${details}${terms}<h2>معلومات قبل الطلب</h2><p>راجع المواصفات والتوافق والسعر والتوافر في صفحة المنتج، ثم أدخل العنوان في checkout لرؤية خيارات الشحن الحالية.</p><h2>أسئلة شائعة</h2><details><summary>كيف أختار المنتج المناسب؟</summary><p>ابدأ من الاستخدام والمنفذ والقدرة، ثم راجع بيانات الموديل المحدد.</p></details><details><summary>هل التوافر مضمون؟</summary><p>التوافر مرتبط بالكمية المنشورة وقت التصفح ويعاد التحقق عند الطلب.</p></details></main><footer><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/contact"))}">تواصل معنا</a></footer>`;
+  const guideContent = entity?.type === "guide" && entity.content
+    ? `<section><h2>محتوى الدليل</h2>${renderTextContent(entity.content)}</section>`
+    : "";
+  const categoryLinks = relatedBrands ? `<section><h2>العلامات المتاحة</h2><ul>${relatedBrands}</ul></section>` : "";
+  const buyingLinks = `<section><h2>روابط مفيدة قبل الطلب</h2><p><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/shipping"))}">الشحن والتوصيل</a> · <a href="${escapeHtml(absoluteUrl("/return-policy"))}">الإرجاع والاستبدال</a></p></section>`;
+  return `<header><a href="${escapeHtml(absoluteUrl("/"))}">CABL اليمن</a><nav>${links}</nav></header><main><p>دليل CABL في اليمن</p><h1>${escapeHtml(page.h1)}</h1><p>${escapeHtml(page.description)}</p>${productDetails}${guideContent}${categoryLinks}${renderProductList(entityProducts)}<section><h2>معلومات قبل الطلب</h2><p>راجع المواصفات والتوافق والسعر والتوافر في صفحة المنتج، ثم أدخل العنوان في checkout لرؤية خيارات الشحن الحالية.</p></section>${buyingLinks}</main><footer><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/contact"))}">تواصل معنا</a></footer>`;
 }
 
 function withSeo(indexHtml, page, routePath, entity = null) {
   const canonicalPath = page.canonicalPath || routePath;
   const canonical = absoluteUrl(canonicalPath);
-  const schema = page.entityType === "guide" || page.terms
-    ? pageJsonLd(page, canonicalPath, [faqJsonLd(page)])
-    : pageJsonLd(page, canonicalPath);
+  const schema = pageJsonLd(page, canonicalPath, entity);
   let html = indexHtml
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(page.title)}</title>`)
     .replace(/<meta name="description" content="[^"]*"\s*\/?>/, `<meta name="description" content="${escapeHtml(page.description)}" />`)
     .replace(/<meta name="robots" content="[^"]*"\s*\/?>/, `<meta name="robots" content="${page.indexable === false ? "noindex, follow" : "index, follow"}" />`)
     .replace(/<link rel="canonical" href="[^"]*"\s*\/?>/g, "")
+    .replace(/<meta property="og:[^"]*"[^>]*\/?>/g, "")
+    .replace(/<meta name="twitter:[^"]*"[^>]*\/?>/g, "")
     .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, "")
-    .replace("</head>", `<meta property="og:title" content="${escapeHtml(page.title)}" /><meta property="og:description" content="${escapeHtml(page.description)}" /><meta property="og:url" content="${escapeHtml(canonical)}" /><meta property="og:locale" content="ar_YE" /><meta property="og:site_name" content="CABL" /><link rel="canonical" href="${escapeHtml(canonical)}" /><script type="application/ld+json">${JSON.stringify(schema)}</script></head>`)
+    .replace("</head>", `<meta property="og:title" content="${escapeHtml(page.title)}" /><meta property="og:description" content="${escapeHtml(page.description)}" /><meta property="og:url" content="${escapeHtml(canonical)}" /><meta property="og:locale" content="ar_YE" /><meta property="og:site_name" content="CABL" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="${escapeHtml(page.title)}" /><meta name="twitter:description" content="${escapeHtml(page.description)}" /><link rel="canonical" href="${escapeHtml(canonical)}" /><script type="application/ld+json">${JSON.stringify(schema)}</script></head>`)
     .replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${renderBody(page, routePath, entity)}</div>`);
   return html;
 }
 
 async function main() {
   const indexHtml = await fs.readFile(path.join(distDir, "index.html"), "utf8");
-  const routes = new Map(Object.entries(staticPages).map(([routePath, page]) => [routePath, { ...page, canonicalPath: routePath }]));
-  for (const [routePath, page] of Object.entries(guidePages)) routes.set(routePath, { ...page, canonicalPath: routePath, entityType: "guide" });
+  const routes = new Map(Object.entries(staticPages).map(([routePath, page]) => [routePath, {
+    ...page,
+    canonicalPath: mountedPath(routePath),
+  }]));
 
   const catalog = await getJson("/store/catalog");
-  for (const category of new Map((catalog?.products || []).filter((product) => product.category).map((product) => [product.category.slug, product.category])) .values()) {
-    const seo = await getJson(`/store/seo?type=category&slug=${encodeURIComponent(category.slug)}`);
-    const routePath = publicCategoryPath(category.slug);
-    routes.set(routePath, { ...(seo || {}), title: seo?.title || `${category.name} في اليمن | CABL`, h1: seo?.h1 || category.name, description: seo?.description || `منتجات ${category.name} المنشورة في كتالوج CABL داخل اليمن.`, canonicalPath: routePath });
-    routes.set(`/category/${category.slug}`, { ...(seo || {}), title: seo?.title || `${category.name} في اليمن | CABL`, h1: seo?.h1 || category.name, description: seo?.description || `منتجات ${category.name} المنشورة في كتالوج CABL داخل اليمن.`, canonicalPath: routePath });
+  for (const routePath of Object.keys(guidePages)) {
+    const slug = routePath.split("/").filter(Boolean).at(-1);
+    const seo = await getJson(`/store/seo?type=guide&slug=${encodeURIComponent(slug)}`);
+    const fallback = guidePages[routePath];
+    routes.set(routePath, {
+      ...fallback,
+      ...(seo || {}),
+      title: seo?.title || fallback.title,
+      h1: seo?.h1 || fallback.h1,
+      description: seo?.description || fallback.description,
+      canonicalPath: mountedPath(routePath),
+      entityType: "guide",
+      entity: { type: "guide", content: seo?.jsonLd?.articleBody || "" },
+    });
   }
-  for (const brand of new Map((catalog?.products || []).map((product) => [product.brandSlug, product.brand])).entries()) {
+
+  const products = catalog?.products || [];
+  const categories = new Map(products.filter((product) => product.category).map((product) => [product.category.slug, product.category]));
+  for (const category of categories.values()) {
+    const seo = await getJson(`/store/seo?type=category&slug=${encodeURIComponent(category.slug)}`);
+    const routePath = `/category/${category.slug}`;
+    const categoryProducts = products.filter((product) => product.category?.slug === category.slug);
+    const brands = Array.from(new Map(categoryProducts.map((product) => [product.brandSlug, { slug: product.brandSlug, name: product.brand }])).values());
+    routes.set(routePath, {
+      ...(seo || {}),
+      title: seo?.title || `${category.name} في اليمن | CABL`,
+      h1: seo?.h1 || category.name,
+      description: seo?.description || `منتجات ${category.name} المنشورة في كتالوج CABL داخل اليمن.`,
+      canonicalPath: mountedPath(routePath),
+      entityType: "category",
+      entity: { type: "category", products: categoryProducts, brands, productPath, brandPath: (slug) => `/brand/${slug}` },
+    });
+  }
+  for (const brand of new Map(products.map((product) => [product.brandSlug, product.brand])).entries()) {
     const [brandSlug, brandName] = brand;
     const seo = await getJson(`/store/seo?type=brand&slug=${encodeURIComponent(brandSlug)}`);
-    routes.set(`/brand/${brandSlug}`, { ...(seo || {}), title: seo?.title || `منتجات ${brandName} في اليمن | CABL`, h1: seo?.h1 || `منتجات ${brandName}`, description: seo?.description || `تصفح منتجات ${brandName} المنشورة في كتالوج CABL داخل اليمن.`, canonicalPath: `/brand/${brandSlug}` });
+    const brandProducts = products.filter((product) => product.brandSlug === brandSlug);
+    const brands = [];
+    const entityCategories = Array.from(new Map(brandProducts.filter((product) => product.category).map((product) => [product.category.slug, product.category])).values());
+    routes.set(`/brand/${brandSlug}`, {
+      ...(seo || {}),
+      title: seo?.title || `منتجات ${brandName} في اليمن | CABL`,
+      h1: seo?.h1 || `منتجات ${brandName}`,
+      description: seo?.description || `تصفح منتجات ${brandName} المنشورة في كتالوج CABL داخل اليمن.`,
+      canonicalPath: mountedPath(`/brand/${brandSlug}`),
+      entityType: "brand",
+      entity: { type: "brand", products: brandProducts, categories: entityCategories, brands, productPath, brandPath: (slug) => `/brand/${slug}` },
+    });
   }
   const brandCategories = new Map();
-  for (const product of catalog?.products || []) {
+  for (const product of products) {
     if (!product.brandSlug || !product.category?.slug) continue;
     const key = `${product.brandSlug}/${product.category.slug}`;
     brandCategories.set(key, product);
   }
   for (const product of brandCategories.values()) {
-    const routePath = `/${product.brandSlug}${publicCategoryPath(product.category.slug)}`;
+    const routePath = `/${product.brandSlug}/${product.category.slug}`;
     const categoryName = product.category.name;
     const brandName = product.brand;
+    const matchingProducts = products.filter((item) => item.brandSlug === product.brandSlug && item.category?.slug === product.category.slug);
     routes.set(routePath, {
       title: `${categoryName} من ${brandName} في اليمن | CABL`,
       h1: `${categoryName} من ${brandName}`,
       description: `تصفح منتجات ${categoryName} من ${brandName} المنشورة في كتالوج CABL داخل اليمن، وقارن السعر والتوافر قبل الطلب.`,
-      canonicalPath: routePath,
+      canonicalPath: mountedPath(routePath),
+      entityType: "brand-category",
+      entity: {
+        type: "brand-category",
+        products: matchingProducts,
+        brandName,
+        brandPath: `/brand/${product.brandSlug}`,
+        productPath,
+      },
     });
   }
-  for (const product of catalog?.products || []) {
+  for (const product of products) {
     const seo = await getJson(`/store/seo?type=product&slug=${encodeURIComponent(product.slug)}`);
-    const routePath = `/${product.brandSlug}${publicCategoryPath(product.category?.slug)}/${product.slug}`;
-    routes.set(routePath, { ...(seo || {}), title: seo?.title || `${product.productName} | CABL`, h1: seo?.h1 || product.productName, description: seo?.description || `${product.productName} من كتالوج CABL داخل اليمن.`, canonicalPath: routePath, entityType: "product", product });
+    const routePath = productPath(product);
+    routes.set(routePath, {
+      ...(seo || {}),
+      title: seo?.title || `${product.productName} | CABL`,
+      h1: seo?.h1 || product.productName,
+      description: seo?.description || `${product.productName} من كتالوج CABL داخل اليمن.`,
+      canonicalPath: mountedPath(routePath),
+      entityType: "product",
+      product,
+      entity: { type: "product", product, productPath, brandPath: (slug) => `/brand/${slug}` },
+    });
   }
 
   for (const [routePath, page] of routes) {
@@ -217,7 +336,7 @@ async function main() {
       ? path.join(distDir, "index.html")
       : path.join(distDir, routePath.replace(/^\/+/, ""), "index.html");
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
-    await fs.writeFile(outputPath, withSeo(indexHtml, page, routePath, page.product ? page : null));
+    await fs.writeFile(outputPath, withSeo(indexHtml, page, routePath, page.entity || (page.product ? { type: "product", product: page.product, productPath } : null)));
   }
   console.log(`SEO pre-rendered ${routes.size} public routes`);
 }

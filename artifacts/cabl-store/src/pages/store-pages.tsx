@@ -1252,11 +1252,26 @@ function CategoryLandingPage({ slug }: { slug: string }) {
   const { catalog, isLoading, isError } = useStore();
   const products = catalog?.products || [];
   const seoParams = { type: 'category' as const, slug };
-  const { data: categorySeo } = useGetStoreSeo(seoParams, {
+  const { data: categorySeo, isLoading: isSeoLoading, isError: isSeoError } = useGetStoreSeo(seoParams, {
     query: { queryKey: getGetStoreSeoQueryKey(seoParams), enabled: Boolean(slug), staleTime: 60_000 },
   });
   const categoryProducts = useMemo(() => products.filter((product) => matchesCategory(product, slug)), [products, slug]);
   const name = categorySeo?.h1 || categoryProducts[0]?.category?.name || slug.replaceAll('-', ' ');
+  if (!isLoading && !isSeoLoading && (isError || isSeoError || !categorySeo)) {
+    return (
+      <>
+        <NoIndex />
+        <div className="container">
+          <Breadcrumbs items={[{ label: 'الأقسام', href: '/search' }, { label: 'القسم غير موجود' }]} />
+          <div className="state-panel" style={{ margin: '60px 0' }}>
+            <h1>القسم غير موجود</h1>
+            <p>هذا القسم غير متاح حالياً في كتالوج CABL.</p>
+            <Link href="/search" className="button button-primary">استعرض الكتالوج</Link>
+          </div>
+        </div>
+      </>
+    );
+  }
   const copy = categoryGuideCopy[slug] || {
     eyebrow: 'دليل القسم',
     title: `منتجات ${name} في اليمن`,

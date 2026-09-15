@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --config vite.config.ts --host 0.0.0.0",
     "build": "vite build --config vite.config.ts && node ../../scripts/seo-prerender.mjs",
-    "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
+    "serve": "node ../../scripts/serve-cabl-store.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:seo:render": "STORE_DIST=dist/public node ../../scripts/seo-prerender-acceptance.mjs"
   },

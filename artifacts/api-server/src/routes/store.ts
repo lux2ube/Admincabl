@@ -24,6 +24,7 @@ import {
   buildHomeSeo,
   buildProductSeo,
   brandPublicPath,
+  mountedStorePath,
   productSlug,
   productPublicPath,
   publicCategoryPath,
@@ -106,10 +107,9 @@ function publicSiteOrigin(req: Request) {
   const forwardedHost = String(req.get("x-forwarded-host") || req.get("host") || "").split(",")[0].trim();
   const forwardedProtocol = String(req.get("x-forwarded-proto") || "").split(",")[0].trim();
   const protocol = forwardedProtocol || (process.env.NODE_ENV === "production" ? "https" : req.protocol);
-  const basePath = String(process.env.PUBLIC_SITE_BASE_PATH || "").replace(/\/$/, "");
   return {
     origin: String(process.env.PUBLIC_SITE_ORIGIN || `${protocol}://${forwardedHost}`).replace(/\/$/, ""),
-    basePath,
+    basePath: "",
   };
 }
 
@@ -157,10 +157,10 @@ async function getSitemapPaths() {
     ),
   ]);
 
-  const paths = new Set(STATIC_SITEMAP_PATHS);
+  const paths = new Set(STATIC_SITEMAP_PATHS.map((path) => mountedStorePath(path)));
   for (const row of categories.rows) paths.add(publicCategoryPath(row.slug));
-  for (const row of brands.rows) paths.add(`/brand/${row.slug}`);
-  for (const row of brandCategories.rows) paths.add(`/${row.brand_slug}${publicCategoryPath(row.category_slug)}`);
+  for (const row of brands.rows) paths.add(brandPublicPath(row.slug));
+  for (const row of brandCategories.rows) paths.add(mountedStorePath(`/${row.brand_slug}/${row.category_slug}`));
   for (const row of products.rows) {
     paths.add(productPublicPath({
       brandSlug: row.brand_slug,
@@ -173,7 +173,7 @@ async function getSitemapPaths() {
 }
 
 function sitemapUrl(origin: string, basePath: string, path: string) {
-  return `${origin}${basePath}${path === "/" ? "/" : path}`;
+  return `${origin}${basePath}${path === "/" ? `${mountedStorePath("/")}/` : path}`;
 }
 
 function sitemapXml(origin: string, basePath: string, paths: string[]) {
@@ -183,7 +183,9 @@ function sitemapXml(origin: string, basePath: string, paths: string[]) {
 }
 
 function guidePublicPath(slug: string, canonicalPath: string | null) {
-  return (canonicalPath || `/guides/${slug}`).replace(/^\/guide\//, "/guides/");
+  return mountedStorePath((canonicalPath || `/guides/${slug}`)
+    .replace(/^\/cabl-store/, "")
+    .replace(/^\/guide\//, "/guides/"));
 }
 
 function sitemapIndexXml(origin: string, basePath: string, chunkCount: number) {
@@ -192,10 +194,10 @@ function sitemapIndexXml(origin: string, basePath: string, chunkCount: number) {
 
 async function findCatalogRedirect(type: "product" | "category" | "brand", slug: string) {
   const exactPaths = type === "product"
-    ? [`/product/${slug}`]
+      ? [mountedStorePath(`/product/${slug}`), `/product/${slug}`]
     : type === "category"
-      ? [publicCategoryPath(slug), `/category/${slug}`]
-      : [brandPublicPath(slug), `/brand/${slug}`];
+        ? [publicCategoryPath(slug), `/category/${slug}`, mountedStorePath(`/category/${slug}`)]
+        : [brandPublicPath(slug), `/brand/${slug}`];
   const result = await pool.query<{ to_path: string }>(
     `SELECT "to_path"
      FROM "seo_redirects"
