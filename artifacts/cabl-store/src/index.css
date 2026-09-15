@@ -646,7 +646,9 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:h
 
 @media (max-width:767px){
   .purchase-steps{padding:6px 7px;margin:6px 0 14px}
+  .cart-layout,.checkout-layout{width:100%;align-items:stretch}
   .cart-panel,.summary-panel{padding:12px}
+  .cart-panel,.summary-panel,.checkout-panel{width:100%;box-sizing:border-box}
   .cart-line{grid-template-columns:60px minmax(0,1fr);grid-template-areas:"visual copy" "visual actions";gap:7px 10px;padding:9px}
   .cart-line-visual{grid-area:visual;width:60px;height:60px}
   .cart-line-copy{grid-area:copy}
