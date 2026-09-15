@@ -1,12 +1,37 @@
-import { type ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route, Router as WouterRouter, Switch, useLocation, useParams } from 'wouter';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { StoreShell } from '@/components/store-shell';
 import { StoreProvider } from '@/lib/store';
 import NotFound from '@/pages/not-found';
-import { BrandCategoryPage, BrandPage, CanonicalProductPage, CartPage, CategoryPage, CategoryPageForSlug, CheckoutPage, ComparePage, HomePage, OrderPage, OrdersPage, ProductPage, SearchPage } from '@/pages/store-pages';
-import { AboutPage, ArticlePage, ContactPage, FAQPage, LabPage, LocationPage, ReturnPage, SeoGuidePage, SeoGuidesIndexPage, ShippingPage, SolutionPage, VerifyPage } from '@/pages/content-pages';
+
+const BrandCategoryPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.BrandCategoryPage })));
+const BrandPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.BrandPage })));
+const CanonicalProductPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.CanonicalProductPage })));
+const CartPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.CartPage })));
+const CategoryPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.CategoryPage })));
+const CategoryPageForSlug = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.CategoryPageForSlug })));
+const CheckoutPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.CheckoutPage })));
+const ComparePage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.ComparePage })));
+const HomePage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.HomePage })));
+const OrderPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.OrderPage })));
+const OrdersPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.OrdersPage })));
+const ProductPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.ProductPage })));
+const SearchPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.SearchPage })));
+
+const AboutPage = lazy(() => import('@/pages/content-pages').then((module) => ({ default: module.AboutPage })));
+const ArticlePage = lazy(() => import('@/pages/content-pages').then((module) => ({ default: module.ArticlePage })));
+const ContactPage = lazy(() => import('@/pages/content-pages').then((module) => ({ default: module.ContactPage })));
+const FAQPage = lazy(() => import('@/pages/content-pages').then((module) => ({ default: module.FAQPage })));
+const LabPage = lazy(() => import('@/pages/content-pages').then((module) => ({ default: module.LabPage })));
+const LocationPage = lazy(() => import('@/pages/content-pages').then((module) => ({ default: module.LocationPage })));
+const ReturnPage = lazy(() => import('@/pages/content-pages').then((module) => ({ default: module.ReturnPage })));
+const SeoGuidePage = lazy(() => import('@/pages/content-pages').then((module) => ({ default: module.SeoGuidePage })));
+const SeoGuidesIndexPage = lazy(() => import('@/pages/content-pages').then((module) => ({ default: module.SeoGuidesIndexPage })));
+const ShippingPage = lazy(() => import('@/pages/content-pages').then((module) => ({ default: module.ShippingPage })));
+const SolutionPage = lazy(() => import('@/pages/content-pages').then((module) => ({ default: module.SolutionPage })));
+const VerifyPage = lazy(() => import('@/pages/content-pages').then((module) => ({ default: module.VerifyPage })));
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } });
 
@@ -27,7 +52,7 @@ function PublicCategoryPage() {
 }
 
 function Router() {
-  return <StoreShell><RoutedErrorBoundary><Switch>
+  return <StoreShell><RoutedErrorBoundary><Suspense fallback={null}><Switch>
     <Route path="/" component={HomePage}/>
     <Route path="/category/:slug" component={CategoryPage}/>
     <Route path="/brand/:brandSlug/:categorySlug" component={BrandCategoryPage}/>
@@ -55,7 +80,7 @@ function Router() {
     <Route path="/:categorySlug" component={PublicCategoryPage}/>
     <Route path="/:brandSlug/:categorySlug" component={BrandCategoryPage}/>
     <Route component={NotFound}/>
-  </Switch></RoutedErrorBoundary></StoreShell>;
+  </Switch></Suspense></RoutedErrorBoundary></StoreShell>;
 }
 
 function App() {

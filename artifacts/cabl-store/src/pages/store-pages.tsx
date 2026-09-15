@@ -14,8 +14,17 @@ import { EditorialSection, FAQList, InfoCards, ProductEditorial, mergeFaqItems }
 function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; slug?: string }) {
   const [location, navigate] = useLocation();
   const params = slug ? { type, slug } : { type };
-  const { data } = useGetStoreSeo(params, { query: { queryKey: getGetStoreSeoQueryKey(params), enabled: true, staleTime: 60_000 } });
+  const isStaticHome = type === 'home' && !slug;
+  const { data } = useGetStoreSeo(params, { query: { queryKey: getGetStoreSeoQueryKey(params), enabled: !isStaticHome, staleTime: 60_000 } });
   useEffect(() => {
+    if (isStaticHome) {
+      setSeoHead({
+        title: 'CABL | منتجات الشحن والطاقة والإكسسوارات',
+        description: 'تسوق منتجات الشحن والطاقة والإكسسوارات من كتالوج CABL، مع أسعار ومخزون وخيارات شحن مأخوذة من المتجر.',
+        canonicalPath: '/',
+      });
+      return;
+    }
     if (!data) return;
     if (slug && data.slug && data.slug !== slug) {
       const redirectPath = type === 'product'
@@ -53,7 +62,7 @@ function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; 
         };
       })(),
     });
-  }, [data, location, navigate, type]);
+  }, [data, isStaticHome, location, navigate, type]);
   return null;
 }
 
