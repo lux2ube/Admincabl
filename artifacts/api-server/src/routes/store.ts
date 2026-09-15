@@ -34,6 +34,11 @@ import {
 import { emptyStoreSpecifications, fetchStoreSpecificationFilters, fetchStoreSpecifications } from "../lib/store-specifications";
 
 const router: IRouter = Router();
+type StoreCatalogResponse = ReturnType<typeof GetStoreCatalogResponse.parse>;
+type StoreCatalogCacheEntry = { expiresAt: number; value: StoreCatalogResponse };
+const STORE_CATALOG_CACHE_TTL_MS = 15_000;
+const storeCatalogCache = new Map<string, StoreCatalogCacheEntry>();
+const storeCatalogInFlight = new Map<string, Promise<StoreCatalogResponse>>();
 
 type ProductRow = {
   id: string;
@@ -255,6 +260,32 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
     res.status(400).json({ error: "معامل القسم غير صالح" });
     return;
   }
+  const cacheKey = parsed.data.category ?? "__all__";
+  const cached = storeCatalogCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    res.set("Cache-Control", `private, max-age=${Math.floor(STORE_CATALOG_CACHE_TTL_MS / 1000)}`);
+    res.json(cached.value);
+    return;
+  }
+  if (cached) storeCatalogCache.delete(cacheKey);
+  const inFlight = storeCatalogInFlight.get(cacheKey);
+  if (inFlight) {
+    try {
+      const response = await inFlight;
+      res.set("Cache-Control", `private, max-age=${Math.floor(STORE_CATALOG_CACHE_TTL_MS / 1000)}`);
+      res.json(response);
+    } catch {
+      res.status(500).json({ error: "تعذر تحميل كتالوج المتجر" });
+    }
+    return;
+  }
+  let resolveInFlight!: (response: StoreCatalogResponse) => void;
+  let rejectInFlight!: (error: unknown) => void;
+  const pending = new Promise<StoreCatalogResponse>((resolve, reject) => {
+    resolveInFlight = resolve;
+    rejectInFlight = reject;
+  });
+  storeCatalogInFlight.set(cacheKey, pending);
   try {
     const result = await pool.query<ProductRow>(`
       SELECT
@@ -355,12 +386,9 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
       productMap.set(row.id, existing);
     }
 
-    const specifications = await fetchStoreSpecifications([...productMap.keys()]);
-    for (const [productId, product] of productMap) {
-      product.specifications = specifications.get(productId) ?? emptyStoreSpecifications();
-    }
-
-    const categoriesResult = await pool.query<{
+  const specificationsPromise = fetchStoreSpecifications([...productMap.keys()]);
+  const [categoriesResult, brandsResult, shippingResult, paymentMethodsResult, currenciesResult] = await Promise.all([
+    pool.query<{
       id: string;
       name: string;
       slug: string;
@@ -379,15 +407,8 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
         AND BTRIM(c."slug") <> ''
       GROUP BY c."id", c."category_name", c."slug"
       ORDER BY c."category_name" ASC
-    `);
-    const categories = categoriesResult.rows.map((category) => ({
-      id: category.id,
-      name: category.name,
-      slug: category.slug,
-      productCount: category.product_count,
-    }));
-
-    const brandsResult = await pool.query<{
+    `),
+    pool.query<{
       id: string;
       name: string;
       slug: string;
@@ -404,15 +425,8 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
         AND BTRIM(b."slug") <> ''
       GROUP BY b."id", b."brand_name", b."slug"
       ORDER BY b."brand_name" ASC
-    `);
-    const brands = brandsResult.rows.map((brand) => ({
-      id: brand.id,
-      name: brand.name,
-      slug: brand.slug,
-      productCount: brand.product_count,
-    }));
-
-    const shippingResult = await pool.query<{
+    `),
+    pool.query<{
       id: number;
       name: string;
       charge: string | number;
@@ -426,15 +440,8 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
        LEFT JOIN "product_shippings" ps ON ps."shipping_id" = s."id"
        WHERE s."active" = TRUE
        GROUP BY s."id", s."name"
-       ORDER BY s."id" ASC`);
-    const shippingOptions = shippingResult.rows.map((shipping) => ({
-      id: shipping.id,
-      name: shipping.name,
-      charge: asNumber(shipping.charge),
-      free: shipping.free,
-      estimatedDays: shipping.estimated_days === null ? null : asNumber(shipping.estimated_days),
-    }));
-    const paymentMethodsResult = await pool.query<{
+       ORDER BY s."id" ASC`),
+    pool.query<{
       id: number;
       name: string;
       description: string | null;
@@ -449,7 +456,43 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
        FROM "payment_methods"
        WHERE "active" = TRUE
        ORDER BY "sort_order" ASC, "id" ASC`,
-    );
+    ),
+    pool.query<{
+      code: string;
+      name: string;
+      rate_per_usd: string | number;
+      is_default: boolean;
+    }>(
+      `SELECT "code", "name", "rate_per_usd", "is_default"
+       FROM "currencies"
+       WHERE "active" = TRUE
+       ORDER BY "is_default" DESC, "id" ASC`,
+    ),
+  ]);
+  const specifications = await specificationsPromise;
+  for (const [productId, product] of productMap) {
+    product.specifications = specifications.get(productId) ?? emptyStoreSpecifications();
+  }
+
+    const categories = categoriesResult.rows.map((category) => ({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      productCount: category.product_count,
+    }));
+    const brands = brandsResult.rows.map((brand) => ({
+      id: brand.id,
+      name: brand.name,
+      slug: brand.slug,
+      productCount: brand.product_count,
+    }));
+    const shippingOptions = shippingResult.rows.map((shipping) => ({
+      id: shipping.id,
+      name: shipping.name,
+      charge: asNumber(shipping.charge),
+      free: shipping.free,
+      estimatedDays: shipping.estimated_days === null ? null : asNumber(shipping.estimated_days),
+    }));
     const paymentMethods = paymentMethodsResult.rows.map((method) => ({
       id: method.id,
       name: method.name,
@@ -460,17 +503,6 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
       iconKey: method.icon_key,
       requiresTransactionReference: method.requires_transaction_reference,
     }));
-    const currenciesResult = await pool.query<{
-      code: string;
-      name: string;
-      rate_per_usd: string | number;
-      is_default: boolean;
-    }>(
-      `SELECT "code", "name", "rate_per_usd", "is_default"
-       FROM "currencies"
-       WHERE "active" = TRUE
-       ORDER BY "is_default" DESC, "id" ASC`,
-    );
     const currencies = currenciesResult.rows.map((currency) => ({
       code: currency.code,
       name: currency.name,
@@ -486,10 +518,19 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
       paymentMethods,
       currencies,
     });
+    storeCatalogCache.set(cacheKey, {
+      expiresAt: Date.now() + STORE_CATALOG_CACHE_TTL_MS,
+      value: response,
+    });
+    resolveInFlight(response);
+    res.set("Cache-Control", `private, max-age=${Math.floor(STORE_CATALOG_CACHE_TTL_MS / 1000)}`);
     res.json(response);
   } catch (error) {
+    rejectInFlight(error);
     req.log.error({ err: error }, "Failed to load store catalog");
     res.status(500).json({ error: "تعذر تحميل كتالوج المتجر" });
+  } finally {
+    storeCatalogInFlight.delete(cacheKey);
   }
 });
 
