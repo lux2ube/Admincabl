@@ -228,6 +228,7 @@ export function buildProductSeo(input: ProductSeoInput): SeoResponse {
     canonicalPath,
     indexable: true,
     breadcrumbs: breadcrumbs([
+      { name: input.brand, path: brandPublicPath(input.brandSlug) },
       { name: categoryName, path: categoryPath },
       { name: input.productName, path: canonicalPath },
     ]),

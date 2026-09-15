@@ -194,6 +194,44 @@ function renderProductList(products) {
   }).join("")}</ul></section>`;
 }
 
+function renderProductSpecifications(product) {
+  const specifications = product?.specifications;
+  if (!specifications) return "";
+  const rows = [
+    ...(specifications.attributes || []).map((attribute) => {
+      const value = attribute.value !== null && attribute.value !== undefined
+        ? String(attribute.value)
+        : attribute.values?.join("، ");
+      return value ? `<li><strong>${escapeHtml(attribute.label)}:</strong> ${escapeHtml(value)}${attribute.unit ? ` ${escapeHtml(attribute.unit)}` : ""}</li>` : "";
+    }),
+    ...(specifications.ports || []).map((port) => `<li><strong>المنفذ ${escapeHtml(port.name)}:</strong> ${escapeHtml(port.type)}${port.maxPowerW ? ` · ${escapeHtml(String(port.maxPowerW))}W` : ""}${port.maxVoltageV ? ` · ${escapeHtml(String(port.maxVoltageV))}V` : ""}${port.maxCurrentA ? ` · ${escapeHtml(String(port.maxCurrentA))}A` : ""}</li>`),
+    ...(specifications.protocols || []).map((protocol) => `<li><strong>البروتوكول:</strong> ${escapeHtml(protocol.name)}</li>`),
+    ...(specifications.maxPowerW ? [`<li><strong>القدرة القصوى:</strong> ${escapeHtml(String(specifications.maxPowerW))}W</li>`] : []),
+    ...(specifications.capabilityLabel ? [`<li><strong>القدرة:</strong> ${escapeHtml(specifications.capabilityLabel)}</li>`] : []),
+    ...(specifications.compatibility || []).map((item) => `<li><strong>التوافق:</strong> ${escapeHtml(item.name || item.label || String(item))}</li>`),
+  ].filter(Boolean);
+  return rows.length ? `<section><h2>المواصفات المنشورة</h2><ul class="seo-product-specifications">${rows.join("")}</ul></section>` : "";
+}
+
+function renderProductShipping(product) {
+  const options = product?.shippingOptions || [];
+  if (!options.length) return "";
+  return `<section><h2>خيارات الشحن المنشورة</h2><ul>${options.map((option) => {
+    const charge = option.free ? "مجاني" : `${option.charge} USD`;
+    const days = option.estimatedDays ? ` · المدة التقديرية: ${option.estimatedDays} أيام` : "";
+    return `<li>${escapeHtml(option.name)} · ${escapeHtml(charge)}${escapeHtml(days)}</li>`;
+  }).join("")}</ul></section>`;
+}
+
+function renderRelatedProducts(products) {
+  if (!products?.length) return "";
+  return `<section><h2>منتجات ذات صلة</h2><ul class="seo-product-list">${products.map((product) => {
+    const path = productPath(product);
+    const price = product.discountPrice ?? product.regularPrice;
+    return `<li><a href="${escapeHtml(absoluteUrl(path))}"><strong>${escapeHtml(product.productName)}</strong></a><span>${escapeHtml(product.brand)} · ${escapeHtml(product.category?.name || "منتج")}</span><span>${product.quantity > 0 ? "متوفر حسب الكتالوج الحالي" : "غير متوفر حالياً"} · ${escapeHtml(String(price))} USD</span></li>`;
+  }).join("")}</ul></section>`;
+}
+
 function renderBody(page, routePath, entity = null) {
   const links = [
     `<a href="${escapeHtml(absoluteUrl("/guides"))}">أدلة الشراء</a>`,
@@ -206,14 +244,14 @@ function renderBody(page, routePath, entity = null) {
   ).join("");
   const product = entity?.product;
   const productDetails = product
-    ? `<section><h2>بيانات المنتج</h2><p><strong>العلامة:</strong> <a href="${escapeHtml(absoluteUrl(`/brand/${product.brandSlug}`))}">${escapeHtml(product.brand)}</a> · <strong>الفئة:</strong> <a href="${escapeHtml(absoluteUrl(`/category/${product.category?.slug || ""}`))}">${escapeHtml(product.category?.name || "المنتجات")}</a></p><p><strong>SKU:</strong> ${escapeHtml(product.sku)} · <strong>السعر:</strong> ${escapeHtml(String(product.discountPrice ?? product.regularPrice))} USD · <strong>الحالة:</strong> ${product.quantity > 0 ? "متوفر حسب الكتالوج الحالي" : "غير متوفر حالياً"}</p>${product.specifications?.attributes?.length ? `<ul>${product.specifications.attributes.map((attribute) => `<li>${escapeHtml(attribute.label)}: ${escapeHtml(attribute.value || attribute.values?.join("، ") || "غير منشور")}</li>`).join("")}</ul>` : ""}</section>`
+    ? `<section class="seo-product-summary"><h2>بيانات المنتج</h2>${product.images?.[0] ? `<img src="${escapeHtml(product.images[0])}" alt="${escapeHtml(product.productName)}" width="640" height="640" />` : ""}<p><strong>العلامة:</strong> ${product.brandSlug ? `<a href="${escapeHtml(absoluteUrl(`/brand/${product.brandSlug}`))}">${escapeHtml(product.brand)}</a>` : escapeHtml(product.brand)} · <strong>الفئة:</strong> ${product.category?.slug ? `<a href="${escapeHtml(absoluteUrl(`/category/${product.category.slug}`))}">${escapeHtml(product.category.name)}</a>` : "المنتجات"}</p><p><strong>SKU:</strong> <span dir="ltr">${escapeHtml(product.sku)}</span> · <strong>السعر:</strong> ${escapeHtml(String(product.discountPrice ?? product.regularPrice))} USD · <strong>الحالة:</strong> ${product.quantity > 0 ? "متوفر حسب الكتالوج الحالي" : "غير متوفر حالياً"}</p>${product.shortDescription || product.productDescription ? `<p>${escapeHtml(product.shortDescription || product.productDescription)}</p>` : ""}</section>${renderProductSpecifications(product)}${renderProductShipping(product)}`
     : "";
   const guideContent = entity?.type === "guide" && entity.content
     ? `<section><h2>محتوى الدليل</h2>${renderTextContent(entity.content)}</section>`
     : "";
   const categoryLinks = relatedBrands ? `<section><h2>العلامات المتاحة</h2><ul>${relatedBrands}</ul></section>` : "";
   const buyingLinks = `<section><h2>روابط مفيدة قبل الطلب</h2><p><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/shipping"))}">الشحن والتوصيل</a> · <a href="${escapeHtml(absoluteUrl("/return-policy"))}">الإرجاع والاستبدال</a></p></section>`;
-  return `<header><a href="${escapeHtml(absoluteUrl("/"))}">CABL اليمن</a><nav>${links}</nav></header><main><p>دليل CABL في اليمن</p><h1>${escapeHtml(page.h1)}</h1><p>${escapeHtml(page.description)}</p>${productDetails}${guideContent}${categoryLinks}${renderProductList(entityProducts)}<section><h2>معلومات قبل الطلب</h2><p>راجع المواصفات والتوافق والسعر والتوافر في صفحة المنتج، ثم أدخل العنوان في checkout لرؤية خيارات الشحن الحالية.</p></section>${buyingLinks}</main><footer><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/contact"))}">تواصل معنا</a></footer>`;
+  return `<header><a href="${escapeHtml(absoluteUrl("/"))}">CABL اليمن</a><nav>${links}</nav></header><main><p>دليل CABL في اليمن</p><h1>${escapeHtml(page.h1)}</h1><p>${escapeHtml(page.description)}</p>${productDetails}${guideContent}${categoryLinks}${renderProductList(entityProducts)}${renderRelatedProducts(entity?.relatedProducts)}<section><h2>معلومات قبل الطلب</h2><p>راجع المواصفات والتوافق والسعر والتوافر في صفحة المنتج، ثم أدخل العنوان في checkout لرؤية خيارات الشحن الحالية.</p></section>${buyingLinks}</main><footer><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/contact"))}">تواصل معنا</a></footer>`;
 }
 
 function withSeo(indexHtml, page, routePath, entity = null) {
@@ -319,6 +357,10 @@ async function main() {
   for (const product of products) {
     const seo = await getJson(`/store/seo?type=product&slug=${encodeURIComponent(product.slug)}`);
     const routePath = productPath(product);
+    const relatedProducts = products
+      .filter((item) => item.slug !== product.slug && item.category?.slug === product.category?.slug)
+      .sort((a, b) => Number(b.brandSlug === product.brandSlug) - Number(a.brandSlug === product.brandSlug))
+      .slice(0, 6);
     routes.set(routePath, {
       ...(seo || {}),
       title: seo?.title || `${product.productName} | CABL`,
@@ -327,7 +369,7 @@ async function main() {
       canonicalPath: mountedPath(routePath),
       entityType: "product",
       product,
-      entity: { type: "product", product, productPath, brandPath: (slug) => `/brand/${slug}` },
+      entity: { type: "product", product, relatedProducts, productPath, brandPath: (slug) => `/brand/${slug}` },
     });
   }
 

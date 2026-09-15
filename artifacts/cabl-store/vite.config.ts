@@ -112,7 +112,88 @@ function escapeSeoHtml(value: string) {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 }
 
-function renderLoadingShell(page: { h1: string; description: string }) {
+type DevProduct = {
+  slug: string;
+  brand: string;
+  brandSlug: string | null;
+  productName: string;
+  sku: string;
+  regularPrice: number;
+  discountPrice: number | null;
+  quantity: number;
+  shortDescription: string | null;
+  productDescription: string | null;
+  category: { name: string; slug: string } | null;
+  images: string[];
+  shippingOptions: Array<{ name: string; charge: number; free: boolean; estimatedDays: number | null }>;
+  specifications?: {
+    attributes?: Array<{ label: string; value: string | number | boolean | null; values?: string[]; unit: string | null }>;
+  };
+};
+
+type DevSeoPage = {
+  route: string;
+  title: string;
+  h1: string;
+  description: string;
+  indexable?: boolean;
+  breadcrumbs?: Array<{ name: string; path: string }>;
+  jsonLd?: Record<string, unknown>;
+  product?: DevProduct;
+};
+
+const apiOrigin = (process.env.SEO_PRERENDER_API_URL || `http://127.0.0.1:${process.env.API_PORT || '8080'}`).replace(/\/api\/?$/, '');
+let devCatalogPromise: Promise<DevProduct[]> | null = null;
+
+async function getDevCatalog() {
+  if (!devCatalogPromise) {
+    devCatalogPromise = fetch(`${apiOrigin}/api/store/catalog`)
+      .then(async (response) => {
+        if (!response.ok) return [];
+        const payload = await response.json() as { products?: DevProduct[] };
+        return Array.isArray(payload.products) ? payload.products : [];
+      })
+      .catch(() => []);
+  }
+  return devCatalogPromise;
+}
+
+async function getDevProduct(slug: string) {
+  const products = await getDevCatalog();
+  return products.find((product) => product.slug === slug);
+}
+
+async function getDevProductSeo(slug: string) {
+  try {
+    const response = await fetch(`${apiOrigin}/api/store/seo?type=product&slug=${encodeURIComponent(slug)}`);
+    if (!response.ok) return null;
+    return await response.json() as {
+      title: string;
+      h1: string;
+      description: string;
+      canonicalPath: string;
+      indexable: boolean;
+      breadcrumbs: Array<{ name: string; path: string }>;
+      jsonLd: Record<string, unknown>;
+    };
+  } catch {
+    return null;
+  }
+}
+
+function renderLoadingShell(page: DevSeoPage) {
+  const product = page.product;
+  const productDetails = product
+    ? `<section class="cabl-loading-product" aria-label="بيانات المنتج">
+        ${product.images?.[0] ? `<img src="${escapeSeoHtml(product.images[0])}" alt="${escapeSeoHtml(product.productName)}" width="320" height="320" />` : ''}
+        <div><p><strong>العلامة:</strong> ${escapeSeoHtml(product.brand)} · <strong>القسم:</strong> ${escapeSeoHtml(product.category?.name || 'المنتجات')}</p>
+        <p><strong>SKU:</strong> <span dir="ltr">${escapeSeoHtml(product.sku)}</span> · <strong>السعر:</strong> ${escapeSeoHtml(String(product.discountPrice ?? product.regularPrice))} USD · <strong>الحالة:</strong> ${product.quantity > 0 ? 'متوفر حسب الكتالوج الحالي' : 'غير متوفر حالياً'}</p>
+        ${product.shortDescription || product.productDescription ? `<p>${escapeSeoHtml(product.shortDescription || product.productDescription || '')}</p>` : ''}
+        ${product.specifications?.attributes?.length ? `<ul>${product.specifications.attributes.map((attribute) => `<li>${escapeSeoHtml(attribute.label)}: ${escapeSeoHtml(String(attribute.value ?? (attribute.values?.join('، ') || 'غير منشور')))}${attribute.unit ? ` ${escapeSeoHtml(attribute.unit)}` : ''}</li>`).join('')}</ul>` : ''}
+        ${product.shippingOptions?.length ? `<p><strong>خيارات الشحن:</strong> ${product.shippingOptions.map((option) => escapeSeoHtml(option.name)).join('، ')}</p>` : ''}
+        </div>
+      </section>`
+    : '';
   return `<div class="cabl-loading-shell" role="status" aria-live="polite">
     <div class="cabl-loading-brand" aria-label="CABL اليمن">
       <span class="cabl-loading-mark" aria-hidden="true">C</span>
@@ -122,6 +203,7 @@ function renderLoadingShell(page: { h1: string; description: string }) {
     <p class="cabl-loading-status">جارٍ تجهيز المتجر</p>
     <h1>${escapeSeoHtml(page.h1)}</h1>
     <p class="cabl-loading-description">${escapeSeoHtml(page.description)}</p>
+    ${productDetails}
     <noscript>فعّل JavaScript لفتح متجر CABL وتصفح المنتجات.</noscript>
   </div>`;
 }
@@ -130,7 +212,7 @@ function mountedPath() {
   return basePath.replace(/\/+$/, '');
 }
 
-function devSeoPage(originalUrl: string) {
+async function devSeoPage(originalUrl: string): Promise<DevSeoPage> {
   const requestedPath = new URL(originalUrl, 'http://localhost').pathname;
   const mount = mountedPath();
   const route = requestedPath.startsWith(mount)
@@ -142,9 +224,33 @@ function devSeoPage(originalUrl: string) {
     const name = parts[1].replaceAll('-', ' ');
     return { route, title: `منتجات ${name} في اليمن | CABL`, h1: `منتجات ${name}`, description: `تصفح منتجات ${name} المنشورة في كتالوج CABL داخل اليمن.` };
   }
-  if (parts.length === 3) {
-    const name = parts[2].replaceAll('-', ' ');
-    return { route, title: `${name} | CABL`, h1: name, description: `${name} من كتالوج CABL داخل اليمن. راجع المواصفات والتوافر قبل الطلب.` };
+  const productSlug = parts[0] === 'product' && parts[1]
+    ? parts[1]
+    : parts.length === 3
+      ? parts[2]
+      : null;
+  if (productSlug) {
+    const product = await getDevProduct(productSlug);
+    if (!product) {
+      return {
+        route,
+        title: 'المنتج غير موجود | CABL',
+        h1: 'المنتج غير موجود',
+        description: 'لم نجد هذا المنتج ضمن المنتجات المنشورة في كتالوج CABL.',
+        indexable: false,
+      };
+    }
+    const seo = await getDevProductSeo(product.slug);
+    return {
+      route,
+      title: seo?.title || `${product.productName} | CABL`,
+      h1: seo?.h1 || product.productName,
+      description: seo?.description || `${product.productName} من كتالوج CABL داخل اليمن.`,
+      breadcrumbs: seo?.breadcrumbs,
+      jsonLd: seo?.jsonLd,
+      indexable: seo?.indexable ?? true,
+      product,
+    };
   }
   if (parts.length === 2 && !['category', 'guides', 'blog', 'locations', 'solutions'].includes(parts[0])) {
     const category = parts[1].replaceAll('-', ' ');
@@ -161,23 +267,39 @@ function devSeoPage(originalUrl: string) {
 function seoHtmlPlugin() {
   return {
     name: 'cabl-seo-html',
-    transformIndexHtml(html: string, context: { originalUrl?: string }) {
-      const page = devSeoPage(context.originalUrl || '/');
+    async transformIndexHtml(html: string, context: { originalUrl?: string }) {
+      const page = await devSeoPage(context.originalUrl || '/');
       const relativeCanonical = `${mountedPath()}${page.route === '/' ? '' : page.route}`;
       const origin = process.env.PUBLIC_SITE_ORIGIN
         || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : '');
       const canonical = `${origin}${relativeCanonical}`;
       const schema = JSON.stringify({
         '@context': 'https://schema.org',
-        '@type': 'WebPage',
-        name: page.title,
-        description: page.description,
-        url: canonical,
-        inLanguage: 'ar-YE',
+        '@graph': [
+          {
+            '@type': 'WebPage',
+            '@id': canonical,
+            name: page.title,
+            description: page.description,
+            url: canonical,
+            inLanguage: 'ar-YE',
+          },
+          ...(page.jsonLd ? [page.jsonLd] : []),
+          ...(page.breadcrumbs?.length ? [{
+            '@type': 'BreadcrumbList',
+            itemListElement: page.breadcrumbs.map((item, index) => ({
+              '@type': 'ListItem',
+              position: index + 1,
+              name: item.name,
+              item: `${origin}${item.path}`,
+            })),
+          }] : []),
+        ],
       });
       return html
         .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeSeoHtml(page.title)}</title>`)
         .replace(/<meta name="description" content="[^"]*"\s*\/?>/, `<meta name="description" content="${escapeSeoHtml(page.description)}" />`)
+        .replace(/<meta name="robots" content="[^"]*"\s*\/?>/, `<meta name="robots" content="${page.indexable === false ? 'noindex, follow' : 'index, follow'}" />`)
         .replace(/<link rel="canonical" href="[^"]*"\s*\/?>/g, '')
         .replace(/<meta property="og:[^"]*"[^>]*\/?>/g, '')
         .replace(/<meta name="twitter:[^"]*"[^>]*\/?>/g, '')
@@ -196,6 +318,11 @@ function seoHtmlPlugin() {
           .cabl-loading-status { margin: 0; color: #50709b; font-size: 13px; font-weight: 700; }
           .cabl-loading-shell h1 { max-width: 620px; margin: 18px 0 8px; color: #14213d; font-size: clamp(22px, 5vw, 34px); line-height: 1.35; }
           .cabl-loading-description { max-width: 560px; margin: 0; color: #7184a0; font-size: 14px; line-height: 1.9; }
+          .cabl-loading-product { width: min(760px, 100%); display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: 24px; margin-top: 24px; padding: 18px; border: 1px solid #dbe8f8; border-radius: 20px; background: #fff; text-align: right; line-height: 1.8; }
+          .cabl-loading-product img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; border-radius: 14px; background: #f6f9fe; }
+          .cabl-loading-product p { margin: 0 0 10px; color: #526b8d; font-size: 13px; }
+          .cabl-loading-product ul { margin: 0; padding-right: 18px; color: #526b8d; font-size: 13px; }
+          @media (max-width: 620px) { .cabl-loading-product { grid-template-columns: 1fr; } .cabl-loading-product img { max-width: 220px; margin: auto; } }
           .cabl-loading-shell noscript { max-width: 560px; margin-top: 22px; color: #b05d35; font-size: 12px; line-height: 1.7; }
           @keyframes cabl-loading { 0% { transform: translateX(145%); } 45%, 65% { transform: translateX(70%); } 100% { transform: translateX(-145%); } }
           @media (prefers-reduced-motion: reduce) { .cabl-loading-line i { animation: none; margin-left: 29%; } }
