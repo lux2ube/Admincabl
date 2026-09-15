@@ -52,18 +52,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (routePath === '/' && previousRoute.current !== '/') setHomeCategory('chargers');
     previousRoute.current = routePath;
   }, [routePath]);
-  const catalogParams = routePath === '/' && homeCategory ? { category: homeCategory } : undefined;
-  const query = useGetStoreCatalog(catalogParams);
-  const [homeProducts, setHomeProducts] = useState<StoreProduct[]>([]);
-  useEffect(() => {
-    if (routePath !== '/' || !query.data) return;
-    setHomeProducts((current) => {
-      const products = new Map(current.map((product) => [product.id, product]));
-      query.data.products.forEach((product) => products.set(product.id, product));
-      const merged = [...products.values()];
-      return merged.length === current.length && merged.every((product, index) => product === current[index]) ? current : merged;
-    });
-  }, [query.data, routePath]);
+  const query = useGetStoreCatalog();
   const [cart, setCart] = useState<CartLine[]>(() => {
     const stored = readStorage('cabl-cart');
     return Array.isArray(stored) ? stored as CartLine[] : [];
@@ -76,13 +65,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => localStorage.setItem('cabl-cart', JSON.stringify(cart)), [cart]);
   useEffect(() => localStorage.setItem('cabl-favorites', JSON.stringify(favorites)), [favorites]);
   useEffect(() => localStorage.setItem('cabl-currency', currencyCode), [currencyCode]);
-  const catalog = useMemo(() => {
-    if (!query.data) return undefined;
-    if (routePath !== '/') return query.data;
-    const products = new Map(homeProducts.map((product) => [product.id, product]));
-    query.data.products.forEach((product) => products.set(product.id, product));
-    return { ...query.data, products: [...products.values()] };
-  }, [homeProducts, query.data, routePath]);
+  const catalog = query.data;
   const currency = catalog?.currencies.find((item) => item.code === currencyCode)
     || catalog?.currencies.find((item) => item.code === 'YER')
     || catalog?.currencies.find((item) => item.isDefault)
@@ -93,12 +76,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCurrencyCode(catalog.currencies.find((item) => item.code === 'YER')?.code || catalog.currencies.find((item) => item.isDefault)?.code || catalog.currencies[0].code);
   }, [catalog, currencyCode]);
   useEffect(() => {
-    if (!catalog || (routePath === '/' && homeCategory)) return;
+    if (!catalog) return;
     setCart((current) => {
       const normalized = normalizeCart(current, catalog.products);
       return JSON.stringify(normalized) === JSON.stringify(current) ? current : normalized;
     });
-  }, [catalog, homeCategory, routePath]);
+  }, [catalog]);
   const cartProducts = useMemo(() => cart.flatMap((line) => {
     const product = catalog?.products.find((item) => item.id === line.productId);
     return product ? [{ product, quantity: line.quantity }] : [];

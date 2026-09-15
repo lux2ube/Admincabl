@@ -6,7 +6,6 @@ import { StoreShell } from '@/components/store-shell';
 import { WebMcpTools } from '@/components/webmcp-tools';
 import { StoreProvider } from '@/lib/store';
 import NotFound from '@/pages/not-found';
-import { HomePage } from '@/pages/store-pages';
 
 const BrandCategoryPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.BrandCategoryPage })));
 const BrandPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.BrandPage })));
@@ -16,6 +15,7 @@ const CategoryPage = lazy(() => import('@/pages/store-pages').then((module) => (
 const CategoryPageForSlug = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.CategoryPageForSlug })));
 const CheckoutPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.CheckoutPage })));
 const ComparePage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.ComparePage })));
+const HomePage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.HomePage })));
 const OrderPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.OrderPage })));
 const OrdersPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.OrdersPage })));
 const ProductPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.ProductPage })));
@@ -52,9 +52,32 @@ function PublicCategoryPage() {
   return <CategoryPageForSlug slug={publicCategoryAliases[categorySlug] || categorySlug} />;
 }
 
+function HomeRoute() {
+  return (
+    <Suspense fallback={
+      <section className="reference-hero" aria-busy="true">
+        <div className="container reference-hero-inner">
+          <div className="reference-hero-copy">
+            <span className="eyebrow">CABL / اليمن</span>
+            <h1>أصلي يعيش معك..<br /><em>وتورّثه لعيالك.</em></h1>
+            <p>منتجات أصلية من براندات تعرفها، تستاهل مكانها على طاولتك.</p>
+            <a href={`${import.meta.env.BASE_URL}search`} className="reference-hero-cta">تسوّق المنتجات <span aria-hidden="true">←</span></a>
+            <div className="reference-hero-note">اختيارات من كتالوج CABL الحالي</div>
+          </div>
+          <div className="reference-hero-media" aria-hidden="true">
+            <div className="reference-hero-loading" />
+          </div>
+        </div>
+      </section>
+    }>
+      <HomePage />
+    </Suspense>
+  );
+}
+
 function Router() {
   return <StoreShell><RoutedErrorBoundary><Suspense fallback={null}><Switch>
-    <Route path="/" component={HomePage}/>
+    <Route path="/" component={HomeRoute}/>
     <Route path="/category/:slug" component={CategoryPage}/>
     <Route path="/brand/:brandSlug/:categorySlug" component={BrandCategoryPage}/>
     <Route path="/brand/:slug" component={BrandPage}/>
