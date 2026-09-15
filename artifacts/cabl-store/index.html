@@ -27,7 +27,6 @@
       .boot-loader-content{position:relative;z-index:2;width:47%;margin-inline-start:auto;padding:76px 72px 64px 42px;text-align:right}
       .boot-loader-kicker{display:inline-flex;align-items:center;gap:8px;margin-bottom:24px;color:#66e3f4;font-size:11px;font-weight:800;letter-spacing:.15em}
       .boot-loader-kicker:before{content:"";width:24px;height:2px;border-radius:10px;background:#ff7143;box-shadow:0 0 14px #ff7143}
-      .boot-loader-mark{display:grid;place-items:center;width:58px;height:58px;margin-bottom:22px;border:1px solid #5fe8ff5c;border-radius:20px;background:linear-gradient(145deg,#146cf0,#16bcd0);color:#fff;font-size:32px;font-weight:900;letter-spacing:-.16em;line-height:1;box-shadow:0 14px 35px #0756dd66}
       .boot-loader-card h1{max-width:400px;margin:0;color:#fff;font-size:clamp(29px,4.2vw,54px);font-weight:950;line-height:1.12;letter-spacing:-.07em}
       .boot-loader-card h1 span{display:block;color:#5fe8ff}
       .boot-loader-card p{max-width:280px;margin:18px 0 32px;color:#aec2d6;font-size:13px;line-height:1.8}
@@ -43,7 +42,7 @@
       @keyframes boot-loader-float{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-10px) rotate(1deg)}}
       .boot-loader-art img{animation:boot-loader-float 4s ease-in-out infinite}
       @media (prefers-reduced-motion:reduce){#boot-loader,#boot-loader *{animation:none!important;transition:none!important}}
-      @media (max-width:680px){.boot-loader-card{min-height:620px;border-radius:30px}.boot-loader-content{width:auto;margin:0;padding:42px 30px 0;text-align:center}.boot-loader-kicker{margin-bottom:18px}.boot-loader-kicker:before{display:none}.boot-loader-mark{margin:0 auto 18px}.boot-loader-card h1{margin-inline:auto;font-size:clamp(30px,10vw,43px)}.boot-loader-card p{margin:14px auto 24px}.boot-loader-track{margin-inline:auto}.boot-loader-art{left:50%;bottom:-64px;width:86%;transform:translateX(-50%)}.boot-loader-art img{animation-name:boot-loader-float-mobile}.boot-loader-badge{top:20%;right:9%;font-size:10px}}
+      @media (max-width:680px){.boot-loader-card{min-height:620px;border-radius:30px}.boot-loader-content{width:auto;margin:0;padding:42px 30px 0;text-align:center}.boot-loader-kicker{margin-bottom:18px}.boot-loader-kicker:before{display:none}.boot-loader-card h1{margin-inline:auto;font-size:clamp(30px,10vw,43px)}.boot-loader-card p{margin:14px auto 24px}.boot-loader-track{margin-inline:auto}.boot-loader-art{left:50%;bottom:-64px;width:86%;transform:translateX(-50%)}.boot-loader-art img{animation-name:boot-loader-float-mobile}.boot-loader-badge{top:20%;right:9%;font-size:10px}}
       @keyframes boot-loader-float-mobile{0%,100%{transform:translate(-50%,0) rotate(-1deg)}50%{transform:translate(-50%,-8px) rotate(1deg)}}
     </style>
   </head>
@@ -52,7 +51,6 @@
       <div class="boot-loader-card">
         <div class="boot-loader-content">
           <div class="boot-loader-kicker">CABL / اليمن</div>
-          <div class="boot-loader-mark" aria-hidden="true">C</div>
           <h1>ومعانا شواحن <span>وبطارياااات</span></h1>
           <p>اختيارات واضحة وطاقة تكمل يومك، من أول لحظة تفتح فيها CABL.</p>
           <div class="boot-loader-track" aria-hidden="true"><span></span></div>
