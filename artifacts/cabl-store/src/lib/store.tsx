@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { useGetStoreCatalog } from '@workspace/api-client-react';
+import { getGetStoreCatalogQueryKey, useGetStoreCatalog } from '@workspace/api-client-react';
 import type { StoreCatalog, StoreProduct } from '@workspace/api-client-react';
 import { useLocation } from 'wouter';
 
@@ -23,6 +23,32 @@ type StoreContextValue = {
   selectHomeCategory: (category: string | null) => void;
 };
 const StoreContext = createContext<StoreContextValue | null>(null);
+let initialCatalog: StoreCatalog | undefined;
+
+function readInitialCatalog(): StoreCatalog | undefined {
+  if (initialCatalog) return initialCatalog;
+  const element = document.getElementById('cabl-catalog-data');
+  if (!element?.textContent) return undefined;
+  try {
+    const value = JSON.parse(element.textContent) as Partial<StoreCatalog>;
+    if (
+      !Array.isArray(value.products)
+      || !Array.isArray(value.categories)
+      || !Array.isArray(value.brands)
+      || !Array.isArray(value.shippingOptions)
+      || !Array.isArray(value.paymentMethods)
+      || !Array.isArray(value.currencies)
+    ) {
+      throw new Error('catalog payload is missing one or more required arrays');
+    }
+    initialCatalog = value as StoreCatalog;
+    return initialCatalog;
+  } catch (error) {
+    console.error('Invalid CABL catalog payload:', error);
+    return undefined;
+  }
+}
+
 const readStorage = (key: string): unknown => {
   try { return JSON.parse(localStorage.getItem(key) || ''); } catch { return null; }
 };
@@ -52,7 +78,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (routePath === '/' && previousRoute.current !== '/') setHomeCategory('chargers');
     previousRoute.current = routePath;
   }, [routePath]);
-  const query = useGetStoreCatalog();
+  const query = useGetStoreCatalog(undefined, {
+    query: {
+      queryKey: getGetStoreCatalogQueryKey(),
+      initialData: readInitialCatalog(),
+      staleTime: 30_000,
+    },
+  });
   const [cart, setCart] = useState<CartLine[]>(() => {
     const stored = readStorage('cabl-cart');
     return Array.isArray(stored) ? stored as CartLine[] : [];

@@ -13,10 +13,16 @@ for (const route of routes) {
   assert.match(html, /<h1>[^<]+<\/h1>/, `${route} should contain a crawlable H1`);
   assert.match(html, /<link rel="canonical" href="[^"]+"/, `${route} should contain a canonical`);
   assert.match(html, /<script type="application\/ld\+json">/, `${route} should contain JSON-LD`);
+  assert.match(html, /<script id="cabl-catalog-data" type="application\/json">/, `${route} should contain the canonical catalog payload`);
   assert.equal((html.match(/rel="canonical"/g) || []).length, 1, `${route} should contain one canonical`);
   assert.equal((html.match(/application\/ld\+json/g) || []).length, 1, `${route} should contain one JSON-LD block`);
   assert.doesNotMatch(html, /<h1>Page Not Found/i, `${route} must not be a 404 shell`);
   assert.match(html, new RegExp(`canonical" href="/cabl-store${route === "/" ? "" : route}"`), `${route} should use the mounted canonical`);
+  const catalogPayload = html.match(/<script id="cabl-catalog-data" type="application\/json">([\s\S]*?)<\/script>/);
+  assert.ok(catalogPayload, `${route} should expose a parseable catalog payload`);
+  const catalog = JSON.parse(catalogPayload[1]);
+  assert.ok(Array.isArray(catalog.products), `${route} catalog payload should contain products`);
+  assert.ok(Array.isArray(catalog.currencies), `${route} catalog payload should contain currencies`);
 }
 
 const productCandidates = [];

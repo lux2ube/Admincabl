@@ -321,6 +321,16 @@ function renderRelatedProducts(products) {
   }).join("")}</ul></section>`;
 }
 
+function serializeJsonForHtml(value) {
+  return JSON.stringify(value).replace(/[<>&\u2028\u2029]/g, (character) => ({
+    "<": "\\u003c",
+    ">": "\\u003e",
+    "&": "\\u0026",
+    "\u2028": "\\u2028",
+    "\u2029": "\\u2029",
+  })[character]);
+}
+
 function renderBody(page, routePath, entity = null) {
   const links = [
     `<a href="${escapeHtml(absoluteUrl("/guides"))}">أدلة الشراء</a>`,
@@ -343,10 +353,13 @@ function renderBody(page, routePath, entity = null) {
   return `<header><a href="${escapeHtml(absoluteUrl("/"))}">CABL اليمن</a><nav>${links}</nav></header><main><p>دليل CABL في اليمن</p><h1>${escapeHtml(page.h1)}</h1><p>${escapeHtml(page.description)}</p>${productDetails}${guideContent}${categoryLinks}${renderProductList(entityProducts)}${renderRelatedProducts(entity?.relatedProducts)}<section><h2>معلومات قبل الطلب</h2><p>راجع المواصفات والتوافق والسعر والتوافر في صفحة المنتج، ثم أدخل العنوان في checkout لرؤية خيارات الشحن الحالية.</p></section>${buyingLinks}</main><footer><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/contact"))}">تواصل معنا</a></footer>`;
 }
 
-function withSeo(indexHtml, page, routePath, entity = null) {
+function withSeo(indexHtml, page, routePath, entity = null, catalog = null) {
   const canonicalPath = page.canonicalPath || routePath;
   const canonical = absoluteUrl(canonicalPath);
   const schema = pageJsonLd(page, canonicalPath, entity);
+  const catalogPayload = catalog
+    ? `<script id="cabl-catalog-data" type="application/json">${serializeJsonForHtml(catalog)}</script>`
+    : "";
   let html = indexHtml
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(page.title)}</title>`)
     .replace(/<meta name="description" content="[^"]*"\s*\/?>/, `<meta name="description" content="${escapeHtml(page.description)}" />`)
@@ -355,7 +368,7 @@ function withSeo(indexHtml, page, routePath, entity = null) {
     .replace(/<meta property="og:[^"]*"[^>]*\/?>/g, "")
     .replace(/<meta name="twitter:[^"]*"[^>]*\/?>/g, "")
     .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, "")
-    .replace("</head>", `<meta property="og:title" content="${escapeHtml(page.title)}" /><meta property="og:description" content="${escapeHtml(page.description)}" /><meta property="og:url" content="${escapeHtml(canonical)}" /><meta property="og:locale" content="ar_YE" /><meta property="og:site_name" content="CABL" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="${escapeHtml(page.title)}" /><meta name="twitter:description" content="${escapeHtml(page.description)}" /><link rel="canonical" href="${escapeHtml(canonical)}" /><script type="application/ld+json">${JSON.stringify(schema)}</script></head>`)
+    .replace("</head>", `<meta property="og:title" content="${escapeHtml(page.title)}" /><meta property="og:description" content="${escapeHtml(page.description)}" /><meta property="og:url" content="${escapeHtml(canonical)}" /><meta property="og:locale" content="ar_YE" /><meta property="og:site_name" content="CABL" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="${escapeHtml(page.title)}" /><meta name="twitter:description" content="${escapeHtml(page.description)}" /><link rel="canonical" href="${escapeHtml(canonical)}" /><script type="application/ld+json">${JSON.stringify(schema)}</script>${catalogPayload}</head>`)
     .replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${renderBody(page, routePath, entity)}</div>`);
   return html;
 }
@@ -477,7 +490,7 @@ async function main() {
       ? path.join(distDir, "index.html")
       : path.join(distDir, routePath.replace(/^\/+/, ""), "index.html");
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
-    await fs.writeFile(outputPath, withSeo(indexHtml, page, routePath, page.entity || (page.product ? { type: "product", product: page.product, productPath } : null)));
+    await fs.writeFile(outputPath, withSeo(indexHtml, page, routePath, page.entity || (page.product ? { type: "product", product: page.product, productPath } : null), catalog));
   }
   console.log(`SEO pre-rendered ${routes.size} public routes`);
 }
