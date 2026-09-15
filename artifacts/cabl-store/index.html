@@ -14,8 +14,37 @@
     <meta name="twitter:description" content="إكسسوارات تقنية منتقاة بعناية، بأسعار واضحة وتوصيل يعتمد عليه إلى كل مدن اليمن." />
     <meta name="theme-color" content="#1d4ed8" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <style>
+      :root{background:#f4f8fd}
+      html,body{margin:0;min-height:100%;background:#f4f8fd}
+      #boot-loader{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;overflow:hidden;background:linear-gradient(145deg,#f7fbff 0%,#eaf3ff 52%,#dcecff 100%);color:#14213d;font-family:Arial,"Tahoma",sans-serif;direction:rtl;opacity:1;visibility:visible;transition:opacity .38s ease,visibility .38s ease}
+      #boot-loader:before,#boot-loader:after{content:"";position:absolute;border:1px solid #1757ee1c;border-radius:50%;pointer-events:none}
+      #boot-loader:before{width:min(560px,125vw);height:min(560px,125vw);transform:translate(-24%,20%);box-shadow:0 0 0 42px #1757ee06,0 0 0 86px #1757ee04}
+      #boot-loader:after{width:280px;height:280px;transform:translate(38%,-35%);border-color:#12bfdc2b}
+      #boot-loader.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
+      .boot-loader-card{position:relative;z-index:1;width:min(290px,calc(100% - 48px));padding:31px 25px 26px;border:1px solid #ffffffd9;border-radius:25px;background:#ffffffc9;box-shadow:0 22px 60px #1b4d7d1c;text-align:center;backdrop-filter:blur(16px)}
+      .boot-loader-mark{position:relative;display:grid;place-items:center;width:70px;height:70px;margin:0 auto 18px;border:1px solid #1757ee35;border-radius:22px;background:#edf5ff;color:#1757ee;font-size:43px;font-weight:900;letter-spacing:-.16em;line-height:1;box-shadow:0 10px 24px #1757ee1c}
+      .boot-loader-mark:after{content:"";position:absolute;inset:7px;border:1px dashed #12bfdc80;border-radius:17px;animation:boot-loader-spin 5s linear infinite}
+      .boot-loader-card h1{margin:0;color:#14213d;font-size:20px;letter-spacing:-.05em}
+      .boot-loader-card p{margin:7px 0 20px;color:#71819b;font-size:11px}
+      .boot-loader-track{height:5px;overflow:hidden;border-radius:99px;background:#dce8f5}
+      .boot-loader-track span{display:block;width:42%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#1757ee,#12bfdc);animation:boot-loader-progress 1.35s ease-in-out infinite}
+      .boot-loader-note{display:block;margin-top:11px;color:#9aa8b9;font-size:9px}
+      @keyframes boot-loader-progress{0%{transform:translateX(245%)}100%{transform:translateX(-245%)}}
+      @keyframes boot-loader-spin{to{transform:rotate(360deg)}}
+      @media (prefers-reduced-motion:reduce){#boot-loader,#boot-loader *{animation:none!important;transition:none!important}}
+    </style>
   </head>
   <body>
+    <div id="boot-loader" role="status" aria-live="polite" aria-label="جارٍ تحميل متجر CABL">
+      <div class="boot-loader-card">
+        <div class="boot-loader-mark" aria-hidden="true">C</div>
+        <h1>نجهّز لك المتجر</h1>
+        <p>نحمّل الكتالوج والأسعار الحالية</p>
+        <div class="boot-loader-track" aria-hidden="true"><span></span></div>
+        <small class="boot-loader-note">لحظات ونبدأ</small>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

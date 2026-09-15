@@ -5,6 +5,8 @@ import { ErrorBoundary } from '@/components/error-boundary';
 
 import './index.css';
 
+const bootLoader = document.getElementById('boot-loader');
+
 createRoot(document.getElementById('root')!, {
   // Keeps caught errors off reportError(), which would raise the dev overlay.
   onCaughtError: (error, errorInfo) => {
@@ -15,3 +17,10 @@ createRoot(document.getElementById('root')!, {
     <App />
   </ErrorBoundary>,
 );
+
+if (bootLoader) {
+  window.requestAnimationFrame(() => {
+    bootLoader.classList.add('is-hidden');
+    window.setTimeout(() => bootLoader.remove(), 450);
+  });
+}
