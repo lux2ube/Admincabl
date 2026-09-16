@@ -56,8 +56,19 @@ function routePath(urlPath) {
   return urlPath.slice(basePath.length) || "/";
 }
 
+function isSeoMetadataPath(urlPath) {
+  return urlPath === "/robots.txt" || urlPath === "/sitemap.xml";
+}
+
 function serve(request, response) {
   const requestUrl = new URL(request.url || "/", "http://localhost");
+  if (isSeoMetadataPath(requestUrl.pathname)) {
+    const metadataPath = safePath(requestUrl.pathname);
+    if (metadataPath && fs.existsSync(metadataPath) && fs.statSync(metadataPath).isFile()) {
+      sendFile(response, metadataPath);
+      return;
+    }
+  }
   const route = routePath(requestUrl.pathname);
   if (!route) {
     response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });

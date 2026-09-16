@@ -8,7 +8,7 @@ router = "path"
 
 [[services]]
 name = "web"
-paths = [ "/cabl-store/" ]
+paths = [ "/cabl-store/", "/robots.txt", "/sitemap.xml" ]
 localPort = 25770
 
 [services.development]

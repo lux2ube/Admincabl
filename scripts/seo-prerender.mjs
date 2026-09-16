@@ -85,6 +85,15 @@ function absoluteUrl(routePath) {
   return mountedPath(routePath) || "/";
 }
 
+function escapeXml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
+}
+
 function escapeHtml(value) {
   return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 }
@@ -373,6 +382,30 @@ function withSeo(indexHtml, page, routePath, entity = null, catalog = null) {
   return html;
 }
 
+function renderSitemap(routes) {
+  const paths = new Set();
+  for (const [routePath, page] of routes) {
+    if (page.indexable === false) continue;
+    paths.add(absoluteUrl(page.canonicalPath || routePath));
+  }
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...paths]
+    .map((routePath) => `  <url><loc>${escapeXml(routePath)}</loc></url>`)
+    .join("\n")}\n</urlset>\n`;
+}
+
+function renderRobots() {
+  return `User-agent: *
+Allow: /
+Disallow: ${absoluteUrl("/search")}
+Disallow: ${absoluteUrl("/cart")}
+Disallow: ${absoluteUrl("/checkout")}
+Disallow: ${absoluteUrl("/orders")}
+Disallow: ${absoluteUrl("/order/")}
+
+Sitemap: ${absoluteUrl("/sitemap.xml")}
+`;
+}
+
 async function main() {
   const indexHtml = await fs.readFile(path.join(distDir, "index.html"), "utf8");
   const routes = new Map(Object.entries(staticPages).map(([routePath, page]) => [routePath, {
@@ -484,6 +517,9 @@ async function main() {
     }];
   });
   for (const [routePath, page] of productRoutes) routes.set(routePath, page);
+
+  await fs.writeFile(path.join(distDir, "sitemap.xml"), renderSitemap(routes));
+  await fs.writeFile(path.join(distDir, "robots.txt"), renderRobots());
 
   for (const [routePath, page] of routes) {
     const outputPath = routePath === "/"

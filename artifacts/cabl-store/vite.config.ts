@@ -140,6 +140,7 @@ type DevSeoPage = {
   breadcrumbs?: Array<{ name: string; path: string }>;
   jsonLd?: Record<string, unknown>;
   product?: DevProduct;
+  products?: DevProduct[];
 };
 
 const apiOrigin = (process.env.SEO_PRERENDER_API_URL || `http://127.0.0.1:${process.env.API_PORT || '8080'}`).replace(/\/api\/?$/, '');
@@ -181,7 +182,44 @@ async function getDevProductSeo(slug: string) {
   }
 }
 
-function renderLoadingShell(page: DevSeoPage) {
+const devCategoryAliases: Record<string, string> = {
+  chargers: 'chargers',
+  cables: 'charging-cables',
+  'power-banks': 'power-banks',
+  'hubs-adapters': 'phone-accessories',
+  'car-accessories': 'travel-adapters',
+};
+
+function devProductPath(product: DevProduct) {
+  return product.brandSlug && product.category?.slug
+    ? `/${product.brandSlug}/${product.category.slug}/${product.slug}`
+    : `/product/${product.slug}`;
+}
+
+async function getDevRouteProducts(route: string) {
+  const products = await getDevCatalog();
+  const parts = route.split('/').filter(Boolean);
+  const categorySlug = devCategoryAliases[route]
+    || (parts[0] === 'category' ? parts[1] : null);
+  if (categorySlug) return products.filter((product) => product.category?.slug === categorySlug);
+  if (parts[0] === 'brand' && parts[1]) {
+    return products.filter((product) => product.brandSlug === parts[1]);
+  }
+  if (parts.length === 2 && !['guides', 'blog', 'locations', 'solutions'].includes(parts[0])) {
+    return products.filter((product) => product.brandSlug === parts[0] && product.category?.slug === parts[1]);
+  }
+  return [];
+}
+
+function renderDevProductList(products: DevProduct[] = []) {
+  if (!products.length) return '';
+  return `<section class="cabl-seo-products" aria-labelledby="cabl-seo-products-title"><h2 id="cabl-seo-products-title">المنتجات المنشورة</h2><ul>${products.slice(0, 60).map((product) => {
+    const price = product.discountPrice ?? product.regularPrice;
+    return `<li><a href="${escapeSeoHtml(`${mountedPath(devProductPath(product))}`)}"><strong>${escapeSeoHtml(product.productName)}</strong></a><span>${escapeSeoHtml(product.brand)} · ${escapeSeoHtml(product.category?.name || 'منتج')}</span><span>${product.quantity > 0 ? 'متوفر حسب الكتالوج الحالي' : 'غير متوفر حالياً'} · ${escapeSeoHtml(String(price))} USD</span></li>`;
+  }).join('')}</ul></section>`;
+}
+
+function renderSeoShell(page: DevSeoPage) {
   const product = page.product;
   const productDetails = product
     ? `<section class="cabl-loading-product" aria-label="بيانات المنتج">
@@ -194,22 +232,27 @@ function renderLoadingShell(page: DevSeoPage) {
         </div>
       </section>`
     : '';
-  return `<div class="cabl-loading-shell" role="status" aria-live="polite">
+  return `<div class="cabl-loading-shell cabl-seo-shell">
     <div class="cabl-loading-brand" aria-label="CABL اليمن">
       <span class="cabl-loading-mark" aria-hidden="true">C</span>
       <span class="cabl-loading-wordmark">CABL <b>اليمن</b></span>
     </div>
-    <div class="cabl-loading-line" aria-hidden="true"><i></i></div>
-    <p class="cabl-loading-status">جارٍ تجهيز المتجر</p>
     <h1>${escapeSeoHtml(page.h1)}</h1>
     <p class="cabl-loading-description">${escapeSeoHtml(page.description)}</p>
     ${productDetails}
-    <noscript>فعّل JavaScript لفتح متجر CABL وتصفح المنتجات.</noscript>
+    ${renderDevProductList(page.products)}
+    <nav aria-label="روابط CABL الأساسية"><a href="${mountedPath('/')}">الرئيسية</a> · <a href="${mountedPath('/search')}">الكتالوج</a> · <a href="${mountedPath('/guides')}">أدلة الشراء</a> · <a href="${mountedPath('/shipping')}">الشحن والتوصيل</a></nav>
+    <noscript>المحتوى الأساسي متاح دون JavaScript، وتحتاج وظائف السلة والفلاتر إلى تشغيله.</noscript>
   </div>`;
 }
 
-function mountedPath() {
-  return basePath.replace(/\/+$/, '');
+function mountedPath(routePath = '') {
+  const mount = basePath.replace(/\/+$/, '');
+  if (!routePath) return mount;
+  const normalized = routePath.startsWith('/') ? routePath : `/${routePath}`;
+  return normalized === mount || normalized.startsWith(`${mount}/`)
+    ? normalized
+    : `${mount}${normalized === '/' ? '' : normalized}`;
 }
 
 async function devSeoPage(originalUrl: string): Promise<DevSeoPage> {
@@ -218,11 +261,13 @@ async function devSeoPage(originalUrl: string): Promise<DevSeoPage> {
   const route = requestedPath.startsWith(mount)
     ? requestedPath.slice(mount.length) || '/'
     : requestedPath;
-  if (devSeoPages[route]) return { ...devSeoPages[route], route };
+  if (devSeoPages[route]) {
+    return { ...devSeoPages[route], route, products: await getDevRouteProducts(route) };
+  }
   const parts = route.split('/').filter(Boolean);
   if (parts[0] === 'brand' && parts[1]) {
     const name = parts[1].replaceAll('-', ' ');
-    return { route, title: `منتجات ${name} في اليمن | CABL`, h1: `منتجات ${name}`, description: `تصفح منتجات ${name} المنشورة في كتالوج CABL داخل اليمن.` };
+    return { route, title: `منتجات ${name} في اليمن | CABL`, h1: `منتجات ${name}`, description: `تصفح منتجات ${name} المنشورة في كتالوج CABL داخل اليمن.`, products: await getDevRouteProducts(route) };
   }
   const productSlug = parts[0] === 'product' && parts[1]
     ? parts[1]
@@ -255,18 +300,58 @@ async function devSeoPage(originalUrl: string): Promise<DevSeoPage> {
   if (parts.length === 2 && !['category', 'guides', 'blog', 'locations', 'solutions'].includes(parts[0])) {
     const category = parts[1].replaceAll('-', ' ');
     const brand = parts[0].replaceAll('-', ' ');
-    return { route, title: `${category} من ${brand} في اليمن | CABL`, h1: `${category} من ${brand}`, description: `تصفح منتجات ${category} من ${brand} المنشورة في كتالوج CABL.` };
+    return { route, title: `${category} من ${brand} في اليمن | CABL`, h1: `${category} من ${brand}`, description: `تصفح منتجات ${category} من ${brand} المنشورة في كتالوج CABL.`, products: await getDevRouteProducts(route) };
   }
   if (parts[0] === 'category' && parts[1]) {
     const name = parts[1].replaceAll('-', ' ');
-    return { route, title: `${name} في اليمن | CABL`, h1: name, description: `منتجات ${name} المنشورة في كتالوج CABL داخل اليمن.` };
+    return { route, title: `${name} في اليمن | CABL`, h1: name, description: `منتجات ${name} المنشورة في كتالوج CABL داخل اليمن.`, products: await getDevRouteProducts(route) };
   }
   return { route, title: 'CABL | منتجات الشحن والطاقة والإكسسوارات', h1: 'CABL في اليمن', description: 'كتالوج CABL لمنتجات الشحن والطاقة والإكسسوارات داخل اليمن.' };
+}
+
+function xmlEscape(value: string) {
+  return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&apos;');
+}
+
+function devSitemap(products: DevProduct[]) {
+  const paths = new Set(Object.keys(devSeoPages).map((route) => mountedPath(route)));
+  for (const product of products) {
+    paths.add(mountedPath(devProductPath(product)));
+    if (product.brandSlug) paths.add(mountedPath(`/brand/${product.brandSlug}`));
+    if (product.category?.slug) paths.add(mountedPath(`/category/${product.category.slug}`));
+    if (product.brandSlug && product.category?.slug) paths.add(mountedPath(`/${product.brandSlug}/${product.category.slug}`));
+  }
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...paths].map((url) => `  <url><loc>${xmlEscape(url)}</loc></url>`).join('\n')}\n</urlset>\n`;
+}
+
+function devRobots() {
+  return `User-agent: *
+Allow: /
+Disallow: ${mountedPath('/search')}
+Disallow: ${mountedPath('/cart')}
+Disallow: ${mountedPath('/checkout')}
+Disallow: ${mountedPath('/orders')}
+Disallow: ${mountedPath('/order/')}
+
+Sitemap: ${mountedPath('/sitemap.xml')}
+`;
 }
 
 function seoHtmlPlugin() {
   return {
     name: 'cabl-seo-html',
+    configureServer(server: { middlewares: { use: (handler: (request: { url?: string }, response: { statusCode: number; setHeader: (name: string, value: string) => void; end: (body: string) => void }, next: () => void) => void) => void } }) {
+      server.middlewares.use(async (request, response, next) => {
+        const pathname = new URL(request.url || '/', 'http://localhost').pathname;
+        if (!['/robots.txt', '/sitemap.xml', `${mountedPath()}/robots.txt`, `${mountedPath()}/sitemap.xml`].includes(pathname)) {
+          next();
+          return;
+        }
+        response.statusCode = 200;
+        response.setHeader('Content-Type', pathname.endsWith('.xml') ? 'application/xml; charset=utf-8' : 'text/plain; charset=utf-8');
+        response.end(pathname.endsWith('.xml') ? devSitemap(await getDevCatalog()) : devRobots());
+      });
+    },
     async transformIndexHtml(html: string, context: { originalUrl?: string }) {
       const page = await devSeoPage(context.originalUrl || '/');
       const relativeCanonical = `${mountedPath()}${page.route === '/' ? '' : page.route}`;
@@ -327,7 +412,7 @@ function seoHtmlPlugin() {
           @keyframes cabl-loading { 0% { transform: translateX(145%); } 45%, 65% { transform: translateX(70%); } 100% { transform: translateX(-145%); } }
           @media (prefers-reduced-motion: reduce) { .cabl-loading-line i { animation: none; margin-left: 29%; } }
         </style></head>`)
-        .replace('<div id="root"></div>', `<div id="root">${renderLoadingShell(page)}</div>`);
+        .replace('<div id="root"></div>', `<div id="root">${renderSeoShell(page)}</div>`);
     },
   };
 }

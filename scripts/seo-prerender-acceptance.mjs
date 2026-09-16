@@ -23,7 +23,19 @@ for (const route of routes) {
   const catalog = JSON.parse(catalogPayload[1]);
   assert.ok(Array.isArray(catalog.products), `${route} catalog payload should contain products`);
   assert.ok(Array.isArray(catalog.currencies), `${route} catalog payload should contain currencies`);
+  assert.doesNotMatch(html, /جارٍ تجهيز المتجر/, `${route} should not expose a loading-only SEO shell`);
 }
+
+const robots = fs.readFileSync(path.join(distDir, "robots.txt"), "utf8");
+assert.match(robots, /^User-agent: \*/m, "robots.txt should be generated in the storefront output");
+assert.match(robots, /Sitemap: \/cabl-store\/sitemap\.xml/, "robots.txt should point to the static storefront sitemap");
+assert.doesNotMatch(robots, /\/api\/store\/sitemap\.xml/, "robots.txt must not depend on the backend sitemap route");
+
+const sitemap = fs.readFileSync(path.join(distDir, "sitemap.xml"), "utf8");
+assert.match(sitemap, /^<\?xml version="1\.0" encoding="UTF-8"\?>/, "sitemap.xml should be valid XML output");
+assert.match(sitemap, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/, "sitemap.xml should use the sitemap namespace");
+assert.match(sitemap, /<loc>\/cabl-store\/[^<]+<\/loc>|<loc>\/cabl-store<\/loc>/, "sitemap.xml should contain mounted storefront URLs");
+assert.doesNotMatch(sitemap, /\/api\/store\//, "sitemap.xml must not point crawlers at backend routes");
 
 const productCandidates = [];
 function collectHtml(directory) {
