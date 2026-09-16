@@ -24,3 +24,4 @@
 - [Homepage first paint](homepage-first-paint.md) — keep the storefront hero independent of catalog latency and route-level lazy loading.
 - [Catalog response performance](catalog-response-performance.md) — full catalog payloads are acceptable; database round trips need short caching and in-flight deduplication.
 - [Static catalog handoff](static-catalog-handoff.md) — prerendered CABL HTML is a custom SEO shell, so use embedded catalog data with client bootstrap instead of React hydration.
+- [Browser smoke runtime](browser-smoke-runtime.md) — Playwright browser checks use the workspace Chromium binary when bundled browser downloads are unavailable.
