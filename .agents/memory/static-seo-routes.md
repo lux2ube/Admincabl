@@ -20,3 +20,9 @@ The Vite SPA entry should not contain a root-relative canonical URL such as `/` 
 **Why:** Vite's HTML asset transform can fail the production build with `EISDIR` when it resolves the root canonical reference as a directory.
 
 **How to apply:** Keep canonical tags explicit in generated public route pages. For the SPA entry, create or update the canonical link after the page route and SEO response are known.
+
+Prerendering must replace the complete nested root container, not the first closing `</div>`, and upstream JSON-LD paths from the Replit-mounted storefront must be normalized before composing the production canonical.
+
+**Why:** A partial root replacement leaves the homepage shell in every generated document, while inherited `/cabl-store` paths make product, offer, and breadcrumb URLs incorrect in a root-hosted Vercel deployment.
+
+**How to apply:** Use balanced root-container replacement during HTML generation and strip the mounted preview prefix before adding the active deployment base path.

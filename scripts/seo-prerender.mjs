@@ -82,7 +82,8 @@ function mountedPath(routePath) {
 }
 
 function absoluteUrl(routePath) {
-  return mountedPath(routePath) || "/";
+  const normalized = String(routePath).replace(/^\/cabl-store(?=\/|$)/, "") || "/";
+  return mountedPath(normalized) || "/";
 }
 
 function escapeXml(value) {
@@ -348,6 +349,39 @@ function serializeJsonForHtml(value) {
   })[character]);
 }
 
+function replaceRootContent(indexHtml, content) {
+  const rootOpen = indexHtml.match(/<div id="root"[^>]*>/i);
+  if (!rootOpen || rootOpen.index === undefined) {
+    throw new Error("SEO prerender failed: index.html is missing the root container.");
+  }
+
+  const rootOpenEnd = rootOpen.index + rootOpen[0].length;
+  const tagPattern = /<\/?div\b[^>]*>/gi;
+  tagPattern.lastIndex = rootOpenEnd;
+  let depth = 1;
+  let rootCloseStart = -1;
+  let tag;
+
+  while ((tag = tagPattern.exec(indexHtml))) {
+    if (/^<\//.test(tag[0])) {
+      depth -= 1;
+      if (depth === 0) {
+        rootCloseStart = tag.index;
+        break;
+      }
+    } else if (!/\/>$/.test(tag[0])) {
+      depth += 1;
+    }
+  }
+
+  if (rootCloseStart < 0) {
+    throw new Error("SEO prerender failed: root container is not balanced.");
+  }
+
+  const rootCloseEnd = tagPattern.lastIndex;
+  return `${indexHtml.slice(0, rootOpenEnd)}${content}${indexHtml.slice(rootCloseStart, rootCloseEnd)}${indexHtml.slice(rootCloseEnd)}`;
+}
+
 function renderBody(page, routePath, entity = null) {
   const links = [
     `<a href="${escapeHtml(absoluteUrl("/guides"))}">أدلة الشراء</a>`,
@@ -385,9 +419,8 @@ function withSeo(indexHtml, page, routePath, entity = null, catalog = null) {
     .replace(/<meta property="og:[^"]*"[^>]*\/?>/g, "")
     .replace(/<meta name="twitter:[^"]*"[^>]*\/?>/g, "")
     .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, "")
-    .replace("</head>", `<meta property="og:title" content="${escapeHtml(page.title)}" /><meta property="og:description" content="${escapeHtml(page.description)}" /><meta property="og:url" content="${escapeHtml(canonical)}" /><meta property="og:locale" content="ar_YE" /><meta property="og:site_name" content="CABL" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="${escapeHtml(page.title)}" /><meta name="twitter:description" content="${escapeHtml(page.description)}" /><link rel="canonical" href="${escapeHtml(canonical)}" /><script type="application/ld+json">${JSON.stringify(schema)}</script>${catalogPayload}</head>`)
-    .replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${renderBody(page, routePath, entity)}</div>`);
-  return html;
+    .replace("</head>", `<meta property="og:title" content="${escapeHtml(page.title)}" /><meta property="og:description" content="${escapeHtml(page.description)}" /><meta property="og:url" content="${escapeHtml(canonical)}" /><meta property="og:locale" content="ar_YE" /><meta property="og:site_name" content="CABL" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="${escapeHtml(page.title)}" /><meta name="twitter:description" content="${escapeHtml(page.description)}" /><link rel="canonical" href="${escapeHtml(canonical)}" /><script type="application/ld+json">${JSON.stringify(schema)}</script>${catalogPayload}</head>`);
+  return replaceRootContent(html, renderBody(page, routePath, entity));
 }
 
 function renderSitemap(routes) {

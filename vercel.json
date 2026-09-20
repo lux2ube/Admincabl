@@ -10,22 +10,29 @@
       "maxDuration": 60
     }
   },
-  "rewrites": [
+  "routes": [
     {
-      "source": "/admin",
-      "destination": "/admin/index.html"
+      "src": "/api$",
+      "dest": "/api/index.js"
     },
     {
-      "source": "/admin/",
-      "destination": "/admin/index.html"
+      "src": "/api/(.*)",
+      "dest": "/api/[...path].js"
     },
     {
-      "source": "/admin/((?!assets(?:/|$)|fonts(?:/|$)|favicon\\.svg$).*)",
-      "destination": "/admin/index.html"
+      "handle": "filesystem"
     },
     {
-      "source": "/((?!api(?:/|$)|admin(?:/|$)|assets(?:/|$)|fonts(?:/|$)|cairovolt(?:/|$)|favicon\\.svg$|loading-avatar\\.png$|robots\\.txt$|sitemap\\.xml$|llms\\.txt$).*)",
-      "destination": "/index.html"
+      "src": "/admin$",
+      "dest": "/admin/index.html"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/admin/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
