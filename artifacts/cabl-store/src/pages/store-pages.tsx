@@ -1287,7 +1287,8 @@ function CategoryLandingPage({ slug }: { slug: string }) {
   });
   const categoryProducts = useMemo(() => products.filter((product) => matchesCategory(product, slug)), [products, slug]);
   const name = categorySeo?.h1 || categoryProducts[0]?.category?.name || slug.replaceAll('-', ' ');
-  if (!isLoading && !isSeoLoading && (isError || isSeoError || !categorySeo)) {
+  const hasCategoryData = Boolean(categorySeo) || categoryProducts.length > 0;
+  if (!isLoading && !isSeoLoading && (!hasCategoryData || (isError && !catalog) || (isSeoError && categoryProducts.length === 0))) {
     return (
       <>
         <NoIndex />

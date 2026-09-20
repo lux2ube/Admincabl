@@ -14,3 +14,9 @@ The production static server must serve generated route files before applying an
 **Why:** A static server can return a misleading 404 for a valid client-side route even when the React router knows how to render its empty state or redirect.
 
 **How to apply:** When adding or testing a browser route, verify both its generated HTML/static-file path and its server fallback classification; keep legacy and dynamic route patterns explicit rather than relying on a catch-all that could mask missing SEO files.
+
+Interactive catalog consumers must keep a valid embedded snapshot when a background catalog refresh fails; a failed refresh should not replace a usable page with an error boundary.
+
+**Why:** The published Vercel API can fail independently of static route delivery when runtime database variables are missing or unavailable, while the prerendered HTML still contains enough catalog data to render the route.
+
+**How to apply:** Expose loading and error state as fatal only when no catalog data exists, and let category/product pages use their catalog-derived fallback metadata when optional SEO requests fail.

@@ -118,8 +118,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const product = catalog?.products.find((item) => item.id === line.productId);
     return product ? [{ product, quantity: line.quantity }] : [];
   }), [cart, catalog]);
+  const hasCatalog = Boolean(query.data);
   const value: StoreContextValue = {
-    catalog, isLoading: query.isLoading || query.isFetching, isError: query.isError, cart, favorites,
+    catalog,
+    // Keep prerendered pages usable when the background refresh fails. The
+    // embedded catalog is a complete snapshot for the current route.
+    isLoading: !hasCatalog && (query.isLoading || query.isFetching),
+    isError: !hasCatalog && query.isError,
+    cart, favorites,
     addToCart: (productId, quantity = 1) => setCart((current) => {
       const existing = current.find((line) => line.productId === productId);
       const product = catalog?.products.find((item) => item.id === productId);
