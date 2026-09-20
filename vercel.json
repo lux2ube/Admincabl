@@ -1,0 +1,28 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "node scripts/vercel-build.mjs",
+  "outputDirectory": "artifacts/cabl-store/dist/public",
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/((?!assets(?:/|$)|fonts(?:/|$)|favicon\\.svg$).*)",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/((?!api(?:/|$)|admin(?:/|$)|assets(?:/|$)|fonts(?:/|$)|cairovolt(?:/|$)|favicon\\.svg$|loading-avatar\\.png$|robots\\.txt$|sitemap\\.xml$|llms\\.txt$).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
