@@ -3,8 +3,8 @@ name: Build environment requirements
 description: Vite package builds in this workspace validate PORT and BASE_PATH even when they do not start a server.
 ---
 
-Vite builds for the workspace artifacts require both `PORT` and `BASE_PATH` in the environment; the values only need to be valid for a build.
+The CABL Vite config accepts missing `PORT` and `BASE_PATH` for external static hosts, defaulting to a dev-safe port and root deployment path; Replit still supplies its mounted artifact values.
 
-**Why:** The package configs validate these variables while loading, so a missing value can stop a workspace-wide build before the changed artifact is compiled.
+**Why:** External hosts such as Vercel do not provide Replit's artifact runtime variables during build, while mounted Replit previews still need their configured path.
 
-**How to apply:** When running a production build manually, provide the artifact’s configured base path and any valid nonzero build port, then run the artifact-specific build and acceptance checks.
+**How to apply:** Use `PORT` and `BASE_PATH` for Replit-mounted builds; omit them for a root-hosted static build. Set `SEO_PRERENDER_API_URL` when the external host should emit catalog-backed route HTML.

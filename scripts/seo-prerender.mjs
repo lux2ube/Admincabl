@@ -413,6 +413,15 @@ async function main() {
     canonicalPath: mountedPath(routePath),
   }]));
 
+  const skipCatalogPrerender = process.env.SKIP_SEO_PRERENDER === "1"
+    || (process.env.VERCEL === "1" && !process.env.SEO_PRERENDER_API_URL);
+  if (skipCatalogPrerender) {
+    await fs.writeFile(path.join(distDir, "sitemap.xml"), renderSitemap(routes));
+    await fs.writeFile(path.join(distDir, "robots.txt"), renderRobots());
+    console.warn("SEO catalog prerender skipped: set SEO_PRERENDER_API_URL on the deployment to emit catalog-backed route HTML.");
+    return;
+  }
+
   const catalog = await getRequiredJson("/store/catalog", "catalog");
   if (!Array.isArray(catalog.products)) {
     throw new Error(`Required prerender data unavailable for catalog: ${apiBase}/store/catalog (response does not contain a products array)`);
