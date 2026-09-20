@@ -128,6 +128,10 @@ async function insertSeoRedirect(fromPath: string | null | undefined, toPath: st
   );
 }
 
+function unmountedStorePath(path: string) {
+  return path.replace(/^\/cabl-store(?=\/|$)/, "") || "/";
+}
+
 async function productPathSnapshot(id: string) {
   const result = await pool.query<{
     slug: string | null;
@@ -161,6 +165,10 @@ async function productPathSnapshot(id: string) {
 async function updateCatalogRedirects(table: AdminTable, before: Record<string, unknown>, after: Record<string, unknown>) {
   if (table.key === "categories" && before.slug !== after.slug) {
     await insertSeoRedirect(publicCategoryPath(before.slug ? String(before.slug) : null), publicCategoryPath(after.slug ? String(after.slug) : null));
+    await insertSeoRedirect(
+      before.slug ? `/${String(before.slug)}` : null,
+      after.slug ? `/${String(after.slug)}` : null,
+    );
     const affected = await pool.query<{ slug: string; brand_slug: string | null; category_slug: string | null }>(
       `SELECT p."slug", b."slug" AS "brand_slug", c."slug" AS "category_slug"
        FROM "products" p
@@ -183,11 +191,16 @@ async function updateCatalogRedirects(table: AdminTable, before: Record<string, 
         productPublicPath({ productSlug: product.slug, brandSlug: product.brand_slug, categorySlug: String(before.slug) }),
         productPublicPath({ productSlug: product.slug, brandSlug: product.brand_slug, categorySlug: product.category_slug }),
       );
+      await insertSeoRedirect(
+        unmountedStorePath(productPublicPath({ productSlug: product.slug, brandSlug: product.brand_slug, categorySlug: String(before.slug) })),
+        unmountedStorePath(productPublicPath({ productSlug: product.slug, brandSlug: product.brand_slug, categorySlug: product.category_slug })),
+      );
     }
   }
 
   if (table.key === "brands" && before.slug !== after.slug) {
     await insertSeoRedirect(brandPublicPath(String(before.slug || "")), brandPublicPath(String(after.slug || "")));
+    await insertSeoRedirect(`/${String(before.slug || "")}`, `/${String(after.slug || "")}`);
     const affected = await pool.query<{ slug: string; category_slug: string | null }>(
       `SELECT p."slug", c."slug" AS "category_slug"
        FROM "products" p
@@ -208,6 +221,10 @@ async function updateCatalogRedirects(table: AdminTable, before: Record<string, 
         productPublicPath({ productSlug: product.slug, brandSlug: String(before.slug || ""), categorySlug: product.category_slug }),
         productPublicPath({ productSlug: product.slug, brandSlug: String(after.slug || ""), categorySlug: product.category_slug }),
       );
+      await insertSeoRedirect(
+        unmountedStorePath(productPublicPath({ productSlug: product.slug, brandSlug: String(before.slug || ""), categorySlug: product.category_slug })),
+        unmountedStorePath(productPublicPath({ productSlug: product.slug, brandSlug: String(after.slug || ""), categorySlug: product.category_slug })),
+      );
     }
   }
 
@@ -221,6 +238,7 @@ async function updateCatalogRedirects(table: AdminTable, before: Record<string, 
         })
       : null;
     await insertSeoRedirect(oldPath, current?.path);
+    await insertSeoRedirect(unmountedStorePath(oldPath || ""), unmountedStorePath(current?.path || ""));
   }
 }
 

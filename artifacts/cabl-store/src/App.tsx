@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { StoreShell } from '@/components/store-shell';
 import { WebMcpTools } from '@/components/webmcp-tools';
 import { StoreProvider } from '@/lib/store';
+import { catalogCategorySlug } from '@/lib/store-routes';
 import NotFound from '@/pages/not-found';
 
 const BrandCategoryPage = lazy(() => import('@/pages/store-pages').then((module) => ({ default: module.BrandCategoryPage })));
@@ -41,15 +42,9 @@ function RoutedErrorBoundary({ children }: { children: ReactNode }) {
   return <ErrorBoundary resetKey={location}>{children}</ErrorBoundary>;
 }
 
-const publicCategoryAliases: Record<string, string> = {
-  cables: 'charging-cables',
-  'hubs-adapters': 'phone-accessories',
-  'car-accessories': 'travel-adapters',
-};
-
 function PublicCategoryPage() {
   const { categorySlug = '' } = useParams<{ categorySlug: string }>();
-  return <CategoryPageForSlug slug={publicCategoryAliases[categorySlug] || categorySlug} />;
+  return <CategoryPageForSlug slug={catalogCategorySlug(categorySlug)} />;
 }
 
 function HomeRoute() {

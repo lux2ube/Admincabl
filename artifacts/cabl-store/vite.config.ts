@@ -180,9 +180,17 @@ const devCategoryAliases: Record<string, string> = {
   'car-accessories': 'travel-adapters',
 };
 
+function publicCategorySlug(slug: string) {
+  return {
+    'charging-cables': 'cables',
+    'travel-adapters': 'car-accessories',
+    'phone-accessories': 'hubs-adapters',
+  }[slug] || slug;
+}
+
 function devProductPath(product: DevProduct) {
   return product.brandSlug && product.category?.slug
-    ? `/${product.brandSlug}/${product.category.slug}/${product.slug}`
+    ? `/${product.brandSlug}/${publicCategorySlug(product.category.slug)}/${product.slug}`
     : `/product/${product.slug}`;
 }
 
@@ -196,7 +204,7 @@ async function getDevRouteProducts(route: string) {
     return products.filter((product) => product.brandSlug === parts[1]);
   }
   if (parts.length === 2 && !['guides', 'blog', 'locations', 'solutions'].includes(parts[0])) {
-    return products.filter((product) => product.brandSlug === parts[0] && product.category?.slug === parts[1]);
+    return products.filter((product) => product.brandSlug === parts[0] && publicCategorySlug(product.category?.slug || '') === parts[1]);
   }
   return [];
 }
@@ -309,7 +317,7 @@ function devSitemap(products: DevProduct[]) {
     paths.add(mountedPath(devProductPath(product)));
     if (product.brandSlug) paths.add(mountedPath(`/brand/${product.brandSlug}`));
     if (product.category?.slug) paths.add(mountedPath(`/category/${product.category.slug}`));
-    if (product.brandSlug && product.category?.slug) paths.add(mountedPath(`/${product.brandSlug}/${product.category.slug}`));
+    if (product.brandSlug && product.category?.slug) paths.add(mountedPath(`/${product.brandSlug}/${publicCategorySlug(product.category.slug)}`));
   }
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...paths].map((url) => `  <url><loc>${xmlEscape(url)}</loc></url>`).join('\n')}\n</urlset>\n`;
 }

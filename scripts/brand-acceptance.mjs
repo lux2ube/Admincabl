@@ -41,7 +41,7 @@ async function render(path) {
     "--disable-gpu",
     "--disable-dev-shm-usage",
     "--dump-dom",
-    "--virtual-time-budget=8000",
+    "--virtual-time-budget=20000",
     url,
   ], {
     maxBuffer: 8 * 1024 * 1024,
@@ -121,6 +121,25 @@ assert.match(brandText, new RegExp(`${availableProducts} متاح الآن`), "t
 assert.equal(canonicalPath(brandHtml), expectedMountedPath(`/brand/${brandSlug}`), "the brand route should keep its mounted canonical URL");
 assert.equal(metadata(brandHtml, "robots"), "index, follow", "a real brand route should remain indexable");
 assert.ok(hrefPaths(brandHtml).includes(expectedMountedPath(categoryPath)), "brand/category links should use the expected public category path");
+
+const productPath = `${categoryPath}/${brandProduct.slug}`;
+const productSeo = await request(`/store/seo?type=product&slug=${encodeURIComponent(brandProduct.slug)}`);
+assert.equal(productSeo.entityType, "product", "the selected catalog product should have product SEO data");
+assert.equal(productSeo.canonicalPath, `/cabl-store${productPath}`, "product SEO should preserve the public brand/category/product path");
+assert.equal(productSeo.breadcrumbs.at(-1)?.path, productSeo.canonicalPath, "product SEO breadcrumbs should end at the product canonical path");
+assert.equal(productSeo.breadcrumbs.find((item) => item.name === brandName)?.path, `/cabl-store/brand/${brandSlug}`, "product SEO should link back to the public brand path");
+assert.equal(productSeo.breadcrumbs.find((item) => item.name === brandProduct.category.name)?.path, `/cabl-store${categoryPath}`, "product SEO should link back to the public brand/category path");
+
+const productHtml = await render(productPath);
+const productText = bodyText(productHtml);
+assert.match(productText, new RegExp(`${brandProduct.productName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`), "the public brand/category/product route should render the live product");
+assert.equal(canonicalPath(productHtml), expectedMountedPath(productPath), "the product route should keep its public mounted canonical URL");
+assert.equal(metadata(productHtml, "robots"), "index, follow", "a live product route should remain indexable");
+assert.ok(hrefPaths(productHtml).includes(expectedMountedPath(`/brand/${brandSlug}`)), "product breadcrumbs should link to the public brand route");
+assert.ok(hrefPaths(productHtml).includes(expectedMountedPath(categoryPath)), "product breadcrumbs should link to the public brand/category route");
+
+const legacyProductHtml = await render(`/product/${brandProduct.slug}`);
+assert.equal(canonicalPath(legacyProductHtml), expectedMountedPath(productPath), "the legacy product route should canonicalize to the public brand/category/product path");
 
 const unknownSlug = "__brand-route-regression-unknown__";
 const unknownHtml = await render(`/brand/${unknownSlug}`);

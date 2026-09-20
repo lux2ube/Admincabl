@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { getStoreCatalog } from '@workspace/api-client-react';
 import type { StoreCatalog, StoreProduct } from '@workspace/api-client-react';
 import { useStore } from '@/lib/store';
+import { productPath } from '@/lib/store-routes';
 
 type WebMcpTool = {
   name: string;
@@ -39,9 +40,7 @@ function productSummary(product: StoreProduct, currencyCode: string) {
     inStock: product.quantity > 0,
     quantity: product.quantity,
     shortDescription: product.shortDescription,
-    productUrl: product.brandSlug && product.category?.slug
-      ? `/${product.brandSlug}/${product.category.slug}/${product.slug}`
-      : `/product/${product.slug}`,
+    productUrl: productPath(product),
   };
 }
 

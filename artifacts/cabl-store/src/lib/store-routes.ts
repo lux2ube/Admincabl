@@ -4,8 +4,22 @@ export function brandPath(brandSlug: string) {
   return `/brand/${brandSlug}`;
 }
 
+const publicCategoryAliases: Record<string, string> = {
+  'charging-cables': 'cables',
+  'travel-adapters': 'car-accessories',
+  'phone-accessories': 'hubs-adapters',
+};
+
+export function publicCategorySlug(categorySlug: string) {
+  return publicCategoryAliases[categorySlug] || categorySlug;
+}
+
+export function catalogCategorySlug(categorySlug: string) {
+  return Object.entries(publicCategoryAliases).find(([, publicSlug]) => publicSlug === categorySlug)?.[0] || categorySlug;
+}
+
 export function brandCategoryPath(brandSlug: string, categorySlug: string) {
-  return `/${brandSlug}/${categorySlug}`;
+  return `/${brandSlug}/${publicCategorySlug(categorySlug)}`;
 }
 
 export function productPath(product: Pick<StoreProduct, 'slug' | 'brandSlug' | 'category'>) {

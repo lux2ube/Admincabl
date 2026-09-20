@@ -107,12 +107,26 @@ const categorySeoProfiles: Record<string, { title: string; description: string }
   },
 };
 
+const publicCategoryAliases: Record<string, string> = {
+  "charging-cables": "cables",
+  "travel-adapters": "car-accessories",
+  "phone-accessories": "hubs-adapters",
+};
+
+export function publicCategorySlug(slug: string) {
+  return publicCategoryAliases[slug] || slug;
+}
+
 export function publicCategoryPath(slug: string | null) {
   return mountedStorePath(slug ? `/category/${slug}` : "/categories/");
 }
 
 export function brandPublicPath(slug: string) {
   return mountedStorePath(`/brand/${slug}`);
+}
+
+export function brandCategoryPublicPath(brandSlug: string, categorySlug: string) {
+  return mountedStorePath(`/${brandSlug}/${publicCategorySlug(categorySlug)}`);
 }
 
 export function productPublicPath({
@@ -125,7 +139,7 @@ export function productPublicPath({
   productSlug: string;
 }) {
   return brandSlug && categorySlug
-    ? mountedStorePath(`/${brandSlug}/${categorySlug}/${productSlug}`)
+    ? mountedStorePath(`${brandCategoryPublicPath(brandSlug, categorySlug)}/${productSlug}`)
     : mountedStorePath(`/product/${productSlug}`);
 }
 
@@ -215,7 +229,9 @@ export function buildProductSeo(input: ProductSeoInput): SeoResponse {
     categorySlug: input.categorySlug,
     productSlug: input.slug,
   });
-  const categoryPath = publicCategoryPath(input.categorySlug);
+  const categoryPath = input.brandSlug && input.categorySlug
+    ? brandCategoryPublicPath(input.brandSlug, input.categorySlug)
+    : publicCategoryPath(input.categorySlug);
   const categoryName = input.categoryName || "المنتجات";
   const price = input.discountPrice ?? input.regularPrice;
 

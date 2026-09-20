@@ -25,6 +25,7 @@ import {
   buildHomeSeo,
   buildProductSeo,
   brandPublicPath,
+  brandCategoryPublicPath,
   mountedStorePath,
   productSlug,
   productPublicPath,
@@ -166,7 +167,7 @@ async function getSitemapPaths() {
   const paths = new Set(STATIC_SITEMAP_PATHS.map((path) => mountedStorePath(path)));
   for (const row of categories.rows) paths.add(publicCategoryPath(row.slug));
   for (const row of brands.rows) paths.add(brandPublicPath(row.slug));
-  for (const row of brandCategories.rows) paths.add(mountedStorePath(`/${row.brand_slug}/${row.category_slug}`));
+  for (const row of brandCategories.rows) paths.add(brandCategoryPublicPath(row.brand_slug, row.category_slug));
   for (const row of products.rows) {
     paths.add(productPublicPath({
       brandSlug: row.brand_slug,
@@ -202,8 +203,8 @@ async function findCatalogRedirect(type: "product" | "category" | "brand", slug:
   const exactPaths = type === "product"
       ? [mountedStorePath(`/product/${slug}`), `/product/${slug}`]
     : type === "category"
-        ? [publicCategoryPath(slug), `/category/${slug}`, mountedStorePath(`/category/${slug}`)]
-        : [brandPublicPath(slug), `/brand/${slug}`];
+        ? [publicCategoryPath(slug), `/category/${slug}`, mountedStorePath(`/category/${slug}`), `/${slug}`]
+        : [brandPublicPath(slug), `/brand/${slug}`, `/${slug}`];
   const result = await pool.query<{ to_path: string }>(
     `SELECT "to_path"
      FROM "seo_redirects"

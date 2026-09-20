@@ -237,9 +237,17 @@ function renderTextContent(value) {
     .join("");
 }
 
+function publicCategorySlug(slug) {
+  return {
+    "charging-cables": "cables",
+    "travel-adapters": "car-accessories",
+    "phone-accessories": "hubs-adapters",
+  }[slug] || slug;
+}
+
 function productPath(product) {
   return product.brandSlug && product.category?.slug
-    ? `/${product.brandSlug}/${product.category.slug}/${product.slug}`
+    ? `/${product.brandSlug}/${publicCategorySlug(product.category.slug)}/${product.slug}`
     : `/product/${product.slug}`;
 }
 
@@ -352,7 +360,7 @@ function renderBody(page, routePath, entity = null) {
   ).join("");
   const product = entity?.product;
   const productDetails = product
-    ? `<section class="seo-product-summary"><h2>بيانات المنتج</h2>${product.images?.[0] ? `<img src="${escapeHtml(product.images[0])}" alt="${escapeHtml(product.productName)}" width="640" height="640" />` : ""}<p><strong>العلامة:</strong> ${product.brandSlug ? `<a href="${escapeHtml(absoluteUrl(`/brand/${product.brandSlug}`))}">${escapeHtml(product.brand)}</a>` : escapeHtml(product.brand)} · <strong>الفئة:</strong> ${product.category?.slug ? `<a href="${escapeHtml(absoluteUrl(`/category/${product.category.slug}`))}">${escapeHtml(product.category.name)}</a>` : "المنتجات"}</p><p><strong>SKU:</strong> <span dir="ltr">${escapeHtml(product.sku)}</span> · <strong>السعر:</strong> ${escapeHtml(String(product.discountPrice ?? product.regularPrice))} USD · <strong>الحالة:</strong> ${product.quantity > 0 ? "متوفر حسب الكتالوج الحالي" : "غير متوفر حالياً"}</p>${product.shortDescription || product.productDescription ? `<p>${escapeHtml(product.shortDescription || product.productDescription)}</p>` : ""}</section>${renderProductSpecifications(product)}${renderProductShipping(product)}`
+    ? `<section class="seo-product-summary"><h2>بيانات المنتج</h2>${product.images?.[0] ? `<img src="${escapeHtml(product.images[0])}" alt="${escapeHtml(product.productName)}" width="640" height="640" />` : ""}<p><strong>العلامة:</strong> ${product.brandSlug ? `<a href="${escapeHtml(absoluteUrl(`/brand/${product.brandSlug}`))}">${escapeHtml(product.brand)}</a>` : escapeHtml(product.brand)} · <strong>الفئة:</strong> ${product.category?.slug ? `<a href="${escapeHtml(absoluteUrl(product.brandSlug ? `/${product.brandSlug}/${publicCategorySlug(product.category.slug)}` : `/category/${product.category.slug}`))}">${escapeHtml(product.category.name)}</a>` : "المنتجات"}</p><p><strong>SKU:</strong> <span dir="ltr">${escapeHtml(product.sku)}</span> · <strong>السعر:</strong> ${escapeHtml(String(product.discountPrice ?? product.regularPrice))} USD · <strong>الحالة:</strong> ${product.quantity > 0 ? "متوفر حسب الكتالوج الحالي" : "غير متوفر حالياً"}</p>${product.shortDescription || product.productDescription ? `<p>${escapeHtml(product.shortDescription || product.productDescription)}</p>` : ""}</section>${renderProductSpecifications(product)}${renderProductShipping(product)}`
     : "";
   const guideContent = entity?.type === "guide" && entity.content
     ? `<section><h2>محتوى الدليل</h2>${renderTextContent(entity.content)}</section>`
@@ -483,11 +491,11 @@ async function main() {
   const brandCategories = new Map();
   for (const product of products) {
     if (!product.brandSlug || !product.category?.slug) continue;
-    const key = `${product.brandSlug}/${product.category.slug}`;
+    const key = `${product.brandSlug}/${publicCategorySlug(product.category.slug)}`;
     brandCategories.set(key, product);
   }
   for (const product of brandCategories.values()) {
-    const routePath = `/${product.brandSlug}/${product.category.slug}`;
+    const routePath = `/${product.brandSlug}/${publicCategorySlug(product.category.slug)}`;
     const categoryName = product.category.name;
     const brandName = product.brand;
     const matchingProducts = products.filter((item) => item.brandSlug === product.brandSlug && item.category?.slug === product.category.slug);

@@ -1508,17 +1508,23 @@ function ProductDetailPage({ slug }: { slug: string }) {
   const product = catalog?.products.find((item) => item.slug === slug);
   const [imageIndex, setImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  if (isLoading) return <div className="container"><Breadcrumbs items={[{ label: 'المنتج' }]}/><LoadingCatalog/></div>;
-  if (isError) return <div className="container"><CatalogError retry={() => window.location.reload()}/></div>;
-  if (!product) return <div className="container"><div className="state-panel" style={{ margin: '60px 0' }}><h3>هذا المنتج غير متاح</h3><Link href="/search" className="button button-primary" data-testid="link-product-missing">العودة للكتالوج</Link></div></div>;
+  const seo = <SEO type="product" slug={slug}/>;
+  if (isLoading) return <>{seo}<div className="container"><Breadcrumbs items={[{ label: 'المنتج' }]}/><LoadingCatalog/></div></>;
+  if (isError) return <>{seo}<div className="container"><CatalogError retry={() => window.location.reload()}/></div></>;
+  if (!product) return <>{seo}<div className="container"><div className="state-panel" style={{ margin: '60px 0' }}><h3>هذا المنتج غير متاح</h3><Link href="/search" className="button button-primary" data-testid="link-product-missing">العودة للكتالوج</Link></div></div></>;
   const price = product.discountPrice ?? product.regularPrice;
   return (
     <>
-      <SEO type="product" slug={slug}/>
+      {seo}
       <div className="container product-detail">
         <Breadcrumbs items={[
           ...(product.brandSlug ? [{ label: product.brand, href: brandPath(product.brandSlug) }] : []),
-          ...(product.category ? [{ label: product.category.name, href: `/category/${product.category.slug}` }] : []),
+          ...(product.category ? [{
+            label: product.category.name,
+            href: product.brandSlug
+              ? brandCategoryPath(product.brandSlug, product.category.slug)
+              : `/category/${product.category.slug}`,
+          }] : []),
           { label: product.productName },
         ]}/>
         <div className="product-context-strip" data-testid="section-product-context">
