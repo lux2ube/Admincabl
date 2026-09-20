@@ -18,6 +18,8 @@ const clientRoutes = [
   /^\/checkout$/,
   /^\/orders$/,
   /^\/order\/[^/]+$/,
+  /^\/product\/[^/]+$/,
+  /^\/brand\/[^/]+$/,
 ];
 
 const contentTypes = {

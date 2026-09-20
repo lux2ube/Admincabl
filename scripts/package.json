@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test:brand": "node ./brand-acceptance.mjs",
+    "test:brand:release": "node ./brand-release.mjs",
     "hello": "tsx ./src/hello.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

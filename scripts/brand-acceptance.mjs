@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
+import fs from "node:fs";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const devDomain = process.env.REPLIT_DEV_DOMAIN;
 const apiBase = (process.env.API_URL || (devDomain ? `https://${devDomain}/api` : "http://127.0.0.1:8080/api")).replace(/\/$/, "");
 const storeBase = process.env.STORE_URL || (devDomain ? `https://${devDomain}/cabl-store/` : "http://127.0.0.1:25770/cabl-store/");
-const chromium = process.env.CHROMIUM_BIN || "chromium";
+const chromium = process.env.CHROMIUM_BIN || (fs.existsSync("/repl/tools/bin/chromium") ? "/repl/tools/bin/chromium" : "chromium");
 
 async function request(path) {
   const response = await fetch(`${apiBase}${path}`);
