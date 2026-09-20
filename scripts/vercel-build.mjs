@@ -92,6 +92,7 @@ try {
   });
 
   await run("pnpm", ["--filter", "@workspace/cabl-admin", "run", "build"], {
+    PORT: "22761",
     BASE_PATH: "/admin/",
   });
 
