@@ -6,4 +6,4 @@ Disallow: /checkout
 Disallow: /orders
 Disallow: /order/
 
-Sitemap: /cabl-store/sitemap.xml
+Sitemap: /sitemap.xml

@@ -4,7 +4,7 @@ import path from "node:path";
 const root = process.cwd();
 const distDir = path.resolve(root, "dist/public");
 const apiBase = (process.env.SEO_PRERENDER_API_URL || "http://127.0.0.1:8080/api").replace(/\/$/, "");
-const basePath = (process.env.BASE_PATH || "/cabl-store/").replace(/\/+$/, "");
+const basePath = (process.env.BASE_PATH || "/").replace(/\/+$/, "");
 const prerenderConcurrency = Math.max(1, Math.min(12, Number.parseInt(process.env.SEO_PRERENDER_CONCURRENCY || "6", 10) || 6));
 
 const guidePages = {
