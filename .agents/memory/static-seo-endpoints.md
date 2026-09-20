@@ -14,3 +14,9 @@ For Vercel SPA fallback rules, exclude `/api`, compiled assets, fonts, public im
 **Why:** Rewriting a JavaScript chunk to `index.html` causes lazy imports to fail at runtime, while rewriting `/api` to HTML turns a JSON request into an application error.
 
 **How to apply:** Keep the fallback rewrite limited to page paths and test representative asset, API, robots, sitemap, and page URLs against the routing pattern.
+
+When deploying the Express API as its own Vercel project, expose the app from an `api/index.ts` function instead of serving the long-running `dist/index.mjs` bundle as a static output.
+
+**Why:** A Vercel project that only publishes the compiled server bundle can return JavaScript at `/` while every `/api/*` request returns `404 NOT_FOUND`.
+
+**How to apply:** Keep `src/index.ts` for Replit's `app.listen()` workflow, add a serverless entry that exports `app`, set the API project root to the API artifact, and verify `/api/healthz` plus `/api/store/catalog` after redeploy.
