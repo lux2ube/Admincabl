@@ -23,6 +23,7 @@ import {
   buildCategorySeo,
   buildGuideSeo,
   buildHomeSeo,
+  buildProductDescription,
   buildProductSeo,
   brandPublicPath,
   brandCategoryPublicPath,
@@ -473,6 +474,21 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
   const specifications = await specificationsPromise;
   for (const [productId, product] of productMap) {
     product.specifications = specifications.get(productId) ?? emptyStoreSpecifications();
+    product.productDescription = buildProductDescription({
+      brand: product.brand,
+      brandSlug: product.brandSlug,
+      productName: product.productName,
+      sku: product.sku,
+      regularPrice: product.regularPrice,
+      discountPrice: product.discountPrice,
+      quantity: product.quantity,
+      shortDescription: product.shortDescription,
+      productDescription: product.productDescription,
+      image: product.images[0] || null,
+      categoryName: product.category?.name || null,
+      categorySlug: product.category?.slug || null,
+      specifications: product.specifications,
+    });
   }
 
     const categories = categoriesResult.rows.map((category) => ({

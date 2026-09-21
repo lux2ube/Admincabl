@@ -28,3 +28,4 @@
 - [Browser smoke runtime](browser-smoke-runtime.md) — Playwright browser checks use the workspace Chromium binary when bundled browser downloads are unavailable.
 - [Vercel API middleware typing](vercel-api-middleware-typing.md) — type Pino/Express middleware explicitly because Vercel can reject inferred callback types that pass locally.
 - [Single Vercel deployment](single-vercel-deployment.md) — publish storefront, admin, and Express API from the repository root with one domain.
+- [Product description generation](product-description-generation.md) — generate full Arabic copy from verified catalog/specification data and keep meta descriptions concise.

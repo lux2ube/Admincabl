@@ -1,3 +1,5 @@
+import type { StoreSpecifications } from "@workspace/api-zod";
+
 type Breadcrumb = {
   name: string;
   path: string;
@@ -29,7 +31,10 @@ type ProductSeoInput = {
   image: string | null;
   categoryName: string | null;
   categorySlug: string | null;
+  specifications?: StoreSpecifications;
 };
+
+type ProductDescriptionInput = Omit<ProductSeoInput, "slug">;
 
 type CategorySeoInput = {
   slug: string;
@@ -171,10 +176,116 @@ function productDisplayName(brand: string, productName: string) {
     : `${brand} ${productName}`;
 }
 
-function productDescription(input: ProductSeoInput, displayName: string) {
-  const detail = input.shortDescription || input.productDescription;
-  const base = detail ? `${displayName}: ${detail}` : `${displayName} من كتالوج CABL.`;
-  return `${base} راجع المواصفات والسعر والتوافر قبل الطلب داخل اليمن.`;
+const arabicBrandNames: Record<string, string> = {
+  anker: "أنكر",
+  baseus: "بيسوس",
+  ugreen: "يوجرين",
+  vention: "فينتشن",
+  soundcore: "ساوندكور",
+  hollyland: "هوليلاند",
+};
+
+const categoryCopy: Record<string, { noun: string; search: string; use: string }> = {
+  chargers: { noun: "شاحن", search: "شاحن", use: "شحن الهواتف والأجهزة المتوافقة للاستخدام اليومي" },
+  "charging-cables": { noun: "كابل شحن", search: "كابل", use: "الشحن أو نقل البيانات بين الأجهزة المتوافقة" },
+  "power-banks": { noun: "باور بانك", search: "باور بانك", use: "توفير طاقة إضافية للجوال أثناء التنقل أو السفر" },
+  "phone-accessories": { noun: "محور أو ملحق للأجهزة", search: "محور USB-C", use: "توسيع المنافذ أو توصيل الملحقات المتوافقة" },
+  "travel-adapters": { noun: "شاحن سيارة أو ملحق سفر", search: "شاحن سيارة", use: "شحن الأجهزة أثناء التنقل" },
+  "wireless-earbuds": { noun: "سماعة أذن لاسلكية", search: "سماعات لاسلكية", use: "الاستماع والمكالمات أثناء الحركة" },
+  "wireless-microphones": { noun: "ميكروفون لاسلكي", search: "ميكروفون Hollyland", use: "التسجيل أو صناعة المحتوى حسب التكوين المتاح" },
+};
+
+function cleanProductText(value: string | null | undefined) {
+  return String(value || "")
+    .replaceAll("واط", "وات")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function arabicBrandName(brand: string, brandSlug: string) {
+  return arabicBrandNames[brandSlug.toLowerCase()] || brand;
+}
+
+function formatNumber(value: number | null | undefined) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return null;
+  return Number.isInteger(value) ? String(value) : String(value).replace(/\.0+$/, "");
+}
+
+function specificationHighlights(input: ProductDescriptionInput) {
+  const specifications = input.specifications;
+  if (!specifications) return [];
+  const highlights: string[] = [];
+  const powerBank = specifications.powerBank;
+  const cable = specifications.cable;
+  const carCharger = specifications.carCharger;
+
+  if (powerBank?.capacityMah) highlights.push(`سعة ${formatNumber(powerBank.capacityMah)} مللي أمبير`);
+  if (powerBank?.maxOutputW) highlights.push(`قدرة إخراج تصل إلى ${formatNumber(powerBank.maxOutputW)} وات`);
+  if (powerBank?.wirelessCharging === true) highlights.push("شحن لاسلكي");
+  if (powerBank?.display === true) highlights.push("شاشة لعرض حالة الشحن");
+  if (cable?.connectorA && cable?.connectorB) highlights.push(`موصل ${cable.connectorA} إلى ${cable.connectorB}`);
+  if (cable?.lengthM) highlights.push(`طول ${formatNumber(cable.lengthM)} متر`);
+  if (cable?.maxPowerW) highlights.push(`يدعم قدرة تصل إلى ${formatNumber(cable.maxPowerW)} وات`);
+  if (cable?.dataSpeedGbps) highlights.push(`نقل بيانات بسرعة تصل إلى ${formatNumber(cable.dataSpeedGbps)} جيجابت/ثانية`);
+  if (cable?.material) highlights.push(`مصنوع من ${cable.material}`);
+  if (carCharger?.maxOutputW) highlights.push(`قدرة خرج تصل إلى ${formatNumber(carCharger.maxOutputW)} وات`);
+  if (specifications.maxPowerW && !highlights.some((item) => item.includes("قدرة"))) {
+    highlights.push(`قدرة تصل إلى ${formatNumber(specifications.maxPowerW)} وات`);
+  }
+  if (specifications.ports.length) {
+    highlights.push(`${specifications.ports.length} ${specifications.ports.length === 1 ? "منفذ" : "منافذ"}`);
+  }
+  if (specifications.protocols.length) {
+    highlights.push(`يدعم ${specifications.protocols.slice(0, 2).map((protocol) => protocol.name).join(" و")}`);
+  }
+  return highlights.slice(0, 5);
+}
+
+function compatibilityText(input: ProductDescriptionInput) {
+  const specifications = input.specifications;
+  const names = specifications?.compatibility?.map((item) => item.name).filter(Boolean) || [];
+  if (names.length) return `ومناسب لـ${names.slice(0, 3).join(" و")} وفق البيانات المنشورة.`;
+  if (specifications?.cable?.connectorA && specifications.cable.connectorB) {
+    return `ويعمل مع الأجهزة التي تستخدم ${specifications.cable.connectorA} و${specifications.cable.connectorB} وفق مواصفات الكابل والجهاز.`;
+  }
+  if (specifications?.carCharger) return "ومناسب للاستخدام في السيارة عندما يتوافق منفذ السيارة مع مواصفات الشاحن.";
+  return "ويُفضّل مراجعة منفذ الجهاز وبروتوكول الشحن قبل الطلب للتأكد من التوافق.";
+}
+
+function keywordPhrase(input: ProductDescriptionInput, brandArabic: string, category: { noun: string; search: string }) {
+  const power = input.specifications?.maxPowerW
+    || input.specifications?.powerBank?.maxOutputW
+    || input.specifications?.cable?.maxPowerW
+    || input.specifications?.carCharger?.maxOutputW;
+  const powerPhrase = power ? ` ${formatNumber(power)} وات` : "";
+  return `${category.search} ${brandArabic}${powerPhrase}`.trim();
+}
+
+export function buildProductDescription(input: ProductDescriptionInput) {
+  const brandArabic = arabicBrandName(input.brand, input.brandSlug);
+  const category = categoryCopy[input.categorySlug || ""] || { noun: "منتج", search: "منتج", use: "الاستخدام اليومي" };
+  const displayName = cleanProductText(productDisplayName(brandArabic, input.productName));
+  const detail = cleanProductText(input.productDescription || input.shortDescription);
+  const highlights = specificationHighlights(input);
+  const keyword = keywordPhrase(input, brandArabic, category);
+  const featureSentence = highlights.length
+    ? `وتشمل المواصفات المنشورة ${highlights.join("، ")}.`
+    : "وتعتمد ملاءمته على المواصفات المنشورة للموديل.";
+  const sourceDetail = detail
+    ? `وتوضح بيانات المنتج أنه ${detail.replace(/[.!؟]+$/, "")}.`
+    : `وهو مناسب لمن يحتاج ${category.use}.`;
+  const differentiator = highlights[0]
+    ? `وتساعد هذه المواصفة على اختيار ${category.noun} المناسب لاستخدامك دون الاعتماد على اسم المنتج فقط.`
+    : "وتساعد مراجعة تفاصيل الموديل على معرفة ما إذا كان مناسباً لاستخدامك قبل الشراء.";
+
+  return `${displayName} هو ${category.noun} من ${brandArabic} (${cleanProductText(input.brand)})، وموديل مناسب لمن يحتاج ${category.use}. ${sourceDetail} ${featureSentence} ${compatibilityText(input)} ${differentiator} إذا كنت تبحث عن ${keyword} في اليمن، يمكنك مراجعة المواصفات والسعر والتوافر وطلب المنتج من متجر كابل قبل إتمام الشراء. يوفر كابل معلومات المنتج وخيارات التوصيل الظاهرة في الكتالوج، وتظهر بيانات الضمان أو خدمة ما بعد البيع عند توفرها وفق شروط المنتج والمتجر.`;
+}
+
+function productMetaDescription(fullDescription: string) {
+  const normalized = cleanProductText(fullDescription);
+  if (normalized.length <= 160) return normalized;
+  const shortened = normalized.slice(0, 157).replace(/\s+\S*$/, "").trim();
+  return `${shortened}...`;
 }
 
 function breadcrumbs(items: Breadcrumb[]) {
@@ -222,8 +333,9 @@ export function buildHomeSeo(): SeoResponse {
 }
 
 export function buildProductSeo(input: ProductSeoInput): SeoResponse {
-  const displayName = productDisplayName(input.brand, input.productName);
-  const description = productDescription(input, displayName);
+  const displayName = cleanProductText(productDisplayName(input.brand, input.productName));
+  const fullDescription = buildProductDescription(input);
+  const description = productMetaDescription(fullDescription);
   const canonicalPath = productPublicPath({
     brandSlug: input.brandSlug,
     categorySlug: input.categorySlug,
@@ -252,7 +364,7 @@ export function buildProductSeo(input: ProductSeoInput): SeoResponse {
       "@context": "https://schema.org",
       "@type": "Product",
       name: input.productName,
-      description,
+      description: fullDescription,
       sku: input.sku,
       url: canonicalPath,
       ...(input.image ? { image: [input.image] } : {}),

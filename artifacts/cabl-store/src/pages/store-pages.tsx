@@ -1563,7 +1563,7 @@ function ProductDetailPage({ slug }: { slug: string }) {
             <span className="product-brand">{product.brand}</span>
             <h1>{product.productName}</h1>
             <div className="product-identity"><span>SKU</span><b dir="ltr">{product.sku}</b></div>
-            <p className="detail-copy">{product.shortDescription || product.productDescription || 'منتج متاح من كتالوج CABL.'}</p>
+            <p className="detail-copy">{product.productDescription || product.shortDescription || 'منتج متاح من كتالوج CABL.'}</p>
             <div className="detail-price"><strong data-testid="text-product-detail-price">{formatPrice(price)}</strong>{product.discountPrice && <del>{formatPrice(product.regularPrice)}</del>}</div>
             <div className="stock-note"><i/>{product.quantity > 0 ? `متوفر الآن — ${product.quantity} قطعة` : 'غير متوفر حالياً'}</div>
             <div className="detail-actions">
