@@ -455,6 +455,23 @@ function CommercialHomePage() {
         </div>
       </section>
 
+      <section className="home-mobile-category-rail" aria-labelledby="home-mobile-category-title">
+        <div className="container">
+          <div className="home-mobile-category-head">
+            <strong id="home-mobile-category-title">تصفح حسب القسم</strong>
+            <Link href="/search" data-testid="link-home-mobile-categories-all">كل المنتجات <ArrowLeft size={13} /></Link>
+          </div>
+          <nav className="home-mobile-category-list" aria-label="أقسام المتجر">
+            <Link href="/search" className="home-mobile-category-chip" data-testid="link-home-mobile-category-all">الكل</Link>
+            {categories.slice(0, 5).map((category) => (
+              <Link href={`/category/${category.slug}`} className="home-mobile-category-chip" key={category.slug} data-testid={`link-home-mobile-category-${category.slug}`}>
+                {category.name}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      </section>
+
       <section className="guided-path guided-path-home" aria-label="لماذا يختار العملاء CABL">
         <div className="container guided-path-inner">
           <div className="guided-path-intro">
@@ -513,6 +530,22 @@ function CommercialHomePage() {
           )}
         </div>
       </section>
+
+      {inStockProducts.length > 0 && (
+        <section className="guided-featured-section" aria-labelledby="home-featured-title">
+          <div className="container">
+            <div className="guided-section-header">
+              <div>
+                <span className="eyebrow">مختارات CABL</span>
+                <h2 id="home-featured-title">منتجات تستحق نظرة</h2>
+                <p>اختيارات متوفرة حالياً من الكتالوج المنشور.</p>
+              </div>
+              <Link href="/search" data-testid="link-home-featured-all">استعرض الكل <ArrowLeft size={15} /></Link>
+            </div>
+            <ProductGrid products={inStockProducts.slice(0, 4)} />
+          </div>
+        </section>
+      )}
 
       <section className="guided-quick-access guided-home-catalog" aria-labelledby="home-quick-access-title">
         <div className="container">
