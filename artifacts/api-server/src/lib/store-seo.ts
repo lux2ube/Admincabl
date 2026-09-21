@@ -244,12 +244,12 @@ function specificationHighlights(input: ProductDescriptionInput) {
 function compatibilityText(input: ProductDescriptionInput) {
   const specifications = input.specifications;
   const names = specifications?.compatibility?.map((item) => item.name).filter(Boolean) || [];
-  if (names.length) return `ومناسب لـ${names.slice(0, 3).join(" و")} وفق البيانات المنشورة.`;
+  if (names.length) return `ومناسب لـ${names.slice(0, 3).join(" و")}.`;
   if (specifications?.cable?.connectorA && specifications.cable.connectorB) {
-    return `ويعمل مع الأجهزة التي تستخدم ${specifications.cable.connectorA} و${specifications.cable.connectorB} وفق مواصفات الكابل والجهاز.`;
+    return `ويعمل مع الأجهزة التي تستخدم ${specifications.cable.connectorA} و${specifications.cable.connectorB}.`;
   }
   if (specifications?.carCharger) return "ومناسب للاستخدام في السيارة عندما يتوافق منفذ السيارة مع مواصفات الشاحن.";
-  return "ويُفضّل مراجعة منفذ الجهاز وبروتوكول الشحن قبل الطلب للتأكد من التوافق.";
+  return "";
 }
 
 function keywordPhrase(input: ProductDescriptionInput, brandArabic: string, category: { noun: string; search: string }) {
@@ -269,16 +269,30 @@ export function buildProductDescription(input: ProductDescriptionInput) {
   const highlights = specificationHighlights(input);
   const keyword = keywordPhrase(input, brandArabic, category);
   const featureSentence = highlights.length
-    ? `وتشمل المواصفات المنشورة ${highlights.join("، ")}.`
-    : "وتعتمد ملاءمته على المواصفات المنشورة للموديل.";
+    ? `وتتضمن مواصفاته ${highlights.join("، ")}.`
+    : "";
   const sourceDetail = detail
-    ? `وتوضح بيانات المنتج أنه ${detail.replace(/[.!؟]+$/, "")}.`
+    ? `${detail.replace(/[.!؟]+$/, "")}.`
     : `وهو مناسب لمن يحتاج ${category.use}.`;
   const differentiator = highlights[0]
-    ? `وتساعد هذه المواصفة على اختيار ${category.noun} المناسب لاستخدامك دون الاعتماد على اسم المنتج فقط.`
-    : "وتساعد مراجعة تفاصيل الموديل على معرفة ما إذا كان مناسباً لاستخدامك قبل الشراء.";
+    ? `وتمنح هذه الميزة ${category.noun} استخداماً عملياً في ${category.use}.`
+    : "";
+  const compatibility = compatibilityText(input);
+  const warranty = input.specifications?.warrantyMonths
+    ? `يتوفر ضمان لمدة ${formatNumber(input.specifications.warrantyMonths)} شهراً${input.specifications.warrantyNote ? `، ${cleanProductText(input.specifications.warrantyNote)}` : ""}.`
+    : input.specifications?.warrantyNote
+      ? `${cleanProductText(input.specifications.warrantyNote)}.`
+      : "";
 
-  return `${displayName} هو ${category.noun} من ${brandArabic} (${cleanProductText(input.brand)})، وموديل مناسب لمن يحتاج ${category.use}. ${sourceDetail} ${featureSentence} ${compatibilityText(input)} ${differentiator} إذا كنت تبحث عن ${keyword} في اليمن، يمكنك مراجعة المواصفات والسعر والتوافر وطلب المنتج من متجر كابل قبل إتمام الشراء. يوفر كابل معلومات المنتج وخيارات التوصيل الظاهرة في الكتالوج، وتظهر بيانات الضمان أو خدمة ما بعد البيع عند توفرها وفق شروط المنتج والمتجر.`;
+  return [
+    `${displayName} هو ${category.noun} من ${brandArabic} (${cleanProductText(input.brand)})، وموديل مناسب لمن يحتاج ${category.use}.`,
+    sourceDetail,
+    featureSentence,
+    compatibility,
+    differentiator,
+    `إذا كنت تبحث عن ${keyword} في اليمن، يتوفر هذا المنتج عبر متجر كابل، مع عرض السعر والتوافر الحاليين في صفحة المنتج.`,
+    warranty,
+  ].filter(Boolean).join(" ");
 }
 
 function productMetaDescription(fullDescription: string) {
