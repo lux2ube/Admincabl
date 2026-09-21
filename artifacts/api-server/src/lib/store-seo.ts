@@ -388,12 +388,57 @@ function compatibilityText(input: ProductDescriptionInput) {
   return "";
 }
 
+function hasFastChargingSignal(input: ProductDescriptionInput) {
+  const specifications = input.specifications;
+  if (!specifications) return false;
+  const protocolText = specifications.protocols.map((protocol) => protocol.name).join(" ");
+  const protocolSignal = /(?:PD|PPS|QC|AFC|FCP|SCP|VOOC|DASH|APPLE)/i.test(protocolText);
+  const maxPowerW = specifications.maxPowerW ?? specifications.cable?.maxPowerW ?? specifications.powerBank?.maxOutputW ?? null;
+  if (input.categorySlug === "chargers" || input.categorySlug === "travel-adapters") {
+    return protocolSignal || (maxPowerW !== null && maxPowerW >= 18);
+  }
+  if (input.categorySlug === "charging-cables") {
+    return (maxPowerW !== null && maxPowerW >= 60) || Boolean(specifications.cable?.dataSpeedGbps);
+  }
+  if (input.categorySlug === "power-banks") {
+    return protocolSignal || (maxPowerW !== null && maxPowerW >= 18);
+  }
+  return false;
+}
+
+function marketingProductNoun(input: ProductDescriptionInput, category: { noun: string }) {
+  if (!hasFastChargingSignal(input)) return category.noun;
+  switch (input.categorySlug) {
+    case "chargers":
+      return "شاحن سريع";
+    case "charging-cables":
+      return "كابل شحن سريع";
+    case "power-banks":
+      return "باور بانك سريع";
+    case "travel-adapters":
+      return "شاحن سيارة سريع";
+    default:
+      return category.noun;
+  }
+}
+
 function keywordPhrase(input: ProductDescriptionInput, brandArabic: string, category: { noun: string; search: string }) {
   const search = category.search.toLocaleLowerCase("ar-YE");
+  const searchTerm = hasFastChargingSignal(input)
+    ? input.categorySlug === "chargers"
+      ? "شاحن سريع"
+      : input.categorySlug === "charging-cables"
+        ? "كابل شحن سريع"
+        : input.categorySlug === "power-banks"
+          ? "باور بانك سريع"
+          : input.categorySlug === "travel-adapters"
+            ? "شاحن سيارة سريع"
+            : category.search
+    : category.search;
   const brandNames = [input.brand, brandArabic].map((value) => value.toLocaleLowerCase("ar-YE"));
   return brandNames.some((brandName) => search.includes(brandName))
-    ? category.search
-    : `${category.search} ${brandArabic}`.trim();
+    ? searchTerm
+    : `${searchTerm} ${brandArabic}`.trim();
 }
 
 export function buildProductDescription(input: ProductDescriptionInput) {
@@ -403,6 +448,7 @@ export function buildProductDescription(input: ProductDescriptionInput) {
   const detail = sourceFeatureText(input, displayName);
   const keyword = keywordPhrase(input, brandArabic, category);
   const purpose = productPurpose(input.categorySlug);
+  const marketingNoun = marketingProductNoun(input, category);
   const relatedSpecifications = relatedSpecificationSentences(input, input.categorySlug);
   const sourceFeature = detail ? sourceFeatureSentence(detail, input) : "";
   const compatibility = compatibilityText(input);
@@ -418,7 +464,7 @@ export function buildProductDescription(input: ProductDescriptionInput) {
       : "";
 
   return [
-    `${displayName} هو ${category.noun} عملي من ${brandArabic} ${cleanProductText(input.brand)}، ويوفر ${purpose}.`,
+    `${displayName} هو ${marketingNoun} عملي من ${brandArabic} ${cleanProductText(input.brand)}، ويوفر ${purpose}.`,
     sourceFeature,
     ...relatedSpecifications,
     compatibility,
