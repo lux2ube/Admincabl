@@ -235,6 +235,7 @@ function arabicTechnicalText(value: string) {
     .replace(/\bHuawei\s+FCP\b/gi, "الشحن السريع من هواوي")
     .replace(/\bQualcomm\s+QC\s*([0-9.]+)?\b/gi, (_, version: string | undefined) => `الشحن السريع من كوالكوم${version ? ` ${version}` : ""}`)
     .replace(/\bPD\b/gi, "توصيل الطاقة")
+    .replace(/توصيل الطاقة\s+سريع/gu, "يدعم توصيل الطاقة")
     .replace(/\bPPS\b/gi, "الشحن القابل للبرمجة")
     .replace(/\bQC\s*([0-9.]+)?\b/gi, (_, version: string | undefined) => `الشحن السريع${version ? ` ${version}` : ""}`)
     .replace(/\bAFC\b/gi, "الشحن التكيفي")
@@ -346,9 +347,23 @@ function sourceFeatureSentence(detail: string, input: ProductDescriptionInput) {
       `${arabicTechnicalText(specifications.cable.connectorA).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+إلى\\s+${arabicTechnicalText(specifications.cable.connectorB).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
       "i",
     ).test(feature)
-  ) return "";
+  ) {
+    const connectorPattern = new RegExp(
+      `(?:كابل|سلك)?\\s*${arabicTechnicalText(specifications.cable.connectorA).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+إلى\\s+${arabicTechnicalText(specifications.cable.connectorB).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
+      "i",
+    );
+    feature = feature.replace(connectorPattern, "").replace(/\s+/g, " ").trim();
+  }
   if (specifications?.cable?.dataSpeedGbps && /^و?\s*نقل بيانات/u.test(feature)) return "";
   if (!feature || feature.length <= 8) return "";
+
+  if (input.categorySlug === "charging-cables") {
+    if (/قابل للسحب/u.test(feature)) return "ويتميز بتصميم كابل قابل للسحب، ما يقلل التشابك والحاجة إلى حمل كابل منفصل.";
+    if (/مضفر|نايلون/u.test(feature)) return "ويأتي بتغليف نايلون مضفر يساعد على تحمل الاستخدام المتكرر.";
+    if (/طول\s+\d|بطول\s+\d/u.test(feature)) {
+      return `ويبلغ طوله ${feature.replace(/^.*?(?:طول|بطول)\s+/u, "").replace(/[.!؟]+$/, "")}.`;
+    }
+  }
 
   if (/كابل\s+USB-C.*قابل للسحب/i.test(feature) && input.categorySlug === "chargers") {
     return "ويتميز بكابل USB-C مدمج قابل للسحب، مما يقلل الحاجة إلى حمل كابل منفصل.";
@@ -409,6 +424,10 @@ function powerBankFeatureSentence(feature: string, input: ProductDescriptionInpu
   if (!normalized) return "";
   const integratedCable = normalized.match(/(?:كابل|سلك)\s+(?:USB-C|USB-A|شحن)(?:\s+[\w-]+)?\s+مدمج/iu);
   if (integratedCable) return `ويأتي ب${integratedCable[0]}.`;
+  if (/كابل.*مدمج/u.test(normalized)) return "ويأتي بكابل شحن مدمج، ما يقلل الحاجة إلى حمل كابل منفصل.";
+  if (/يو إس بي-سي.*لايتنينغ|لايتنينغ.*يو إس بي-سي/u.test(normalized) && /مدمج/u.test(normalized)) {
+    return "ويضم موصلي يو إس بي-سي ولايتنينغ مدمجين لشحن أجهزة متعددة دون حمل كابل منفصل.";
+  }
   return "";
 }
 
@@ -605,6 +624,18 @@ function marketingProductNoun(input: ProductDescriptionInput, category: { noun: 
 }
 
 function keywordPhrase(input: ProductDescriptionInput, brandArabic: string, category: { noun: string; search: string }) {
+  if (input.categorySlug === "power-banks") {
+    return `باور بانك${hasFastChargingSignal(input) ? " سريع" : ""} ${brandArabic}`.trim();
+  }
+  if (input.categorySlug === "charging-cables") {
+    return `كيبل شحن${hasFastChargingSignal(input) ? " سريع" : ""} ${brandArabic}`.trim();
+  }
+  if (input.categorySlug === "chargers") {
+    return `شاحن${hasFastChargingSignal(input) ? " سريع" : ""} ${brandArabic}`.trim();
+  }
+  if (input.categorySlug === "travel-adapters") {
+    return `شاحن جوال للسيارة${hasFastChargingSignal(input) ? " سريع" : ""} ${brandArabic}`.trim();
+  }
   const profile = seoKeywordProfiles[input.categorySlug || ""] || { primary: category.search };
   const searchTerm = hasFastChargingSignal(input) && profile.fast ? profile.fast : profile.primary;
   const brandNames = [input.brand, brandArabic].map((value) => value.toLocaleLowerCase("ar-YE"));
