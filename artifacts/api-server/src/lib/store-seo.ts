@@ -212,6 +212,10 @@ function withoutPowerMentions(value: string) {
     .trim();
 }
 
+function isGeneratedSeoDescription(value: string) {
+  return /(?:إذا كنت تبحث عن|يتوفر هذا الموديل|هو\s+.+?\s+عملي من|ويشمل هذا الموديل ضماناً)/u.test(value);
+}
+
 function sourceFeatureText(input: ProductDescriptionInput, identity: string) {
   const productNames = new Set([
     cleanProductText(input.productName).toLocaleLowerCase("ar-YE"),
@@ -225,7 +229,8 @@ function sourceFeatureText(input: ProductDescriptionInput, identity: string) {
     .filter(Boolean)
     .sort((a, b) => b.length - a.length);
 
-  for (const source of [input.productDescription, input.shortDescription]) {
+  for (const source of [input.shortDescription, input.productDescription]) {
+    if (!source || isGeneratedSeoDescription(cleanProductText(source))) continue;
     let detail = withoutPowerMentions(cleanProductText(source)
       .replace(/منتج منشور من CABL مع توصيل داخل اليمن\.?/gi, "")
       .replace(/راجع بيانات الموديل والتوافر قبل الطلب\.?/gi, "")
@@ -241,6 +246,25 @@ function sourceFeatureText(input: ProductDescriptionInput, identity: string) {
       }
     }
     if (detail && !productNames.has(detail.toLocaleLowerCase("ar-YE")) && detail.length > 8) return detail;
+  }
+  return "";
+}
+
+function wirelessEarbudsFeature(input: ProductDescriptionInput) {
+  const sourceText = [
+    input.shortDescription,
+    input.productDescription,
+    ...(input.specifications?.attributes || []).map((attribute) => [
+      attribute.label,
+      attribute.value,
+      ...attribute.values,
+    ].filter(Boolean).join(" ")),
+  ].filter(Boolean).join(" ");
+  if (/علبة\s+شحن\s+ل(?:ل)?هاتف|شحن\s+الهاتف/u.test(sourceText)) {
+    return "وتأتي بعلبة شحن لا تقتصر على حفظ السماعات وشحنها، بل تتيح أيضاً شحن الهاتف عند الحاجة، ما يوفر حلاً عملياً للطاقة أثناء التنقل.";
+  }
+  if (/استخدام\s+اليومي|السفر/u.test(sourceText)) {
+    return "وتأتي مع علبة شحن تناسب الاستخدام اليومي والسفر.";
   }
   return "";
 }
@@ -307,6 +331,29 @@ function categoryIdentity(input: ProductDescriptionInput, category: { identity: 
     : `${category.identity} ${name}`.trim();
 }
 
+function productSubject(input: ProductDescriptionInput, marketingNoun: string) {
+  const productName = cleanProductText(input.productName);
+  if (input.categorySlug === "wireless-earbuds") {
+    return `سماعة ${productName} اللاسلكية`;
+  }
+  if (input.categorySlug === "wireless-microphones") {
+    return `ميكروفون ${productName} اللاسلكي`;
+  }
+  const sourcePrefix = input.categorySlug === "travel-adapters"
+    ? /^(شاحن سيارة)/u
+    : input.categorySlug === "charging-cables"
+      ? /^(كابل)/u
+      : input.categorySlug === "power-banks"
+        ? /^(باور\s+(?:بانك|بنك))/u
+        : input.categorySlug === "chargers"
+          ? /^(شاحن)/u
+          : null;
+  if (sourcePrefix?.test(productName)) {
+    return `${marketingNoun}${productName.replace(sourcePrefix, "")}`;
+  }
+  return `${marketingNoun} ${productName}`;
+}
+
 function countLabel(count: number, singular: string, plural: string) {
   if (count === 1) return "منفذاً واحداً";
   if (count === 2) return "منفذين";
@@ -334,6 +381,17 @@ function productPurpose(categorySlug: string | null) {
       return "التسجيل وصناعة المحتوى حسب التكوين المتاح";
     default:
       return "الاستخدام اليومي";
+  }
+}
+
+function purposePhrase(categorySlug: string | null) {
+  switch (categorySlug) {
+    case "wireless-earbuds":
+      return "مصممة للاستماع وإجراء المكالمات أثناء التنقل";
+    case "wireless-microphones":
+      return "مصمم للتسجيل وصناعة المحتوى حسب التكوين المتاح";
+    default:
+      return `يوفر ${productPurpose(categorySlug)}`;
   }
 }
 
@@ -451,10 +509,12 @@ export function buildProductDescription(input: ProductDescriptionInput) {
   const displayName = categoryIdentity(input, category);
   const detail = sourceFeatureText(input, displayName);
   const keyword = keywordPhrase(input, brandArabic, category);
-  const purpose = productPurpose(input.categorySlug);
+  const purpose = purposePhrase(input.categorySlug);
   const marketingNoun = marketingProductNoun(input, category);
   const relatedSpecifications = relatedSpecificationSentences(input, input.categorySlug);
   const sourceFeature = detail ? sourceFeatureSentence(detail, input) : "";
+  const subject = productSubject(input, marketingNoun);
+  const centralFeature = input.categorySlug === "wireless-earbuds" ? wirelessEarbudsFeature(input) : "";
   const compatibility = compatibilityText(input);
   const warrantyNote = cleanProductText(input.specifications?.warrantyNote);
   const warrantyMonths = input.specifications?.warrantyMonths;
@@ -468,11 +528,11 @@ export function buildProductDescription(input: ProductDescriptionInput) {
       : "";
 
   return [
-    `${displayName} هو ${marketingNoun} عملي من ${brandArabic} ${cleanProductText(input.brand)}، ويوفر ${purpose}.`,
-    sourceFeature,
+    `${subject} من ${brandArabic} ${cleanProductText(input.brand)} ${purpose}.`,
+    centralFeature || sourceFeature,
     ...relatedSpecifications,
     compatibility,
-    `إذا كنت تبحث عن ${keyword} في اليمن، يتوفر هذا الموديل عبر متجر كابل.`,
+    `ولهذا قد يكون خياراً عملياً لمن يبحث عن ${keyword} في اليمن، ويتوفر عبر متجر كابل مع إمكانية مراجعة المواصفات والتفاصيل قبل الطلب.`,
     warranty,
   ].filter(Boolean).join(" ");
 }
