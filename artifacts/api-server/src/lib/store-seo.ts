@@ -232,14 +232,17 @@ function arabicTechnicalText(value: string) {
     .replace(/\bLightning\b/gi, "لايتنينغ")
     .replace(/\bGaN\b/gi, "نيتريد الغاليوم")
     .replace(/\bLED\b/gi, "ليد")
+    .replace(/\bHuawei\s+FCP\b/gi, "الشحن السريع من هواوي")
+    .replace(/\bQualcomm\s+QC\s*([0-9.]+)?\b/gi, (_, version: string | undefined) => `الشحن السريع من كوالكوم${version ? ` ${version}` : ""}`)
     .replace(/\bPD\b/gi, "توصيل الطاقة")
     .replace(/\bPPS\b/gi, "الشحن القابل للبرمجة")
-    .replace(/\bQC(?:\s+([0-9.]+))?\b/gi, (_, version: string | undefined) => `الشحن السريع${version ? ` ${version}` : ""}`)
+    .replace(/\bQC\s*([0-9.]+)?\b/gi, (_, version: string | undefined) => `الشحن السريع${version ? ` ${version}` : ""}`)
     .replace(/\bAFC\b/gi, "الشحن التكيفي")
     .replace(/\bFCP\b/gi, "الشحن السريع من هواوي")
     .replace(/\bSCP\b/gi, "الشحن الفائق من هواوي")
     .replace(/\bVOOC\b/gi, "الشحن السريع من أوبو")
     .replace(/\bDASH\b/gi, "الشحن السريع")
+    .replace(/\bAVS\b/gi, "تعديل الجهد الذكي")
     .replace(/\bAPPLE\b/gi, "أبل")
     .replace(/\bHuawei\b/gi, "هواوي")
     .replace(/\bQualcomm\b/gi, "كوالكوم")
@@ -323,7 +326,7 @@ function wirelessEarbudsFeature(input: ProductDescriptionInput) {
 }
 
 function sourceFeatureSentence(detail: string, input: ProductDescriptionInput) {
-  let feature = arabicMarketingText(detail);
+  let feature = arabicTechnicalText(detail);
   const specifications = input.specifications;
   feature = feature.replace(/^و+\s*/u, "");
   if (input.categorySlug === "power-banks") {
@@ -340,7 +343,7 @@ function sourceFeatureSentence(detail: string, input: ProductDescriptionInput) {
     specifications?.cable?.connectorA &&
     specifications.cable.connectorB &&
     new RegExp(
-      `${specifications.cable.connectorA.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+إلى\\s+${specifications.cable.connectorB.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
+      `${arabicTechnicalText(specifications.cable.connectorA).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+إلى\\s+${arabicTechnicalText(specifications.cable.connectorB).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
       "i",
     ).test(feature)
   ) return "";
@@ -427,7 +430,7 @@ function categoryIdentity(input: ProductDescriptionInput, category: { identity: 
 }
 
 function productSubject(input: ProductDescriptionInput, marketingNoun: string) {
-  const productName = replaceEnglishBrandNames(cleanProductText(input.productName), input);
+  const productName = arabicTechnicalText(replaceEnglishBrandNames(cleanProductText(input.productName), input));
   if (input.categorySlug === "wireless-earbuds") {
     return `سماعة ${productName} اللاسلكية`;
   }
@@ -510,7 +513,7 @@ function relatedSpecificationSentences(input: ProductDescriptionInput, categoryS
   const specifications = input.specifications;
   if (!specifications) return [];
   const sentences: string[] = [];
-  const protocols = specifications.protocols.slice(0, 3).map((protocol) => arabicMarketingText(protocol.name)).filter(Boolean);
+  const protocols = specifications.protocols.slice(0, 3).map((protocol) => arabicTechnicalText(protocol.name)).filter(Boolean);
   const protocolText = protocols.join(" و");
   if (specifications.ports.length && protocols.length && !(specifications.cable?.connectorA && specifications.cable?.connectorB)) {
     const count = countLabel(specifications.ports.length, "منفذ", "منافذ");
@@ -544,7 +547,7 @@ function relatedSpecificationSentences(input: ProductDescriptionInput, categoryS
 
   const cable = specifications.cable;
   if (cable?.connectorA && cable.connectorB) {
-    const connector = `يأتي بموصل ${cable.connectorA} إلى ${cable.connectorB}`;
+    const connector = `يأتي بموصل ${arabicTechnicalText(cable.connectorA)} إلى ${arabicTechnicalText(cable.connectorB)}`;
     if (cable.dataSpeedGbps) {
       sentences.push(`${connector} ويدعم نقل البيانات بسرعة تصل إلى ${formatNumber(cable.dataSpeedGbps)} جيجابت/ثانية${protocols.length ? `، كما يدعم ${protocolText}` : ""}.`);
     } else if (cable.lengthM) {
@@ -558,10 +561,10 @@ function relatedSpecificationSentences(input: ProductDescriptionInput, categoryS
 
 function compatibilityText(input: ProductDescriptionInput) {
   const specifications = input.specifications;
-  const names = specifications?.compatibility?.map((item) => replaceEnglishBrandNames(item.name, input)).filter(Boolean) || [];
+  const names = specifications?.compatibility?.map((item) => arabicTechnicalText(replaceEnglishBrandNames(item.name, input))).filter(Boolean) || [];
   if (names.length) return `ويعمل مع الأجهزة التالية: ${names.slice(0, 3).join(" و")}.`;
   if (specifications?.cable?.connectorA && specifications.cable.connectorB) {
-    return `ويعمل مع الأجهزة التي تستخدم موصلَي ${specifications.cable.connectorA} و${specifications.cable.connectorB}.`;
+    return `ويعمل مع الأجهزة التي تستخدم موصلَي ${arabicTechnicalText(specifications.cable.connectorA)} و${arabicTechnicalText(specifications.cable.connectorB)}.`;
   }
   if (specifications?.carCharger) return "ويمكن استخدامه في السيارة عندما يتوافق منفذها مع مواصفات الشاحن.";
   return "";
