@@ -1,5 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import {
+  distributeKeywordBank,
+  keywordCoverageStats,
+  loadKeywordBank,
+} from "./seo-keyword-bank.mjs";
 
 const root = process.cwd();
 const distDir = path.resolve(root, "dist/public");
@@ -399,6 +404,21 @@ function renderRelatedProducts(products) {
   }).join("")}</ul></section>`;
 }
 
+function renderKeywordCoverage(rows) {
+  if (!rows?.length) return "";
+  const byIntent = new Map();
+  for (const row of rows) {
+    const intent = row.Intent || "مصطلحات مرتبطة";
+    const terms = byIntent.get(intent) || [];
+    terms.push(row.Keyword);
+    byIntent.set(intent, terms);
+  }
+  const groups = [...byIntent.entries()].map(([intent, terms]) =>
+    `<section class="seo-keyword-group"><h3>${escapeHtml(intent)}</h3><ul>\n${terms.map((term) => `<li>${escapeHtml(term)}</li>`).join("\n")}\n</ul></section>`,
+  ).join("\n");
+  return `<section class="seo-keyword-coverage" aria-labelledby="keyword-coverage-title"><h2 id="keyword-coverage-title">عبارات البحث المرتبطة بهذا المحتوى</h2><p>تغطي هذه الصفحة عبارات البحث المرتبطة بالقسم أو الموديل من بنك CABL. وجود العبارة هنا يصف نية البحث ولا يثبت توفر منتج مستقل لكل عبارة.</p><details><summary>عرض ${rows.length} عبارة بحث مرتبطة</summary>${groups}</details></section>`;
+}
+
 function serializeJsonForHtml(value) {
   return JSON.stringify(value).replace(/[<>&\u2028\u2029]/g, (character) => ({
     "<": "\\u003c",
@@ -461,7 +481,7 @@ function renderBody(page, routePath, entity = null) {
     : "";
   const categoryLinks = relatedBrands ? `<section><h2>العلامات المتاحة</h2><ul>${relatedBrands}</ul></section>` : "";
   const buyingLinks = `<section><h2>روابط مفيدة قبل الطلب</h2><p><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/shipping"))}">الشحن والتوصيل</a> · <a href="${escapeHtml(absoluteUrl("/return-policy"))}">الإرجاع والاستبدال</a></p></section>`;
-  return `<header><a href="${escapeHtml(absoluteUrl("/"))}">CABL اليمن</a><nav>${links}</nav></header><main><p>دليل CABL في اليمن</p><h1>${escapeHtml(page.h1)}</h1><p>${escapeHtml(page.description)}</p>${productDetails}${guideContent}${categoryLinks}${renderProductList(entityProducts)}${renderRelatedProducts(entity?.relatedProducts)}<section><h2>معلومات قبل الطلب</h2><p>راجع المواصفات والتوافق والسعر والتوافر في صفحة المنتج، ثم أدخل العنوان في checkout لرؤية خيارات الشحن الحالية.</p></section>${buyingLinks}</main><footer><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/contact"))}">تواصل معنا</a></footer>`;
+  return `<header><a href="${escapeHtml(absoluteUrl("/"))}">CABL اليمن</a><nav>${links}</nav></header><main><p>دليل CABL في اليمن</p><h1>${escapeHtml(page.h1)}</h1><p>${escapeHtml(page.description)}</p>${productDetails}${guideContent}${categoryLinks}${renderProductList(entityProducts)}${renderRelatedProducts(entity?.relatedProducts)}${renderKeywordCoverage(page.keywordRows)}<section><h2>معلومات قبل الطلب</h2><p>راجع المواصفات والتوافق والسعر والتوافر في صفحة المنتج، ثم أدخل العنوان في checkout لرؤية خيارات الشحن الحالية.</p></section>${buyingLinks}</main><footer><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/contact"))}">تواصل معنا</a></footer>`;
 }
 
 function withSeo(indexHtml, page, routePath, entity = null, catalog = null) {
@@ -651,6 +671,20 @@ async function main() {
   });
   for (const [routePath, page] of productRoutes) routes.set(routePath, page);
 
+  const keywordRows = await loadKeywordBank(root);
+  const keywordAssignments = distributeKeywordBank(keywordRows, products, routes);
+  for (const [routePath, page] of routes) {
+    const assignedRows = keywordAssignments.get(routePath) || [];
+    routes.set(routePath, {
+      ...page,
+      keywordRows: assignedRows,
+    });
+  }
+  const coverage = keywordCoverageStats(keywordRows, keywordAssignments);
+  if (coverage.unused !== 0 || coverage.assigned !== coverage.source) {
+    throw new Error(`SEO keyword bank coverage failed: ${coverage.assigned}/${coverage.source} assigned, ${coverage.unused} unused`);
+  }
+
   await fs.writeFile(path.join(distDir, "sitemap.xml"), renderSitemap(routes));
   await fs.writeFile(path.join(distDir, "robots.txt"), renderRobots());
 
@@ -661,7 +695,7 @@ async function main() {
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, withSeo(indexHtml, page, routePath, page.entity || (page.product ? { type: "product", product: page.product, productPath } : null), catalog));
   }
-  console.log(`SEO pre-rendered ${routes.size} public routes`);
+  console.log(`SEO pre-rendered ${routes.size} public routes with ${coverage.assigned} keyword bank phrases assigned`);
 }
 
 main().catch((error) => {
