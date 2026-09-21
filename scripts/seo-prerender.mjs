@@ -377,7 +377,7 @@ function renderProductSpecifications(product) {
   const specifications = product?.specifications;
   if (!specifications) return "";
   const rows = [
-    ...(specifications.attributes || []).map((attribute) => {
+    ...(specifications.attributes || []).filter((attribute) => attribute.slug !== "max_power_w").map((attribute) => {
       const value = attribute.value !== null && attribute.value !== undefined
         ? String(attribute.value)
         : attribute.values?.join("، ");
@@ -386,7 +386,6 @@ function renderProductSpecifications(product) {
     ...(specifications.ports || []).map((port) => `<li><strong>المنفذ ${escapeHtml(port.name)}:</strong> ${escapeHtml(port.type)}${port.maxPowerW ? ` · ${escapeHtml(String(port.maxPowerW))}W` : ""}${port.maxVoltageV ? ` · ${escapeHtml(String(port.maxVoltageV))}V` : ""}${port.maxCurrentA ? ` · ${escapeHtml(String(port.maxCurrentA))}A` : ""}</li>`),
     ...(specifications.protocols || []).map((protocol) => `<li><strong>البروتوكول:</strong> ${escapeHtml(protocol.name)}</li>`),
     ...(specifications.maxPowerW ? [`<li><strong>القدرة القصوى:</strong> ${escapeHtml(String(specifications.maxPowerW))}W</li>`] : []),
-    ...(specifications.capabilityLabel ? [`<li><strong>القدرة:</strong> ${escapeHtml(specifications.capabilityLabel)}</li>`] : []),
     ...(specifications.compatibility || []).map((item) => `<li><strong>التوافق:</strong> ${escapeHtml(item.name || item.label || String(item))}</li>`),
     ...(specifications.protections?.length ? [`<li><strong>أنظمة الحماية:</strong> ${specifications.protections.map(protectionLabel).map(escapeHtml).join("، ")}</li>`] : []),
   ].filter(Boolean);

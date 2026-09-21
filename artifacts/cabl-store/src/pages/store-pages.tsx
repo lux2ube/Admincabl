@@ -1735,10 +1735,10 @@ function ProductSpecificationsPanel({ product }: { product: StoreProduct }) {
     return `${typeof value === 'boolean' ? (value ? 'نعم' : 'لا') : value}${unit ? ` ${unit}` : ''}`;
   };
    return <section className="product-specs-panel product-attributes-panel" aria-labelledby="product-attributes-title">
-     <div className="product-specs-heading product-attributes-heading"><div><span className="eyebrow">بيانات المنتج المنشورة</span><h2 id="product-attributes-title">خصائص المنتج</h2><p>راجع الخصائص المهمة من الكتالوج الحالي في بطاقات واضحة، من دون جدول مزدحم أو استنتاجات غير موثقة.</p></div>{specs.capabilityLabel && <div className="spec-capability"><b>C</b><span>{specs.capabilityLabel}</span></div>}</div>
+      <div className="product-specs-heading product-attributes-heading"><div><span className="eyebrow">بيانات المنتج المنشورة</span><h2 id="product-attributes-title">خصائص المنتج</h2><p>راجع الخصائص المهمة من الكتالوج الحالي في بطاقات واضحة، من دون جدول مزدحم أو استنتاجات غير موثقة.</p></div></div>
     <div className="product-specs-grid product-attributes-grid">
        {specs.maxPowerW !== null && <div className="spec-card"><span>{specificationLabel('max_power_w', 'القدرة القصوى')}</span><strong>{specs.maxPowerW} W</strong></div>}
-      {specs.attributes.map((attribute) => {
+       {specs.attributes.filter((attribute) => attribute.slug !== 'max_power_w').map((attribute) => {
         const values = attribute.values.length ? attribute.values.join('، ') : visibleValue(attribute.value, attribute.unit);
           return values ? <div className="spec-card product-attribute-card" key={attribute.slug}><span>{specificationLabel(attribute.slug, attribute.label)}</span><strong>{values}</strong></div> : null;
       })}
