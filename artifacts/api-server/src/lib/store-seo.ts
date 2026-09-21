@@ -267,7 +267,8 @@ function sourceFeatureText(input: ProductDescriptionInput, identity: string) {
         break;
       }
     }
-    if (detail && !productNames.has(detail.toLocaleLowerCase("ar-YE")) && detail.length > 8) return detail;
+    const arabicDetail = withoutEnglishBrandNames(detail, input);
+    if (arabicDetail && !productNames.has(arabicDetail.toLocaleLowerCase("ar-YE")) && arabicDetail.length > 8) return arabicDetail;
   }
   return "";
 }
@@ -341,6 +342,18 @@ function arabicBrandName(brand: string, brandSlug: string) {
   return arabicBrandNames[brandSlug.toLowerCase()] || brand;
 }
 
+function withoutEnglishBrandNames(value: string, input: ProductDescriptionInput) {
+  const brandNames = [input.brand, input.brandSlug]
+    .filter(Boolean)
+    .map((name) => String(name).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  if (!brandNames.length) return value;
+  return value
+    .replace(new RegExp(`\\b(?:${brandNames.join("|")})\\b`, "gi"), "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+([،,؛:])/g, "$1")
+    .trim();
+}
+
 function formatNumber(value: number | null | undefined) {
   if (value === null || value === undefined || !Number.isFinite(value)) return null;
   return Number.isInteger(value) ? String(value) : String(value).replace(/\.0+$/, "");
@@ -384,7 +397,7 @@ function categoryIdentity(input: ProductDescriptionInput, category: { identity: 
 }
 
 function productSubject(input: ProductDescriptionInput, marketingNoun: string) {
-  const productName = cleanProductText(input.productName);
+  const productName = withoutEnglishBrandNames(cleanProductText(input.productName), input);
   if (input.categorySlug === "wireless-earbuds") {
     return `سماعة ${productName} اللاسلكية`;
   }
@@ -454,13 +467,12 @@ function openingSentence(
   input: ProductDescriptionInput,
   subject: string,
   brandArabic: string,
-  brand: string,
   purpose: string,
 ) {
   if (input.categorySlug === "power-banks") {
-    return `${subject} من ${brandArabic} ${brand} هو بطارية محمولة توفر طاقة إضافية للجوال أثناء التنقل والسفر، ومناسب للاستخدام اليومي عندما تحتاج إلى شحن هاتفك بعيداً عن مصدر الكهرباء.`;
+    return `${subject} من ${brandArabic} هو بطارية محمولة توفر طاقة إضافية للجوال أثناء التنقل والسفر، ومناسب للاستخدام اليومي عندما تحتاج إلى شحن هاتفك بعيداً عن مصدر الكهرباء.`;
   }
-  return `${subject} من ${brandArabic} ${brand} ${purpose}.`;
+  return `${subject} من ${brandArabic} ${purpose}.`;
 }
 
 function relatedSpecificationSentences(input: ProductDescriptionInput, categorySlug: string | null) {
@@ -593,7 +605,7 @@ export function buildProductDescription(input: ProductDescriptionInput) {
       : "";
 
   return [
-    openingSentence(input, subject, brandArabic, cleanProductText(input.brand), purpose),
+    openingSentence(input, subject, brandArabic, purpose),
     centralFeature || sourceFeature,
     ...relatedSpecifications,
     compatibility,
