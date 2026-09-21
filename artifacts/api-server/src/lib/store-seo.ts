@@ -202,6 +202,25 @@ function cleanProductText(value: string | null | undefined) {
     .trim();
 }
 
+function sourceProductDetail(input: ProductDescriptionInput) {
+  const productNames = new Set([
+    cleanProductText(input.productName).toLocaleLowerCase("ar-YE"),
+    cleanProductText(productDisplayName(input.brand, input.productName)).toLocaleLowerCase("ar-YE"),
+  ]);
+  for (const source of [input.productDescription, input.shortDescription]) {
+    const detail = cleanProductText(source)
+      .replace(/منتج منشور من CABL مع توصيل داخل اليمن\.?/gi, "")
+      .replace(/راجع بيانات الموديل والتوافر قبل الطلب\.?/gi, "")
+      .replace(/راجع بيانات المنتج والتوافر قبل الطلب\.?/gi, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/[.!؟]+$/, "")
+      .trim();
+    if (detail && !productNames.has(detail.toLocaleLowerCase("ar-YE"))) return `${detail}.`;
+  }
+  return "";
+}
+
 function arabicBrandName(brand: string, brandSlug: string) {
   return arabicBrandNames[brandSlug.toLowerCase()] || brand;
 }
@@ -265,14 +284,14 @@ export function buildProductDescription(input: ProductDescriptionInput) {
   const brandArabic = arabicBrandName(input.brand, input.brandSlug);
   const category = categoryCopy[input.categorySlug || ""] || { noun: "منتج", search: "منتج", use: "الاستخدام اليومي" };
   const displayName = cleanProductText(productDisplayName(brandArabic, input.productName));
-  const detail = cleanProductText(input.productDescription || input.shortDescription);
+  const detail = sourceProductDetail(input);
   const highlights = specificationHighlights(input);
   const keyword = keywordPhrase(input, brandArabic, category);
   const featureSentence = highlights.length
     ? `وتتضمن مواصفاته ${highlights.join("، ")}.`
     : "";
   const sourceDetail = detail
-    ? `${detail.replace(/[.!؟]+$/, "")}.`
+    ? detail
     : `وهو مناسب لمن يحتاج ${category.use}.`;
   const differentiator = highlights[0]
     ? `وتمنح هذه الميزة ${category.noun} استخداماً عملياً في ${category.use}.`
