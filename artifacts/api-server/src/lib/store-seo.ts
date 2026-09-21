@@ -515,16 +515,28 @@ function purposePhrase(categorySlug: string | null) {
   }
 }
 
+function powerBankOpeningSentence(input: ProductDescriptionInput, subject: string, brandArabic: string) {
+  const brandSuffix = subject.includes(brandArabic) ? "" : ` من ${brandArabic}`;
+  const capacity = input.specifications?.powerBank?.capacityMah ?? null;
+  const capacityUse = capacity && capacity >= 20000
+    ? "مصمم للرحلات والتنقل الطويل؛ تساعد سعته الكبيرة على تقليل الحاجة إلى البحث عن مقبس كهرباء"
+    : "اختيار عملي للحمل اليومي في الحقيبة أو السيارة عندما تحتاج إلى شحن الهاتف بعيداً عن المقبس";
+  const chargingBenefit = hasFastChargingSignal(input)
+    ? "، ويدعم شحناً سريعاً للأجهزة المتوافقة"
+    : "";
+  return `${subject}${brandSuffix} ${capacityUse}${chargingBenefit}.`;
+}
+
 function openingSentence(
   input: ProductDescriptionInput,
   subject: string,
   brandArabic: string,
   purpose: string,
 ) {
-  const brandSuffix = subject.includes(brandArabic) ? "" : ` من ${brandArabic}`;
   if (input.categorySlug === "power-banks") {
-    return `${subject}${brandSuffix} هو بطارية محمولة توفر طاقة إضافية للجوال أثناء التنقل والسفر، ومناسب للاستخدام اليومي عندما تحتاج إلى شحن هاتفك بعيداً عن مصدر الكهرباء.`;
+    return powerBankOpeningSentence(input, subject, brandArabic);
   }
+  const brandSuffix = subject.includes(brandArabic) ? "" : ` من ${brandArabic}`;
   return `${subject}${brandSuffix} ${purpose}.`;
 }
 
