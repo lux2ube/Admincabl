@@ -267,7 +267,7 @@ function sourceFeatureText(input: ProductDescriptionInput, identity: string) {
         break;
       }
     }
-    const arabicDetail = withoutEnglishBrandNames(detail, input);
+    const arabicDetail = replaceEnglishBrandNames(detail, input);
     if (arabicDetail && !productNames.has(arabicDetail.toLocaleLowerCase("ar-YE")) && arabicDetail.length > 8) return arabicDetail;
   }
   return "";
@@ -342,13 +342,13 @@ function arabicBrandName(brand: string, brandSlug: string) {
   return arabicBrandNames[brandSlug.toLowerCase()] || brand;
 }
 
-function withoutEnglishBrandNames(value: string, input: ProductDescriptionInput) {
+function replaceEnglishBrandNames(value: string, input: ProductDescriptionInput) {
   const brandNames = [input.brand, input.brandSlug]
     .filter(Boolean)
     .map((name) => String(name).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
   if (!brandNames.length) return value;
   return value
-    .replace(new RegExp(`\\b(?:${brandNames.join("|")})\\b`, "gi"), "")
+    .replace(new RegExp(`\\b(?:${brandNames.join("|")})\\b`, "gi"), arabicBrandName(input.brand, input.brandSlug))
     .replace(/\s{2,}/g, " ")
     .replace(/\s+([،,؛:])/g, "$1")
     .trim();
@@ -397,7 +397,7 @@ function categoryIdentity(input: ProductDescriptionInput, category: { identity: 
 }
 
 function productSubject(input: ProductDescriptionInput, marketingNoun: string) {
-  const productName = withoutEnglishBrandNames(cleanProductText(input.productName), input);
+  const productName = replaceEnglishBrandNames(cleanProductText(input.productName), input);
   if (input.categorySlug === "wireless-earbuds") {
     return `سماعة ${productName} اللاسلكية`;
   }
@@ -469,10 +469,11 @@ function openingSentence(
   brandArabic: string,
   purpose: string,
 ) {
+  const brandSuffix = subject.includes(brandArabic) ? "" : ` من ${brandArabic}`;
   if (input.categorySlug === "power-banks") {
-    return `${subject} من ${brandArabic} هو بطارية محمولة توفر طاقة إضافية للجوال أثناء التنقل والسفر، ومناسب للاستخدام اليومي عندما تحتاج إلى شحن هاتفك بعيداً عن مصدر الكهرباء.`;
+    return `${subject}${brandSuffix} هو بطارية محمولة توفر طاقة إضافية للجوال أثناء التنقل والسفر، ومناسب للاستخدام اليومي عندما تحتاج إلى شحن هاتفك بعيداً عن مصدر الكهرباء.`;
   }
-  return `${subject} من ${brandArabic} ${purpose}.`;
+  return `${subject}${brandSuffix} ${purpose}.`;
 }
 
 function relatedSpecificationSentences(input: ProductDescriptionInput, categorySlug: string | null) {
