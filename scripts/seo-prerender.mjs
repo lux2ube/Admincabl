@@ -58,6 +58,66 @@ const staticPages = {
     h1: "شواحن وتوصيلات وخوازن طاقة في اليمن",
     description: "تسوّق شواحن الجوال وتوصيلات الشحن وخوازن الطاقة وإكسسوارات التقنية في اليمن، مع أسعار وتوافر وخيارات شحن واضحة من كتالوج CABL.",
   },
+  "/chargers": {
+    title: "شواحن سريعة في اليمن | CABL",
+    h1: "الشواحن",
+    description: "شواحن USB-C وGaN بقدرات ومنافذ مختلفة من كتالوج CABL.",
+    canonicalPath: "/category/chargers",
+  },
+  "/cables": {
+    title: "توصيلات شحن ونقل بيانات | CABL",
+    h1: "توصيلات الشحن",
+    description: "قارن توصيلات USB-C وLightning حسب الطرف والقدرة والطول.",
+    canonicalPath: "/category/charging-cables",
+  },
+  "/power-banks": {
+    title: "خوازن الطاقة (Power Bank) في اليمن | CABL",
+    h1: "خوازن الطاقة",
+    description: "قارن خوازن الطاقة حسب السعة والقدرة والمنافذ والتوافر في اليمن.",
+    canonicalPath: "/category/power-banks",
+  },
+  "/hubs-adapters": {
+    title: "ملحقات الهاتف والاتصال | CABL",
+    h1: "الملحقات",
+    description: "محاور USB-C وكابلات العرض والملحقات من كتالوج CABL.",
+    canonicalPath: "/category/phone-accessories",
+  },
+  "/car-accessories": {
+    title: "شواحن السيارة والسفر في اليمن | CABL",
+    h1: "السفر والسيارة",
+    description: "حلول شحن للسيارة والسفر مع مقارنة القدرة والمنافذ.",
+    canonicalPath: "/category/travel-adapters",
+  },
+  "/search": {
+    title: "كتالوج المنتجات | CABL",
+    h1: "ابحث عن قطعتك القادمة",
+    description: "ابحث في كتالوج CABL عن المنتجات المنشورة حسب الاسم أو العلامة أو القسم.",
+    indexable: false,
+  },
+  "/compare": {
+    title: "مقارنة المنتجات | CABL",
+    h1: "قارن المنتجات جنباً إلى جنب",
+    description: "قارن مواصفات المنتجات المنشورة في كتالوج CABL.",
+    indexable: false,
+  },
+  "/cart": {
+    title: "سلة المشتريات | CABL",
+    h1: "سلة مشترياتك",
+    description: "راجع المنتجات التي اخترتها قبل الانتقال إلى بيانات التوصيل والدفع.",
+    indexable: false,
+  },
+  "/checkout": {
+    title: "إتمام الشراء | CABL",
+    h1: "البيانات والدفع",
+    description: "أدخل بيانات التوصيل واختر الشحن والدفع لإرسال طلب CABL.",
+    indexable: false,
+  },
+  "/orders": {
+    title: "تتبع الطلبات | CABL",
+    h1: "تتبع طلباتك",
+    description: "راجع طلباتك باستخدام رقم الهاتف والبريد الإلكتروني عند توفره.",
+    indexable: false,
+  },
   "/guides": {
     title: "أدلة شراء الشحن والطاقة والإكسسوارات في اليمن | CABL",
     h1: "أدلة شراء مبنية على الكتالوج",
@@ -451,7 +511,7 @@ async function main() {
   const indexHtml = await fs.readFile(path.join(distDir, "index.html"), "utf8");
   const routes = new Map(Object.entries(staticPages).map(([routePath, page]) => [routePath, {
     ...page,
-    canonicalPath: mountedPath(routePath),
+    canonicalPath: mountedPath(page.canonicalPath || routePath),
   }]));
 
   const skipCatalogPrerender = process.env.SKIP_SEO_PRERENDER === "1"
@@ -485,6 +545,29 @@ async function main() {
   for (const [routePath, page] of guideRoutes) routes.set(routePath, page);
 
   const products = catalog.products;
+  const categoryAliases = {
+    "/chargers": "chargers",
+    "/cables": "charging-cables",
+    "/power-banks": "power-banks",
+    "/hubs-adapters": "phone-accessories",
+    "/car-accessories": "travel-adapters",
+  };
+  for (const [routePath, categorySlug] of Object.entries(categoryAliases)) {
+    const category = products.find((product) => product.category?.slug === categorySlug)?.category;
+    if (!category) continue;
+    const seo = await getJson(`/store/seo?type=category&slug=${encodeURIComponent(categorySlug)}`);
+    const categoryProducts = products.filter((product) => product.category?.slug === categorySlug);
+    const brands = Array.from(new Map(categoryProducts.map((product) => [product.brandSlug, { slug: product.brandSlug, name: product.brand }])).values());
+    routes.set(routePath, {
+      ...(seo || {}),
+      title: seo?.title || routes.get(routePath)?.title || `${category.name} في اليمن | CABL`,
+      h1: seo?.h1 || routes.get(routePath)?.h1 || category.name,
+      description: seo?.description || routes.get(routePath)?.description || `منتجات ${category.name} المنشورة في كتالوج CABL داخل اليمن.`,
+      canonicalPath: mountedPath(seo?.canonicalPath || `/category/${categorySlug}`),
+      entityType: "category",
+      entity: { type: "category", products: categoryProducts, brands, productPath, brandPath: (slug) => `/brand/${slug}` },
+    });
+  }
   const categories = new Map(products.filter((product) => product.category).map((product) => [product.category.slug, product.category]));
   const categoryRoutes = await mapWithConcurrency([...categories.values()], async (category) => {
     const seo = await getJson(`/store/seo?type=category&slug=${encodeURIComponent(category.slug)}`);

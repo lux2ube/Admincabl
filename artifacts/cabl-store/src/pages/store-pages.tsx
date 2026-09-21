@@ -62,7 +62,7 @@ function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; 
         };
       })(),
     });
-  }, [data, isStaticHome, location, navigate, type]);
+  }, [data, isStaticHome, location, navigate, slug, type]);
   return null;
 }
 
@@ -73,8 +73,24 @@ function StaticSEO({ title, description, canonicalPath, indexable = true, jsonLd
   return null;
 }
 
-function NoIndex() {
-  return <StaticSEO title="CABL" description="صفحة تنقل داخل متجر CABL." indexable={false} />;
+function NoIndex({ title, description = 'صفحة تنقل داخل متجر CABL.' }: { title?: string; description?: string }) {
+  const [location] = useLocation();
+  const route = location.split('?')[0];
+  const view = new URLSearchParams(window.location.search).get('view');
+  const routeTitle = route === '/search'
+    ? view === 'brands' ? 'دليل العلامات التجارية' : view === 'favorites' ? 'المنتجات المفضلة' : 'كتالوج المنتجات'
+    : route === '/compare'
+      ? 'مقارنة المنتجات'
+      : route === '/cart'
+        ? 'سلة المشتريات'
+        : route === '/checkout'
+          ? 'إتمام الشراء'
+          : route === '/orders'
+            ? 'تتبع الطلبات'
+            : route.startsWith('/order/')
+              ? 'تفاصيل الطلب'
+              : 'CABL';
+  return <StaticSEO title={title || routeTitle} description={description} indexable={false} />;
 }
 
 function ProductImage({
@@ -640,7 +656,7 @@ function BrandStorefrontPage({ slug }: { slug: string }) {
     return (
       <>
         <SEO type="brand" slug={slug} />
-        <NoIndex />
+        <NoIndex title={`منتجات ${brandName}`} />
         <div className="container brand-empty-page">
           <Breadcrumbs items={[{ label: 'العلامات التجارية', href: '/search?view=brands' }, { label: brandName }]} />
           <div className="state-panel">
@@ -1291,7 +1307,7 @@ function CategoryLandingPage({ slug }: { slug: string }) {
   if (!isLoading && !isSeoLoading && (!hasCategoryData || (isError && !catalog) || (isSeoError && categoryProducts.length === 0))) {
     return (
       <>
-        <NoIndex />
+        <NoIndex title="القسم غير موجود" />
         <div className="container">
           <Breadcrumbs items={[{ label: 'الأقسام', href: '/search' }, { label: 'القسم غير موجود' }]} />
           <div className="state-panel" style={{ margin: '60px 0' }}>
@@ -1496,12 +1512,13 @@ export function SearchPage() {
     [catalog],
   );
   const activeFilterCount = Number(Boolean(brand)) + Number(Boolean(category)) + Number(Boolean(power)) + Number(Boolean(protocol));
+  const pageTitle = view === 'brands' ? 'دليل العلامات التجارية' : view === 'favorites' ? 'المنتجات المفضلة' : 'كتالوج المنتجات';
   const clearFilters = () => { setBrand(''); setCategory(''); setPower(''); setProtocol(''); };
   const toggleCompare = (productId: string) => setCompareIds((current) => current.includes(productId) ? current.filter((id) => id !== productId) : current.length >= 4 ? current : [...current, productId]);
   const submit = (event: FormEvent) => { event.preventDefault(); setLocation(`/search${term ? `?q=${encodeURIComponent(term)}` : ''}`); };
-   if (view === 'brands') return <><NoIndex/><div className="container"><Breadcrumbs items={[{ label: 'العلامات التجارية' }]}/><PageHeading eyebrow="دليل العلامات" title="اختر علامتك المفضلة" description="تصفح المنتجات المنشورة حسب العلامة التجارية."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <div className="brand-directory">{brandDirectory.map(([slug, name, productCount]) => <Link href={`/brand/${slug}`} className="brand-directory-card" key={slug} data-testid={`link-brand-directory-${slug}`}><span className="brand-directory-mark">{name.slice(0, 1)}</span><span><strong>{name}</strong><small>{productCount} منتجات</small></span><ArrowLeft size={17}/></Link>)}</div>}</div></>;
-   if (view === 'favorites') return <><NoIndex/><div className="container"><Breadcrumbs items={[{ label: 'المفضلة' }]}/><PageHeading eyebrow="اختياراتك" title="منتجاتك المفضلة" description="المنتجات التي حفظتها على هذا الجهاز تظهر هنا."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <ProductGrid products={favoriteProducts} empty="لم تحفظ أي منتج بعد."/>}</div></>;
-     return <><NoIndex/><div className="container search-page"><Breadcrumbs items={[{ label: 'البحث' }]}/><div className="search-hero"><div className="search-hero-copy"><span className="eyebrow">اكتشف بهدوء</span><h1>ابحث عن قطعتك القادمة</h1><p>النتائج تتحدث من كتالوج CABL مباشرة.</p></div><form {...{ toolname: 'search-cabl-catalog-page', tooldescription: 'Search the CABL product catalog by name, brand, or category.' }} className="big-search" onSubmit={submit}><input name="query" value={term} onChange={(event) => setTerm(event.target.value)} placeholder="مثلاً: شاحن سريع" aria-label="بحث المنتجات" data-testid="input-search"/><button aria-label="تنفيذ البحث" data-testid="button-submit-search"><SearchIcon size={18}/><span>بحث</span></button></form></div><div className="search-mobile-toolbar"><button type="button" className="search-filter-toggle" onClick={() => setFiltersOpen(true)} data-testid="button-open-search-filters"><SlidersHorizontal size={16}/><span>الفلاتر</span>{activeFilterCount > 0 && <b>{activeFilterCount}</b>}</button><span>{result.length} منتج</span></div><div className="search-layout"><aside className="filter-panel"><SearchFilters brands={brands} categories={categories} powerOptions={powerOptions} protocolOptions={protocolOptions} brand={brand} category={category} power={power} protocol={protocol} onBrandChange={setBrand} onCategoryChange={setCategory} onPowerChange={setPower} onProtocolChange={setProtocol} onClear={clearFilters}/></aside><div className="search-results">{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <><CatalogToolbar products={result} sort={sort} setSort={setSort}/>{compareIds.length > 0 && <div className="compare-tray"><div><strong>مقارنة المنتجات</strong><span>{compareIds.length} من 4 منتجات محددة</span></div><div className="compare-tray-actions"><button type="button" className="button button-quiet" onClick={() => setCompareIds([])}>مسح</button>{compareIds.length >= 2 && <Link className="button button-primary" href={`/compare?ids=${compareIds.join(',')}`}><Scale size={15}/> افتح المقارنة</Link>}</div></div>}<ProductGrid products={result} compareIds={compareIds} onToggleCompare={toggleCompare} empty="لم نجد نتائج بهذا الوصف."/></>}</div></div>{filtersOpen && <div className="search-filter-modal" role="dialog" aria-modal="true" aria-label="فلاتر البحث"><button className="search-filter-backdrop" type="button" aria-label="إغلاق الفلاتر" onClick={() => setFiltersOpen(false)} /><aside className="search-filter-drawer"><div className="search-filter-drawer-head"><div><span className="eyebrow">تحكم بالنتائج</span><h2>فلترة المنتجات</h2></div><button type="button" onClick={() => setFiltersOpen(false)} aria-label="إغلاق الفلاتر"><X size={19}/></button></div><SearchFilters brands={brands} categories={categories} powerOptions={powerOptions} protocolOptions={protocolOptions} brand={brand} category={category} power={power} protocol={protocol} onBrandChange={setBrand} onCategoryChange={setCategory} onPowerChange={setPower} onProtocolChange={setProtocol} onClear={clearFilters}/><button type="button" className="button button-primary search-filter-apply" onClick={() => setFiltersOpen(false)}>عرض النتائج <ArrowLeft size={15}/></button></aside></div>}</div></>;
+   if (view === 'brands') return <><NoIndex title={pageTitle}/><div className="container"><Breadcrumbs items={[{ label: 'العلامات التجارية' }]}/><PageHeading eyebrow="دليل العلامات" title="اختر علامتك المفضلة" description="تصفح المنتجات المنشورة حسب العلامة التجارية."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <div className="brand-directory">{brandDirectory.map(([slug, name, productCount]) => <Link href={`/brand/${slug}`} className="brand-directory-card" key={slug} data-testid={`link-brand-directory-${slug}`}><span className="brand-directory-mark">{name.slice(0, 1)}</span><span><strong>{name}</strong><small>{productCount} منتجات</small></span><ArrowLeft size={17}/></Link>)}</div>}</div></>;
+   if (view === 'favorites') return <><NoIndex title={pageTitle}/><div className="container"><Breadcrumbs items={[{ label: 'المفضلة' }]}/><PageHeading eyebrow="اختياراتك" title="منتجاتك المفضلة" description="المنتجات التي حفظتها على هذا الجهاز تظهر هنا."/>{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <ProductGrid products={favoriteProducts} empty="لم تحفظ أي منتج بعد."/>}</div></>;
+     return <><NoIndex title={pageTitle}/><div className="container search-page"><Breadcrumbs items={[{ label: 'البحث' }]}/><div className="search-hero"><div className="search-hero-copy"><span className="eyebrow">اكتشف بهدوء</span><h1>ابحث عن قطعتك القادمة</h1><p>النتائج تتحدث من كتالوج CABL مباشرة.</p></div><form {...{ toolname: 'search-cabl-catalog-page', tooldescription: 'Search the CABL product catalog by name, brand, or category.' }} className="big-search" onSubmit={submit}><input name="query" value={term} onChange={(event) => setTerm(event.target.value)} placeholder="مثلاً: شاحن سريع" aria-label="بحث المنتجات" data-testid="input-search"/><button aria-label="تنفيذ البحث" data-testid="button-submit-search"><SearchIcon size={18}/><span>بحث</span></button></form></div><div className="search-mobile-toolbar"><button type="button" className="search-filter-toggle" onClick={() => setFiltersOpen(true)} data-testid="button-open-search-filters"><SlidersHorizontal size={16}/><span>الفلاتر</span>{activeFilterCount > 0 && <b>{activeFilterCount}</b>}</button><span>{result.length} منتج</span></div><div className="search-layout"><aside className="filter-panel"><SearchFilters brands={brands} categories={categories} powerOptions={powerOptions} protocolOptions={protocolOptions} brand={brand} category={category} power={power} protocol={protocol} onBrandChange={setBrand} onCategoryChange={setCategory} onPowerChange={setPower} onProtocolChange={setProtocol} onClear={clearFilters}/></aside><div className="search-results">{isLoading ? <LoadingCatalog/> : isError ? <CatalogError retry={() => window.location.reload()}/> : <><CatalogToolbar products={result} sort={sort} setSort={setSort}/>{compareIds.length > 0 && <div className="compare-tray"><div><strong>مقارنة المنتجات</strong><span>{compareIds.length} من 4 منتجات محددة</span></div><div className="compare-tray-actions"><button type="button" className="button button-quiet" onClick={() => setCompareIds([])}>مسح</button>{compareIds.length >= 2 && <Link className="button button-primary" href={`/compare?ids=${compareIds.join(',')}`}><Scale size={15}/> افتح المقارنة</Link>}</div></div>}<ProductGrid products={result} compareIds={compareIds} onToggleCompare={toggleCompare} empty="لم نجد نتائج بهذا الوصف."/></>}</div></div>{filtersOpen && <div className="search-filter-modal" role="dialog" aria-modal="true" aria-label="فلاتر البحث"><button className="search-filter-backdrop" type="button" aria-label="إغلاق الفلاتر" onClick={() => setFiltersOpen(false)} /><aside className="search-filter-drawer"><div className="search-filter-drawer-head"><div><span className="eyebrow">تحكم بالنتائج</span><h2>فلترة المنتجات</h2></div><button type="button" onClick={() => setFiltersOpen(false)} aria-label="إغلاق الفلاتر"><X size={19}/></button></div><SearchFilters brands={brands} categories={categories} powerOptions={powerOptions} protocolOptions={protocolOptions} brand={brand} category={category} power={power} protocol={protocol} onBrandChange={setBrand} onCategoryChange={setCategory} onPowerChange={setPower} onProtocolChange={setProtocol} onClear={clearFilters}/><button type="button" className="button button-primary search-filter-apply" onClick={() => setFiltersOpen(false)}>عرض النتائج <ArrowLeft size={15}/></button></aside></div>}</div></>;
 }
 
 function ProductDetailPage({ slug }: { slug: string }) {
@@ -1737,8 +1754,8 @@ export function ComparePage() {
   const comparisonQuery = useCompareStoreProducts(compareParams, { query: { enabled: ids.length >= 2, queryKey: getCompareStoreProductsQueryKey(compareParams) } });
   const localProducts = catalog?.products.filter((product) => ids.includes(product.id)) ?? [];
   if (ids.length < 2) return <><NoIndex/><div className="container"><Breadcrumbs items={[{ label: 'مقارنة المنتجات' }]}/><div className="state-panel" style={{ margin: '60px 0' }}><h3>اختر منتجين على الأقل للمقارنة</h3><Link href="/search" className="button button-primary">العودة للكتالوج</Link></div></div></>;
-  if (comparisonQuery.isLoading || !catalog) return <div className="container"><Breadcrumbs items={[{ label: 'مقارنة المنتجات' }]}/><LoadingCatalog/></div>;
-  if (comparisonQuery.isError) return <div className="container"><CatalogError retry={() => comparisonQuery.refetch()}/></div>;
+  if (comparisonQuery.isLoading || !catalog) return <><NoIndex title="مقارنة المنتجات"/><div className="container"><Breadcrumbs items={[{ label: 'مقارنة المنتجات' }]}/><LoadingCatalog/></div></>;
+  if (comparisonQuery.isError) return <><NoIndex title="مقارنة المنتجات"/><div className="container"><CatalogError retry={() => comparisonQuery.refetch()}/></div></>;
   const items = comparisonQuery.data?.products ?? localProducts.map((product) => ({ product, comparison: product.specifications }));
   const rows = [
     { label: 'السعر', value: (item: typeof items[number]) => formatPrice(item.product.discountPrice ?? item.product.regularPrice) },

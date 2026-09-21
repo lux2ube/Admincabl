@@ -15,26 +15,71 @@ if (Number.isNaN(port) || port <= 0) {
 
 const basePath = process.env.BASE_PATH || '/';
 
-const devSeoPages: Record<string, { title: string; h1: string; description: string }> = {
+const devSeoPages: Record<string, { title: string; h1: string; description: string; indexable?: boolean; canonicalPath?: string }> = {
   '/': {
     title: 'CABL | منتجات الشحن والطاقة والإكسسوارات',
     h1: 'شواحن وتوصيلات وخوازن طاقة في اليمن',
     description: 'تسوّق شواحن الجوال وتوصيلات الشحن وخوازن الطاقة وإكسسوارات التقنية في اليمن، مع أسعار وتوافر وخيارات شحن واضحة من كتالوج CABL.',
   },
   '/chargers': {
-    title: 'شواحن الجوال والشحن السريع في اليمن | CABL',
+    title: 'شواحن سريعة في اليمن | CABL',
     h1: 'الشواحن',
-    description: 'قارن شواحن الجوال وUSB-C وPD المتاحة في كتالوج CABL داخل اليمن.',
+    description: 'شواحن USB-C وGaN بقدرات ومنافذ مختلفة من كتالوج CABL.',
+    canonicalPath: '/category/chargers',
   },
   '/cables': {
-    title: 'كابلات وتوصيلات الشحن في اليمن | CABL',
+    title: 'توصيلات شحن ونقل بيانات | CABL',
     h1: 'توصيلات الشحن',
-    description: 'استكشف توصيلات الشحن المنشورة في CABL حسب USB-C وLightning والقدرة.',
+    description: 'قارن توصيلات USB-C وLightning حسب الطرف والقدرة والطول.',
+    canonicalPath: '/category/charging-cables',
   },
   '/power-banks': {
-    title: 'خوازن الطاقة والباور بانك في اليمن | CABL',
+    title: 'خوازن الطاقة (Power Bank) في اليمن | CABL',
     h1: 'خوازن الطاقة',
-    description: 'قارن خوازن الطاقة والباور بانك المتاحة في اليمن من كتالوج CABL.',
+    description: 'قارن خوازن الطاقة حسب السعة والقدرة والمنافذ والتوافر في اليمن.',
+    canonicalPath: '/category/power-banks',
+  },
+  '/hubs-adapters': {
+    title: 'ملحقات الهاتف والاتصال | CABL',
+    h1: 'الملحقات',
+    description: 'محاور USB-C وكابلات العرض والملحقات من كتالوج CABL.',
+    canonicalPath: '/category/phone-accessories',
+  },
+  '/car-accessories': {
+    title: 'شواحن السيارة والسفر في اليمن | CABL',
+    h1: 'السفر والسيارة',
+    description: 'حلول شحن للسيارة والسفر مع مقارنة القدرة والمنافذ.',
+    canonicalPath: '/category/travel-adapters',
+  },
+  '/search': {
+    title: 'كتالوج المنتجات | CABL',
+    h1: 'ابحث عن قطعتك القادمة',
+    description: 'ابحث في كتالوج CABL عن المنتجات المنشورة حسب الاسم أو العلامة أو القسم.',
+    indexable: false,
+  },
+  '/compare': {
+    title: 'مقارنة المنتجات | CABL',
+    h1: 'قارن المنتجات جنباً إلى جنب',
+    description: 'قارن مواصفات المنتجات المنشورة في كتالوج CABL.',
+    indexable: false,
+  },
+  '/cart': {
+    title: 'سلة المشتريات | CABL',
+    h1: 'سلة مشترياتك',
+    description: 'راجع المنتجات التي اخترتها قبل الانتقال إلى بيانات التوصيل والدفع.',
+    indexable: false,
+  },
+  '/checkout': {
+    title: 'إتمام الشراء | CABL',
+    h1: 'البيانات والدفع',
+    description: 'أدخل بيانات التوصيل واختر الشحن والدفع لإرسال طلب CABL.',
+    indexable: false,
+  },
+  '/orders': {
+    title: 'تتبع الطلبات | CABL',
+    h1: 'تتبع طلباتك',
+    description: 'راجع طلباتك باستخدام رقم الهاتف والبريد الإلكتروني عند توفره.',
+    indexable: false,
   },
   '/guides': {
     title: 'أدلة شراء الشحن والطاقة والإكسسوارات في اليمن | CABL',
@@ -127,6 +172,7 @@ type DevSeoPage = {
   h1: string;
   description: string;
   indexable?: boolean;
+  canonicalPath?: string;
   breadcrumbs?: Array<{ name: string; path: string }>;
   jsonLd?: Record<string, unknown>;
   product?: DevProduct;
@@ -157,6 +203,24 @@ async function getDevProduct(slug: string) {
 async function getDevProductSeo(slug: string) {
   try {
     const response = await fetch(`${apiOrigin}/api/store/seo?type=product&slug=${encodeURIComponent(slug)}`);
+    if (!response.ok) return null;
+    return await response.json() as {
+      title: string;
+      h1: string;
+      description: string;
+      canonicalPath: string;
+      indexable: boolean;
+      breadcrumbs: Array<{ name: string; path: string }>;
+      jsonLd: Record<string, unknown>;
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function getDevRouteSeo(type: 'category' | 'brand', slug: string) {
+  try {
+    const response = await fetch(`${apiOrigin}/api/store/seo?type=${type}&slug=${encodeURIComponent(slug)}`);
     if (!response.ok) return null;
     return await response.json() as {
       title: string;
@@ -259,13 +323,35 @@ async function devSeoPage(originalUrl: string): Promise<DevSeoPage> {
   const route = requestedPath.startsWith(mount)
     ? requestedPath.slice(mount.length) || '/'
     : requestedPath;
+  const aliasCategorySlug = devCategoryAliases[route];
+  if (aliasCategorySlug) {
+    const seo = await getDevRouteSeo('category', aliasCategorySlug);
+    return {
+      ...devSeoPages[route],
+      ...(seo || {}),
+      route,
+      canonicalPath: seo?.canonicalPath || devSeoPages[route].canonicalPath,
+      products: await getDevRouteProducts(route),
+    };
+  }
   if (devSeoPages[route]) {
-    return { ...devSeoPages[route], route, products: await getDevRouteProducts(route) };
+      return { ...devSeoPages[route], route, products: await getDevRouteProducts(route) };
   }
   const parts = route.split('/').filter(Boolean);
   if (parts[0] === 'brand' && parts[1]) {
     const name = parts[1].replaceAll('-', ' ');
-    return { route, title: `منتجات ${name} في اليمن | CABL`, h1: `منتجات ${name}`, description: `تصفح منتجات ${name} المنشورة في كتالوج CABL داخل اليمن.`, products: await getDevRouteProducts(route) };
+    const seo = await getDevRouteSeo('brand', parts[1]);
+    return {
+      route,
+      title: seo?.title || `منتجات ${name} في اليمن | CABL`,
+      h1: seo?.h1 || `منتجات ${name}`,
+      description: seo?.description || `تصفح منتجات ${name} المنشورة في كتالوج CABL داخل اليمن.`,
+      canonicalPath: seo?.canonicalPath,
+      indexable: seo?.indexable ?? true,
+      breadcrumbs: seo?.breadcrumbs,
+      jsonLd: seo?.jsonLd,
+      products: await getDevRouteProducts(route),
+    };
   }
   const productSlug = parts[0] === 'product' && parts[1]
     ? parts[1]
@@ -289,6 +375,7 @@ async function devSeoPage(originalUrl: string): Promise<DevSeoPage> {
       title: seo?.title || `${product.productName} | CABL`,
       h1: seo?.h1 || product.productName,
       description: seo?.description || `${product.productName} من كتالوج CABL داخل اليمن.`,
+      canonicalPath: seo?.canonicalPath,
       breadcrumbs: seo?.breadcrumbs,
       jsonLd: seo?.jsonLd,
       indexable: seo?.indexable ?? true,
@@ -312,7 +399,9 @@ function xmlEscape(value: string) {
 }
 
 function devSitemap(products: DevProduct[]) {
-  const paths = new Set(Object.keys(devSeoPages).map((route) => mountedPath(route)));
+  const paths = new Set(Object.entries(devSeoPages)
+    .filter(([, page]) => page.indexable !== false)
+    .map(([route, page]) => mountedPath(page.canonicalPath || route)));
   for (const product of products) {
     paths.add(mountedPath(devProductPath(product)));
     if (product.brandSlug) paths.add(mountedPath(`/brand/${product.brandSlug}`));
@@ -352,7 +441,7 @@ function seoHtmlPlugin() {
     },
     async transformIndexHtml(html: string, context: { originalUrl?: string }) {
       const page = await devSeoPage(context.originalUrl || '/');
-      const relativeCanonical = `${mountedPath()}${page.route === '/' ? '' : page.route}`;
+       const relativeCanonical = mountedPath(page.canonicalPath || page.route);
       const origin = process.env.PUBLIC_SITE_ORIGIN
         || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : '');
       const canonical = `${origin}${relativeCanonical}`;

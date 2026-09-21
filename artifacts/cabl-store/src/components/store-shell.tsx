@@ -23,16 +23,6 @@ export function StoreShell({ children }: { children: ReactNode }) {
     { label: 'المساعدة', href: '/faq' },
   ], [featuredCategories]);
   useEffect(() => {
-    const titles: Record<string, string> = {
-      '/search': 'كتالوج المنتجات | CABL',
-      '/cart': 'سلة المشتريات | CABL',
-      '/checkout': 'إتمام الشراء | CABL',
-      '/orders': 'تتبع الطلبات | CABL',
-    };
-    const route = location.split('?')[0];
-    if (titles[route]) document.title = titles[route];
-  }, [location]);
-  useEffect(() => {
     const [route, queryString] = location.split('?');
     if (route === '/search') setSearchTerm(new URLSearchParams(queryString || '').get('q') || '');
   }, [location]);

@@ -20,3 +20,9 @@ Interactive catalog consumers must keep a valid embedded snapshot when a backgro
 **Why:** The published Vercel API can fail independently of static route delivery when runtime database variables are missing or unavailable, while the prerendered HTML still contains enough catalog data to render the route.
 
 **How to apply:** Expose loading and error state as fatal only when no catalog data exists, and let category/product pages use their catalog-derived fallback metadata when optional SEO requests fail.
+
+Public category aliases and noindex utility routes need their own build-time metadata entries; an SPA fallback otherwise serves the homepage title in raw HTML even when React later corrects it.
+
+**Why:** Search engines and link previews read the first HTML response before client JavaScript runs, so client-only title effects cannot repair a generic fallback document.
+
+**How to apply:** Keep alias metadata backed by the same category SEO response used by the client, generate files for `/search`, `/compare`, `/cart`, `/checkout`, and `/orders`, and keep their noindex status explicit.
