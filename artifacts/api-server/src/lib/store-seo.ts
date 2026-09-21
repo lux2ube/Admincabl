@@ -199,7 +199,7 @@ const seoKeywordProfiles: Record<string, { primary: string; fast?: string }> = {
   chargers: { primary: "شاحن", fast: "شاحن سريع" },
   "charging-cables": { primary: "كيبل شحن", fast: "كيبل شحن سريع" },
   "power-banks": { primary: "باور بانك", fast: "باور بانك سريع" },
-  "phone-accessories": { primary: "وصلة USB-C" },
+  "phone-accessories": { primary: "وصلة يو إس بي-سي" },
   "travel-adapters": { primary: "شاحن جوال للسيارة", fast: "شاحن جوال للسيارة سريع" },
   "wireless-earbuds": { primary: "سماعات لاسلكية" },
   "wireless-microphones": { primary: "مايك لاسلكي هوليلاند" },
@@ -222,6 +222,36 @@ function arabicMarketingText(value: string) {
     .replace(/\bfor\s+travel\b/gi, "للسفر")
     .replace(/\bLavalier\b/gi, "لافالييه")
     .replace(/\bCombo\b/gi, "مجمعة");
+}
+
+function arabicTechnicalText(value: string) {
+  return arabicMarketingText(value)
+    .replace(/\bUSB-C\b/gi, "يو إس بي-سي")
+    .replace(/\bUSB-A\b/gi, "يو إس بي-إيه")
+    .replace(/\bType-C\b/gi, "تايب سي")
+    .replace(/\bLightning\b/gi, "لايتنينغ")
+    .replace(/\bGaN\b/gi, "نيتريد الغاليوم")
+    .replace(/\bLED\b/gi, "ليد")
+    .replace(/\bPD\b/gi, "توصيل الطاقة")
+    .replace(/\bPPS\b/gi, "الشحن القابل للبرمجة")
+    .replace(/\bQC(?:\s+([0-9.]+))?\b/gi, (_, version: string | undefined) => `الشحن السريع${version ? ` ${version}` : ""}`)
+    .replace(/\bAFC\b/gi, "الشحن التكيفي")
+    .replace(/\bFCP\b/gi, "الشحن السريع من هواوي")
+    .replace(/\bSCP\b/gi, "الشحن الفائق من هواوي")
+    .replace(/\bVOOC\b/gi, "الشحن السريع من أوبو")
+    .replace(/\bDASH\b/gi, "الشحن السريع")
+    .replace(/\bAPPLE\b/gi, "أبل")
+    .replace(/\bHuawei\b/gi, "هواوي")
+    .replace(/\bQualcomm\b/gi, "كوالكوم")
+    .replace(/\bBC1\.2\b/gi, "معيار شحن البطارية 1.2")
+    .replace(/(\d[\d,.]*)\s*mAh\b/gi, "$1 مللي أمبير")
+    .replace(/(\d[\d,.]*)\s*W\b/gi, "$1 وات")
+    .replace(/(\d[\d,.]*)\s*A\b/gi, "$1 أمبير")
+    .replace(/(\d[\d,.]*)\s*Gbps\b/gi, "$1 جيجابت/ثانية")
+    .replace(/\b(\d[\d,.]*)\s*M\b/gi, "$1 متر")
+    .replace(/\b(\d+)\s+in\s+(\d+)\b/gi, "$1 في $2")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function withoutPowerMentions(value: string) {
@@ -528,7 +558,7 @@ function relatedSpecificationSentences(input: ProductDescriptionInput, categoryS
 
 function compatibilityText(input: ProductDescriptionInput) {
   const specifications = input.specifications;
-  const names = specifications?.compatibility?.map((item) => item.name).filter(Boolean) || [];
+  const names = specifications?.compatibility?.map((item) => replaceEnglishBrandNames(item.name, input)).filter(Boolean) || [];
   if (names.length) return `ويعمل مع الأجهزة التالية: ${names.slice(0, 3).join(" و")}.`;
   if (specifications?.cable?.connectorA && specifications.cable.connectorB) {
     return `ويعمل مع الأجهزة التي تستخدم موصلَي ${specifications.cable.connectorA} و${specifications.cable.connectorB}.`;
