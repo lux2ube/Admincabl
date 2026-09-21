@@ -213,73 +213,97 @@ function RelatedLinks({ links }: { links: Array<{ label: string; href: string; t
 }
 
 export function AboutPage() {
-  const { catalog } = useStore();
-  const brands = Array.from(new Set((catalog?.products || []).map((product) => product.brand))).slice(0, 8);
   return (
     <>
-      <PageMeta title="من نحن" description="تعرف على CABL وطريقة اختيار المنتجات وخدمة العملاء في اليمن." />
-      <EditorialHero
-        eyebrow="CABL / اليمن"
-        title="من نحن"
-        description="متجر إلكتروني يختار إكسسوارات الشحن والطاقة والصوتيات بعناية، ويعرض معلومات الشراء بوضوح للعملاء في اليمن."
+      <PageMeta
+        title="About us | من نحن"
+        description="تعرف على CABL وفلسفة اختيار منتجات الطاقة والشحن والصوتيات التي تستحق أن تختارها في اليمن."
       />
-      <EditorialSection eyebrow="المهمة" title="اختيار أوضح ليومك">
-        <InfoCards
-          items={[
-            { icon: <ShieldCheck />, title: 'بيانات منتج واضحة', text: 'العلامة والموديل والسعر والتوافر تظهر قبل أن تضيف المنتج إلى السلة.' },
-            { icon: <Zap />, title: 'مواصفات مفيدة', text: 'نشرح القدرة والمنافذ والتوافق بلغة عملية، ولا نحوّل رقم الوات إلى وعد غير مؤكد.' },
-            { icon: <Truck />, title: 'خطوات شراء مفهومة', text: 'الشحن والدفع والطلب تظهر في نفس المسار قبل التأكيد.' },
-            { icon: <MessageCircle />, title: 'متابعة بعد الطلب', text: 'احتفظ برقم الطلب واستخدم صفحة التتبع عند الحاجة.', href: '/orders' },
-          ]}
-        />
+      <EditorialHero
+        eyebrow="About us | من نحن"
+        title="ليست كل الأشياء التي تشتريها متشابهة"
+        description="هناك فرق بين أن تشتري شيئاً لأنك تحتاجه، وأن تختار شيئاً لأنك تعرف قيمته."
+      />
+      <EditorialSection title="أشياء تدخل في تفاصيل يومك">
+        <div className="editorial-copy about-story">
+          <p>الشاحن الذي تستخدمه كل صباح.</p>
+          <p>الكابل الذي تحمله معك.</p>
+          <p>السماعة التي ترافقك في الطريق.</p>
+          <p>الباور بانك الذي تعتمد عليه عندما تكون بعيداً عن الكهرباء.</p>
+          <p>أشياء تبدو بسيطة، لكنها تدخل في تفاصيل يومك أكثر مما تتوقع.</p>
+          <p className="about-lead">ومن هنا جاء CABL.</p>
+        </div>
       </EditorialSection>
-      <EditorialSection eyebrow="ما الذي نفعله؟" title="محتوى يساعدك قبل الشراء">
-        <div className="editorial-copy">
+      <EditorialSection eyebrow="وجهة نظر واضحة" title="متجر بوجهة نظر واضحة">
+        <div className="editorial-copy about-story">
+          <p>في كابل، لا نريد أن يكون الاختيار بين عشرات المنتجات المتشابهة.</p>
+          <p>نريد أن يكون الاختيار أسهل.</p>
           <p>
-            CABL متجر تجزئة مستقل. نعرض العلامة ورقم الموديل كما يردان في الكتالوج المنشور، ونفصل بين وجود المنتج
-            في المتجر وبين ادعاء الوكالة أو الضمان المصنّع ما لم تظهر معلومة موثقة في صفحة المنتج.
+            نبحث عن المنتجات التي يجتمع فيها التصميم الجيد، العلامة الموثوقة، المواصفات المفهومة، وجودة الاستخدام؛
+            ثم نضعها أمامك بطريقة تساعدك على معرفة ما تشتريه ولماذا قد يكون مناسباً لك.
           </p>
           <p>
-            يبدأ الاختيار من الاستخدام الحقيقي: هاتف، راوتر، لابتوب، سيارة، سفر أو صوتيات. بعد ذلك نراجع القدرة
-            والمنافذ والتوافق والسعر والتوافر، ثم نترك القرار لك.
+            لهذا تجد في كابل منتجات من علامات مثل Baseus وUGREEN وAnker وVention وSoundcore وHollyland، إلى جانب
+            فئات مختارة من الشواحن والكابلات والباور بانك والسماعات والمايكروفونات والملحقات الإلكترونية.
+          </p>
+          <p>لسنا مهتمين بأن يكون لدينا كل شيء.</p>
+          <p className="about-lead">المهم أن يكون ما لدينا جديراً بأن تختاره.</p>
+        </div>
+      </EditorialSection>
+      <EditorialSection eyebrow="الجودة مع الوقت" title="نؤمن أن الجودة تُلاحظ مع الوقت">
+        <div className="editorial-copy about-story">
+          <p>قد لا يكون الفرق واضحاً دائماً في صورة المنتج.</p>
+          <p>لكن ستلاحظه عندما تستخدمه كل يوم.</p>
+          <p>في حجم الشاحن داخل حقيبتك.</p>
+          <p>في طريقة ترتيب الكابل.</p>
+          <p>في سرعة الشحن التي تحتاجها فعلاً.</p>
+          <p>في جودة السماعة أثناء المكالمات.</p>
+          <p>في منتج صُمم ليكون جزءاً من استخدامك، لا مجرد قطعة إضافية تشتريها.</p>
+          <p>
+            لهذا لا ننظر إلى المواصفات كأرقام منفصلة.
+          </p>
+          <div className="about-highlight">
+            <strong>30W ليست مجرد 30W.</strong>
+            <strong>و65W ليست دائماً أفضل لمجرد أنها 65W.</strong>
+          </div>
+          <p>القيمة الحقيقية هي أن تحصل على المواصفات المناسبة لجهازك وطريقة استخدامك.</p>
+        </div>
+      </EditorialSection>
+      <EditorialSection eyebrow="اختيارك" title="اختيارك يقول شيئاً عنك">
+        <div className="editorial-copy about-story">
+          <p>لسنا بحاجة إلى أن يكون كل شيء فاخراً حتى يكون جيداً.</p>
+          <p>لكننا نؤمن أن هناك متعة في امتلاك أشياء اخترتها بعناية.</p>
+          <p>علامة تثق بها.</p>
+          <p>تصميم يعجبك.</p>
+          <p>خامة جيدة.</p>
+          <p>تفاصيل مدروسة.</p>
+          <p>وأداء تعرف أنك تستطيع الاعتماد عليه.</p>
+          <p className="about-lead">الجودة بالنسبة لنا ليست شعاراً على الصفحة. إنها سبب اختيار المنتج من الأساس.</p>
+        </div>
+      </EditorialSection>
+      <EditorialSection eyebrow="في اليمن" title="CABL في اليمن">
+        <div className="editorial-copy about-story">
+          <p>نبني كابل كمتجر إلكترونيات في اليمن لمن يريد أن يعرف ما الذي يشتريه قبل أن يدفع ثمنه.</p>
+          <p>
+            لذلك نهتم بتقديم معلومات واضحة عن المنتجات، وعرض العلامات التي نختارها بعناية، ومساعدة العميل عندما
+            يحتاج إلى معرفة المنتج الأنسب لجهازه أو استخدامه.
+          </p>
+          <p>
+            سواء كنت تبحث عن شاحن سريع، شاحن USB-C، كابل شحن، باور بانك، سماعات لاسلكية، مايكروفون لاسلكي أو ملحق
+            إلكتروني، نريد أن تجد في كابل خيارات تستحق أن تنظر إليها.
           </p>
         </div>
       </EditorialSection>
-      <EditorialSection eyebrow="العلامات المتاحة" title="ما ستجده في الكتالوج">
-        <div className="brand-list editorial-brand-list">
-          {brands.map((brand) => {
-            const product = catalog?.products.find((item) => item.brand === brand);
-            return (
-              <Link
-                className="brand-pill"
-                href={`/brand/${product?.brandSlug || brand.toLowerCase().replace(/\s+/g, '-')}`}
-                key={brand}
-              >
-                {brand}
-              </Link>
-            );
-          })}
+      <EditorialSection eyebrow="فلسفتنا" title="فلسفتنا في جملة واحدة">
+        <div className="editorial-copy about-story">
+          <p>لا نريد أن نبيعك أي شيء.</p>
+          <p className="about-lead">نريد أن نكون المكان الذي تتجه إليه عندما تريد شيئاً يستحق الشراء.</p>
+          <p className="about-signoff">هذا هو كابل.</p>
+          <div className="about-signature">
+            <strong>CABL — كابل</strong>
+            <span>منتجات مختارة. علامات نعرفها. وتفاصيل تهمك.</span>
+          </div>
         </div>
-      </EditorialSection>
-      <EditorialSection eyebrow="المنهج" title="كيف نكتب عن المنتج؟">
-        <div className="editorial-copy">
-          <p>نبدأ من معلومات المنتج المنشورة، ثم نفصل بين المواصفة المعلنة والتقدير العملي. عندما تكون المعلومة غير متاحة، نذكر ذلك بدلاً من اختراع مدة ضمان أو نتيجة اختبار.</p>
-          <ul className="check-list">
-            <li><Check size={16} /> المقارنة تعتمد على السعر والتوافق والمنافذ المتاحة.</li>
-            <li><Check size={16} /> العيوب والحدود جزء من وصف المنتج، وليست ملاحظة مخفية.</li>
-            <li><Check size={16} /> السعر والتوافر الحاليان يُؤخذان من الكتالوج وقت الطلب.</li>
-            <li><Check size={16} /> سياسات الشحن والإرجاع هي المرجع النهائي، لا العبارات التسويقية العامة.</li>
-          </ul>
-        </div>
-      </EditorialSection>
-      <EditorialSection title="أسئلة يطرحها الناس في الشارع">
-        <FAQList
-          items={[
-            { question: 'هل المنتج الأغلى هو الأفضل؟', answer: 'ليس دائماً. الأفضل هو ما يطابق جهازك وقدرتك وطريقة استخدامك، مع سعر وتوافر مناسبين.' },
-            { question: 'هل يمكن معرفة الشاحن المناسب من شكل المنفذ؟', answer: 'الشكل يحدد التوافق الميكانيكي فقط؛ راجع القدرة والبروتوكول والكابل أيضاً.' },
-            { question: 'هل أستطيع الطلب بدون معرفة كل المواصفات؟', answer: 'نعم، ابدأ من الاستخدام ثم راجع صفحة المنتج أو دليل الشراء، ولا تؤكد قبل مراجعة التوافق.' },
-          ]}
-        />
       </EditorialSection>
       <CTASection />
     </>
@@ -598,40 +622,49 @@ export function ShippingPage() {
 export function ReturnPage() {
   return (
     <>
-      <PageMeta title="سياسة الإرجاع والاستبدال" description="الشروط والخطوات العامة للإرجاع والاستبدال في CABL." />
-      <EditorialHero eyebrow="خدمة ما بعد الشراء" title="سياسة الإرجاع والاستبدال" description="راجع حالة المنتج والطلب قبل طلب الإرجاع، واحتفظ برقم الطلب وإثبات الشراء." />
-      <EditorialSection title="قبل طلب الإرجاع">
-        <div className="policy-highlight"><strong>الأهلية حسب الشروط المنشورة للمنتج والطلب</strong><span>تختلف الأهلية بحسب حالة المنتج وطريقة الشراء. لا تعتبر هذه الصفحة موافقة تلقائية.</span></div>
-      </EditorialSection>
-      <EditorialSection title="شروط الإرجاع">
-        <div className="check-list">
-          <div><Check size={16} /> المنتج بحالته الأصلية وغير مستخدم.</div>
-          <div><Check size={16} /> التغليف والملحقات والكتيبات موجودة.</div>
-          <div><Check size={16} /> رقم الطلب أو إثبات الشراء متوفر.</div>
-          <div><Check size={16} /> لا يوجد تلف بسبب سوء الاستخدام أو التعديل.</div>
-          <div><Check size={16} /> وصف المشكلة وصور الحالة مرفقة عند الحاجة.</div>
+      <PageMeta
+        title="الإرجاع والاستبدال"
+        description="خذ قرارك بثقة مع سياسة CABL للإرجاع والاستبدال وخدمة ما بعد الشراء."
+      />
+      <EditorialHero
+        eyebrow="خدمة ما بعد الشراء"
+        title="خذ قرارك بثقة"
+        description="نحن نختار منتجات كابل بعناية، ونتوقع أن تختار منها ما يناسبك."
+      />
+      <EditorialSection title="نوقف مع منتجاتنا">
+        <div className="editorial-copy about-story">
+          <p>ما نعرضه في كابل نختاره على أساس الجودة، العلامة، والتفاصيل التي تفرق في الاستخدام.</p>
+          <p>وبنفس الاهتمام، نتعامل معك بعد الشراء.</p>
+          <p>ما نريدك تشتري وأنت خايف من الغلط.</p>
+          <p className="about-lead">نريدك تشتري وأنت واثق من اختيارك.</p>
         </div>
       </EditorialSection>
-      <EditorialSection title="خطوات الإرجاع والاستبدال">
-        <div className="numbered-steps">
-          <div><b>01</b><h3>راجع الطلب</h3><p>افتح تفاصيل الطلب وتحقق من المنتج.</p></div>
-          <div><b>02</b><h3>اكتب المشكلة</h3><p>احتفظ بصور واضحة ووصف مختصر.</p></div>
-          <div><b>03</b><h3>أرسل المراجعة</h3><p>استخدم بيانات الطلب حتى يمكن مطابقة المنتج.</p></div>
-          <div><b>04</b><h3>انتظر القرار</h3><p>تؤكد الأهلية والخطوة التالية بعد مراجعة البيانات.</p></div>
+      <EditorialSection title="إذا احتجت ترجع أو تستبدل">
+        <div className="editorial-copy about-story">
+          <p>تواصل معنا، وسنراجع الحالة معك ونوضح لك الإجراء المناسب حسب سياسة الإرجاع والاستبدال.</p>
+          <p>الشروط واضحة، والإجراء واضح، وما في داعي لتعقيد الموضوع.</p>
         </div>
       </EditorialSection>
-      <EditorialSection title="المنتجات المعيبة أو المختلفة">
-        <div className="editorial-copy">
-          <p>إذا وصل المنتج تالفاً أو مختلفاً عن الطلب، اذكر ذلك مباشرة مع رقم الطلب. احتفظ بالتغليف ولا تعدّل المنتج قبل المراجعة.</p>
-          <p>بعد انتهاء فترة الإرجاع، تُراجع الحالة وفق شروط المنتج والضمان المنشورة. لا نعرض مدة أو نتيجة غير موجودة في الشروط الحالية.</p>
+      <EditorialSection title="لأن الثقة ما تنبني بالكلام">
+        <div className="editorial-copy about-story">
+          <p>الثقة تبدأ من المنتج الذي نختاره لك، ومن المعلومات التي نعطيك إياها قبل الشراء، وتستمر في الطريقة التي نتعامل بها معك بعده.</p>
+          <p>في كابل، ما نبيعك ونختفي.</p>
+          <p>نريد أن تعرف ماذا تشتري، ولماذا اخترته، وأن تكون راضياً عنه بعد ما يصير جزءاً من يومك.</p>
         </div>
       </EditorialSection>
-      <EditorialSection title="أسئلة الإرجاع">
-        <FAQList items={[
-          { question: 'هل الإرجاع متاح لكل المنتجات؟', answer: 'تحدد الأهلية حالة المنتج وشروط الطلب. راجع الصفحة والتأكيد قبل الشراء.' },
-          { question: 'متى أحصل على المبلغ؟', answer: 'لا نعد بمدة ثابتة هنا؛ تُحدد الخطوة التالية بعد قبول الحالة ومراجعة طريقة الدفع.' },
-          { question: 'ماذا أحتاج عند التواصل؟', answer: 'رقم الطلب، اسم المنتج أو SKU، وصف المشكلة، وصور واضحة عند الحاجة.' },
-        ]} />
+      <EditorialSection eyebrow="معلومات غير مكتملة" title="شروط الإرجاع والاستبدال">
+        <div className="policy-grid return-policy-details">
+          <div><strong>مدة الإرجاع</strong><p className="return-policy-placeholder">[تحدد لاحقاً]</p></div>
+          <div><strong>حالة المنتج</strong><p className="return-policy-placeholder">[تحدد لاحقاً]</p></div>
+          <div><strong>المنتجات المستثناة</strong><p className="return-policy-placeholder">[تحدد لاحقاً]</p></div>
+          <div><strong>تكلفة الإرجاع</strong><p className="return-policy-placeholder">[تحدد لاحقاً]</p></div>
+          <div><strong>الاستبدال واسترداد المبلغ</strong><p className="return-policy-placeholder">[تحدد لاحقاً]</p></div>
+        </div>
+      </EditorialSection>
+      <EditorialSection title="CABL — كابل">
+        <div className="editorial-copy about-story">
+          <p className="about-lead">منتجات طاقة أصلية وفاخرة<br />لمن يقدّر الفرق.</p>
+        </div>
       </EditorialSection>
       <CTASection />
     </>

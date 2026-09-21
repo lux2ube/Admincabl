@@ -459,8 +459,11 @@ const ugreenReplacementProductIds = [
   "00000000-0000-4000-8000-000000000043",
   "00000000-0000-4000-8000-000000000044",
   "00000000-0000-4000-8000-000000000045",
+  "00000000-0000-4000-8000-000000000046",
+  "00000000-0000-4000-8000-000000000047",
   "00000000-0000-4000-8000-000000000048",
   "00000000-0000-4000-8000-000000000049",
+  "00000000-0000-4000-8000-000000000050",
 ] as const;
 
 type UgreenSpecificationSeed = {
@@ -490,6 +493,16 @@ type UgreenSpecificationSeed = {
     videoSupport?: boolean;
     material?: string;
   };
+  powerBank?: {
+    capacityMah: number;
+    inputSummary?: string;
+    outputSummary?: string;
+    maxOutputW?: number;
+    rechargeTimeHours?: number;
+    wirelessCharging?: boolean;
+    display?: boolean;
+    passThroughCharging?: boolean;
+  };
   carCharger?: {
     inputVoltageV?: string;
     maxOutputW?: number;
@@ -499,6 +512,66 @@ type UgreenSpecificationSeed = {
 };
 
 const ugreenSpecificationSeed: UgreenSpecificationSeed[] = [
+  {
+    productId: "00000000-0000-4000-8000-000000000046",
+    sourceUrl: "https://www.ugreen.com/en-ae/products/ae-35603",
+    sourceNote: "المصدر الرسمي يذكر شحناً ثنائي الاتجاه بقدرة 30W، كابل USB-C مدمجاً، منفذي USB-C وUSB-A، شاشة TFT، وثلاث عشرة طبقة حماية.",
+    maxPowerW: 30,
+    portAttribute: "USB-C مدمج، USB-C، USB-A",
+    ports: [
+      { name: "USB-C cable", typeSlug: "usb-c", maxPowerW: 30 },
+      { name: "USB-C", typeSlug: "usb-c", maxPowerW: 30 },
+      { name: "USB-A", typeSlug: "usb-a" },
+    ],
+    protocols: ["PD"],
+    powerBank: {
+      capacityMah: 10000,
+      inputSummary: "كابل USB-C مدمج أو منفذ USB-C",
+      outputSummary: "كابل USB-C مدمج ومنفذا USB-C وUSB-A",
+      maxOutputW: 30,
+      display: true,
+    },
+  },
+  {
+    productId: "00000000-0000-4000-8000-000000000047",
+    sourceUrl: "https://www.ugreen.com/en-au/products/au-55989",
+    sourceNote: "المصدر الرسمي يذكر سعة 20,000mAh، منفذي USB-C ومنفذ USB-A، قدرة 30W، أبعاد 150×70×30 مم، وزن 447 غراماً ووقت إعادة شحن يقارب 4 ساعات.",
+    maxPowerW: 30,
+    portAttribute: "USB-C، USB-C، USB-A",
+    ports: [
+      { name: "USB-C1", typeSlug: "usb-c", maxPowerW: 30 },
+      { name: "USB-C2", typeSlug: "usb-c", maxPowerW: 30 },
+      { name: "USB-A", typeSlug: "usb-a" },
+    ],
+    protocols: ["PD"],
+    dimensions: { lengthMm: 150, widthMm: 70, heightMm: 30, weightG: 447, note: "الأبعاد والوزن كما يذكرهما المصدر الرسمي." },
+    powerBank: {
+      capacityMah: 20000,
+      inputSummary: "منفذ USB-C بقدرة 30W",
+      outputSummary: "منفذا USB-C ومنفذ USB-A",
+      maxOutputW: 30,
+      rechargeTimeHours: 4,
+    },
+  },
+  {
+    productId: "00000000-0000-4000-8000-000000000050",
+    sourceUrl: "https://www.ugreen.com/en-ae/products/ae-15214",
+    sourceNote: "المصدر الرسمي يذكر محور Revodok بسبعة منافذ: HDMI بدقة 4K/30Hz، شحن USB-C PD بقدرة 100W، USB-C للبيانات، منفذا USB 3.0 بسرعة 5Gbps، وقارئَي SD وTF، مع هيكل من الألومنيوم وضمان 24 شهراً.",
+    maxPowerW: 100,
+    portAttribute: "USB-C، HDMI، USB-A، SD، TF",
+    ports: [
+      { name: "USB-C PD", typeSlug: "usb-c", maxPowerW: 100 },
+      { name: "USB-C data", typeSlug: "usb-c" },
+      { name: "USB-A 1", typeSlug: "usb-a" },
+      { name: "USB-A 2", typeSlug: "usb-a" },
+      { name: "HDMI", typeSlug: "hdmi" },
+      { name: "SD", typeSlug: "sd" },
+      { name: "TF", typeSlug: "tf" },
+    ],
+    protocols: ["PD"],
+    profiles: [{ name: "USB-C pass-through", totalPowerW: 100, description: "شحن مرورّي بقدرة تصل إلى 100W." }],
+    warrantyMonths: 24,
+  },
   {
     productId: "00000000-0000-4000-8000-000000000038",
     sourceUrl: "https://www.ugreen.com/ar-sa/products/sa-55538",
@@ -676,7 +749,7 @@ async function seedUgreenSpecifications() {
     const attributeIds = new Map(attributeRows.rows.map((row) => [row.slug, row.id]));
     const portTypes = await client.query<{ id: string; slug: string }>(
       `SELECT "id", "slug" FROM "port_types" WHERE "slug" = ANY($1::text[])`,
-      [["usb-c", "usb-a"]],
+      [["usb-c", "usb-a", "hdmi", "sd", "tf"]],
     );
     const portTypeIds = new Map(portTypes.rows.map((row) => [row.slug, row.id]));
     const compatibilityRows = await client.query<{ id: string; slug: string }>(
@@ -753,6 +826,33 @@ async function seedUgreenSpecifications() {
              "usb_version"=EXCLUDED."usb_version","e_marker"=EXCLUDED."e_marker","video_support"=EXCLUDED."video_support",
              "material"=EXCLUDED."material","source_url"=EXCLUDED."source_url","source_note"=EXCLUDED."source_note","updated_at"=NOW()`,
           [item.productId, item.cable.connectorA ?? null, item.cable.connectorB ?? null, item.cable.lengthM ?? null, item.cable.maxPowerW ?? null, item.cable.dataSpeedGbps ?? null, item.cable.usbVersion ?? null, item.cable.eMarker ?? null, item.cable.videoSupport ?? null, item.cable.material ?? null, item.sourceUrl, item.sourceNote],
+        );
+      }
+
+      if (item.powerBank) {
+        await client.query(
+          `INSERT INTO "power_bank_specifications"
+             ("product_id","capacity_mah","input_summary","output_summary","max_output_w","recharge_time_hours","wireless_charging","display","pass_through_charging","source_url","source_note")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+           ON CONFLICT ("product_id") DO UPDATE SET
+             "capacity_mah"=EXCLUDED."capacity_mah","input_summary"=EXCLUDED."input_summary",
+             "output_summary"=EXCLUDED."output_summary","max_output_w"=EXCLUDED."max_output_w",
+             "recharge_time_hours"=EXCLUDED."recharge_time_hours","wireless_charging"=EXCLUDED."wireless_charging",
+             "display"=EXCLUDED."display","pass_through_charging"=EXCLUDED."pass_through_charging",
+             "source_url"=EXCLUDED."source_url","source_note"=EXCLUDED."source_note","updated_at"=NOW()`,
+          [
+            item.productId,
+            item.powerBank.capacityMah,
+            item.powerBank.inputSummary ?? null,
+            item.powerBank.outputSummary ?? null,
+            item.powerBank.maxOutputW ?? null,
+            item.powerBank.rechargeTimeHours ?? null,
+            item.powerBank.wirelessCharging ?? null,
+            item.powerBank.display ?? null,
+            item.powerBank.passThroughCharging ?? null,
+            item.sourceUrl,
+            item.sourceNote,
+          ],
         );
       }
 
@@ -1071,6 +1171,114 @@ async function seedCatalogDerivedSpecifications() {
   }
 }
 
+type VerifiedCatalogAttributeSeed = {
+  sku: string;
+  sourceUrl: string;
+  valueText?: string;
+  maxPowerW?: number;
+  portType?: string;
+};
+
+const verifiedCatalogAttributeSeed: VerifiedCatalogAttributeSeed[] = [
+  {
+    sku: "CABL-UGR-HUB7",
+    sourceUrl: "https://www.ugreen.com/en-ae/products/ae-15214",
+    valueText: "إخراج 4K عند 30Hz عبر HDMI، نقل بيانات بسرعة 5Gbps، وشحن مرورّي حتى 100W",
+    maxPowerW: 100,
+    portType: "USB-C، HDMI، USB-A، SD، TF",
+  },
+  {
+    sku: "CABL-UGR-PB10K",
+    sourceUrl: "https://www.ugreen.com/en-ae/products/ae-35603",
+    valueText: "كابل USB-C مدمج وشاشة TFT وشحن ثنائي الاتجاه بقدرة 30W",
+  },
+  {
+    sku: "CABL-ANK-HUB7",
+    sourceUrl: "https://www.anker.com/products/a83d2-usb-c-hub-7-in-1",
+    valueText: "إخراج 4K عند 60Hz عبر HDMI، نقل بيانات بسرعة 5Gbps، وشحن مرورّي حتى 85W",
+    maxPowerW: 85,
+    portType: "USB-C، HDMI، USB-A، SD، microSD",
+  },
+  {
+    sku: "CABL-HOL-A1",
+    sourceUrl: "https://www.hollyland.com/product/lark-a1",
+    valueText: "تسجيل 24-bit/48kHz وإلغاء ضوضاء ذكي بثلاثة مستويات",
+  },
+  {
+    sku: "CABL-HOL-M2-COMBO",
+    sourceUrl: "https://www.hollyland.com/product/lark-m2",
+    valueText: "تسجيل 24-bit/48kHz وإلغاء ضوضاء بيئي ENC وبطارية تصل إلى 40 ساعة",
+  },
+  {
+    sku: "CABL-HOL-M2",
+    sourceUrl: "https://www.hollyland.com/product/lark-m2",
+    valueText: "تسجيل 24-bit/48kHz وإلغاء ضوضاء بيئي ENC وبطارية تصل إلى 40 ساعة",
+  },
+  {
+    sku: "CABL-HOL-M2S-COMBO",
+    sourceUrl: "https://www.hollyland.com/product/lark-m2s",
+    valueText: "تسجيل 24-bit/48kHz وإلغاء ضوضاء بيئي ENC ومدى لاسلكي يصل إلى 300 متر وبطارية تصل إلى 30 ساعة ووزن 7 غرامات للميكروفون",
+  },
+  {
+    sku: "CABL-SCO-P41I",
+    sourceUrl: "https://www.soundcore.com/products/a3937-p41i-ture-wireless-earbuds",
+    valueText: "علبة شحن تشحن الهاتف، بطارية تصل إلى 192 ساعة، إلغاء ضوضاء تكيفي، ومحركات 11 مم",
+  },
+];
+
+async function seedVerifiedCatalogSpecifications() {
+  const client = await pool.connect();
+  let applied = 0;
+  try {
+    await client.query("BEGIN");
+    const attributeRows = await client.query<{ id: string; slug: string }>(
+      `SELECT "id", "slug" FROM "attributes"
+       WHERE "slug" = ANY($1::text[])`,
+      [["use_case", "max_power_w", "port_type"]],
+    );
+    const attributeIds = new Map(attributeRows.rows.map((row) => [row.slug, row.id]));
+    for (const item of verifiedCatalogAttributeSeed) {
+      const product = await client.query<{ id: string }>(
+        `SELECT "id" FROM "products" WHERE "SKU" = $1 LIMIT 1`,
+        [item.sku],
+      );
+      const productId = product.rows[0]?.id;
+      if (!productId) continue;
+      const upsertAttribute = async (slug: string, value: { text?: string; number?: number }) => {
+        const attributeId = attributeIds.get(slug);
+        if (!attributeId) return;
+        const result = await client.query(
+          `INSERT INTO "product_attributes"
+             ("product_id","attribute_id","value_text","value_number","source_url","source_note")
+           VALUES ($1,$2,$3,$4,$5,$6)
+           ON CONFLICT ("product_id","attribute_id") DO UPDATE SET
+             "value_text"=EXCLUDED."value_text","value_number"=EXCLUDED."value_number",
+             "source_url"=EXCLUDED."source_url","source_note"=EXCLUDED."source_note","updated_at"=NOW()`,
+          [
+            productId,
+            attributeId,
+            value.text ?? null,
+            value.number ?? null,
+            item.sourceUrl,
+            "تمت مطابقة المواصفة مع صفحة الشركة الرسمية للموديل نفسه.",
+          ],
+        );
+        applied += result.rowCount ?? 0;
+      };
+      if (item.valueText) await upsertAttribute("use_case", { text: item.valueText });
+      if (item.maxPowerW !== undefined) await upsertAttribute("max_power_w", { number: item.maxPowerW });
+      if (item.portType) await upsertAttribute("port_type", { text: item.portType });
+    }
+    await client.query("COMMIT");
+    return applied;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 async function seedTable(query: string, values: unknown[], conflict = "DO NOTHING") {
   const result = await pool.query(query, values);
   return result.rowCount ?? 0;
@@ -1342,7 +1550,9 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
        ('50000000-0000-4000-8000-000000000002','USB-A','usb-a',TRUE),
        ('50000000-0000-4000-8000-000000000003','AC','ac',TRUE),
        ('50000000-0000-4000-8000-000000000004','HDMI','hdmi',TRUE),
-       ('50000000-0000-4000-8000-000000000005','Lightning','lightning',TRUE)
+       ('50000000-0000-4000-8000-000000000005','Lightning','lightning',TRUE),
+       ('50000000-0000-4000-8000-000000000006','SD','sd',TRUE),
+       ('50000000-0000-4000-8000-000000000007','TF','tf',TRUE)
        ON CONFLICT ("id") DO UPDATE SET "name" = EXCLUDED."name", "slug" = EXCLUDED."slug", "active" = EXCLUDED."active"`,
       [],
     );
@@ -1377,6 +1587,7 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
     const catalogDerived = await seedCatalogDerivedSpecifications();
     counts.catalog_derived_attributes = catalogDerived.importedAttributes;
     counts.catalog_derived_modules = catalogDerived.importedModules;
+     counts.verified_catalog_specifications = await seedVerifiedCatalogSpecifications();
     const catalogSources = await seedCatalogSourceUrls();
     counts.catalog_source_urls = catalogSources.applied;
     counts.catalog_products_missing_source = catalogSources.unresolved.length;

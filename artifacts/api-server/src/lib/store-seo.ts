@@ -221,7 +221,7 @@ function arabicMarketingText(value: string) {
     .replace(/\bcharging\b/gi, "الشحن")
     .replace(/\bfor\s+travel\b/gi, "للسفر")
     .replace(/\bLavalier\b/gi, "لافالييه")
-    .replace(/\bCombo\b/gi, "مجمعة");
+    .replace(/\bCombo\b/gi, "كومبو");
 }
 
 function arabicTechnicalText(value: string) {
@@ -285,29 +285,48 @@ function sourceFeatureText(input: ProductDescriptionInput, identity: string) {
     .filter(Boolean)
     .sort((a, b) => b.length - a.length);
 
-  for (const source of [input.shortDescription, input.productDescription]) {
+  const verifiedAttribute = input.specifications?.attributes.find((attribute) =>
+    attribute.slug === "use_case"
+    && Boolean(attribute.sourceUrl)
+    && typeof attribute.value === "string"
+    && attribute.value.trim().length > 8,
+  );
+  const verifiedAttributeValue = verifiedAttribute && typeof verifiedAttribute.value === "string"
+    ? verifiedAttribute.value
+    : undefined;
+  for (const source of [verifiedAttributeValue, input.shortDescription, input.productDescription]) {
     if (!source || isGeneratedSeoDescription(cleanProductText(source))) continue;
-    let detail = withoutPowerMentions(arabicMarketingText(cleanProductText(source)
+    const sourceIsVerifiedAttribute = source === verifiedAttributeValue;
+    let detail = (sourceIsVerifiedAttribute ? arabicMarketingText : withoutPowerMentions)(cleanProductText(source)
       .replace(/منتج منشور من CABL مع توصيل داخل اليمن\.?/gi, "")
       .replace(/راجع بيانات الموديل والتوافر قبل الطلب\.?/gi, "")
       .replace(/راجع بيانات المنتج والتوافر قبل الطلب\.?/gi, "")
       .replace(/\s+/g, " ")
       .trim()
       .replace(/[.!؟]+$/, "")
-      .trim()));
+      .trim());
     for (const prefix of identityPrefixes) {
       if (detail.toLocaleLowerCase("ar-YE").startsWith(prefix.toLocaleLowerCase("ar-YE"))) {
         detail = detail.slice(prefix.length).replace(/^[\s،:؛—-]*(?:هو|هي)?[\s،:؛—-]*/u, "").trim();
         break;
       }
     }
-    const arabicDetail = replaceEnglishBrandNames(detail, input);
+    const arabicDetail = replaceEnglishBrandNames(detail.replace(/\s+ب$/u, ""), input);
     if (arabicDetail && !productNames.has(arabicDetail.toLocaleLowerCase("ar-YE")) && arabicDetail.length > 8) return arabicDetail;
   }
   return "";
 }
 
 function wirelessEarbudsFeature(input: ProductDescriptionInput) {
+  const verifiedAttribute = input.specifications?.attributes.find((attribute) =>
+    attribute.slug === "use_case"
+    && Boolean(attribute.sourceUrl)
+    && typeof attribute.value === "string"
+    && attribute.value.trim().length > 8,
+  );
+  if (verifiedAttribute && typeof verifiedAttribute.value === "string") {
+    return `وتقدم ${verifiedAttribute.value.replace(/[.!؟]+$/, "")}.`;
+  }
   const sourceText = [
     input.shortDescription,
     input.productDescription,
@@ -573,6 +592,16 @@ function relatedSpecificationSentences(input: ProductDescriptionInput, categoryS
       } else {
         sentences.push(`${capacity}.`);
       }
+    }
+    if (powerBank.rechargeTimeHours) {
+      sentences.push(`ويستغرق إعادة شحنه نحو ${formatNumber(powerBank.rechargeTimeHours)} ساعات وفق القدرة المناسبة.`);
+    }
+    if (specifications.dimensions && (specifications.dimensions.weightG || specifications.dimensions.lengthMm)) {
+      const { lengthMm, widthMm, heightMm, weightG } = specifications.dimensions;
+      const dimensions = [lengthMm, widthMm, heightMm].filter((value): value is number => value !== null && value !== undefined).join(" × ");
+      sentences.push(
+        `وتبلغ أبعاده ${dimensions} مم${weightG ? ` ويزن ${formatNumber(weightG)} غراماً` : ""}.`,
+      );
     }
   }
 
