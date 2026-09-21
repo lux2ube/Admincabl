@@ -195,6 +195,16 @@ const categoryCopy: Record<string, { noun: string; search: string; use: string; 
   "wireless-microphones": { noun: "ميكروفون لاسلكي", search: "ميكروفون Hollyland", use: "التسجيل أو صناعة المحتوى حسب التكوين المتاح", identity: "ميكروفون لاسلكي" },
 };
 
+const seoKeywordProfiles: Record<string, { primary: string; fast?: string }> = {
+  chargers: { primary: "شاحن", fast: "شاحن سريع" },
+  "charging-cables": { primary: "كيبل شحن", fast: "كيبل شحن سريع" },
+  "power-banks": { primary: "باور بانك", fast: "باور بانك سريع" },
+  "phone-accessories": { primary: "وصلة USB-C" },
+  "travel-adapters": { primary: "شاحن جوال للسيارة", fast: "شاحن جوال للسيارة سريع" },
+  "wireless-earbuds": { primary: "سماعات لاسلكية" },
+  "wireless-microphones": { primary: "مايك لاسلكي هوليلاند" },
+};
+
 function cleanProductText(value: string | null | undefined) {
   return String(value || "")
     .replaceAll("واط", "وات")
@@ -202,8 +212,20 @@ function cleanProductText(value: string | null | undefined) {
     .trim();
 }
 
-function withoutPowerMentions(value: string) {
+function arabicMarketingText(value: string) {
   return cleanProductText(value)
+    .replace(/\bPD\s+fast\s+charge\b/gi, "PD للشحن السريع")
+    .replace(/\bfast\s+charge\b/gi, "الشحن السريع")
+    .replace(/\bwireless\s+charging\b/gi, "الشحن اللاسلكي")
+    .replace(/\bwireless\b/gi, "لاسلكي")
+    .replace(/\bcharging\b/gi, "الشحن")
+    .replace(/\bfor\s+travel\b/gi, "للسفر")
+    .replace(/\bLavalier\b/gi, "لافالييه")
+    .replace(/\bCombo\b/gi, "مجمعة");
+}
+
+function withoutPowerMentions(value: string) {
+  return arabicMarketingText(value)
     .replace(/(?:بقدرة|قدرة|حتى)\s*\d+(?:\.\d+)?\s*(?:W|وات)\b/gi, "")
     .replace(/\b\d+(?:\.\d+)?\s*(?:W|وات)\b/gi, "")
     .replace(/\s*\/\s*(?=[،,.؛]|$)/g, "")
@@ -231,14 +253,14 @@ function sourceFeatureText(input: ProductDescriptionInput, identity: string) {
 
   for (const source of [input.shortDescription, input.productDescription]) {
     if (!source || isGeneratedSeoDescription(cleanProductText(source))) continue;
-    let detail = withoutPowerMentions(cleanProductText(source)
+    let detail = withoutPowerMentions(arabicMarketingText(cleanProductText(source)
       .replace(/منتج منشور من CABL مع توصيل داخل اليمن\.?/gi, "")
       .replace(/راجع بيانات الموديل والتوافر قبل الطلب\.?/gi, "")
       .replace(/راجع بيانات المنتج والتوافر قبل الطلب\.?/gi, "")
       .replace(/\s+/g, " ")
       .trim()
       .replace(/[.!؟]+$/, "")
-      .trim());
+      .trim()));
     for (const prefix of identityPrefixes) {
       if (detail.toLocaleLowerCase("ar-YE").startsWith(prefix.toLocaleLowerCase("ar-YE"))) {
         detail = detail.slice(prefix.length).replace(/^[\s،:؛—-]*(?:هو|هي)?[\s،:؛—-]*/u, "").trim();
@@ -270,7 +292,7 @@ function wirelessEarbudsFeature(input: ProductDescriptionInput) {
 }
 
 function sourceFeatureSentence(detail: string, input: ProductDescriptionInput) {
-  let feature = detail;
+  let feature = arabicMarketingText(detail);
   const specifications = input.specifications;
   feature = feature.replace(/^و+\s*/u, "");
   if (input.categorySlug === "power-banks") {
@@ -283,7 +305,14 @@ function sourceFeatureSentence(detail: string, input: ProductDescriptionInput) {
       .replace(/\s+/g, " ")
       .trim();
   }
-  if (specifications?.cable && /^USB-C\s+إلى\s+USB-C/i.test(feature)) return "";
+  if (
+    specifications?.cable?.connectorA &&
+    specifications.cable.connectorB &&
+    new RegExp(
+      `${specifications.cable.connectorA.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+إلى\\s+${specifications.cable.connectorB.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
+      "i",
+    ).test(feature)
+  ) return "";
   if (specifications?.cable?.dataSpeedGbps && /^و?\s*نقل بيانات/u.test(feature)) return "";
   if (!feature || feature.length <= 8) return "";
 
@@ -362,6 +391,9 @@ function productSubject(input: ProductDescriptionInput, marketingNoun: string) {
   if (input.categorySlug === "wireless-microphones") {
     return `ميكروفون ${productName} اللاسلكي`;
   }
+  if (input.categorySlug === "phone-accessories" && /^(?:محور|وصلة|محول|حامل)/u.test(productName)) {
+    return productName;
+  }
   const sourcePrefix = input.categorySlug === "travel-adapters"
     ? /^(شاحن سيارة)/u
     : input.categorySlug === "charging-cables"
@@ -435,7 +467,7 @@ function relatedSpecificationSentences(input: ProductDescriptionInput, categoryS
   const specifications = input.specifications;
   if (!specifications) return [];
   const sentences: string[] = [];
-  const protocols = specifications.protocols.slice(0, 3).map((protocol) => protocol.name).filter(Boolean);
+  const protocols = specifications.protocols.slice(0, 3).map((protocol) => arabicMarketingText(protocol.name)).filter(Boolean);
   const protocolText = protocols.join(" و");
   if (specifications.ports.length && protocols.length && !(specifications.cable?.connectorA && specifications.cable?.connectorB)) {
     const count = countLabel(specifications.ports.length, "منفذ", "منافذ");
@@ -527,20 +559,11 @@ function marketingProductNoun(input: ProductDescriptionInput, category: { noun: 
 }
 
 function keywordPhrase(input: ProductDescriptionInput, brandArabic: string, category: { noun: string; search: string }) {
-  const search = category.search.toLocaleLowerCase("ar-YE");
-  const searchTerm = hasFastChargingSignal(input)
-    ? input.categorySlug === "chargers"
-      ? "شاحن سريع"
-      : input.categorySlug === "charging-cables"
-        ? "كابل شحن سريع"
-        : input.categorySlug === "power-banks"
-          ? "باور بانك سريع"
-          : input.categorySlug === "travel-adapters"
-            ? "شاحن سيارة سريع"
-            : category.search
-    : category.search;
+  const profile = seoKeywordProfiles[input.categorySlug || ""] || { primary: category.search };
+  const searchTerm = hasFastChargingSignal(input) && profile.fast ? profile.fast : profile.primary;
   const brandNames = [input.brand, brandArabic].map((value) => value.toLocaleLowerCase("ar-YE"));
-  return brandNames.some((brandName) => search.includes(brandName))
+  const normalizedTerm = searchTerm.toLocaleLowerCase("ar-YE");
+  return brandNames.some((brandName) => normalizedTerm.includes(brandName))
     ? searchTerm
     : `${searchTerm} ${brandArabic}`.trim();
 }
