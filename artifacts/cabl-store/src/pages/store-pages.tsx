@@ -1557,15 +1557,6 @@ function ProductDetailPage({ slug }: { slug: string }) {
           }] : []),
           { label: product.productName },
         ]}/>
-        <div className="product-context-strip" data-testid="section-product-context">
-          <div className="product-context-main">
-            <span className="eyebrow">بيانات المنتج من الكتالوج</span>
-            <strong>{product.brand}{product.category ? ` · ${product.category.name}` : ''}</strong>
-          </div>
-          <div className="product-context-item"><span>SKU</span><b dir="ltr">{product.sku}</b></div>
-          <div className="product-context-item"><span>السعر الحالي</span><b>{formatPrice(price)}</b></div>
-          <div className={`product-context-item ${product.quantity > 0 ? 'is-available' : 'is-unavailable'}`}><span>التوافر</span><b>{product.quantity > 0 ? `${product.quantity} قطعة` : 'غير متوفر'}</b></div>
-        </div>
         <div className="product-detail-grid">
           <div className="detail-gallery">
             <div className="detail-main-image"><img src={catalogImageUrl(product.images?.[imageIndex] || product.images?.[0] || '', 640)} srcSet={catalogImageSrcSet(product.images?.[imageIndex] || product.images?.[0] || '')} sizes="(max-width: 767px) 92vw, 640px" width={640} height={640} alt={product.productName} data-testid="img-product-main"/></div>
@@ -1575,6 +1566,12 @@ function ProductDetailPage({ slug }: { slug: string }) {
             <span className="product-brand">{product.brand}</span>
              <h1><BidiProductText text={product.productName}/></h1>
             <div className="product-identity"><span>SKU</span><b dir="ltr">{product.sku}</b></div>
+            {product.specifications.warrantyMonths !== null && (
+              <div className="warranty-badge warranty-badge-detail" data-testid="badge-product-warranty">
+                <ShieldCheck size={22} />
+                <span><small>حماية اختيارك</small><strong>ضمان {product.specifications.warrantyMonths} شهراً</strong></span>
+              </div>
+            )}
              <p className="detail-copy" dir="rtl"><BidiProductText text={product.productDescription || product.shortDescription || 'منتج متاح من كتالوج CABL.'}/></p>
             <div className="detail-price"><strong data-testid="text-product-detail-price">{formatPrice(price)}</strong>{product.discountPrice && <del>{formatPrice(product.regularPrice)}</del>}</div>
             <div className="stock-note"><i/>{product.quantity > 0 ? `متوفر الآن — ${product.quantity} قطعة` : 'غير متوفر حالياً'}</div>
