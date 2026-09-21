@@ -273,6 +273,9 @@ function sourceFeatureSentence(detail: string, input: ProductDescriptionInput) {
   let feature = detail;
   const specifications = input.specifications;
   feature = feature.replace(/^و+\s*/u, "");
+  if (input.categorySlug === "power-banks") {
+    return powerBankFeatureSentence(feature, input);
+  }
   if (specifications?.ports.length) {
     feature = feature
       .replace(/\s*(?:و|،)?\s*(?:واحد|اثنان|اثنين|ثلاثة|أربعة|خمسة|ستة|سبعة|ثمانية|تسعة|عشرة|\d+)\s+منافذ?/g, "")
@@ -312,6 +315,26 @@ function arabicBrandName(brand: string, brandSlug: string) {
 function formatNumber(value: number | null | undefined) {
   if (value === null || value === undefined || !Number.isFinite(value)) return null;
   return Number.isInteger(value) ? String(value) : String(value).replace(/\.0+$/, "");
+}
+
+function productNameIncludesCapacity(input: ProductDescriptionInput) {
+  return /(?:mAh|مللي\s*أمبير)/i.test(cleanProductText(input.productName));
+}
+
+function powerBankFeatureSentence(feature: string, input: ProductDescriptionInput) {
+  const powerBank = input.specifications?.powerBank;
+  if (!powerBank) return "";
+  const normalized = feature
+    .replace(/(?:بسعة|سعة|بطارية\s+بسعة)?\s*[\d,]+(?:\.\d+)?\s*(?:mAh|مللي\s*أمبير)/gi, "")
+    .replace(/(?:عالي|عالية|كبير|كبيرة)\s+السعة/gu, "")
+    .replace(/\bUno\b/gi, "")
+    .replace(/\s+/g, " ")
+    .replace(/^[\s،:؛—-]+|[\s،:؛—-]+$/g, "")
+    .trim();
+  if (!normalized) return "";
+  const integratedCable = normalized.match(/(?:كابل|سلك)\s+(?:USB-C|USB-A|شحن)(?:\s+[\w-]+)?\s+مدمج/iu);
+  if (integratedCable) return `ويأتي ب${integratedCable[0]}.`;
+  return "";
 }
 
 function categoryIdentity(input: ProductDescriptionInput, category: { identity: string }) {
@@ -395,6 +418,19 @@ function purposePhrase(categorySlug: string | null) {
   }
 }
 
+function openingSentence(
+  input: ProductDescriptionInput,
+  subject: string,
+  brandArabic: string,
+  brand: string,
+  purpose: string,
+) {
+  if (input.categorySlug === "power-banks") {
+    return `${subject} من ${brandArabic} ${brand} هو بطارية محمولة توفر طاقة إضافية للجوال أثناء التنقل والسفر، ومناسب للاستخدام اليومي عندما تحتاج إلى شحن هاتفك بعيداً عن مصدر الكهرباء.`;
+  }
+  return `${subject} من ${brandArabic} ${brand} ${purpose}.`;
+}
+
 function relatedSpecificationSentences(input: ProductDescriptionInput, categorySlug: string | null) {
   const specifications = input.specifications;
   if (!specifications) return [];
@@ -416,12 +452,18 @@ function relatedSpecificationSentences(input: ProductDescriptionInput, categoryS
   const powerBank = specifications.powerBank;
   if (powerBank?.capacityMah) {
     const capacity = `تبلغ سعته ${formatNumber(powerBank.capacityMah)} مللي أمبير`;
-    if (powerBank.wirelessCharging === true) {
-      sentences.push(`${capacity} ويدعم الشحن اللاسلكي، ما يوفر طاقة إضافية بمرونة أكبر أثناء التنقل.`);
-    } else if (powerBank.display === true) {
-      sentences.push(`${capacity} ويضم شاشة لعرض حالة الشحن، لتسهيل متابعة الطاقة المتبقية.`);
-    } else {
-      sentences.push(`${capacity}، ما يوفر طاقة إضافية للجوال أثناء التنقل.`);
+    if (powerBank.wirelessCharging === true && productNameIncludesCapacity(input)) {
+      sentences.push("ويدعم الشحن اللاسلكي، ما يوفر مرونة أكبر أثناء التنقل.");
+    } else if (powerBank.display === true && productNameIncludesCapacity(input)) {
+      sentences.push("ويضم شاشة لعرض حالة الشحن، لتسهيل متابعة الطاقة المتبقية.");
+    } else if (!productNameIncludesCapacity(input)) {
+      if (powerBank.wirelessCharging === true) {
+        sentences.push(`${capacity} ويدعم الشحن اللاسلكي، ما يوفر مرونة أكبر أثناء التنقل.`);
+      } else if (powerBank.display === true) {
+        sentences.push(`${capacity} ويضم شاشة لعرض حالة الشحن، لتسهيل متابعة الطاقة المتبقية.`);
+      } else {
+        sentences.push(`${capacity}.`);
+      }
     }
   }
 
@@ -528,7 +570,7 @@ export function buildProductDescription(input: ProductDescriptionInput) {
       : "";
 
   return [
-    `${subject} من ${brandArabic} ${cleanProductText(input.brand)} ${purpose}.`,
+    openingSentence(input, subject, brandArabic, cleanProductText(input.brand), purpose),
     centralFeature || sourceFeature,
     ...relatedSpecifications,
     compatibility,

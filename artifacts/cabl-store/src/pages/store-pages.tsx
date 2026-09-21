@@ -14,7 +14,7 @@ import { EditorialSection, FAQList, InfoCards, ProductEditorial, mergeFaqItems }
 function BidiProductText({ text }: { text: string }) {
   return (
     <>
-      {text.split(/([A-Za-z0-9][A-Za-z0-9+./:#_-]*)/g).map((part, index) => (
+      {text.split(/([A-Za-z0-9][A-Za-z0-9+./:#_,-]*)/g).map((part, index) => (
         /^[A-Za-z0-9]/.test(part)
           ? <bdi dir="ltr" key={`${part}-${index}`}>{part}</bdi>
           : part
