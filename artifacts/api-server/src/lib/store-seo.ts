@@ -185,14 +185,14 @@ const arabicBrandNames: Record<string, string> = {
   hollyland: "هوليلاند",
 };
 
-const categoryCopy: Record<string, { noun: string; search: string; use: string }> = {
-  chargers: { noun: "شاحن", search: "شاحن", use: "شحن الهواتف والأجهزة المتوافقة للاستخدام اليومي" },
-  "charging-cables": { noun: "كابل شحن", search: "كابل", use: "الشحن أو نقل البيانات بين الأجهزة المتوافقة" },
-  "power-banks": { noun: "باور بانك", search: "باور بانك", use: "توفير طاقة إضافية للجوال أثناء التنقل أو السفر" },
-  "phone-accessories": { noun: "محور أو ملحق للأجهزة", search: "محور USB-C", use: "توسيع المنافذ أو توصيل الملحقات المتوافقة" },
-  "travel-adapters": { noun: "شاحن سيارة أو ملحق سفر", search: "شاحن سيارة", use: "شحن الأجهزة أثناء التنقل" },
-  "wireless-earbuds": { noun: "سماعة أذن لاسلكية", search: "سماعات لاسلكية", use: "الاستماع والمكالمات أثناء الحركة" },
-  "wireless-microphones": { noun: "ميكروفون لاسلكي", search: "ميكروفون Hollyland", use: "التسجيل أو صناعة المحتوى حسب التكوين المتاح" },
+const categoryCopy: Record<string, { noun: string; search: string; use: string; identity: string }> = {
+  chargers: { noun: "شاحن", search: "شاحن", use: "شحن الهواتف والأجهزة المتوافقة للاستخدام اليومي", identity: "شاحن" },
+  "charging-cables": { noun: "كابل شحن", search: "كابل", use: "الشحن أو نقل البيانات بين الأجهزة المتوافقة", identity: "كابل شحن" },
+  "power-banks": { noun: "باور بانك", search: "باور بانك", use: "توفير طاقة إضافية للجوال أثناء التنقل أو السفر", identity: "باور بانك" },
+  "phone-accessories": { noun: "محور أو ملحق للأجهزة", search: "محور USB-C", use: "توسيع المنافذ أو توصيل الملحقات المتوافقة", identity: "محور أو ملحق" },
+  "travel-adapters": { noun: "شاحن سيارة أو ملحق سفر", search: "شاحن سيارة", use: "شحن الأجهزة أثناء التنقل", identity: "شاحن سيارة" },
+  "wireless-earbuds": { noun: "سماعة أذن لاسلكية", search: "سماعات لاسلكية", use: "الاستماع والمكالمات أثناء الحركة", identity: "سماعة أذن لاسلكية" },
+  "wireless-microphones": { noun: "ميكروفون لاسلكي", search: "ميكروفون Hollyland", use: "التسجيل أو صناعة المحتوى حسب التكوين المتاح", identity: "ميكروفون لاسلكي" },
 };
 
 function cleanProductText(value: string | null | undefined) {

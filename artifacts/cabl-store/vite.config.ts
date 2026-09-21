@@ -147,6 +147,14 @@ function escapeSeoHtml(value: string) {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 }
 
+function renderBidiSeoText(value: string) {
+  return value.split(/([A-Za-z0-9][A-Za-z0-9+./:#_-]*)/g).map((part) => (
+    /^[A-Za-z0-9]/.test(part)
+      ? `<bdi dir="ltr">${escapeSeoHtml(part)}</bdi>`
+      : escapeSeoHtml(part)
+  )).join('');
+}
+
 type DevProduct = {
   slug: string;
   brand: string;
@@ -288,7 +296,7 @@ function renderSeoShell(page: DevSeoPage) {
         ${product.images?.[0] ? `<img src="${escapeSeoHtml(product.images[0])}" alt="${escapeSeoHtml(product.productName)}" width="320" height="320" />` : ''}
         <div><p><strong>العلامة:</strong> ${escapeSeoHtml(product.brand)} · <strong>القسم:</strong> ${escapeSeoHtml(product.category?.name || 'المنتجات')}</p>
         <p><strong>SKU:</strong> <span dir="ltr">${escapeSeoHtml(product.sku)}</span> · <strong>السعر:</strong> ${escapeSeoHtml(String(product.discountPrice ?? product.regularPrice))} USD · <strong>الحالة:</strong> ${product.quantity > 0 ? 'متوفر حسب الكتالوج الحالي' : 'غير متوفر حالياً'}</p>
-         ${product.productDescription || product.shortDescription ? `<p>${escapeSeoHtml(product.productDescription || product.shortDescription || '')}</p>` : ''}
+         ${product.productDescription || product.shortDescription ? `<p dir="rtl" class="detail-copy">${renderBidiSeoText(product.productDescription || product.shortDescription || '')}</p>` : ''}
         ${product.specifications?.attributes?.length ? `<ul>${product.specifications.attributes.map((attribute) => `<li>${escapeSeoHtml(attribute.label)}: ${escapeSeoHtml(String(attribute.value ?? (attribute.values?.join('، ') || 'غير منشور')))}${attribute.unit ? ` ${escapeSeoHtml(attribute.unit)}` : ''}</li>`).join('')}</ul>` : ''}
         ${product.shippingOptions?.length ? `<p><strong>خيارات الشحن:</strong> ${product.shippingOptions.map((option) => escapeSeoHtml(option.name)).join('، ')}</p>` : ''}
         </div>

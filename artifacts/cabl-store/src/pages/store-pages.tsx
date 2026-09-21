@@ -11,6 +11,18 @@ import { Breadcrumbs, CTASection, CatalogError, CatalogToolbar, LoadingCatalog, 
 import { CartLine, ProductGrid, QuantityControl } from '@/components/catalog-ui';
 import { EditorialSection, FAQList, InfoCards, ProductEditorial, mergeFaqItems } from '@/pages/content-pages';
 
+function BidiProductText({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/([A-Za-z0-9][A-Za-z0-9+./:#_-]*)/g).map((part, index) => (
+        /^[A-Za-z0-9]/.test(part)
+          ? <bdi dir="ltr" key={`${part}-${index}`}>{part}</bdi>
+          : part
+      ))}
+    </>
+  );
+}
+
 function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; slug?: string }) {
   const [location, navigate] = useLocation();
   const params = slug ? { type, slug } : { type };
@@ -1561,9 +1573,9 @@ function ProductDetailPage({ slug }: { slug: string }) {
           </div>
           <div className="detail-info">
             <span className="product-brand">{product.brand}</span>
-            <h1>{product.productName}</h1>
+             <h1><BidiProductText text={product.productName}/></h1>
             <div className="product-identity"><span>SKU</span><b dir="ltr">{product.sku}</b></div>
-            <p className="detail-copy">{product.productDescription || product.shortDescription || 'منتج متاح من كتالوج CABL.'}</p>
+             <p className="detail-copy" dir="rtl"><BidiProductText text={product.productDescription || product.shortDescription || 'منتج متاح من كتالوج CABL.'}/></p>
             <div className="detail-price"><strong data-testid="text-product-detail-price">{formatPrice(price)}</strong>{product.discountPrice && <del>{formatPrice(product.regularPrice)}</del>}</div>
             <div className="stock-note"><i/>{product.quantity > 0 ? `متوفر الآن — ${product.quantity} قطعة` : 'غير متوفر حالياً'}</div>
             <div className="detail-actions">

@@ -17,6 +17,7 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:hsl(var(--background));color:hsl(var(--foreground));font-family:var(--app-font-sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+.detail-copy{direction:rtl;unicode-bidi:plaintext;text-align:right}.detail-copy bdi{direction:ltr;unicode-bidi:isolate;white-space:nowrap}
 h1,h2,h3,h4,h5,h6,.brand-cabl,.eyebrow,.nav-link,.button,.reference-hero-cta,.hero-illustration-brands span{font-family:var(--app-font-display)}
 button,input,select,textarea{font:inherit}
 button,a{touch-action:manipulation}
