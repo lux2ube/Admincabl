@@ -211,13 +211,21 @@ function withoutPowerMentions(value: string) {
     .trim();
 }
 
-function sourceProductDetail(input: ProductDescriptionInput) {
+function sourceFeatureText(input: ProductDescriptionInput, identity: string) {
   const productNames = new Set([
     cleanProductText(input.productName).toLocaleLowerCase("ar-YE"),
-    cleanProductText(productDisplayName(input.brand, input.productName)).toLocaleLowerCase("ar-YE"),
+    cleanProductText(identity).toLocaleLowerCase("ar-YE"),
   ]);
+  const identityPrefixes = [
+    identity,
+    withoutPowerMentions(input.productName),
+    withoutPowerMentions(input.productName).split(/\s+/).slice(0, 3).join(" "),
+  ]
+    .filter(Boolean)
+    .sort((a, b) => b.length - a.length);
+
   for (const source of [input.productDescription, input.shortDescription]) {
-    const detail = withoutPowerMentions(cleanProductText(source)
+    let detail = withoutPowerMentions(cleanProductText(source)
       .replace(/منتج منشور من CABL مع توصيل داخل اليمن\.?/gi, "")
       .replace(/راجع بيانات الموديل والتوافر قبل الطلب\.?/gi, "")
       .replace(/راجع بيانات المنتج والتوافر قبل الطلب\.?/gi, "")
@@ -225,9 +233,48 @@ function sourceProductDetail(input: ProductDescriptionInput) {
       .trim()
       .replace(/[.!؟]+$/, "")
       .trim());
-    if (detail && !productNames.has(detail.toLocaleLowerCase("ar-YE"))) return `${detail}.`;
+    for (const prefix of identityPrefixes) {
+      if (detail.toLocaleLowerCase("ar-YE").startsWith(prefix.toLocaleLowerCase("ar-YE"))) {
+        detail = detail.slice(prefix.length).replace(/^[\s،:؛—-]*(?:هو|هي)?[\s،:؛—-]*/u, "").trim();
+        break;
+      }
+    }
+    if (detail && !productNames.has(detail.toLocaleLowerCase("ar-YE")) && detail.length > 8) return detail;
   }
   return "";
+}
+
+function sourceFeatureSentence(detail: string, input: ProductDescriptionInput) {
+  let feature = detail;
+  const specifications = input.specifications;
+  feature = feature.replace(/^و+\s*/u, "");
+  if (specifications?.ports.length) {
+    feature = feature
+      .replace(/\s*(?:و|،)?\s*(?:واحد|اثنان|اثنين|ثلاثة|أربعة|خمسة|ستة|سبعة|ثمانية|تسعة|عشرة|\d+)\s+منافذ?/g, "")
+      .replace(/\s*(?:و|،)?\s*منفذ واحد/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+  if (specifications?.cable && /^USB-C\s+إلى\s+USB-C/i.test(feature)) return "";
+  if (specifications?.cable?.dataSpeedGbps && /^و?\s*نقل بيانات/u.test(feature)) return "";
+  if (!feature || feature.length <= 8) return "";
+
+  if (/كابل\s+USB-C.*قابل للسحب/i.test(feature) && input.categorySlug === "chargers") {
+    return "ويتميز بكابل USB-C مدمج قابل للسحب، مما يقلل الحاجة إلى حمل كابل منفصل.";
+  }
+  if (/^(?:إلى|الى)\s/u.test(feature)) return "";
+  if (/^و?\s*تقنية\s+/u.test(feature)) {
+    return `ويأتي بتقنية ${feature.replace(/^و?\s*تقنية\s+/u, "").replace(/[.!؟]+$/, "")}.`;
+  } else if (/^(?:منفذ|منفذين|ثلاثة منافذ|أربعة منافذ)(?:\s|$)/u.test(feature)) {
+    return specifications?.ports.length
+      ? ""
+      : `ويضم ${feature.replace(/،\s*يدعم/u, "، ويدعم").replace(/[.!؟]+$/, "")}.`;
+  } else if (/^نقل بيانات(?:\s|$)/u.test(feature)) {
+    return `ويدعم ${feature.replace(/^نقل بيانات/u, "نقل البيانات").replace(/[.!؟]+$/, "")}.`;
+  } else if (/^مع\s+/u.test(feature)) {
+    return `ويأتي ${feature.replace(/[.!؟]+$/, "")}.`;
+  }
+  return `ويأتي ب${feature.replace(/[.!؟]+$/, "")}.`;
 }
 
 function arabicBrandName(brand: string, brandSlug: string) {
@@ -239,60 +286,125 @@ function formatNumber(value: number | null | undefined) {
   return Number.isInteger(value) ? String(value) : String(value).replace(/\.0+$/, "");
 }
 
-function specificationHighlights(input: ProductDescriptionInput) {
+function categoryIdentity(input: ProductDescriptionInput, category: { identity: string }) {
+  const name = withoutPowerMentions(cleanProductText(input.productName));
+  const markers: Record<string, string[]> = {
+    chargers: ["شاحن", "طقم شحن"],
+    "charging-cables": ["كابل", "كيبل"],
+    "power-banks": ["باور", "خازن"],
+    "phone-accessories": ["محور", "وصلة", "محول"],
+    "travel-adapters": ["شاحن سيارة", "محول سفر"],
+    "wireless-earbuds": ["سماعة"],
+    "wireless-microphones": ["ميكروفون", "مايك"],
+  };
+  const categoryMarkers = markers[input.categorySlug || ""] || [];
+  return categoryMarkers.some((marker) => name.toLocaleLowerCase("ar-YE").includes(marker))
+    ? name
+    : `${category.identity} ${name}`.trim();
+}
+
+function countLabel(count: number, singular: string, plural: string) {
+  if (count === 1) return "منفذاً واحداً";
+  if (count === 2) return "منفذين";
+  if (count === 3) return "ثلاثة منافذ";
+  if (count === 4) return "أربعة منافذ";
+  if (count <= 10) return `${count} ${plural}`;
+  return `${count} منفذاً`;
+}
+
+function productPurpose(categorySlug: string | null) {
+  switch (categorySlug) {
+    case "chargers":
+      return "شحن الهواتف والأجهزة اللوحية المتوافقة للاستخدام اليومي";
+    case "charging-cables":
+      return "شحن الأجهزة المتوافقة ونقل البيانات بينها";
+    case "power-banks":
+      return "توفير طاقة إضافية للجوال أثناء التنقل أو السفر";
+    case "phone-accessories":
+      return "توسيع منافذ الجهاز وتوصيل الملحقات المتوافقة";
+    case "travel-adapters":
+      return "شحن الأجهزة أثناء التنقل بالسيارة";
+    case "wireless-earbuds":
+      return "الاستماع والمكالمات أثناء التنقل";
+    case "wireless-microphones":
+      return "التسجيل وصناعة المحتوى حسب التكوين المتاح";
+    default:
+      return "الاستخدام اليومي";
+  }
+}
+
+function relatedSpecificationSentences(input: ProductDescriptionInput, categorySlug: string | null) {
   const specifications = input.specifications;
   if (!specifications) return [];
-  const highlights: string[] = [];
-  const powerBank = specifications.powerBank;
-  const cable = specifications.cable;
+  const sentences: string[] = [];
+  const protocols = specifications.protocols.slice(0, 3).map((protocol) => protocol.name).filter(Boolean);
+  const protocolText = protocols.join(" و");
+  if (specifications.ports.length && protocols.length && !(specifications.cable?.connectorA && specifications.cable?.connectorB)) {
+    const count = countLabel(specifications.ports.length, "منفذ", "منافذ");
+    const reason = (categorySlug === "chargers" || categorySlug === "travel-adapters") && specifications.ports.length > 1
+      ? "ما يجعله مناسباً لشحن أكثر من جهاز باستخدام شاحن واحد"
+      : "لتوفير شحن متوافق مع الأجهزة التي تدعم هذه المعايير";
+    sentences.push(`يضم ${count} ويدعم ${protocolText}، ${reason}.`);
+  } else if (specifications.ports.length) {
+    sentences.push(`يضم ${countLabel(specifications.ports.length, "منفذاً", "منافذ")}.`);
+  } else if (protocols.length && !(specifications.cable?.connectorA && specifications.cable?.connectorB)) {
+    sentences.push(`يدعم ${protocols.join(" و")}.`);
+  }
 
-  if (powerBank?.capacityMah) highlights.push(`سعة ${formatNumber(powerBank.capacityMah)} مللي أمبير`);
-  if (powerBank?.wirelessCharging === true) highlights.push("شحن لاسلكي");
-  if (powerBank?.display === true) highlights.push("شاشة لعرض حالة الشحن");
-  if (cable?.connectorA && cable?.connectorB) highlights.push(`موصل ${cable.connectorA} إلى ${cable.connectorB}`);
-  if (cable?.lengthM) highlights.push(`طول ${formatNumber(cable.lengthM)} متر`);
-  if (cable?.dataSpeedGbps) highlights.push(`نقل بيانات بسرعة تصل إلى ${formatNumber(cable.dataSpeedGbps)} جيجابت/ثانية`);
-  if (cable?.material) highlights.push(`مصنوع من ${cable.material}`);
-  if (specifications.ports.length) {
-    highlights.push(`${specifications.ports.length} ${specifications.ports.length === 1 ? "منفذ" : "منافذ"}`);
+  const powerBank = specifications.powerBank;
+  if (powerBank?.capacityMah) {
+    const capacity = `تبلغ سعته ${formatNumber(powerBank.capacityMah)} مللي أمبير`;
+    if (powerBank.wirelessCharging === true) {
+      sentences.push(`${capacity} ويدعم الشحن اللاسلكي، ما يوفر طاقة إضافية بمرونة أكبر أثناء التنقل.`);
+    } else if (powerBank.display === true) {
+      sentences.push(`${capacity} ويضم شاشة لعرض حالة الشحن، لتسهيل متابعة الطاقة المتبقية.`);
+    } else {
+      sentences.push(`${capacity}، ما يوفر طاقة إضافية للجوال أثناء التنقل.`);
+    }
   }
-  if (specifications.protocols.length) {
-    highlights.push(`يدعم ${specifications.protocols.slice(0, 2).map((protocol) => protocol.name).join(" و")}`);
+
+  const cable = specifications.cable;
+  if (cable?.connectorA && cable.connectorB) {
+    const connector = `يأتي بموصل ${cable.connectorA} إلى ${cable.connectorB}`;
+    if (cable.dataSpeedGbps) {
+      sentences.push(`${connector} ويدعم نقل البيانات بسرعة تصل إلى ${formatNumber(cable.dataSpeedGbps)} جيجابت/ثانية${protocols.length ? `، كما يدعم ${protocolText}` : ""}.`);
+    } else if (cable.lengthM) {
+      sentences.push(`${connector} بطول ${formatNumber(cable.lengthM)} متر${protocols.length ? `، كما يدعم ${protocolText}` : ""}.`);
+    } else {
+      sentences.push(`${connector}${protocols.length ? `، كما يدعم ${protocolText}` : ""}.`);
+    }
   }
-  return highlights.slice(0, 5);
+  return sentences;
 }
 
 function compatibilityText(input: ProductDescriptionInput) {
   const specifications = input.specifications;
   const names = specifications?.compatibility?.map((item) => item.name).filter(Boolean) || [];
-  if (names.length) return `ومناسب لـ${names.slice(0, 3).join(" و")}.`;
+  if (names.length) return `ويعمل مع الأجهزة التالية: ${names.slice(0, 3).join(" و")}.`;
   if (specifications?.cable?.connectorA && specifications.cable.connectorB) {
-    return `ويعمل مع الأجهزة التي تستخدم ${specifications.cable.connectorA} و${specifications.cable.connectorB}.`;
+    return `ويعمل مع الأجهزة التي تستخدم موصلَي ${specifications.cable.connectorA} و${specifications.cable.connectorB}.`;
   }
-  if (specifications?.carCharger) return "ومناسب للاستخدام في السيارة عندما يتوافق منفذ السيارة مع مواصفات الشاحن.";
+  if (specifications?.carCharger) return "ويمكن استخدامه في السيارة عندما يتوافق منفذها مع مواصفات الشاحن.";
   return "";
 }
 
 function keywordPhrase(input: ProductDescriptionInput, brandArabic: string, category: { noun: string; search: string }) {
-  return `${category.search} ${brandArabic}`.trim();
+  const search = category.search.toLocaleLowerCase("ar-YE");
+  const brandNames = [input.brand, brandArabic].map((value) => value.toLocaleLowerCase("ar-YE"));
+  return brandNames.some((brandName) => search.includes(brandName))
+    ? category.search
+    : `${category.search} ${brandArabic}`.trim();
 }
 
 export function buildProductDescription(input: ProductDescriptionInput) {
   const brandArabic = arabicBrandName(input.brand, input.brandSlug);
-  const category = categoryCopy[input.categorySlug || ""] || { noun: "منتج", search: "منتج", use: "الاستخدام اليومي" };
-  const displayName = withoutPowerMentions(productDisplayName(brandArabic, input.productName));
-  const detail = sourceProductDetail(input);
-  const highlights = specificationHighlights(input);
+  const category = categoryCopy[input.categorySlug || ""] || { noun: "منتج", search: "منتج", use: "الاستخدام اليومي", identity: "منتج" };
+  const displayName = categoryIdentity(input, category);
+  const detail = sourceFeatureText(input, displayName);
   const keyword = keywordPhrase(input, brandArabic, category);
-  const featureSentence = highlights.length
-    ? `وتتضمن مواصفاته ${highlights.join("، ")}.`
-    : "";
-  const sourceDetail = detail
-    ? detail
-    : `وهو مناسب لمن يحتاج ${category.use}.`;
-  const differentiator = highlights[0]
-    ? `وتمنح هذه الميزة ${category.noun} استخداماً عملياً في ${category.use}.`
-    : "";
+  const purpose = productPurpose(input.categorySlug);
+  const relatedSpecifications = relatedSpecificationSentences(input, input.categorySlug);
+  const sourceFeature = detail ? sourceFeatureSentence(detail, input) : "";
   const compatibility = compatibilityText(input);
   const warrantyNote = cleanProductText(input.specifications?.warrantyNote);
   const warrantyMonths = input.specifications?.warrantyMonths;
@@ -300,18 +412,17 @@ export function buildProductDescription(input: ProductDescriptionInput) {
     warrantyNote && warrantyMonths && new RegExp(`${formatNumber(warrantyMonths)}\\s*شهر`).test(warrantyNote),
   );
   const warranty = warrantyMonths
-    ? `يتوفر ضمان لمدة ${formatNumber(warrantyMonths)} شهراً${warrantyNote && !warrantyNoteRepeatsDuration ? `، ${warrantyNote}` : ""}.`
+    ? `ويشمل هذا الموديل ضماناً لمدة ${formatNumber(warrantyMonths)} شهراً${warrantyNote && !warrantyNoteRepeatsDuration ? `، ${warrantyNote}` : ""}.`
     : warrantyNote
       ? `${warrantyNote}.`
       : "";
 
   return [
-    `${displayName} هو ${category.noun} من ${brandArabic} (${cleanProductText(input.brand)})، وموديل مناسب لمن يحتاج ${category.use}.`,
-    sourceDetail,
-    featureSentence,
+    `${displayName} هو ${category.noun} عملي من ${brandArabic} ${cleanProductText(input.brand)}، ويوفر ${purpose}.`,
+    sourceFeature,
+    ...relatedSpecifications,
     compatibility,
-    differentiator,
-    `إذا كنت تبحث عن ${keyword} في اليمن، يتوفر هذا المنتج عبر متجر كابل، مع عرض السعر والتوافر الحاليين في صفحة المنتج.`,
+    `إذا كنت تبحث عن ${keyword} في اليمن، يتوفر هذا الموديل عبر متجر كابل.`,
     warranty,
   ].filter(Boolean).join(" ");
 }
