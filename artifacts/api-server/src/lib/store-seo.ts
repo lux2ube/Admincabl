@@ -202,20 +202,29 @@ function cleanProductText(value: string | null | undefined) {
     .trim();
 }
 
+function withoutPowerMentions(value: string) {
+  return cleanProductText(value)
+    .replace(/(?:بقدرة|قدرة|حتى)\s*\d+(?:\.\d+)?\s*(?:W|وات)\b/gi, "")
+    .replace(/\b\d+(?:\.\d+)?\s*(?:W|وات)\b/gi, "")
+    .replace(/\s*\/\s*(?=[،,.؛]|$)/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function sourceProductDetail(input: ProductDescriptionInput) {
   const productNames = new Set([
     cleanProductText(input.productName).toLocaleLowerCase("ar-YE"),
     cleanProductText(productDisplayName(input.brand, input.productName)).toLocaleLowerCase("ar-YE"),
   ]);
   for (const source of [input.productDescription, input.shortDescription]) {
-    const detail = cleanProductText(source)
+    const detail = withoutPowerMentions(cleanProductText(source)
       .replace(/منتج منشور من CABL مع توصيل داخل اليمن\.?/gi, "")
       .replace(/راجع بيانات الموديل والتوافر قبل الطلب\.?/gi, "")
       .replace(/راجع بيانات المنتج والتوافر قبل الطلب\.?/gi, "")
       .replace(/\s+/g, " ")
       .trim()
       .replace(/[.!؟]+$/, "")
-      .trim();
+      .trim());
     if (detail && !productNames.has(detail.toLocaleLowerCase("ar-YE"))) return `${detail}.`;
   }
   return "";
@@ -236,21 +245,14 @@ function specificationHighlights(input: ProductDescriptionInput) {
   const highlights: string[] = [];
   const powerBank = specifications.powerBank;
   const cable = specifications.cable;
-  const carCharger = specifications.carCharger;
 
   if (powerBank?.capacityMah) highlights.push(`سعة ${formatNumber(powerBank.capacityMah)} مللي أمبير`);
-  if (powerBank?.maxOutputW) highlights.push(`قدرة إخراج تصل إلى ${formatNumber(powerBank.maxOutputW)} وات`);
   if (powerBank?.wirelessCharging === true) highlights.push("شحن لاسلكي");
   if (powerBank?.display === true) highlights.push("شاشة لعرض حالة الشحن");
   if (cable?.connectorA && cable?.connectorB) highlights.push(`موصل ${cable.connectorA} إلى ${cable.connectorB}`);
   if (cable?.lengthM) highlights.push(`طول ${formatNumber(cable.lengthM)} متر`);
-  if (cable?.maxPowerW) highlights.push(`يدعم قدرة تصل إلى ${formatNumber(cable.maxPowerW)} وات`);
   if (cable?.dataSpeedGbps) highlights.push(`نقل بيانات بسرعة تصل إلى ${formatNumber(cable.dataSpeedGbps)} جيجابت/ثانية`);
   if (cable?.material) highlights.push(`مصنوع من ${cable.material}`);
-  if (carCharger?.maxOutputW) highlights.push(`قدرة خرج تصل إلى ${formatNumber(carCharger.maxOutputW)} وات`);
-  if (specifications.maxPowerW && !highlights.some((item) => item.includes("قدرة"))) {
-    highlights.push(`قدرة تصل إلى ${formatNumber(specifications.maxPowerW)} وات`);
-  }
   if (specifications.ports.length) {
     highlights.push(`${specifications.ports.length} ${specifications.ports.length === 1 ? "منفذ" : "منافذ"}`);
   }
@@ -272,18 +274,13 @@ function compatibilityText(input: ProductDescriptionInput) {
 }
 
 function keywordPhrase(input: ProductDescriptionInput, brandArabic: string, category: { noun: string; search: string }) {
-  const power = input.specifications?.maxPowerW
-    || input.specifications?.powerBank?.maxOutputW
-    || input.specifications?.cable?.maxPowerW
-    || input.specifications?.carCharger?.maxOutputW;
-  const powerPhrase = power ? ` ${formatNumber(power)} وات` : "";
-  return `${category.search} ${brandArabic}${powerPhrase}`.trim();
+  return `${category.search} ${brandArabic}`.trim();
 }
 
 export function buildProductDescription(input: ProductDescriptionInput) {
   const brandArabic = arabicBrandName(input.brand, input.brandSlug);
   const category = categoryCopy[input.categorySlug || ""] || { noun: "منتج", search: "منتج", use: "الاستخدام اليومي" };
-  const displayName = cleanProductText(productDisplayName(brandArabic, input.productName));
+  const displayName = withoutPowerMentions(productDisplayName(brandArabic, input.productName));
   const detail = sourceProductDetail(input);
   const highlights = specificationHighlights(input);
   const keyword = keywordPhrase(input, brandArabic, category);
@@ -297,10 +294,15 @@ export function buildProductDescription(input: ProductDescriptionInput) {
     ? `وتمنح هذه الميزة ${category.noun} استخداماً عملياً في ${category.use}.`
     : "";
   const compatibility = compatibilityText(input);
-  const warranty = input.specifications?.warrantyMonths
-    ? `يتوفر ضمان لمدة ${formatNumber(input.specifications.warrantyMonths)} شهراً${input.specifications.warrantyNote ? `، ${cleanProductText(input.specifications.warrantyNote)}` : ""}.`
-    : input.specifications?.warrantyNote
-      ? `${cleanProductText(input.specifications.warrantyNote)}.`
+  const warrantyNote = cleanProductText(input.specifications?.warrantyNote);
+  const warrantyMonths = input.specifications?.warrantyMonths;
+  const warrantyNoteRepeatsDuration = Boolean(
+    warrantyNote && warrantyMonths && new RegExp(`${formatNumber(warrantyMonths)}\\s*شهر`).test(warrantyNote),
+  );
+  const warranty = warrantyMonths
+    ? `يتوفر ضمان لمدة ${formatNumber(warrantyMonths)} شهراً${warrantyNote && !warrantyNoteRepeatsDuration ? `، ${warrantyNote}` : ""}.`
+    : warrantyNote
+      ? `${warrantyNote}.`
       : "";
 
   return [
