@@ -103,7 +103,7 @@ Weak / generic	Better conversion-oriented UX copy
 
 في الشاحن:
 
-> كم واط تحتاج؟
+> كم وات تحتاج؟
 
 
 

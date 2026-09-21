@@ -42,7 +42,7 @@
     {
       "tag": "h1",
       "class": "text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white leading-tight",
-      "text": "باور بانك انكر زولو 20,000 مللي أمبير (22.5 واط) | كابل مدمج"
+      "text": "باور بانك انكر زولو 20,000 مللي أمبير (22.5 وات) | كابل مدمج"
     },
     {
       "tag": "button",
@@ -67,12 +67,12 @@
     {
       "tag": "button",
       "class": "relative flex-shrink-0 w-[calc(50%-8px)] min-w-[130px] max-w-[180px] sm:w-[160px] rounded-2xl border-2 p-2.5 sm:p-3 bg-white dark:bg-gray-800 transition-all duration-300 snap-center\n                                    border-green-600 shadow-lg shadow-green-600/20\n                                    cursor-default",
-      "text": "✓ رئيسي باور بانك انكر زولو 20,000 مللي أمبير (22.5 واط) | كابل مدمج 1,730 ج.م"
+      "text": "✓ رئيسي باور بانك انكر زولو 20,000 مللي أمبير (22.5 وات) | كابل مدمج 1,730 ج.م"
     },
     {
       "tag": "button",
       "class": "relative flex-shrink-0 w-[calc(50%-8px)] min-w-[130px] max-w-[180px] sm:w-[160px] rounded-2xl border-2 p-2.5 sm:p-3 bg-white dark:bg-gray-800 transition-all duration-300 snap-center\n                                    border-green-600 shadow-lg shadow-green-600/20\n                                    active:scale-95 cursor-pointer",
-      "text": "✓ مطلوب معاه شاحن انكر A2347K11 بحد معلن 20 واط USB-C PD | راجع بروفايل الجهاز والقابس والضمان 💡 عشان تشحن الباور بانك بسرعة 490 ج.م"
+      "text": "✓ مطلوب معاه شاحن انكر A2347K11 بحد معلن 20 وات USB-C PD | راجع بروفايل الجهاز والقابس والضمان 💡 عشان تشحن الباور بانك بسرعة 490 ج.م"
     },
     {
       "tag": "button",
@@ -87,12 +87,12 @@
     {
       "tag": "button",
       "class": "relative group transition-all duration-300 \n                                         \n                                        cursor-default",
-      "text": "باور بانك انكر زولو 20,000 مللي أمبير (22.5 واط) | كابل مدمج 1,730 ج.م"
+      "text": "باور بانك انكر زولو 20,000 مللي أمبير (22.5 وات) | كابل مدمج 1,730 ج.م"
     },
     {
       "tag": "button",
       "class": "relative group transition-all duration-300 \n                                         \n                                        cursor-pointer hover:scale-[1.02]",
-      "text": "مطلوب معاه شاحن انكر A2347K11 بحد معلن 20 واط USB-C PD | راجع بروفايل الجهاز والقابس والضمان 💡 عشان تشحن الباور بانك بسرعة 490 ج.م"
+      "text": "مطلوب معاه شاحن انكر A2347K11 بحد معلن 20 وات USB-C PD | راجع بروفايل الجهاز والقابس والضمان 💡 عشان تشحن الباور بانك بسرعة 490 ج.م"
     },
     {
       "tag": "button",

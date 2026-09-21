@@ -135,7 +135,7 @@ It should naturally include relevant information already available in the databa
 
 Example for the target product:
 
-"شاحن UGREEN Nexode Air USB-C بقدرة 45 واط من CABL. تعرّف على المواصفات والتوافق والسعر والتوفر وخيارات الشحن داخل اليمن."
+"شاحن UGREEN Nexode Air USB-C بقدرة 45 وات من CABL. تعرّف على المواصفات والتوافق والسعر والتوفر وخيارات الشحن داخل اليمن."
 
 Do not copy this exact sentence to every product.
 
@@ -500,7 +500,7 @@ Do NOT add lists such as:
 شاحن تايب سي
 شاحن USB-C
 شاحن أصلي
-شاحن 45 واط
+شاحن 45 وات
 ...
 
 unless they naturally belong in visible useful content.

@@ -87,12 +87,12 @@
     {
       "tag": "h3",
       "class": "text-xs md:text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-2 min-h-[2.25rem] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
-      "text": "باور بانك انكر زولو 10,000 مللي أمبير (22.5 واط) | كابل مدمج"
+      "text": "باور بانك انكر زولو 10,000 مللي أمبير (22.5 وات) | كابل مدمج"
     },
     {
       "tag": "h3",
       "class": "text-xs md:text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-2 min-h-[2.25rem] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
-      "text": "باور بانك انكر زولو 20,000 مللي أمبير (22.5 واط) | كابل مدمج"
+      "text": "باور بانك انكر زولو 20,000 مللي أمبير (22.5 وات) | كابل مدمج"
     },
     {
       "tag": "h3",
@@ -102,32 +102,32 @@
     {
       "tag": "h3",
       "class": "text-xs md:text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-2 min-h-[2.25rem] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
-      "text": "شاحن انكر نانو 45 واط | شاحن واحد للابتوب والموبايل (وداعاً للزحمة)"
+      "text": "شاحن انكر نانو 45 وات | شاحن واحد للابتوب والموبايل (وداعاً للزحمة)"
     },
     {
       "tag": "h3",
       "class": "text-xs md:text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-2 min-h-[2.25rem] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
-      "text": "شاحن انكر نانو 45 واط 1C (A2664) | منفذ USB-C واحد بتقنية GaN"
+      "text": "شاحن انكر نانو 45 وات 1C (A2664) | منفذ USB-C واحد بتقنية GaN"
     },
     {
       "tag": "h3",
       "class": "text-xs md:text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-2 min-h-[2.25rem] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
-      "text": "شاحن انكر A2347K11 بحد معلن 20 واط USB-C PD | راجع بروفايل الجهاز والقابس والضمان"
+      "text": "شاحن انكر A2347K11 بحد معلن 20 وات USB-C PD | راجع بروفايل الجهاز والقابس والضمان"
     },
     {
       "tag": "h3",
       "class": "text-xs md:text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-2 min-h-[2.25rem] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
-      "text": "شاحن حائط انكر زولو 30 واط USB-C (A2698) | GaN وقابس قابل للطي"
+      "text": "شاحن حائط انكر زولو 30 وات USB-C (A2698) | GaN وقابس قابل للطي"
     },
     {
       "tag": "h3",
       "class": "text-xs md:text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-2 min-h-[2.25rem] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
-      "text": "شاحن انكر نانو 45 واط بشاشة ذكية (A121D) | قابس 180° | USB-C PD"
+      "text": "شاحن انكر نانو 45 وات بشاشة ذكية (A121D) | قابس 180° | USB-C PD"
     },
     {
       "tag": "h3",
       "class": "text-xs md:text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-2 min-h-[2.25rem] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
-      "text": "شاحن حائط انكر برايم 67 واط جان (A2669) — 3 منافذ (2 USB-C + USB-A) | GaNPrime وPowerIQ 4.0"
+      "text": "شاحن حائط انكر برايم 67 وات جان (A2669) — 3 منافذ (2 USB-C + USB-A) | GaNPrime وPowerIQ 4.0"
     },
     {
       "tag": "h3",
@@ -142,17 +142,17 @@
     {
       "tag": "h3",
       "class": "text-xs md:text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-2 min-h-[2.25rem] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
-      "text": "كابل انكر زولو USB-C إلى USB-C مضفر (A8060) — 240 واط PD 3.1، 1.5 متر | سلك 8 نوى بمعمار 240 واط"
+      "text": "كابل انكر زولو USB-C إلى USB-C مضفر (A8060) — 240 وات PD 3.1، 1.5 متر | سلك 8 نوى بمعمار 240 وات"
     },
     {
       "tag": "h3",
       "class": "text-xs md:text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-2 min-h-[2.25rem] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
-      "text": "شاحن انكر نانو المغناطيسي اللاسلكي للسيارة (A2216) | Qi2 حتى 15 واط | حامل تابلوه مرن"
+      "text": "شاحن انكر نانو المغناطيسي اللاسلكي للسيارة (A2216) | Qi2 حتى 15 وات | حامل تابلوه مرن"
     },
     {
       "tag": "h3",
       "class": "text-xs md:text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-2 min-h-[2.25rem] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
-      "text": "باور بانك انكر زولو 25,000 مللي أمبير 165 واط — كابلان مدمجان | شحن ماك بوك"
+      "text": "باور بانك انكر زولو 25,000 مللي أمبير 165 وات — كابلان مدمجان | شحن ماك بوك"
     },
     {
       "tag": "h2",
