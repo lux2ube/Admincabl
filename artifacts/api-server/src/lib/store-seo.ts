@@ -208,6 +208,7 @@ function withoutPowerMentions(value: string) {
     .replace(/\b\d+(?:\.\d+)?\s*(?:W|وات)\b/gi, "")
     .replace(/\s*\/\s*(?=[،,.؛]|$)/g, "")
     .replace(/\s+/g, " ")
+    .replace(/\s+(?:و|أو)\s*$/u, "")
     .trim();
 }
 
@@ -261,6 +262,9 @@ function sourceFeatureSentence(detail: string, input: ProductDescriptionInput) {
 
   if (/كابل\s+USB-C.*قابل للسحب/i.test(feature) && input.categorySlug === "chargers") {
     return "ويتميز بكابل USB-C مدمج قابل للسحب، مما يقلل الحاجة إلى حمل كابل منفصل.";
+  }
+  if (/^(?:عالي|عالية)\s+السعة/u.test(feature)) {
+    return "ويتميز بسعة عالية.";
   }
   if (/^(?:إلى|الى)\s/u.test(feature)) return "";
   if (/^و?\s*تقنية\s+/u.test(feature)) {
@@ -319,7 +323,7 @@ function productPurpose(categorySlug: string | null) {
     case "charging-cables":
       return "شحن الأجهزة المتوافقة ونقل البيانات بينها";
     case "power-banks":
-      return "توفير طاقة إضافية للجوال أثناء التنقل أو السفر";
+      return "طاقة إضافية للجوال أثناء التنقل أو السفر";
     case "phone-accessories":
       return "توسيع منافذ الجهاز وتوصيل الملحقات المتوافقة";
     case "travel-adapters":
