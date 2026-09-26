@@ -37,9 +37,9 @@
 :root {
   --background: 38 31% 93%;
   --foreground: 222 30% 16%;
-  --border: 35 18% 82%;
-  --input: 35 18% 78%;
-  --ring: 12 75% 57%;
+  --border: 35 18% 76%;
+  --input: 35 18% 68%;
+  --ring: 12 72% 42%;
   --card: 40 36% 97%;
   --card-foreground: 222 30% 16%;
   --card-border: 35 20% 84%;
@@ -51,16 +51,16 @@
   --secondary: 174 18% 87%;
   --secondary-foreground: 172 32% 22%;
   --muted: 36 23% 88%;
-  --muted-foreground: 218 12% 43%;
-  --accent: 12 75% 57%;
-  --accent-foreground: 24 30% 10%;
+  --muted-foreground: 220 15% 34%;
+  --accent: 12 72% 42%;
+  --accent-foreground: 0 0% 100%;
   --destructive: 4 68% 49%;
   --destructive-foreground: 40 36% 97%;
   --sidebar: 222 31% 18%;
   --sidebar-foreground: 39 30% 91%;
   --sidebar-border: 222 22% 28%;
   --sidebar-primary: 12 75% 57%;
-  --sidebar-primary-foreground: 24 30% 10%;
+  --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 222 24% 25%;
   --sidebar-accent-foreground: 39 30% 91%;
   --sidebar-ring: 12 75% 57%;
@@ -104,4 +104,22 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .mono { font-family: var(--app-font-mono); }
 .scrollbar-thin::-webkit-scrollbar { width: 7px; height: 7px; }
 .scrollbar-thin::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 99px; }
-.focus-ring:focus-visible { outline: 3px solid hsl(var(--accent) / .35); outline-offset: 2px; }
+.focus-ring:focus-visible { outline: 3px solid hsl(var(--ring)); outline-offset: 2px; }
+
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  color: hsl(var(--foreground));
+}
+input::placeholder,
+textarea::placeholder {
+  color: hsl(var(--muted-foreground));
+  opacity: 1;
+}
+[data-testid^="button-edit-row-"] {
+  background: hsl(var(--secondary) / .55);
+  color: hsl(var(--secondary-foreground));
+}
+[data-testid^="button-edit-row-"]:hover {
+  background: hsl(var(--secondary));
+}

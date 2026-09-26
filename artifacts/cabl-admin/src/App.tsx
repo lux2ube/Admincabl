@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { Link, Route, Router as WouterRouter, Switch, useLocation, useParams } from 'wouter';
 import {
@@ -109,14 +109,14 @@ function Shell({ children }: { children: ReactNode }) {
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sidebar-primary text-sm font-extrabold tracking-[-.08em] text-sidebar-primary-foreground">CB</span>
             <span>
               <span className="block text-[15px] font-extrabold tracking-[.18em]">CABL</span>
-              <span className="mono mt-0.5 block text-[9px] uppercase tracking-[.18em] text-sidebar-foreground/55">operations</span>
+              <span className="mono mt-0.5 block text-[10px] uppercase tracking-[.18em] text-sidebar-foreground/75">operations</span>
             </span>
           </Link>
-          <button aria-label="Close navigation" data-testid="button-close-navigation" onClick={() => setMobileOpen(false)} className="focus-ring rounded-md p-1 text-sidebar-foreground/60 hover:text-sidebar-foreground md:hidden"><X size={18} /></button>
+          <button aria-label="Close navigation" data-testid="button-close-navigation" onClick={() => setMobileOpen(false)} className="focus-ring rounded-md p-1 text-sidebar-foreground/80 hover:text-sidebar-foreground md:hidden"><X size={18} /></button>
         </div>
 
         <div className="scrollbar-thin flex-1 overflow-y-auto px-3 py-5">
-          <p className="mono mb-2 px-3 text-[9px] uppercase tracking-[.2em] text-sidebar-foreground/40">Command center</p>
+          <p className="mono mb-2 px-3 text-[10px] uppercase tracking-[.2em] text-sidebar-foreground/75">Command center</p>
           <Link href="/" data-testid="link-dashboard" onClick={() => setMobileOpen(false)} className={`focus-ring mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition-colors ${location === '/' ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground/65 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground'}`}>
             <LayoutDashboard size={16} /><span>Overview</span>
             {location === '/' && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary" />}
@@ -130,15 +130,15 @@ function Shell({ children }: { children: ReactNode }) {
             {location === '/seed' && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary" />}
           </Link>
           <div className="flex items-center justify-between px-3">
-            <p className="mono text-[9px] uppercase tracking-[.2em] text-sidebar-foreground/40">Tables</p>
-            <span className="mono text-[9px] text-sidebar-foreground/35" data-testid="text-table-count">{metadata?.tables.length ?? '···'}</span>
+             <p className="mono text-[10px] uppercase tracking-[.2em] text-sidebar-foreground/75">Tables</p>
+             <span className="mono text-[10px] text-sidebar-foreground/75" data-testid="text-table-count">{metadata?.tables.length ?? '···'}</span>
           </div>
           <div className="mt-3 space-y-5">
             {isLoading && <div className="space-y-2 px-3"><div className="skeleton h-8 bg-sidebar-accent" /><div className="skeleton h-8 bg-sidebar-accent" /><div className="skeleton h-8 bg-sidebar-accent" /></div>}
-            {isError && <p data-testid="status-sidebar-error" className="px-3 text-xs leading-5 text-sidebar-foreground/55">Tables could not load. Refresh to try again.</p>}
+            {isError && <p data-testid="status-sidebar-error" className="px-3 text-xs leading-5 text-sidebar-foreground/80">Tables could not load. Refresh to try again.</p>}
             {Object.entries(groups).map(([group, tables]) => (
               <div key={group}>
-                <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[.12em] text-sidebar-foreground/45">{group}</p>
+                 <p className="mb-1.5 px-3 text-[11px] font-bold uppercase tracking-[.12em] text-sidebar-foreground/75">{group}</p>
                 {tables.map((table) => {
                   const Icon = iconForTable(table.key);
                   const active = location === `/table/${table.key}`;
@@ -157,7 +157,7 @@ function Shell({ children }: { children: ReactNode }) {
         <div className="border-t border-sidebar-border p-4">
           <div className="flex items-center gap-3 rounded-xl bg-sidebar-accent/60 p-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary/15 text-sidebar-primary"><ShieldCheck size={17} /></div>
-            <div className="min-w-0"><p className="text-xs font-bold">CABL internal</p><p className="mono mt-0.5 truncate text-[9px] text-sidebar-foreground/45">sync online / Yemen</p></div>
+             <div className="min-w-0"><p className="text-xs font-bold">CABL internal</p><p className="mono mt-0.5 truncate text-[10px] text-sidebar-foreground/75">sync online / Yemen</p></div>
             <span className="ml-auto h-2 w-2 rounded-full bg-emerald-400" data-testid="status-api-online" />
           </div>
         </div>
@@ -202,7 +202,7 @@ function Dashboard() {
   const maxCount = Math.max(...topTables.map((item) => item.count), 1);
   return <div className="page-enter space-y-8" data-testid="page-dashboard">
     <section className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-      <div><div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-accent"><span className="h-1.5 w-1.5 rounded-full bg-accent" /> live catalog</div><h1 className="max-w-2xl text-3xl font-extrabold tracking-[-.045em] text-primary md:text-[42px]">Good morning.<br /><span className="text-primary/45">Here is the shape of CABL.</span></h1><p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground">A clear read on the store's records, orders, and the links that keep every handoff moving.</p></div>
+      <div><div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-accent"><span className="h-1.5 w-1.5 rounded-full bg-accent" /> live catalog</div><h1 className="max-w-2xl text-3xl font-extrabold tracking-[-.045em] text-primary md:text-[42px]">Good morning.<br /><span className="text-primary/75">Here is the shape of CABL.</span></h1><p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground">A clear read on the store's records, orders, and the links that keep every handoff moving.</p></div>
       <Link href={metadata?.tables[0] ? `/table/${metadata.tables[0].key}` : '/seed'} data-testid="link-browse-catalog" className="focus-ring inline-flex h-11 items-center justify-center gap-2 self-start rounded-xl bg-primary px-5 text-xs font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 lg:self-auto"><Boxes size={16} /> Browse records <ArrowRight size={15} /></Link>
     </section>
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -227,7 +227,7 @@ function Dashboard() {
 
 function MetricCard({ label, value, detail, icon: Icon, accent, testId }: { label: string; value: string | number; detail: string; icon: typeof Database; accent: string; testId: string }) {
   const accentClass = { coral: 'bg-accent/10 text-accent', teal: 'bg-secondary text-secondary-foreground', sand: 'bg-[#e9dfcc] text-[#79613e]', ink: 'bg-primary/10 text-primary' }[accent] ?? 'bg-muted text-primary';
-  return <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]" data-testid={testId}><div className="flex items-start justify-between"><div className={`flex h-9 w-9 items-center justify-center rounded-xl ${accentClass}`}><Icon size={17} /></div><span className="mono text-[9px] uppercase tracking-[.15em] text-muted-foreground">CABL</span></div><p className="mt-6 text-2xl font-extrabold tracking-[-.04em] text-primary" data-testid={`${testId}-value`}>{typeof value === 'number' ? value.toLocaleString() : value}</p><p className="mt-1 text-[11px] font-semibold text-muted-foreground">{label}</p><p className="mt-3 text-[10px] text-muted-foreground/80">{detail}</p></div>;
+  return <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]" data-testid={testId}><div className="flex items-start justify-between"><div className={`flex h-9 w-9 items-center justify-center rounded-xl ${accentClass}`}><Icon size={17} /></div><span className="mono text-[10px] uppercase tracking-[.15em] text-muted-foreground">CABL</span></div><p className="mt-6 text-2xl font-extrabold tracking-[-.04em] text-primary" data-testid={`${testId}-value`}>{typeof value === 'number' ? value.toLocaleString() : value}</p><p className="mt-1 text-xs font-semibold text-muted-foreground">{label}</p><p className="mt-3 text-[11px] text-muted-foreground">{detail}</p></div>;
 }
 
 function EmptyState({ title, detail, testId }: { title: string; detail: string; testId: string }) {
@@ -272,8 +272,57 @@ function TablePage() {
       <button data-testid="button-add-row" onClick={() => setEditingRow(null)} className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-accent px-5 text-xs font-extrabold text-accent-foreground shadow-sm transition-transform hover:-translate-y-0.5"><Plus size={16} /> Add record</button>
     </section>
     <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-soft)] sm:flex-row sm:items-center"><div className="relative flex-1"><Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" /><input data-testid="input-table-search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Search ${table.label.toLowerCase()}…`} className="focus-ring h-10 w-full rounded-xl border-0 bg-muted/60 pl-10 pr-3 text-xs font-medium outline-none placeholder:text-muted-foreground/70" /></div><span className="mono px-3 text-[10px] text-muted-foreground" data-testid="text-row-total">{rowsQuery.data?.total ?? 0} total records</span><button aria-label="Refresh table" data-testid="button-refresh-table" onClick={() => rowsQuery.refetch()} className="focus-ring flex h-10 w-10 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-primary"><RefreshCw size={15} className={rowsQuery.isFetching ? 'animate-spin' : ''} /></button></div>
+    <p className="text-xs font-medium text-muted-foreground">Tip: select any value in a row to edit it. Existing primary keys stay locked.</p>
     {notice && <div data-testid="status-table-notice" className="flex items-center justify-between rounded-xl border border-secondary bg-secondary/50 px-4 py-3 text-xs font-semibold text-secondary-foreground"><span className="flex items-center gap-2"><Check size={14} /> {notice}</span><button data-testid="button-dismiss-notice" onClick={() => setNotice('')}><X size={14} /></button></div>}
-     {rowsQuery.isLoading ? <div className="rounded-2xl border border-border bg-card p-5"><div className="space-y-3">{[1, 2, 3, 4, 5].map((item) => <div key={item} className="skeleton h-11 w-full" />)}</div></div> : rowsQuery.isError ? <ErrorState label={`${table.label} records`} onRetry={() => rowsQuery.refetch()} /> : rows.length === 0 ? <div className="rounded-2xl border border-border bg-card"><EmptyState title={search ? 'No matching records' : `No ${table.label.toLowerCase()} yet`} detail={search ? 'Try a shorter search or clear the filter.' : 'Create the first record to start building this ledger.'} testId="empty-table-rows" /></div> : <div className="scrollbar-thin overflow-hidden overflow-x-auto rounded-2xl border border-border bg-card shadow-[var(--shadow-soft)]"><table className="w-full min-w-[780px] text-left"><thead className="bg-muted/55"><tr className="border-b border-border text-[10px] uppercase tracking-[.1em] text-muted-foreground"><th className="w-20 px-5 py-3 font-bold">#</th>{table.columns.map((column) => <th key={column.key} className="px-4 py-3 font-bold"><span className="inline-flex items-center gap-1.5">{column.primaryKey && <ShieldCheck size={12} className="text-accent" />}{column.label}</span></th>)}<th className="w-24 px-4 py-3 text-right font-bold">Actions</th></tr></thead><tbody>{rows.map((row, index) => { const id = rowId(row, table) || String(index); return <tr key={id} data-testid={`row-${tableName}-${id}`} className="border-b border-border/65 last:border-0 hover:bg-muted/35"><td className="px-5 py-4 mono text-[10px] text-muted-foreground">{String(index + 1).padStart(2, '0')}</td>{table.columns.map((column) => <td key={column.key} data-testid={`cell-${tableName}-${id}-${column.key}`} className="max-w-[230px] px-4 py-4 text-xs font-medium"><span className={`${table.primaryKey.split(',').includes(column.key) ? 'mono font-bold text-primary' : ''} block truncate`} title={displayValue(row[column.key])}>{column.references ? <RelationValue value={row[column.key]} reference={column.references} /> : displayValue(row[column.key])}</span></td>)}<td className="px-4 py-4"><div className="flex justify-end gap-1"><button aria-label={`Edit ${id}`} data-testid={`button-edit-row-${id}`} onClick={() => setEditingRow(row)} className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"><Pencil size={14} /></button><button aria-label={`Delete ${id}`} data-testid={`button-delete-row-${id}`} onClick={() => handleDelete(row)} disabled={deleteRow.isPending} className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"><Trash2 size={14} /></button></div></td></tr>; })}</tbody></table></div>}
+      {rowsQuery.isLoading ? (
+        <div className="rounded-2xl border border-border bg-card p-5"><div className="space-y-3">{[1, 2, 3, 4, 5].map((item) => <div key={item} className="skeleton h-11 w-full" />)}</div></div>
+      ) : rowsQuery.isError ? (
+        <ErrorState label={`${table.label} records`} onRetry={() => rowsQuery.refetch()} />
+      ) : rows.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-card"><EmptyState title={search ? 'No matching records' : `No ${table.label.toLowerCase()} yet`} detail={search ? 'Try a shorter search or clear the filter.' : 'Create the first record to start building this ledger.'} testId="empty-table-rows" /></div>
+      ) : (
+        <div className="scrollbar-thin overflow-hidden overflow-x-auto rounded-2xl border border-border bg-card shadow-[var(--shadow-soft)]">
+          <table className="w-full min-w-[780px] text-left">
+            <thead className="bg-muted/55">
+              <tr className="border-b border-border text-[10px] uppercase tracking-[.1em] text-muted-foreground">
+                <th className="w-20 px-5 py-3 font-bold">#</th>
+                {table.columns.map((column) => <th key={column.key} className="px-4 py-3 font-bold"><span className="inline-flex items-center gap-1.5">{column.primaryKey && <ShieldCheck size={12} className="text-accent" />}{column.label}</span></th>)}
+                <th className="w-24 px-4 py-3 text-right font-bold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => {
+                const id = rowId(row, table) || String(index);
+                return (
+                  <tr key={id} data-testid={`row-${tableName}-${id}`} className="border-b border-border/65 last:border-0 hover:bg-muted/35">
+                    <td className="px-5 py-4 mono text-[10px] text-muted-foreground">{String(index + 1).padStart(2, '0')}</td>
+                    {table.columns.map((column) => (
+                      <td key={column.key} data-testid={`cell-${tableName}-${id}-${column.key}`} className="max-w-[230px] px-3 py-3 text-xs font-medium">
+                        <button
+                          type="button"
+                          data-testid={`button-edit-cell-${tableName}-${id}-${column.key}`}
+                          aria-label={`Edit ${column.label}: ${displayValue(row[column.key])}`}
+                          title={`Edit ${column.label}: ${displayValue(row[column.key])}`}
+                          onClick={() => setEditingRow(row)}
+                          className={`admin-cell-edit focus-ring block w-full truncate rounded-md px-1.5 py-1 text-left transition-colors hover:bg-secondary/70 hover:text-secondary-foreground ${table.primaryKey.split(',').includes(column.key) ? 'mono font-bold text-primary' : ''}`}
+                        >
+                          {column.references ? <RelationValue value={row[column.key]} reference={column.references} /> : displayValue(row[column.key])}
+                        </button>
+                      </td>
+                    ))}
+                    <td className="px-4 py-4">
+                      <div className="flex justify-end gap-1">
+                        <button aria-label={`Edit ${id}`} title="Edit record" data-testid={`button-edit-row-${id}`} onClick={() => setEditingRow(row)} className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"><Pencil size={15} /></button>
+                        <button aria-label={`Delete ${id}`} title="Delete record" data-testid={`button-delete-row-${id}`} onClick={() => handleDelete(row)} disabled={deleteRow.isPending} className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"><Trash2 size={15} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] text-muted-foreground"><span className="flex items-center gap-1.5"><ShieldCheck size={13} className="text-accent" /> Primary key: <strong className="mono text-foreground">{primaryColumn?.label ?? table.primaryKey}</strong></span><span className="flex items-center gap-1.5"><Settings2 size={13} /> Changes sync to the shared API</span></div>
     {editingRow !== undefined && <RowDialog table={table} row={editingRow} onClose={() => setEditingRow(undefined)} onSaved={() => { setEditingRow(undefined); setNotice(editingRow ? 'Record updated.' : 'Record created.'); queryClient.invalidateQueries({ queryKey: getListAdminRowsQueryKey(tableName) }); queryClient.invalidateQueries({ queryKey: getGetAdminDashboardQueryKey() }); }} />}
   </div>;
@@ -306,24 +355,74 @@ function relationOptionLabel(row: Row, preferredColumn?: string) {
   return displayColumn ? displayValue(row[displayColumn]) : displayValue(row.id);
 }
 
+function formatRowForEditing(table: AdminTableLike, row: Row | null): Row {
+  if (!row) return {};
+  return Object.fromEntries(table.columns.map((column) => {
+    const value = row[column.key];
+    if ((column.type === 'json' || column.type === 'array') && value !== null && value !== undefined) {
+      try {
+        return [column.key, JSON.stringify(typeof value === 'string' ? JSON.parse(value) : value, null, 2)];
+      } catch {
+        return [column.key, String(value)];
+      }
+    }
+    return [column.key, value ?? ''];
+  }));
+}
+
 function RowDialog({ table, row, onClose, onSaved }: { table: AdminTableLike; row: Row | null; onClose: () => void; onSaved: () => void }) {
-  const [values, setValues] = useState<Row>(() => row ? { ...row } : {});
+  const [values, setValues] = useState<Row>(() => formatRowForEditing(table, row));
   const [formError, setFormError] = useState('');
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
   const createRow = useCreateAdminRow();
   const updateRow = useUpdateAdminRow();
   const isEditing = Boolean(row);
   const isPending = createRow.isPending || updateRow.isPending;
   const updateValue = (key: string, value: unknown) => setValues((current) => ({ ...current, [key]: value }));
+  useEffect(() => {
+    openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    dialogRef.current?.querySelector<HTMLElement>('form input:not([readonly]), form textarea, form select, form button')?.focus();
+    return () => openerRef.current?.focus();
+  }, []);
+  const closeDialog = () => {
+    if (JSON.stringify(values) !== JSON.stringify(formatRowForEditing(table, row)) && !window.confirm('Discard your unsaved changes?')) return;
+    onClose();
+  };
+  const handleDialogKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeDialog();
+      return;
+    }
+    if (event.key !== 'Tab' || !dialogRef.current) return;
+    const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (!first || !last) return;
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setFormError('');
     const parsed: Row = {};
     for (const column of table.columns) {
       if (column.generated) continue;
+      if (isEditing && column.primaryKey) continue;
       const raw = values[column.key];
       if ((raw === '' || raw === undefined) && column.nullable) { parsed[column.key] = null; continue; }
       if (raw === '' || raw === undefined) { setFormError(`${column.label} is required.`); return; }
-      if (column.type === 'number') parsed[column.key] = Number(raw);
+      if (column.type === 'number') {
+        const numericValue = Number(raw);
+        if (!Number.isFinite(numericValue)) { setFormError(`${column.label} must be a valid number.`); return; }
+        parsed[column.key] = numericValue;
+      }
       else if (column.type === 'boolean') parsed[column.key] = Boolean(raw);
       else if (column.type === 'json' || column.type === 'array') {
         try { parsed[column.key] = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch { setFormError(`${column.label} must be valid JSON.`); return; }
@@ -333,16 +432,74 @@ function RowDialog({ table, row, onClose, onSaved }: { table: AdminTableLike; ro
      if (isEditing && row) updateRow.mutate({ table: table.key, id: rowId(row, table), data: { values: parsed } }, { onSuccess: onSaved, onError });
     else createRow.mutate({ table: table.key, data: { values: parsed } }, { onSuccess: onSaved, onError });
   };
-  return <div className="fixed inset-0 z-[60] flex items-end justify-center bg-foreground/35 p-0 sm:items-center sm:p-5" data-testid="dialog-row"><div className="max-h-[94dvh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-border bg-card shadow-2xl sm:rounded-3xl"><div className="sticky top-0 z-10 flex items-start justify-between border-b border-border bg-card/95 px-6 py-5 backdrop-blur"><div><p className="mono text-[10px] uppercase tracking-[.18em] text-accent">{isEditing ? 'edit record' : 'new record'}</p><h2 className="mt-1 text-xl font-extrabold tracking-[-.03em]">{isEditing ? `Update ${table.label}` : `Add to ${table.label}`}</h2><p className="mt-1 text-xs text-muted-foreground">{table.columns.filter((column) => !column.generated).length} editable fields · generated values stay protected</p></div><button aria-label="Close record dialog" data-testid="button-close-row-dialog" onClick={onClose} className="focus-ring flex h-9 w-9 items-center justify-center rounded-xl border border-border text-muted-foreground hover:bg-muted"><X size={17} /></button></div><form onSubmit={submit} className="space-y-5 p-6"><div className="grid gap-5 sm:grid-cols-2">{table.columns.filter((column) => !column.generated).map((column) => <Field key={column.key} column={column} value={values[column.key]} onChange={(value) => updateValue(column.key, value)} />)}</div>{formError && <div data-testid="status-form-error" className="rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-xs font-semibold text-destructive">{formError}</div>}<div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end"><button type="button" data-testid="button-cancel-row" onClick={onClose} className="focus-ring h-11 rounded-xl border border-border px-5 text-xs font-bold text-muted-foreground hover:bg-muted">Cancel</button><button type="submit" data-testid="button-save-row" disabled={isPending} className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-xs font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-60">{isPending && <LoaderCircle size={14} className="animate-spin" />}{isEditing ? 'Save changes' : 'Create record'}</button></div></form></div></div>;
+  const editableFieldCount = table.columns.filter((column) => !column.generated && !(isEditing && column.primaryKey)).length;
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-foreground/50 p-0 sm:items-center sm:p-5"
+      data-testid="dialog-row"
+      onKeyDown={handleDialogKeyDown}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) closeDialog();
+      }}
+    >
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="row-dialog-title"
+        aria-describedby="row-dialog-description"
+        className="max-h-[94dvh] w-full max-w-3xl overflow-y-auto rounded-t-3xl border border-border bg-card shadow-2xl sm:rounded-3xl"
+      >
+        <div className="sticky top-0 z-10 flex items-start justify-between border-b border-border bg-card/95 px-6 py-5 backdrop-blur">
+          <div>
+            <p className="mono text-[10px] uppercase tracking-[.18em] text-accent">{isEditing ? 'edit record' : 'new record'}</p>
+            <h2 id="row-dialog-title" className="mt-1 text-xl font-extrabold tracking-[-.03em]">{isEditing ? `Update ${table.label}` : `Add to ${table.label}`}</h2>
+            <p id="row-dialog-description" className="mt-1 text-sm text-muted-foreground">
+              {editableFieldCount} editable fields · generated values stay protected{isEditing ? ' · primary keys stay fixed' : ''}
+            </p>
+          </div>
+          <button aria-label="Close record dialog" data-testid="button-close-row-dialog" onClick={closeDialog} className="focus-ring flex h-10 w-10 items-center justify-center rounded-xl border border-border text-muted-foreground hover:bg-muted"><X size={17} /></button>
+        </div>
+        <form onSubmit={submit} className="space-y-5 p-6">
+          <div className="grid gap-5 sm:grid-cols-2">
+            {table.columns.filter((column) => !column.generated).map((column) => (
+              <Field
+                key={column.key}
+                column={column}
+                value={values[column.key]}
+                readOnly={isEditing && column.primaryKey}
+                onChange={(value) => updateValue(column.key, value)}
+              />
+            ))}
+          </div>
+          {formError && <div data-testid="status-form-error" role="alert" className="rounded-xl border border-destructive/35 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive">{formError}</div>}
+          <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
+            <button type="button" data-testid="button-cancel-row" onClick={closeDialog} className="focus-ring h-11 rounded-xl border border-border px-5 text-sm font-bold text-primary hover:bg-muted">Cancel</button>
+            <button type="submit" data-testid="button-save-row" disabled={isPending} className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-60">
+              {isPending && <LoaderCircle size={14} className="animate-spin" />}{isEditing ? 'Save changes' : 'Create record'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
 
-function Field({ column, value, onChange }: { column: { key: string; label: string; type: string; nullable: boolean; primaryKey: boolean; references: string | null }; value: unknown; onChange: (value: unknown) => void }) {
+function Field({ column, value, readOnly = false, onChange }: { column: { key: string; label: string; type: string; nullable: boolean; primaryKey: boolean; references: string | null }; value: unknown; readOnly?: boolean; onChange: (value: unknown) => void }) {
   const testId = `input-field-${column.key}`;
-  const label = <label htmlFor={testId} className="mb-2 flex items-center justify-between text-[11px] font-bold text-primary"><span>{column.label}{!column.nullable && <span className="ml-1 text-accent">*</span>}</span><span className="mono text-[9px] font-normal text-muted-foreground">{column.type}</span></label>;
-  if (column.type === 'boolean') return <div className="sm:col-span-1"><span className="mb-2 flex items-center justify-between text-[11px] font-bold text-primary">{column.label}<span className="mono text-[9px] font-normal text-muted-foreground">boolean</span></span><button type="button" id={testId} data-testid={testId} aria-pressed={Boolean(value)} onClick={() => onChange(!value)} className={`flex h-11 w-full items-center justify-between rounded-xl border px-3 text-xs font-semibold ${value ? 'border-secondary bg-secondary text-secondary-foreground' : 'border-input bg-background text-muted-foreground'}`}><span>{value ? 'Enabled' : 'Disabled'}</span><span className={`h-5 w-9 rounded-full p-0.5 transition-colors ${value ? 'bg-secondary-foreground' : 'bg-muted-foreground/30'}`}><span className={`block h-4 w-4 rounded-full bg-card transition-transform ${value ? 'translate-x-4' : ''}`} /></span></button></div>;
+  const textValue = value === undefined || value === null ? '' : typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
+  const label = <label htmlFor={testId} className="mb-2 flex items-center justify-between text-xs font-bold text-primary"><span>{column.label}{!column.nullable && !readOnly && <span className="ml-1 text-accent">*</span>}</span><span className="mono text-[10px] font-normal text-muted-foreground">{readOnly ? 'primary key' : column.type}</span></label>;
+  if (readOnly) return <div className="admin-readonly-field">{label}<input id={testId} data-testid={testId} value={textValue} readOnly aria-readonly="true" className="h-12 w-full rounded-xl border border-border bg-muted px-3 text-sm font-semibold text-foreground outline-none" /><p className="mt-1.5 text-xs text-muted-foreground">This identifier cannot be changed after creation.</p></div>;
+  if (column.type === 'boolean') return <div className="sm:col-span-1"><span className="mb-2 flex items-center justify-between text-xs font-bold text-primary">{column.label}<span className="mono text-[10px] font-normal text-muted-foreground">boolean</span></span><button type="button" id={testId} data-testid={testId} aria-pressed={Boolean(value)} onClick={() => onChange(!value)} className={`focus-ring flex h-12 w-full items-center justify-between rounded-xl border px-3 text-sm font-semibold ${value ? 'border-secondary bg-secondary text-secondary-foreground' : 'border-input bg-background text-foreground'}`}><span>{value ? 'Enabled' : 'Disabled'}</span><span className={`h-5 w-9 rounded-full p-0.5 transition-colors ${value ? 'bg-secondary-foreground' : 'bg-muted-foreground/50'}`}><span className={`block h-4 w-4 rounded-full bg-card transition-transform ${value ? 'translate-x-4' : ''}`} /></span></button></div>;
   if (column.references) return <RelationField column={column} value={value} onChange={onChange} label={label} testId={testId} />;
-  const textValue = value === undefined || value === null ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value);
-  return <div className="sm:col-span-1">{label}{column.type === 'json' || column.type === 'array' ? <textarea id={testId} data-testid={testId} value={textValue} onChange={(event) => onChange(event.target.value)} placeholder={column.type === 'array' ? '["value"]' : '{"key":"value"}'} rows={3} className="focus-ring w-full resize-y rounded-xl border border-input bg-background px-3 py-2.5 text-xs outline-none placeholder:text-muted-foreground/55" /> : <input id={testId} data-testid={testId} type={column.type === 'number' ? 'number' : column.type === 'date' ? 'date' : 'text'} value={textValue} onChange={(event) => onChange(event.target.value)} placeholder={column.references ? `References ${column.references}` : `Enter ${column.label.toLowerCase()}`} className="focus-ring h-11 w-full rounded-xl border border-input bg-background px-3 text-xs outline-none placeholder:text-muted-foreground/55" />}</div>;
+  const isStructured = column.type === 'json' || column.type === 'array';
+  return <div className={isStructured ? 'admin-structured-field sm:col-span-2' : 'sm:col-span-1'}>
+    {label}
+    {isStructured ? <>
+      <textarea id={testId} data-testid={testId} value={textValue} onChange={(event) => onChange(event.target.value)} placeholder={column.type === 'array' ? '["value"]' : '{"key":"value"}'} rows={7} spellCheck={false} className="focus-ring w-full resize-y rounded-xl border border-input bg-background px-3 py-3 font-mono text-sm leading-6 outline-none placeholder:text-muted-foreground" />
+      <p className="mt-1.5 text-xs text-muted-foreground">{column.type === 'array' ? 'Enter a JSON array, for example ["usb-c", "pd"].' : 'Enter a JSON object, for example {"key": "value"}.'}</p>
+    </> : <input id={testId} data-testid={testId} type={column.type === 'number' ? 'number' : column.type === 'date' ? 'date' : 'text'} value={textValue} onChange={(event) => onChange(event.target.value)} placeholder={`Enter ${column.label.toLowerCase()}`} required={!column.nullable} className="focus-ring h-12 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none placeholder:text-muted-foreground" />}
+  </div>;
 }
 
 function RelationField({
