@@ -9,6 +9,15 @@
 export type ListAdminRowsParams = {
 search?: string;
 /**
+ * Exact-match column filter, restricted to columns in the selected admin table.
+ * @minLength 1
+ */
+filterColumn?: string;
+/**
+ * Exact-match value used with filterColumn.
+ */
+filterValue?: string;
+/**
  * @minimum 1
  * @maximum 100
  */

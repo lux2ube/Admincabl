@@ -270,20 +270,37 @@ router.get("/admin/tables/:table/rows", async (req, res): Promise<void> => {
   }
   const table = tableOr404(parsedParams.data.table, res);
   if (!table) return;
+  const { filterColumn, filterValue } = parsedQuery.data;
+  if ((filterColumn === undefined) !== (filterValue === undefined)) {
+    res.status(400).json({ error: "filterColumn and filterValue must be provided together" });
+    return;
+  }
+  if (filterColumn && !table.columns.some((column) => column.key === filterColumn)) {
+    res.status(400).json({ error: "Invalid filter column" });
+    return;
+  }
   try {
     const { search, limit, offset } = parsedQuery.data;
     const searchColumns = table.columns.filter((column) => ["text", "uuid", "number"].includes(column.type));
-    const params: unknown[] = search && searchColumns.length ? [`%${search}%`] : [];
-    const searchClause = search && searchColumns.length
-      ? ` WHERE ${searchColumns.map((column) => `CAST(${quoteIdentifier(column.key)} AS TEXT) ILIKE $1`).join(" OR ")}`
-      : "";
-    const countParams = search && searchColumns.length ? [`%${search}%`] : [];
+    const params: unknown[] = [];
+    const whereParts: string[] = [];
+    if (search && searchColumns.length) {
+      params.push(`%${search}%`);
+      whereParts.push(`(${searchColumns.map((column) => `CAST(${quoteIdentifier(column.key)} AS TEXT) ILIKE $1`).join(" OR ")})`);
+    }
+    if (filterColumn && filterValue !== undefined) {
+      params.push(filterValue);
+      whereParts.push(`CAST(${quoteIdentifier(filterColumn)} AS TEXT) = $${params.length}`);
+    }
+    const whereClause = whereParts.length ? ` WHERE ${whereParts.join(" AND ")}` : "";
+    const countParams = [...params];
+    const rowsParams = [...params, limit, offset];
     const rowsResult = await pool.query(
-      `SELECT * FROM ${quoteIdentifier(table.key)}${searchClause} ORDER BY ${quoteIdentifier(primaryKeyColumns(table)[0])} DESC LIMIT $${params.push(limit)} OFFSET $${params.push(offset)}`,
-      params,
+      `SELECT * FROM ${quoteIdentifier(table.key)}${whereClause} ORDER BY ${quoteIdentifier(primaryKeyColumns(table)[0])} DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      rowsParams,
     );
     const countResult = await pool.query(
-      `SELECT COUNT(*)::int AS count FROM ${quoteIdentifier(table.key)}${searchClause}`,
+      `SELECT COUNT(*)::int AS count FROM ${quoteIdentifier(table.key)}${whereClause}`,
       countParams,
     );
     res.json(ListAdminRowsResponse.parse({ table: table.key, rows: sanitizeRows(rowsResult.rows), total: Number(countResult.rows[0]?.count ?? 0) }));

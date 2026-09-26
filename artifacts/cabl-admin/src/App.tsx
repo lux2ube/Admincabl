@@ -46,7 +46,9 @@ import './index.css';
 
 const queryClient = new QueryClient();
 type Row = Record<string, unknown>;
-type AdminTableLike = { key: string; label: string; primaryKey: string; columns: Array<{ key: string; label: string; type: string; nullable: boolean; primaryKey: boolean; generated?: boolean; references: string | null }> };
+type AdminColumnLike = { key: string; label: string; type: string; nullable: boolean; primaryKey: boolean; generated?: boolean; references: string | null };
+type AdminRelationLike = { column: string; targetTable: string; targetColumn: string; kind: string; label: string };
+type AdminTableLike = { key: string; label: string; primaryKey: string; columns: AdminColumnLike[]; relations: AdminRelationLike[] };
 
 const rowId = (row: Row, table: { primaryKey: string }) => {
   const keys = table.primaryKey.split(',');
@@ -324,7 +326,19 @@ function TablePage() {
         </div>
       )}
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] text-muted-foreground"><span className="flex items-center gap-1.5"><ShieldCheck size={13} className="text-accent" /> Primary key: <strong className="mono text-foreground">{primaryColumn?.label ?? table.primaryKey}</strong></span><span className="flex items-center gap-1.5"><Settings2 size={13} /> Changes sync to the shared API</span></div>
-    {editingRow !== undefined && <RowDialog table={table} row={editingRow} onClose={() => setEditingRow(undefined)} onSaved={() => { setEditingRow(undefined); setNotice(editingRow ? 'Record updated.' : 'Record created.'); queryClient.invalidateQueries({ queryKey: getListAdminRowsQueryKey(tableName) }); queryClient.invalidateQueries({ queryKey: getGetAdminDashboardQueryKey() }); }} />}
+    {editingRow !== undefined && <RowDialog table={table} tables={metadata?.tables ?? []} row={editingRow} onClose={() => setEditingRow(undefined)} onSaved={(savedRow) => {
+      const wasCreating = editingRow === null;
+      const canManageRelations = table.relations.some((relation) => relation.kind === 'has_many');
+      if (wasCreating && savedRow && canManageRelations) {
+        setEditingRow(savedRow);
+        setNotice('Record created. Add related records in this form.');
+      } else {
+        setEditingRow(undefined);
+        setNotice(wasCreating ? 'Record created.' : 'Record updated.');
+      }
+      queryClient.invalidateQueries({ queryKey: getListAdminRowsQueryKey(tableName) });
+      queryClient.invalidateQueries({ queryKey: getGetAdminDashboardQueryKey() });
+    }} />}
   </div>;
 }
 
@@ -370,7 +384,41 @@ function formatRowForEditing(table: AdminTableLike, row: Row | null): Row {
   }));
 }
 
-function RowDialog({ table, row, onClose, onSaved }: { table: AdminTableLike; row: Row | null; onClose: () => void; onSaved: () => void }) {
+function parseAdminFormValues(
+  table: AdminTableLike,
+  values: Row,
+  options: { isEditing: boolean; lockedColumn?: string; lockedValue?: unknown },
+): { parsed?: Row; error?: string } {
+  const parsed: Row = {};
+  for (const column of table.columns) {
+    if (column.generated || column.key === options.lockedColumn || (options.isEditing && column.primaryKey)) continue;
+    const raw = values[column.key];
+    if ((raw === '' || raw === undefined) && column.nullable) {
+      parsed[column.key] = null;
+      continue;
+    }
+    if (raw === '' || raw === undefined) return { error: `${column.label} is required.` };
+    if (column.type === 'number') {
+      const numericValue = Number(raw);
+      if (!Number.isFinite(numericValue)) return { error: `${column.label} must be a valid number.` };
+      parsed[column.key] = numericValue;
+    } else if (column.type === 'boolean') {
+      parsed[column.key] = Boolean(raw);
+    } else if (column.type === 'json' || column.type === 'array') {
+      try {
+        parsed[column.key] = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      } catch {
+        return { error: `${column.label} must be valid JSON.` };
+      }
+    } else {
+      parsed[column.key] = raw;
+    }
+  }
+  if (!options.isEditing && options.lockedColumn) parsed[options.lockedColumn] = options.lockedValue;
+  return { parsed };
+}
+
+function RowDialog({ table, tables, row, onClose, onSaved }: { table: AdminTableLike; tables: AdminTableLike[]; row: Row | null; onClose: () => void; onSaved: (savedRow?: Row) => void }) {
   const [values, setValues] = useState<Row>(() => formatRowForEditing(table, row));
   const [formError, setFormError] = useState('');
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -379,7 +427,12 @@ function RowDialog({ table, row, onClose, onSaved }: { table: AdminTableLike; ro
   const updateRow = useUpdateAdminRow();
   const isEditing = Boolean(row);
   const isPending = createRow.isPending || updateRow.isPending;
+  const currentRowId = row ? rowId(row, table) : null;
   const updateValue = (key: string, value: unknown) => setValues((current) => ({ ...current, [key]: value }));
+  useEffect(() => {
+    setValues(formatRowForEditing(table, row));
+    setFormError('');
+  }, [table.key, currentRowId]);
   useEffect(() => {
     openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     dialogRef.current?.querySelector<HTMLElement>('form input:not([readonly]), form textarea, form select, form button')?.focus();
@@ -411,27 +464,13 @@ function RowDialog({ table, row, onClose, onSaved }: { table: AdminTableLike; ro
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setFormError('');
-    const parsed: Row = {};
-    for (const column of table.columns) {
-      if (column.generated) continue;
-      if (isEditing && column.primaryKey) continue;
-      const raw = values[column.key];
-      if ((raw === '' || raw === undefined) && column.nullable) { parsed[column.key] = null; continue; }
-      if (raw === '' || raw === undefined) { setFormError(`${column.label} is required.`); return; }
-      if (column.type === 'number') {
-        const numericValue = Number(raw);
-        if (!Number.isFinite(numericValue)) { setFormError(`${column.label} must be a valid number.`); return; }
-        parsed[column.key] = numericValue;
-      }
-      else if (column.type === 'boolean') parsed[column.key] = Boolean(raw);
-      else if (column.type === 'json' || column.type === 'array') {
-        try { parsed[column.key] = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch { setFormError(`${column.label} must be valid JSON.`); return; }
-      } else parsed[column.key] = raw;
-    }
+    const result = parseAdminFormValues(table, values, { isEditing });
+    if (result.error || !result.parsed) { setFormError(result.error ?? 'Check the form values.'); return; }
     const onError = () => setFormError('The API rejected this change. Check the values and try again.');
-     if (isEditing && row) updateRow.mutate({ table: table.key, id: rowId(row, table), data: { values: parsed } }, { onSuccess: onSaved, onError });
-    else createRow.mutate({ table: table.key, data: { values: parsed } }, { onSuccess: onSaved, onError });
+    if (isEditing && row) updateRow.mutate({ table: table.key, id: rowId(row, table), data: { values: result.parsed } }, { onSuccess: (saved) => onSaved(saved.row), onError });
+    else createRow.mutate({ table: table.key, data: { values: result.parsed } }, { onSuccess: (saved) => onSaved(saved.row), onError });
   };
+  const hasManyRelations = table.relations.filter((relation) => relation.kind === 'has_many');
   const editableFieldCount = table.columns.filter((column) => !column.generated && !(isEditing && column.primaryKey)).length;
   return (
     <div
@@ -472,6 +511,37 @@ function RowDialog({ table, row, onClose, onSaved }: { table: AdminTableLike; ro
               />
             ))}
           </div>
+          {hasManyRelations.length > 0 && (
+            <section className="space-y-4 border-t border-border pt-5" aria-label="Related records">
+              <div>
+                <p className="mono text-[10px] uppercase tracking-[.16em] text-muted-foreground">Relationships</p>
+                <h3 className="mt-1 text-base font-extrabold text-primary">Related records</h3>
+                <p className="mt-1 text-sm text-muted-foreground">Manage linked records here without leaving this form.</p>
+              </div>
+              {!isEditing || !row ? (
+                <p className="rounded-xl border border-dashed border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+                  Save this record first. Its related records will become editable here immediately.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {hasManyRelations.map((relation) => {
+                    const relatedTable = tables.find((candidate) => candidate.key === relation.targetTable);
+                    return relatedTable ? (
+                      <RelatedRecordsSection
+                        key={`${relation.targetTable}.${relation.targetColumn}`}
+                        parentTable={table}
+                        parentRow={row}
+                        relation={relation}
+                        relatedTable={relatedTable}
+                      />
+                    ) : (
+                      <p key={relation.targetTable} className="text-sm text-destructive">Could not load related table: {relation.targetTable}</p>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          )}
           {formError && <div data-testid="status-form-error" role="alert" className="rounded-xl border border-destructive/35 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive">{formError}</div>}
           <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
             <button type="button" data-testid="button-cancel-row" onClick={closeDialog} className="focus-ring h-11 rounded-xl border border-border px-5 text-sm font-bold text-primary hover:bg-muted">Cancel</button>
@@ -483,6 +553,221 @@ function RowDialog({ table, row, onClose, onSaved }: { table: AdminTableLike; ro
       </div>
     </div>
   );
+}
+
+function RelatedRecordsSection({ parentTable, parentRow, relation, relatedTable }: {
+  parentTable: AdminTableLike;
+  parentRow: Row;
+  relation: AdminRelationLike;
+  relatedTable: AdminTableLike;
+}) {
+  const parentValue = parentRow[relation.column];
+  const [offset, setOffset] = useState(0);
+  const [editor, setEditor] = useState<Row | null | undefined>(undefined);
+  const [sectionError, setSectionError] = useState('');
+  const queryClient = useQueryClient();
+  const params = useMemo(() => ({
+    filterColumn: relation.targetColumn,
+    filterValue: String(parentValue ?? ''),
+    limit: 100,
+    offset,
+  }), [relation.targetColumn, parentValue, offset]);
+  const rowsQuery = useListAdminRows(relatedTable.key, params, {
+    query: {
+      enabled: parentValue !== null && parentValue !== undefined,
+      queryKey: getListAdminRowsQueryKey(relatedTable.key, params),
+    },
+  });
+  const deleteRow = useDeleteAdminRow();
+  const rows = (rowsQuery.data?.rows ?? []) as Row[];
+  const total = rowsQuery.data?.total ?? 0;
+  const relationCanEdit = relatedTable.columns.some(
+    (column) => !column.generated && !column.primaryKey && column.key !== relation.targetColumn,
+  );
+  const refreshRelatedRows = () => {
+    queryClient.invalidateQueries({ queryKey: getListAdminRowsQueryKey(relatedTable.key) });
+    queryClient.invalidateQueries({ queryKey: getGetAdminDashboardQueryKey() });
+  };
+  const handleDelete = (relatedRow: Row) => {
+    const id = rowId(relatedRow, relatedTable);
+    if (!id || !window.confirm(`Remove this ${relatedTable.label} record from ${parentTable.label}?`)) return;
+    setSectionError('');
+    deleteRow.mutate({ table: relatedTable.key, id }, {
+      onSuccess: refreshRelatedRows,
+      onError: () => setSectionError(`Could not remove this linked ${relatedTable.label} record.`),
+    });
+  };
+  const handleSaved = () => {
+    setEditor(undefined);
+    setSectionError('');
+    refreshRelatedRows();
+  };
+
+  return (
+    <section className="rounded-2xl border border-border bg-muted/20 p-4" data-testid={`related-section-${parentTable.key}-${relatedTable.key}`}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h4 className="text-sm font-extrabold text-primary">{relation.label}</h4>
+          <p className="mt-1 text-xs text-muted-foreground">{relatedTable.label} · {rowsQuery.isLoading ? 'Loading…' : `${total} linked ${total === 1 ? 'record' : 'records'}`}</p>
+        </div>
+        <button
+          type="button"
+          data-testid={`button-add-related-${relatedTable.key}`}
+          onClick={() => { setSectionError(''); setEditor(null); }}
+          className="focus-ring inline-flex h-9 items-center gap-2 rounded-lg bg-secondary px-3 text-xs font-bold text-secondary-foreground hover:bg-secondary/80"
+        >
+          <Plus size={14} /> Add linked record
+        </button>
+      </div>
+      {sectionError && <p role="alert" className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive">{sectionError}</p>}
+      {editor !== undefined && (
+        <RelatedRecordEditor
+          key={editor ? rowId(editor, relatedTable) : 'new'}
+          table={relatedTable}
+          parentColumn={relation.targetColumn}
+          parentValue={parentValue}
+          row={editor}
+          onCancel={() => setEditor(undefined)}
+          onSaved={handleSaved}
+        />
+      )}
+      {rowsQuery.isLoading ? (
+        <p className="mt-4 text-xs text-muted-foreground">Loading linked records…</p>
+      ) : rowsQuery.isError ? (
+        <p role="alert" className="mt-4 text-xs font-semibold text-destructive">Could not load linked records.</p>
+      ) : rows.length === 0 ? (
+        <p className="mt-4 rounded-xl border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">No linked records yet.</p>
+      ) : (
+        <div className="mt-4 space-y-2">
+          {rows.map((relatedRow) => {
+            const id = rowId(relatedRow, relatedTable);
+            const previewColumns = relatedTable.columns
+              .filter((column) => !column.generated && column.key !== relation.targetColumn)
+              .slice(0, 3);
+            return (
+              <div key={id} className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card px-3 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="mono truncate text-[10px] font-semibold text-muted-foreground">{id}</p>
+                  <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                    {previewColumns.map((column) => (
+                      <span key={column.key} className="max-w-full truncate text-xs text-foreground">
+                        <span className="font-semibold">{column.label}:</span>{' '}
+                        {column.references
+                          ? <RelatedFieldValue column={column} value={relatedRow[column.key]} />
+                          : displayValue(relatedRow[column.key])}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex shrink-0 gap-1">
+                  {relationCanEdit && <button type="button" aria-label={`Edit linked ${relatedTable.label}`} data-testid={`button-edit-related-${id}`} onClick={() => setEditor(relatedRow)} className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-primary hover:bg-secondary"><Pencil size={14} /></button>}
+                  <button type="button" aria-label={`Remove linked ${relatedTable.label}`} data-testid={`button-delete-related-${id}`} onClick={() => handleDelete(relatedRow)} disabled={deleteRow.isPending} className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 disabled:opacity-50"><Trash2 size={14} /></button>
+                </div>
+              </div>
+            );
+          })}
+          {total > 100 && (
+            <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
+              <span>Showing {offset + 1}–{Math.min(offset + rows.length, total)} of {total}</span>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setOffset((current) => Math.max(0, current - 100))} disabled={offset === 0} className="focus-ring rounded-md border border-border px-2.5 py-1.5 font-semibold disabled:opacity-50">Previous</button>
+                <button type="button" onClick={() => setOffset((current) => current + 100)} disabled={offset + 100 >= total} className="focus-ring rounded-md border border-border px-2.5 py-1.5 font-semibold disabled:opacity-50">Next</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function RelatedRecordEditor({ table, parentColumn, parentValue, row, onCancel, onSaved }: {
+  table: AdminTableLike;
+  parentColumn: string;
+  parentValue: unknown;
+  row: Row | null;
+  onCancel: () => void;
+  onSaved: () => void;
+}) {
+  const isEditing = Boolean(row);
+  const recordId = row ? rowId(row, table) : null;
+  const initialValues = useMemo(() => {
+    const initial = formatRowForEditing(table, row);
+    if (!row) initial[parentColumn] = parentValue;
+    return initial;
+  }, [table.key, recordId, parentColumn, parentValue]);
+  const [values, setValues] = useState<Row>(initialValues);
+  const [error, setError] = useState('');
+  const createRow = useCreateAdminRow();
+  const updateRow = useUpdateAdminRow();
+  const isPending = createRow.isPending || updateRow.isPending;
+  useEffect(() => {
+    setValues(initialValues);
+    setError('');
+  }, [initialValues]);
+  const closeEditor = () => {
+    if (JSON.stringify(values) !== JSON.stringify(initialValues) && !window.confirm('Discard unsaved changes to this linked record?')) return;
+    onCancel();
+  };
+  const save = () => {
+    setError('');
+    const result = parseAdminFormValues(table, values, { isEditing, lockedColumn: parentColumn, lockedValue: parentValue });
+    if (result.error || !result.parsed) {
+      setError(result.error ?? 'Check the linked record values.');
+      return;
+    }
+    const onError = () => setError('The linked record could not be saved. Check the values and try again.');
+    if (isEditing && row) {
+      updateRow.mutate({ table: table.key, id: rowId(row, table), data: { values: result.parsed } }, { onSuccess: onSaved, onError });
+    } else {
+      createRow.mutate({ table: table.key, data: { values: result.parsed } }, { onSuccess: onSaved, onError });
+    }
+  };
+  const columns = table.columns.filter((column) => !column.generated && column.key !== parentColumn);
+
+  return (
+    <div className="mt-4 rounded-xl border border-accent/35 bg-card p-4" role="group" aria-label={`${isEditing ? 'Edit' : 'Add'} ${table.label}`}>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <p className="mono text-[10px] uppercase tracking-[.14em] text-accent">{isEditing ? 'edit linked record' : 'new linked record'}</p>
+          <h5 className="mt-1 text-sm font-extrabold text-primary">{table.label}</h5>
+        </div>
+        <button type="button" aria-label="Cancel linked record editing" onClick={closeEditor} className="focus-ring rounded-lg p-2 text-muted-foreground hover:bg-muted"><X size={16} /></button>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2" onKeyDown={(event) => {
+        if (event.key === 'Enter' && event.target instanceof HTMLInputElement) event.preventDefault();
+      }}>
+        {columns.map((column) => (
+          <Field
+            key={column.key}
+            column={column}
+            value={values[column.key]}
+            readOnly={isEditing && column.primaryKey}
+            onChange={(value) => setValues((current) => ({ ...current, [column.key]: value }))}
+          />
+        ))}
+      </div>
+      {error && <p role="alert" className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive">{error}</p>}
+      <div className="mt-4 flex justify-end gap-2">
+        <button type="button" onClick={closeEditor} className="focus-ring h-9 rounded-lg border border-border px-3 text-xs font-bold text-primary hover:bg-muted">Cancel</button>
+        <button type="button" onClick={save} disabled={isPending} className="focus-ring inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground disabled:opacity-60">
+          {isPending && <LoaderCircle size={13} className="animate-spin" />}{isEditing ? 'Save linked record' : 'Add linked record'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function RelatedFieldValue({ column, value }: { column: AdminColumnLike; value: unknown }) {
+  const [targetTable, targetColumn] = (column.references ?? '').split('.');
+  const params = useMemo(() => ({ limit: 100, offset: 0 }), [targetTable]);
+  const query = useListAdminRows(targetTable, params, {
+    query: { enabled: Boolean(targetTable && targetColumn), queryKey: getListAdminRowsQueryKey(targetTable, params) },
+  });
+  const match = ((query.data?.rows ?? []) as Row[]).find((candidate) => String(candidate[targetColumn]) === String(value));
+  if (!match) return <>{displayValue(value)}</>;
+  const displayColumn = Object.keys(match).find((key) => key !== targetColumn && /(^|_)(name|title|email|code|label)$/.test(key) || key.endsWith('_name'));
+  return <>{relationOptionLabel(match, displayColumn)} · {displayValue(value)}</>;
 }
 
 function Field({ column, value, readOnly = false, onChange }: { column: { key: string; label: string; type: string; nullable: boolean; primaryKey: boolean; references: string | null }; value: unknown; readOnly?: boolean; onChange: (value: unknown) => void }) {

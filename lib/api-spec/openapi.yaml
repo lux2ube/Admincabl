@@ -301,6 +301,17 @@ paths:
           in: query
           schema:
             type: string
+        - name: filterColumn
+          in: query
+          description: Exact-match column filter, restricted to columns in the selected admin table.
+          schema:
+            type: string
+            minLength: 1
+        - name: filterValue
+          in: query
+          description: Exact-match value used with filterColumn.
+          schema:
+            type: string
         - name: limit
           in: query
           schema:

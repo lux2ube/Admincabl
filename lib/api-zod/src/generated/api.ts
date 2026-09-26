@@ -724,6 +724,7 @@ export const ListAdminRowsParams = zod.object({
   "table": zod.coerce.string()
 })
 
+
 export const listAdminRowsQueryLimitDefault = 25;
 export const listAdminRowsQueryLimitMax = 100;
 
@@ -734,6 +735,8 @@ export const listAdminRowsQueryOffsetMin = 0;
 
 export const ListAdminRowsQueryParams = zod.object({
   "search": zod.coerce.string().optional(),
+  "filterColumn": zod.coerce.string().min(1).optional().describe('Exact-match column filter, restricted to columns in the selected admin table.'),
+  "filterValue": zod.coerce.string().optional().describe('Exact-match value used with filterColumn.'),
   "limit": zod.coerce.number().min(1).max(listAdminRowsQueryLimitMax).default(listAdminRowsQueryLimitDefault),
   "offset": zod.coerce.number().min(listAdminRowsQueryOffsetMin).default(listAdminRowsQueryOffsetDefault)
 })
