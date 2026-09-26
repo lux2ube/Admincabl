@@ -40,6 +40,7 @@ import {
   useUpdateAdminRow,
 } from '@workspace/api-client-react';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { ProductSpecificationsSection } from '@/components/product-specifications-section';
 import { Toaster } from '@/components/ui/toaster';
 import NotFound from '@/pages/not-found';
 import './index.css';
@@ -552,14 +553,19 @@ function RowDialog({ table, tables, row, onClose, onSaved }: { table: AdminTable
                 <div className="space-y-3">
                   {hasManyRelations.map((relation) => {
                     const relatedTable = tables.find((candidate) => candidate.key === relation.targetTable);
+                    const isProductSpecifications = table.key === 'products'
+                      && relation.targetTable === 'product_attributes'
+                      && relation.targetColumn === 'product_id';
                     return relatedTable ? (
-                      <RelatedRecordsSection
-                        key={`${relation.targetTable}.${relation.targetColumn}`}
-                        parentTable={table}
-                        parentRow={row}
-                        relation={relation}
-                        relatedTable={relatedTable}
-                      />
+                      isProductSpecifications
+                        ? <ProductSpecificationsSection key={`${relation.targetTable}.${relation.targetColumn}`} productId={String(row[relation.column] ?? '')} />
+                        : <RelatedRecordsSection
+                            key={`${relation.targetTable}.${relation.targetColumn}`}
+                            parentTable={table}
+                            parentRow={row}
+                            relation={relation}
+                            relatedTable={relatedTable}
+                          />
                     ) : (
                       <p key={relation.targetTable} className="text-sm text-destructive">Could not load related table: {relation.targetTable}</p>
                     );
