@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -35,39 +35,39 @@
 }
 
 :root {
-  --background: 38 31% 93%;
-  --foreground: 222 30% 16%;
-  --border: 35 18% 76%;
-  --input: 35 18% 68%;
-  --ring: 12 72% 42%;
-  --card: 40 36% 97%;
-  --card-foreground: 222 30% 16%;
-  --card-border: 35 20% 84%;
-  --popover: 40 36% 97%;
-  --popover-foreground: 222 30% 16%;
-  --popover-border: 35 18% 82%;
-  --primary: 222 31% 18%;
-  --primary-foreground: 40 36% 97%;
-  --secondary: 174 18% 87%;
-  --secondary-foreground: 172 32% 22%;
-  --muted: 36 23% 88%;
-  --muted-foreground: 220 15% 34%;
-  --accent: 12 72% 42%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 4 68% 49%;
-  --destructive-foreground: 40 36% 97%;
-  --sidebar: 222 31% 18%;
-  --sidebar-foreground: 39 30% 91%;
-  --sidebar-border: 222 22% 28%;
-  --sidebar-primary: 12 75% 57%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 222 24% 25%;
-  --sidebar-accent-foreground: 39 30% 91%;
-  --sidebar-ring: 12 75% 57%;
-  --app-font-sans: 'Manrope', ui-sans-serif, sans-serif;
+  --background: 168 26% 96%;
+  --foreground: 195 30% 18%;
+  --border: 171 18% 82%;
+  --input: 171 18% 72%;
+  --ring: 163 78% 38%;
+  --card: 0 0% 99%;
+  --card-foreground: 195 30% 18%;
+  --card-border: 171 20% 88%;
+  --popover: 0 0% 99%;
+  --popover-foreground: 195 30% 18%;
+  --popover-border: 171 18% 84%;
+  --primary: 195 33% 15%;
+  --primary-foreground: 168 26% 96%;
+  --secondary: 165 49% 90%;
+  --secondary-foreground: 167 54% 22%;
+  --muted: 168 24% 91%;
+  --muted-foreground: 195 14% 41%;
+  --accent: 163 78% 38%;
+  --accent-foreground: 0 0% 99%;
+  --destructive: 3 64% 48%;
+  --destructive-foreground: 0 0% 99%;
+  --sidebar: 168 34% 97%;
+  --sidebar-foreground: 195 30% 17%;
+  --sidebar-border: 168 18% 83%;
+  --sidebar-primary: 163 78% 42%;
+  --sidebar-primary-foreground: 0 0% 99%;
+  --sidebar-accent: 165 43% 87%;
+  --sidebar-accent-foreground: 167 54% 20%;
+  --sidebar-ring: 163 78% 38%;
+  --app-font-sans: 'Manrope', 'Noto Sans Arabic', ui-sans-serif, sans-serif;
   --app-font-mono: 'DM Mono', ui-monospace, monospace;
   --radius: 0.75rem;
-  --shadow-soft: 0 12px 32px rgba(34, 41, 56, .08);
+  --shadow-soft: 0 12px 30px rgba(19, 67, 67, .07);
 }
 
 * { box-sizing: border-box; }
@@ -80,6 +80,7 @@ body {
   font-family: var(--app-font-sans);
   font-feature-settings: "ss01" 1, "cv11" 1;
 }
+body:has([dir="rtl"]) { font-family: 'Noto Sans Arabic', 'Manrope', ui-sans-serif, sans-serif; }
 button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 
@@ -105,6 +106,23 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .scrollbar-thin::-webkit-scrollbar { width: 7px; height: 7px; }
 .scrollbar-thin::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 99px; }
 .focus-ring:focus-visible { outline: 3px solid hsl(var(--ring)); outline-offset: 2px; }
+
+/* CABL's small-screen surface is intentionally denser than the desktop shell. */
+.mobile-safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+.data-rtl { direction: rtl; text-align: right; }
+.cabl-card { border: 1px solid hsl(var(--border)); background: hsl(var(--card)); border-radius: 1.25rem; box-shadow: var(--shadow-soft); }
+.cabl-pill { border-radius: 999px; }
+@media (max-width: 767px) {
+  .cabl-noise::after { opacity: .02; }
+  .page-enter { animation-duration: .25s; }
+  .mobile-full-width { width: 100%; align-self: stretch; }
+  .mobile-stack { flex-direction: column; align-items: stretch; }
+  .mobile-action { min-height: 46px; width: 100%; }
+  .mobile-card-pad { padding: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
 
 input:not([type="checkbox"]):not([type="radio"]),
 textarea,
