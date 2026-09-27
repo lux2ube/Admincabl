@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { createServer } from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -7,14 +8,39 @@ import { fileURLToPath } from "node:url";
 // BRAND_STORE_BASE_PATH, or CHROMIUM_BIN when a validation runner needs
 // isolated ports or a different browser executable.
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const apiPort = Number(process.env.BRAND_API_PORT || "8080");
-const storePort = Number(process.env.BRAND_STORE_PORT || "25770");
+
+async function findAvailablePort(excludedPorts = new Set()) {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const port = await new Promise((resolve, reject) => {
+      const server = createServer();
+      server.once("error", reject);
+      server.listen(0, "127.0.0.1", () => {
+        const address = server.address();
+        if (!address || typeof address === "string") {
+          server.close();
+          reject(new Error("Unable to reserve a local test port."));
+          return;
+        }
+        server.close((error) => error ? reject(error) : resolve(address.port));
+      });
+    });
+    if (!excludedPorts.has(port)) return port;
+  }
+  throw new Error("Unable to reserve distinct local test ports.");
+}
+
+const apiPort = Number(process.env.BRAND_API_PORT || await findAvailablePort());
+const storePort = Number(process.env.BRAND_STORE_PORT || await findAvailablePort(new Set([apiPort])));
 const storeBasePath = normalizeBasePath(process.env.BRAND_STORE_BASE_PATH || "/cabl-store/");
 const apiOrigin = `http://127.0.0.1:${apiPort}`;
 const apiUrl = `${apiOrigin}/api`;
 const storeUrl = `http://127.0.0.1:${storePort}${storeBasePath}`;
 const chromium = process.env.CHROMIUM_BIN || process.env.BRAND_CHROMIUM_BIN;
 const children = new Set();
+
+if (apiPort === storePort) {
+  throw new Error("BRAND_API_PORT and BRAND_STORE_PORT must be different.");
+}
 
 if (!Number.isInteger(apiPort) || apiPort <= 0) {
   throw new Error(`Invalid BRAND_API_PORT value: ${process.env.BRAND_API_PORT || ""}`);
