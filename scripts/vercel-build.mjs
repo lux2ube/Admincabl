@@ -71,24 +71,20 @@ let prerenderApi;
 try {
   await run("pnpm", ["--filter", "@workspace/api-server", "run", "build"]);
 
-  const canPrerender = Boolean(process.env.DATABASE_URL || process.env.SUPABASE_DATABASE_URL);
-  if (canPrerender) {
-    prerenderApi = spawn("node", ["--enable-source-maps", path.join(apiDir, "dist", "index.mjs")], {
-      cwd: root,
-      env: { ...process.env, NODE_ENV: "production", PORT: prerenderPort },
-      stdio: "inherit",
-    });
-    await waitForApi(prerenderPort);
-  } else {
-    console.warn("Vercel build: database URL is not configured; catalog SEO prerendering is skipped.");
+  if (!process.env.SUPABASE_DATABASE_URL) {
+    throw new Error("Vercel build requires SUPABASE_DATABASE_URL for catalog SEO prerendering.");
   }
+  prerenderApi = spawn("node", ["--enable-source-maps", path.join(apiDir, "dist", "index.mjs")], {
+    cwd: root,
+    env: { ...process.env, NODE_ENV: "production", PORT: prerenderPort },
+    stdio: "inherit",
+  });
+  await waitForApi(prerenderPort);
 
   await run("pnpm", ["--filter", "@workspace/cabl-store", "run", "build"], {
     BASE_PATH: "/",
     VITE_API_BASE_URL: "",
-    ...(prerenderApi
-      ? { SEO_PRERENDER_API_URL: `http://127.0.0.1:${prerenderPort}/api` }
-      : { SKIP_SEO_PRERENDER: "1" }),
+    SEO_PRERENDER_API_URL: `http://127.0.0.1:${prerenderPort}/api`,
   });
 
   await run("pnpm", ["--filter", "@workspace/cabl-admin", "run", "build"], {

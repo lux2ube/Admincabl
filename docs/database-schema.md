@@ -18,12 +18,15 @@ The current schema exports **53 table definitions** through
 | Drizzle Kit configuration | `lib/db/drizzle.config.ts` |
 | Admin table metadata | `artifacts/api-server/src/lib/admin-schema.ts` |
 
-The application selects the first configured variable:
+The application and Drizzle Kit require:
 
 ```text
 SUPABASE_DATABASE_URL
-DATABASE_URL
 ```
+
+`DATABASE_URL` may be provided by Replit, but CABL does not read it or fall
+back to it. All catalog, commerce, admin, and SEO database access must use
+Supabase.
 
 The database client uses `pg` and Drizzle's PostgreSQL adapter. Schema changes
 are applied through the workspace's Drizzle Kit commands:

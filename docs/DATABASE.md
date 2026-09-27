@@ -5,7 +5,7 @@ admin dashboard, and API server.
 
 ## Scope and source of truth
 
-- **Database:** PostgreSQL
+- **Database:** Supabase PostgreSQL
 - **ORM/schema:** Drizzle ORM
 - **Schema entry point:** `lib/db/src/schema/index.ts`
 - **Schema modules:**
@@ -15,11 +15,11 @@ admin dashboard, and API server.
   - `lib/db/src/schema/sourcing.ts`
 - **Database configuration:** `lib/db/drizzle.config.ts`
 - **Development schema command:** `pnpm --filter @workspace/db run push`
-- **Development connection:** `DATABASE_URL`
+- **Development connection:** `SUPABASE_DATABASE_URL`
 - **Development API access:** `artifacts/api-server/src/routes/`
 
 The table inventory in this document was checked against the development
-database's `public` schema. It contains 36 application tables. The Drizzle
+Supabase database's `public` schema. It contains 53 application tables. The Drizzle
 definitions are the canonical schema for new code; the admin table map in
 `artifacts/api-server/src/lib/admin-schema.ts` provides the dashboard labels
 and logical relationship metadata.
@@ -358,22 +358,22 @@ guides contribute their canonical paths to the sitemap.
 
 ### Development
 
-Use the workspace's existing database connection and run schema changes
+Use the development-scoped `SUPABASE_DATABASE_URL` and run schema changes
 through the DB package:
 
 ```bash
 pnpm --filter @workspace/db run push
 ```
 
-Inspect the development database from the database pane or with the database
-tools. Do not commit a `DATABASE_URL` value or other credentials.
+The application and Drizzle Kit do not fall back to Replit's `DATABASE_URL`.
+Do not commit `SUPABASE_DATABASE_URL` or other credentials.
 
 ### Production
 
-Production schema changes are applied through Replit's Publish flow. Do not
-add custom startup-time DDL, deployment-time migration scripts, or code that
-silently mutates production schema. Resolve rename prompts in the Publish UI
-when a schema change requires them.
+Replit's Publish flow does not change the external Supabase schema. Apply
+production schema changes explicitly to the production Supabase project only
+after validating them against development. Do not add custom startup-time DDL,
+deployment-time schema mutation, or code that silently changes production.
 
 ## Compatibility notes
 
@@ -407,5 +407,6 @@ Before changing a table:
 - Check catalog, checkout, admin, and SEO queries that use the table.
 - Decide whether the change is additive, a rename, or a compatibility fix.
 - Run typecheck and the relevant build.
-- Push development schema changes only through the DB package.
-- Use Publish for production schema changes.
+- Push development Supabase schema changes only through the DB package.
+- Apply production Supabase schema changes through an explicit, reviewed
+  migration process; Replit Publish alone does not update Supabase.

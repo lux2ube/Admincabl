@@ -4,11 +4,11 @@ import * as schema from "./schema";
 
 const { Pool } = pg;
 
-const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
+const databaseUrl = process.env.SUPABASE_DATABASE_URL;
 
 if (!databaseUrl) {
   throw new Error(
-    "SUPABASE_DATABASE_URL or DATABASE_URL must be set.",
+    "SUPABASE_DATABASE_URL must be set. This application does not fall back to DATABASE_URL.",
   );
 }
 
