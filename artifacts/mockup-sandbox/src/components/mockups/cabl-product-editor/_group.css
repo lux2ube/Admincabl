@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --background: 168 26% 96%;
+  --foreground: 195 30% 18%;
+  --border: 171 18% 82%;
+  --input: 171 18% 72%;
+  --ring: 163 78% 38%;
+  --card: 0 0% 99%;
+  --card-foreground: 195 30% 18%;
+  --card-border: 171 20% 88%;
+  --popover: 0 0% 99%;
+  --popover-foreground: 195 30% 18%;
+  --popover-border: 171 18% 84%;
+  --primary: 195 33% 15%;
+  --primary-foreground: 168 26% 96%;
+  --secondary: 165 49% 90%;
+  --secondary-foreground: 167 54% 22%;
+  --muted: 168 24% 91%;
+  --muted-foreground: 195 14% 41%;
+  --accent: 163 78% 38%;
+  --accent-foreground: 0 0% 99%;
+  --destructive: 3 64% 48%;
+  --destructive-foreground: 0 0% 99%;
+  --sidebar: 168 34% 97%;
+  --sidebar-foreground: 195 30% 17%;
+  --sidebar-border: 168 18% 83%;
+  --sidebar-primary: 163 78% 27%;
+  --sidebar-primary-foreground: 0 0% 99%;
+  --sidebar-accent: 165 43% 87%;
+  --sidebar-accent-foreground: 167 54% 20%;
+  --sidebar-ring: 163 78% 38%;
+  --app-font-sans: 'Manrope', 'Noto Sans Arabic', ui-sans-serif, sans-serif;
+  --app-font-mono: 'DM Mono', ui-monospace, monospace;
+  --radius: 0.75rem;
+  --shadow-soft: 0 12px 30px rgba(19, 67, 67, .07);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-width: 320px; background: hsl(var(--background)); color: hsl(var(--foreground)); }
+body { font-family: var(--app-font-sans); font-feature-settings: "ss01" 1, "cv11" 1; }
+body:has([dir="rtl"]) { font-family: 'Noto Sans Arabic', 'Manrope', ui-sans-serif, sans-serif; }
+button, input, textarea, select { font: inherit; }
+.mono { font-family: var(--app-font-mono); }
+.focus-ring:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.cabl-noise::after { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E"); }
