@@ -697,3 +697,16 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:h
   .guided-featured-section{padding:34px 0}
   .guided-featured-section .guided-section-header{margin-bottom:16px}
 }
+
+/* Keep the display-currency control visibly selectable in compact headers. */
+.currency-switcher{gap:5px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.currency-switcher:focus-within{border-color:#1757ee;box-shadow:0 0 0 3px rgba(23,87,238,.13)}
+.currency-switcher .currency-switcher-label{display:inline-flex;flex:none;color:#52627a;font-size:9px;font-weight:800;white-space:nowrap}
+.currency-switcher select{min-width:0}
+.currency-switcher-chevron{flex:none;color:#52627a;pointer-events:none}
+@media (max-width:767px){
+  .currency-switcher{max-width:116px;gap:4px;padding-inline:6px}
+  .currency-switcher .currency-switcher-label{display:inline-flex}
+  .currency-switcher select{max-width:58px;font-size:9px}
+  .site-header.is-home #header-search-ribbon{display:none}
+}

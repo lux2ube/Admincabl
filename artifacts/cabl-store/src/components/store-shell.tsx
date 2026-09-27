@@ -93,7 +93,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
   const hidePeopleAlsoSearch = ['/cart', '/checkout', '/orders'].some((path) => location === path || location.startsWith(`${path}/`));
   return <div dir="rtl" className="min-h-[100dvh]">
      <div className="top-strip"><div className="container top-strip-inner"><div className="top-announcement"><span>الوكيل الحصري لشركة Baseus في اليمن</span><a href="https://wa.me/967771106977" target="_blank" rel="noreferrer" className="top-phone" dir="ltr" aria-label="تواصل معنا عبر واتساب على 771106977" data-testid="link-whatsapp"><MessageCircle size={13}/> 771106977</a></div><Link href="/orders" className="phone-link" data-testid="link-track-order"><PackageSearch size={13}/> تتبع طلبك</Link></div></div>
-     <header className={`site-header${isScrolled ? ' is-scrolled' : ''}`}>
+      <header className={`site-header${isScrolled ? ' is-scrolled' : ''}${location.split('?')[0] === '/' ? ' is-home' : ''}`}>
       <div className="container header-main">
         <button className="mobile-menu" onClick={() => setMobileOpen(true)} aria-label="فتح القائمة" data-testid="button-open-menu"><Menu size={23}/></button>
         <Link href="/" className="brand-mark" data-testid="link-home"><span className="brand-cabl">CABL</span><span className="brand-dot">.</span><small>طاقة يومك</small></Link>
@@ -105,7 +105,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
          return <Link href={item.href} key={item.href} className={`nav-link${isActive ? ' is-active' : ''}`} aria-current={isActive ? 'page' : undefined} data-testid={`link-nav-${item.label}`}>{item.label}{item.label === 'العلامات التجارية' && <ChevronDown size={14}/>}</Link>;
        })}</nav>
         <div className="header-actions">
-            {catalog?.currencies.length ? <label className="currency-switcher"><select value={currency?.code || 'YER'} onChange={(event) => setCurrencyCode(event.target.value)} aria-label="اختيار العملة" data-testid="select-header-currency">{catalog.currencies.map((option) => <option value={option.code} key={option.code}>{option.name}</option>)}</select></label> : null}
+             {catalog?.currencies.length ? <label className="currency-switcher" data-testid="field-currency-switcher"><span className="currency-switcher-label">العملة</span><select value={currency?.code || 'YER'} onChange={(event) => setCurrencyCode(event.target.value)} aria-label="اختيار العملة" data-testid="select-header-currency">{catalog.currencies.map((option) => <option value={option.code} key={option.code}>{option.name}</option>)}</select><ChevronDown className="currency-switcher-chevron" size={13} aria-hidden="true"/></label> : null}
           <Link href="/orders" className="icon-action orders-action" aria-label="تتبع الطلب" data-testid="link-orders"><PackageSearch size={20}/></Link>
           <Link href="/cart" className="icon-action cart-action" aria-label="السلة" data-testid="link-cart"><ShoppingBag size={20}/>{cartCount > 0 && <b>{cartCount}</b>}</Link>
           <Link href="/search?view=favorites" className="icon-action favorite-action" aria-label="المفضلة" data-testid="link-favorites"><Heart size={20}/>{favorites.length > 0 && <b>{favorites.length}</b>}</Link>
