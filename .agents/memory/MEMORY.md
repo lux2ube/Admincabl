@@ -29,3 +29,4 @@
 - [Vercel API middleware typing](vercel-api-middleware-typing.md) — type Pino/Express middleware explicitly because Vercel can reject inferred callback types that pass locally.
 - [Single Vercel deployment](single-vercel-deployment.md) — publish storefront, admin, and Express API from the repository root with one domain.
 - [Product description generation](product-description-generation.md) — generate full Arabic copy from verified catalog/specification data and keep meta descriptions concise.
+- [CABL category attributes](cabl-category-attributes.md) — offer category-bound and global attributes while preserving saved product values when category links change.

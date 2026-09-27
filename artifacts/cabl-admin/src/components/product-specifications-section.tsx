@@ -16,6 +16,7 @@ type AttributeDefinition = Row & {
   attribute_name: string;
   type: string;
   unit?: string | null;
+  category_id?: string | null;
   is_active?: boolean;
 };
 
@@ -85,6 +86,7 @@ function AttributeValueInput({
 function SpecificationRow({
   row,
   attribute,
+  categoryWarning,
   saving,
   removing,
   onSave,
@@ -92,6 +94,7 @@ function SpecificationRow({
 }: {
   row: Row;
   attribute: AttributeDefinition;
+  categoryWarning: boolean;
   saving: boolean;
   removing: boolean;
   onSave: (row: Row, value: string) => void;
@@ -105,8 +108,13 @@ function SpecificationRow({
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-2" dir="rtl">
-      <label htmlFor={id} className="flex min-h-12 min-w-0 items-center rounded-2xl border border-border bg-background/75 px-3 text-sm font-semibold shadow-sm" dir="auto">
+      <label htmlFor={id} className="flex min-h-12 min-w-0 flex-col justify-center rounded-2xl border border-border bg-background/75 px-3 py-1 text-sm font-semibold shadow-sm" dir="auto">
         <span className="truncate">{attribute.attribute_name || String(row.attribute_id ?? 'مواصفة')}</span>
+        {categoryWarning && (
+          <span className="text-[9px] font-semibold leading-4 text-amber-700">
+            خارج تصنيفات المنتج الحالية · القيمة محفوظة
+          </span>
+        )}
       </label>
       <div className="relative min-w-0">
         <AttributeValueInput type={attribute.type} value={value} onChange={setValue} id={id} />
@@ -153,9 +161,13 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const relationParams = useMemo(() => ({ filterColumn: 'product_id', filterValue: productId, limit: 100, offset: 0 }), [productId]);
+  const categoryParams = useMemo(() => ({ filterColumn: 'product_id', filterValue: productId, limit: 100, offset: 0 }), [productId]);
   const attributeParams = useMemo(() => ({ limit: 100, offset: 0 }), []);
   const productAttributesQuery = useListAdminRows('product_attributes', relationParams, {
     query: { queryKey: getListAdminRowsQueryKey('product_attributes', relationParams) },
+  });
+  const productCategoriesQuery = useListAdminRows('product_categories', categoryParams, {
+    query: { queryKey: getListAdminRowsQueryKey('product_categories', categoryParams) },
   });
   const attributesQuery = useListAdminRows('attributes', attributeParams, {
     query: { queryKey: getListAdminRowsQueryKey('attributes', attributeParams) },
@@ -164,11 +176,21 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
   const updateRow = useUpdateAdminRow();
   const deleteRow = useDeleteAdminRow();
   const rows = (productAttributesQuery.data?.rows ?? []) as Row[];
+  const categoryRows = (productCategoriesQuery.data?.rows ?? []) as Row[];
   const attributes = (attributesQuery.data?.rows ?? []) as AttributeDefinition[];
+  const assignedCategoryIds = useMemo(
+    () => new Set(categoryRows.map((row) => String(row.category_id ?? '')).filter(Boolean)),
+    [categoryRows],
+  );
   const attributesById = useMemo(() => new Map(attributes.map((attribute) => [String(attribute.id), attribute])), [attributes]);
   const attachedIds = new Set(rows.map((row) => String(row.attribute_id)));
   const availableAttributes = attributes
-    .filter((attribute) => attribute.is_active !== false && !attachedIds.has(String(attribute.id)))
+    .filter((attribute) => {
+      const assignedToProductCategory = !attribute.category_id || assignedCategoryIds.has(String(attribute.category_id));
+      return attribute.is_active !== false
+        && assignedToProductCategory
+        && !attachedIds.has(String(attribute.id));
+    })
     .sort((left, right) => left.attribute_name.localeCompare(right.attribute_name, 'ar'));
   const selectedAttribute = availableAttributes.find((attribute) => String(attribute.id) === newAttributeId);
 
@@ -258,24 +280,27 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
         <div>
           <p className="mono text-[10px] uppercase tracking-[.16em] text-muted-foreground">Product details</p>
           <h4 className="mt-1 text-base font-extrabold text-primary" dir="rtl">المواصفات</h4>
+          <p className="mt-1 max-w-xl text-[11px] leading-5 text-muted-foreground" dir="rtl">
+            تظهر خصائص تصنيفات المنتج والخصائص العامة. اربط التصنيف من قسم العلاقات؛ تغيير التصنيف لا يحذف القيم المحفوظة.
+          </p>
         </div>
         <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground" data-testid="text-product-specification-count">
           {rows.length}
         </span>
       </div>
 
-      {productAttributesQuery.isLoading || attributesQuery.isLoading ? (
+      {productAttributesQuery.isLoading || productCategoriesQuery.isLoading || attributesQuery.isLoading ? (
         <div className="space-y-2" aria-label="تحميل المواصفات">
           <div className="skeleton h-12 w-full" />
           <div className="skeleton h-12 w-full" />
         </div>
-      ) : productAttributesQuery.isError || attributesQuery.isError ? (
+      ) : productAttributesQuery.isError || productCategoriesQuery.isError || attributesQuery.isError ? (
         <p className="rounded-xl border border-destructive/25 bg-destructive/5 px-3 py-2.5 text-xs font-semibold text-destructive" role="alert">
           تعذر تحميل مواصفات المنتج.
         </p>
       ) : rows.length === 0 && !adding ? (
         <p className="rounded-xl border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
-          لا توجد مواصفات لهذا المنتج بعد.
+          لا توجد مواصفات لهذا المنتج بعد. أضف تصنيفًا أو خصائص عامة ثم اربط ما يناسب المنتج.
         </p>
       ) : (
         <div className="space-y-2">
@@ -291,6 +316,7 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
                 key={String(row.id)}
                 row={row}
                 attribute={attribute ?? fallback}
+                categoryWarning={Boolean(attribute?.category_id && !assignedCategoryIds.has(String(attribute.category_id)))}
                 saving={updateRow.isPending}
                 removing={deleteRow.isPending}
                 onSave={saveExisting}
@@ -388,7 +414,11 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
         </button>
       )}
       {!adding && availableAttributes.length === 0 && rows.length > 0 && (
-        <p className="mt-4 text-xs text-muted-foreground" dir="rtl">تمت إضافة كل المواصفات النشطة لهذا المنتج.</p>
+        <p className="mt-4 text-xs text-muted-foreground" dir="rtl">
+          {assignedCategoryIds.size
+            ? 'تمت إضافة كل الخصائص النشطة المتاحة لتصنيفات هذا المنتج.'
+            : 'لا توجد خصائص عامة إضافية؛ اربط تصنيفًا لإظهار خصائصه.'}
+        </p>
       )}
     </section>
   );

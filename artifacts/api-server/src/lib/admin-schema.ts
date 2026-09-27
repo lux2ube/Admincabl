@@ -153,7 +153,7 @@ const tables: AdminTable[] = [
     columns: [
       id(), column("attribute_name", "اسم الخاصية", "text", { nullable: false }), column("slug", "الرابط المختصر", "text"),
       column("type", "نوع القيمة", "text", { nullable: false }), column("unit", "الوحدة", "text"), column("description", "الوصف", "text"),
-      column("category_id", "التصنيف", "uuid", { references: "categories.id" }), column("sort_order", "الترتيب", "number", { nullable: false }),
+      column("category_id", "التصنيف (فارغ = عام)", "uuid", { references: "categories.id" }), column("sort_order", "الترتيب", "number", { nullable: false }),
       column("is_filterable", "يظهر في الفلاتر", "boolean", { nullable: false }), column("is_comparable", "يظهر في المقارنة", "boolean", { nullable: false }),
       column("is_active", "نشط", "boolean", { nullable: false }), created(), updated(),
     ],
