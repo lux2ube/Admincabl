@@ -43,6 +43,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { ProductSpecificationsSection } from '@/components/product-specifications-section';
 import { Toaster } from '@/components/ui/toaster';
 import NotFound from '@/pages/not-found';
+import { ProductEditorPage } from '@/pages/product-editor-page';
 import './index.css';
 
 const queryClient = new QueryClient();
@@ -144,7 +145,8 @@ function Shell({ children }: { children: ReactNode }) {
                  <p className="mb-1.5 px-3 text-[11px] font-bold uppercase tracking-[.12em] text-sidebar-foreground/90">{group}</p>
                 {tables.map((table) => {
                   const Icon = iconForTable(table.key);
-                  const active = location === `/table/${table.key}`;
+                  const tablePath = `/table/${table.key}`;
+                  const active = location === tablePath || location.startsWith(`${tablePath}/`);
                   return (
                     <Link href={`/table/${table.key}`} key={table.key} data-testid={`link-table-${table.key}`} onClick={() => setMobileOpen(false)} className={`focus-ring group mb-0.5 flex items-center gap-3 rounded-lg px-3 py-2 text-[12px] transition-colors ${active ? 'bg-sidebar-primary text-sidebar-primary-foreground font-bold' : 'text-sidebar-foreground hover:bg-sidebar-accent/70 hover:text-sidebar-foreground'}`}>
                       <Icon size={15} />
@@ -245,6 +247,7 @@ function EmptyState({ title, detail, testId }: { title: string; detail: string; 
 
 function TablePage() {
   const params = useParams<{ table: string }>();
+  const [, setLocation] = useLocation();
   const tableName = params.table ?? '';
   const { data: metadata, isLoading: metadataLoading } = useGetAdminMetadata();
   const table = metadata?.tables.find((item) => item.key === tableName);
@@ -275,10 +278,24 @@ function TablePage() {
       onError: () => setNotice('Delete failed. The record was not changed.'),
     });
   };
+  const openRowEditor = (row: Row) => {
+    if (tableName === 'products') {
+      setLocation(`/table/products/${encodeURIComponent(rowId(row, table))}/edit`);
+      return;
+    }
+    setEditingRow(row);
+  };
+  const addRecord = () => {
+    if (tableName === 'products') {
+      setLocation('/table/products/new');
+      return;
+    }
+    setEditingRow(null);
+  };
   return <div className="page-enter space-y-6" data-testid={`page-table-${tableName}`}>
     <section className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
       <div><div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.16em] text-muted-foreground"><Link href="/" data-testid="link-breadcrumb-overview" className="focus-ring hover:text-accent">Overview</Link><ChevronDown size={12} className="-rotate-90" /><span>{table.group}</span></div><div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground"><Database size={20} /></div><div><h1 className="text-3xl font-extrabold tracking-[-.045em] text-primary" data-testid="text-table-title">{table.label}</h1><p className="mono mt-1 text-[10px] uppercase tracking-[.12em] text-muted-foreground">{table.key} · {table.columns.length} columns · PK {table.primaryKey}</p></div></div></div>
-       <button data-testid="button-add-row" onClick={() => setEditingRow(null)} className="focus-ring mobile-action inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-accent px-5 text-xs font-extrabold text-accent-foreground shadow-sm transition-transform hover:-translate-y-0.5"><Plus size={16} /> Add record</button>
+       <button data-testid="button-add-row" onClick={addRecord} className="focus-ring mobile-action inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-accent px-5 text-xs font-extrabold text-accent-foreground shadow-sm transition-transform hover:-translate-y-0.5"><Plus size={16} /> {tableName === 'products' ? 'Add product' : 'Add record'}</button>
     </section>
     <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-soft)] sm:flex-row sm:items-center"><div className="relative flex-1"><Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" /><input data-testid="input-table-search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Search ${table.label.toLowerCase()}…`} className="focus-ring h-10 w-full rounded-xl border-0 bg-muted/60 pl-10 pr-3 text-xs font-medium outline-none placeholder:text-muted-foreground/70" /></div><span className="mono px-3 text-[10px] text-muted-foreground" data-testid="text-row-total">{rowsQuery.data?.total ?? 0} total records</span><button aria-label="Refresh table" data-testid="button-refresh-table" onClick={() => rowsQuery.refetch()} className="focus-ring flex h-10 w-10 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-primary"><RefreshCw size={15} className={rowsQuery.isFetching ? 'animate-spin' : ''} /></button></div>
     <p className="text-xs font-medium text-muted-foreground">Tip: select any value in a row to edit it. Existing primary keys stay locked.</p>
@@ -312,7 +329,7 @@ function TablePage() {
                           data-testid={`button-edit-cell-${tableName}-${id}-${column.key}`}
                           aria-label={`Edit ${column.label}: ${displayValue(row[column.key])}`}
                           title={`Edit ${column.label}: ${displayValue(row[column.key])}`}
-                          onClick={() => setEditingRow(row)}
+                          onClick={() => openRowEditor(row)}
                           className={`admin-cell-edit focus-ring block w-full truncate rounded-md px-1.5 py-1 text-left transition-colors hover:bg-secondary/70 hover:text-secondary-foreground ${table.primaryKey.split(',').includes(column.key) ? 'mono font-bold text-primary' : ''}`}
                         >
                           {column.references ? <RelationValue value={row[column.key]} reference={column.references} /> : displayValue(row[column.key])}
@@ -321,7 +338,7 @@ function TablePage() {
                     ))}
                     <td className="px-4 py-4">
                       <div className="flex justify-end gap-1">
-                        <button aria-label={`Edit ${id}`} title="Edit record" data-testid={`button-edit-row-${id}`} onClick={() => setEditingRow(row)} className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"><Pencil size={15} /></button>
+                        <button aria-label={`Edit ${id}`} title="Edit record" data-testid={`button-edit-row-${id}`} onClick={() => openRowEditor(row)} className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"><Pencil size={15} /></button>
                         <button aria-label={`Delete ${id}`} title="Delete record" data-testid={`button-delete-row-${id}`} onClick={() => handleDelete(row)} disabled={deleteRow.isPending} className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"><Trash2 size={15} /></button>
                       </div>
                     </td>
@@ -341,7 +358,7 @@ function TablePage() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0"><p className="mono text-[10px] text-muted-foreground">#{String(index + 1).padStart(2, '0')}</p><p className="mono mt-1 truncate text-sm font-bold text-primary">{id}</p></div>
                 <div className="flex shrink-0 gap-1">
-                  <button aria-label={`Edit ${id}`} title="Edit record" data-testid={`button-edit-row-mobile-${id}`} onClick={() => setEditingRow(row)} className="focus-ring flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-secondary-foreground"><Pencil size={15} /></button>
+                  <button aria-label={`Edit ${id}`} title="Edit record" data-testid={`button-edit-row-mobile-${id}`} onClick={() => openRowEditor(row)} className="focus-ring flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-secondary-foreground"><Pencil size={15} /></button>
                   <button aria-label={`Delete ${id}`} title="Delete record" data-testid={`button-delete-row-mobile-${id}`} onClick={() => handleDelete(row)} disabled={deleteRow.isPending} className="focus-ring flex h-10 w-10 items-center justify-center rounded-xl bg-destructive/10 text-destructive disabled:opacity-50"><Trash2 size={15} /></button>
                 </div>
               </div>
@@ -949,9 +966,45 @@ function SeedPage() {
   </div>;
 }
 
+function ProductEditorRelationships({ row }: { row: Row }) {
+  const { data: metadata, isLoading } = useGetAdminMetadata();
+  if (isLoading) return <LoadingBlocks />;
+  const productTable = metadata?.tables.find((table) => table.key === 'products');
+  if (!productTable) return <ErrorState label="product relationships" onRetry={() => queryClient.invalidateQueries({ queryKey: getGetAdminMetadataQueryKey() })} />;
+
+  const relations = productTable.relations.filter((relation) => relation.kind === 'has_many');
+  return (
+    <div className="space-y-4">
+      {relations.map((relation) => {
+        const relatedTable = metadata?.tables.find((table) => table.key === relation.targetTable);
+        if (!relatedTable) {
+          return <p key={relation.targetTable} className="rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-xs text-destructive">
+            Could not load linked table: {relation.targetTable}
+          </p>;
+        }
+        const isProductSpecifications = relation.targetTable === 'product_attributes' && relation.targetColumn === 'product_id';
+        return isProductSpecifications
+          ? <ProductSpecificationsSection key={`${relation.targetTable}.${relation.targetColumn}`} productId={String(row.id ?? '')} />
+          : <RelatedRecordsSection
+              key={`${relation.targetTable}.${relation.targetColumn}`}
+              parentTable={productTable}
+              parentRow={row}
+              relation={relation}
+              relatedTable={relatedTable}
+            />;
+      })}
+    </div>
+  );
+}
+
+function ProductEditorRoute() {
+  const params = useParams<{ productId?: string }>();
+  return <ProductEditorPage productId={params.productId} renderRelatedRecords={(row) => <ProductEditorRelationships row={row} />} />;
+}
+
 function Router() {
   const [location] = useLocation();
-  return <ErrorBoundary resetKey={location}><Shell><Switch><Route path="/" component={Dashboard} /><Route path="/orders" component={OrdersPage} /><Route path="/table/:table" component={TablePage} /><Route path="/seed" component={SeedPage} /><Route component={NotFound} /></Switch></Shell></ErrorBoundary>;
+  return <ErrorBoundary resetKey={location}><Shell><Switch><Route path="/" component={Dashboard} /><Route path="/orders" component={OrdersPage} /><Route path="/table/products/new" component={ProductEditorRoute} /><Route path="/table/products/:productId/edit" component={ProductEditorRoute} /><Route path="/table/:table" component={TablePage} /><Route path="/seed" component={SeedPage} /><Route component={NotFound} /></Switch></Shell></ErrorBoundary>;
 }
 
 export default function App() {

@@ -73,7 +73,9 @@ const tables: AdminTable[] = [
       column("regular_price", "السعر الأساسي", "number", { nullable: false }), column("discount_price", "سعر الخصم", "number"),
       column("quantity", "الكمية", "number", { nullable: false }), column("short_description", "الوصف المختصر", "text"),
       column("product_description", "وصف المنتج", "text"), column("product_weight", "الوزن", "number"),
-      column("product_note", "ملاحظة المنتج", "text"), column("published", "منشور", "boolean", { nullable: false }), created(), updated(),
+      column("product_note", "ملاحظة المنتج", "text"), column("seo_title", "عنوان SEO", "text"),
+      column("meta_description", "وصف محركات البحث", "text"),
+      column("published", "منشور", "boolean", { nullable: false }), created(), updated(),
     ],
     relations: [
       relation("id", "product_categories", "product_id", "has_many", "تصنيفات المنتج"),

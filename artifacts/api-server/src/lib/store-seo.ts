@@ -31,6 +31,8 @@ type ProductSeoInput = {
   image: string | null;
   categoryName: string | null;
   categorySlug: string | null;
+  seoTitle?: string | null;
+  metaDescription?: string | null;
   specifications?: StoreSpecifications;
 };
 
@@ -774,7 +776,7 @@ export function buildHomeSeo(): SeoResponse {
 export function buildProductSeo(input: ProductSeoInput): SeoResponse {
   const displayName = cleanProductText(productDisplayName(input.brand, input.productName));
   const fullDescription = buildProductDescription(input);
-  const description = productMetaDescription(fullDescription);
+  const description = input.metaDescription?.trim() || productMetaDescription(fullDescription);
   const canonicalPath = productPublicPath({
     brandSlug: input.brandSlug,
     categorySlug: input.categorySlug,
@@ -789,7 +791,7 @@ export function buildProductSeo(input: ProductSeoInput): SeoResponse {
   return {
     entityType: "product",
     slug: input.slug,
-    title: `${displayName} | ${categoryName} | CABL`,
+    title: input.seoTitle?.trim() || `${displayName} | ${categoryName} | CABL`,
     h1: input.productName,
     description,
     canonicalPath,

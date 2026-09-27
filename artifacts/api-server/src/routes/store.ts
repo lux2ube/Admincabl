@@ -693,13 +693,15 @@ router.get("/store/seo", async (req, res): Promise<void> => {
         quantity: number;
         short_description: string | null;
         product_description: string | null;
+        seo_title: string | null;
+        meta_description: string | null;
         image_path: string | null;
         category_name: string | null;
         category_slug: string | null;
       }>(
         `SELECT p."slug", COALESCE(b."brand_name", p."brand") AS "brand", b."slug" AS "brand_slug",
                 p."product_name", p."SKU", p."regular_price", p."discount_price", p."quantity",
-                p."short_description", p."product_description", g."image_path",
+                p."short_description", p."product_description", p."seo_title", p."meta_description", g."image_path",
                 c."category_name", c."slug" AS "category_slug"
          FROM "products" p
          LEFT JOIN "brands" b ON b."id" = p."brand_id"
@@ -739,6 +741,8 @@ router.get("/store/seo", async (req, res): Promise<void> => {
         quantity: product.quantity,
         shortDescription: product.short_description,
         productDescription: product.product_description,
+        seoTitle: product.seo_title,
+        metaDescription: product.meta_description,
         image: product.image_path,
         categoryName: product.category_name,
         categorySlug: product.category_slug ?? (product.category_name ? slugify(product.category_name) : null),

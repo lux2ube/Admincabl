@@ -62,6 +62,8 @@ export const productsTable = pgTable("products", {
   productDescription: text("product_description"),
   productWeight: numeric("product_weight", { precision: 10, scale: 3 }),
   productNote: varchar("product_note", { length: 255 }),
+  seoTitle: varchar("seo_title", { length: 255 }),
+  metaDescription: varchar("meta_description", { length: 320 }),
   published: boolean("published").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
