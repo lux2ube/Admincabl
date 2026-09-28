@@ -10,6 +10,7 @@ import {
   useListAdminRows,
   useUpdateAdminRow,
 } from '@workspace/api-client-react';
+import { ProductAttributeSetup } from '@/components/product-attribute-setup';
 
 type Row = Record<string, unknown>;
 type AttributeDefinition = Row & {
@@ -261,6 +262,7 @@ export function ProductSpecificationsSection({
 }) {
   const queryClient = useQueryClient();
   const [adding, setAdding] = useState(false);
+  const [setupOpen, setSetupOpen] = useState(false);
   const [newAttributeId, setNewAttributeId] = useState('');
   const [newValue, setNewValue] = useState('');
   const [error, setError] = useState('');
@@ -590,7 +592,7 @@ export function ProductSpecificationsSection({
         </p>
       ) : rows.length === 0 && !adding ? (
         <p className="rounded-xl border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
-          لا توجد مواصفات لهذا المنتج بعد. اربط المنتج بتصنيف، ثم اربط الخصائص به من شاشة «خصائص التصنيفات» لتظهر هنا.
+          لا توجد مواصفات لهذا المنتج بعد. اختر «إضافة مواصفة» لإعداد خاصية للتصنيف ثم أضف قيمتها هنا.
         </p>
       ) : (
         <div className="space-y-2">
@@ -700,6 +702,33 @@ export function ProductSpecificationsSection({
         </div>
       )}
 
+      {setupOpen && (
+        <ProductAttributeSetup
+          categoryIds={orderedCategoryIds}
+          attributes={attributes}
+          assignments={categoryAssignmentRows}
+          ready={dataReady}
+          onReady={(attributeId) => {
+            setSetupOpen(false);
+            setError('');
+            if (attachedIds.has(attributeId)) {
+              setNotice('تم ربط الخاصية بالتصنيف. بقيت قيمة المنتج المحفوظة كما هي.');
+            } else {
+              setNewAttributeId(attributeId);
+              setNewValue('');
+              setAdding(true);
+              setNotice('تم إعداد الخاصية. اختر قيمتها ثم احفظها لهذا المنتج.');
+            }
+          }}
+          onCancel={(partiallyCreatedName) => {
+            setSetupOpen(false);
+            if (partiallyCreatedName) {
+              setNotice(`تم حفظ تعريف «${partiallyCreatedName}» دون إكمال ربطه. يمكنك اختيار «ربط خاصية موجودة» لاحقًا.`);
+            }
+          }}
+        />
+      )}
+
       {dataReady && missingRequiredAttributes.length > 0 && (
         <p className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs font-semibold text-amber-900" role="status" data-testid="status-required-product-attributes">
           أكمل المواصفات المطلوبة قبل نشر المنتج: {missingRequiredAttributes.join('، ')}
@@ -708,27 +737,45 @@ export function ProductSpecificationsSection({
       {error && <p className="mt-3 rounded-xl border border-destructive/25 bg-destructive/5 px-3 py-2 text-xs font-semibold text-destructive" role="alert" data-testid="status-product-attribute-error">{error}</p>}
       {notice && !error && <p className="mt-3 text-xs font-semibold text-secondary-foreground" role="status" data-testid="status-product-attribute-notice">{notice}</p>}
 
-      {!adding && availableAttributes.length > 0 && (
-        <button
-          type="button"
-          data-testid="button-add-product-attribute"
-          onClick={() => {
-            setAdding(true);
-            setError('');
-            setNotice('');
-          }}
-          className="focus-ring mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-secondary px-4 text-sm font-bold text-secondary-foreground transition-colors hover:bg-secondary/80"
-          dir="rtl"
-        >
-          <Plus size={18} />
-          إضافة مواصفة
-        </button>
+      {!adding && !setupOpen && dataReady && assignedCategoryIds.size > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2" dir="rtl">
+          <button
+            type="button"
+            data-testid="button-add-product-attribute"
+            onClick={() => {
+              if (availableAttributes.length > 0) setAdding(true);
+              else setSetupOpen(true);
+              setError('');
+              setNotice('');
+            }}
+            className="focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-secondary px-4 text-sm font-bold text-secondary-foreground transition-colors hover:bg-secondary/80"
+          >
+            <Plus size={18} />
+            إضافة مواصفة
+          </button>
+          {availableAttributes.length > 0 && (
+            <button
+              type="button"
+              data-testid="button-setup-category-attribute"
+              onClick={() => {
+                setSetupOpen(true);
+                setError('');
+                setNotice('');
+              }}
+              className="focus-ring inline-flex min-h-11 items-center justify-center rounded-full border border-border bg-background px-4 text-xs font-bold text-primary hover:bg-muted"
+            >
+              إنشاء أو ربط خاصية للتصنيف
+            </button>
+          )}
+        </div>
       )}
-      {!adding && availableAttributes.length === 0 && rows.length > 0 && (
-        <p className="mt-4 text-xs text-muted-foreground" dir="rtl">
-          {assignedCategoryIds.size
-            ? 'تمت إضافة كل الخصائص النشطة المتاحة لتصنيفات هذا المنتج.'
-            : 'لا توجد خصائص عامة إضافية؛ اربط تصنيفًا لإظهار خصائصه.'}
+      {!adding && !setupOpen && dataReady && availableAttributes.length === 0 && (
+        <p className="mt-3 text-xs text-muted-foreground" dir="rtl">
+          {assignedCategoryIds.size === 0
+            ? 'اختر تصنيفًا للمنتج أولًا لتتمكن من إضافة مواصفة.'
+            : eligibleAttributes.length === 0
+              ? 'لم تُربط خصائص بهذا التصنيف بعد. اضغط «إضافة مواصفة» لإنشاء خاصية أو ربط خاصية موجودة.'
+              : 'كل خصائص هذا التصنيف مستخدمة بالفعل. يمكنك إنشاء خاصية جديدة أو ربط خاصية أخرى من زر «إضافة مواصفة».'}
         </p>
       )}
     </section>

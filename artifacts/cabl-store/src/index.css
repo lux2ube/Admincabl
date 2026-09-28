@@ -679,23 +679,9 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;background:h
 /* Keep the verified warranty badge on its own RTL-aligned row below the product identity. */
 .warranty-badge-detail{display:flex;margin:12px 0 8px auto}
 
-.home-mobile-category-rail{display:none}
-.guided-featured-section{padding:52px 0;background:#fff;border-block:1px solid #e2ebf3}
-.guided-featured-section .product-grid{margin-top:3px}
-
 @media (max-width:767px){
   .reference-hero-inner{min-height:600px;padding:34px 0 16px}
   .reference-hero-media{height:270px;margin-top:0}
-  .home-mobile-category-rail{display:block;padding:13px 0 14px;background:#fff;border-bottom:1px solid #e5edf5}
-  .home-mobile-category-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
-  .home-mobile-category-head strong{font-family:var(--app-font-display);font-size:13px;color:#1b2d49}
-  .home-mobile-category-head a{display:flex;align-items:center;gap:4px;color:#1757ee;font-size:10px;font-weight:800;white-space:nowrap}
-  .home-mobile-category-list{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 4px;scrollbar-width:none}
-  .home-mobile-category-list::-webkit-scrollbar{display:none}
-  .home-mobile-category-chip{flex:none;border:1px solid #dce7f2;border-radius:999px;background:#f7faff;color:#536b88;padding:7px 11px;font-size:10px;font-weight:800;white-space:nowrap}
-  .home-mobile-category-chip:first-child,.home-mobile-category-chip:focus-visible{border-color:#1757ee;background:#eaf3ff;color:#1757ee}
-  .guided-featured-section{padding:34px 0}
-  .guided-featured-section .guided-section-header{margin-bottom:16px}
 }
 
 /* Keep the display-currency control visibly selectable in compact headers. */

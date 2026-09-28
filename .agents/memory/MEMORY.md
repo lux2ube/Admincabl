@@ -20,6 +20,7 @@
 - [Build environment requirements](build-environment-requirements.md) — Vite artifact builds validate PORT and BASE_PATH even without starting a server.
 - [PageSpeed preview versus production](pagespeed-preview-vs-production.md) — final Lighthouse scores require the published/static artifact, not the Vite preview URL.
 - [Supabase data migration](supabase-data-migration.md) — legacy PostgreSQL copies need column-qualified inserts because physical column order can differ after schema push.
+- [Supabase SQL execution](supabase-sql-execution.md) — use the app's pg client for one-off SQL; psql can misparse the configured URL and expose credential fragments in errors.
 - [WebMCP availability](webmcp-availability.md) — WebMCP is experimental; feature-detect the browser API and keep registrations abortable and read-only by default.
 - [Homepage first paint](homepage-first-paint.md) — keep the storefront hero independent of catalog latency and route-level lazy loading.
 - [Catalog response performance](catalog-response-performance.md) — full catalog payloads are acceptable; database round trips need short caching and in-flight deduplication.
