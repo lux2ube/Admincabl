@@ -1456,14 +1456,14 @@ router.post("/admin/seed", async (req, res): Promise<void> => {
     counts.order_statuses = await seedTable(`INSERT INTO "order_statuses" ("id","status_name","color","privacy") VALUES (1,'جديد','#d6ee42','public'),(2,'قيد التجهيز','#1748bd','public'),(3,'تم الشحن','#efb12a','public'),(4,'مكتمل','#2f9e44','public') ON CONFLICT ("id") DO NOTHING`, []);
     counts.roles = await seedTable(`INSERT INTO "roles" ("id","role_name","privileges") VALUES (1,'مدير المتجر',ARRAY['catalog.read','catalog.write','orders.read','customers.read']) ON CONFLICT ("id") DO NOTHING`, []);
     counts.attributes = await seedTable(
-       `INSERT INTO "attributes" ("id","attribute_name","slug","type","unit","description","is_filterable","is_comparable","is_active") VALUES
-       ('30000000-0000-4000-8000-000000000001','نوع الاستخدام','use_case','select',NULL,'الاستخدام المنشور للمنتج',FALSE,TRUE,TRUE),
-       ('30000000-0000-4000-8000-000000000002','المنفذ','port_type','multiselect',NULL,'أنواع المنافذ المنشورة',TRUE,TRUE,TRUE),
-       ('30000000-0000-4000-8000-000000000003','القدرة القصوى','max_power_w','number','W','القدرة القصوى كما يثبتها المصدر',TRUE,TRUE,TRUE),
-       ('30000000-0000-4000-8000-000000000004','تقنية GaN','gan','boolean',NULL,'وجود تقنية GaN وفق المصدر',TRUE,TRUE,TRUE),
-        ('30000000-0000-4000-8000-000000000005','السعة','capacity_mah','number','mAh','السعة المعلنة للمنتج',TRUE,TRUE,TRUE),
-        ('30000000-0000-4000-8000-000000000006','جهد الإدخال','input_voltage_v','text','V','جهد الإدخال المنشور للمصدر',FALSE,TRUE,TRUE),
-        ('30000000-0000-4000-8000-000000000007','الوزن','weight_g','number','g','وزن المنتج المنشور للمصدر',FALSE,TRUE,TRUE)
+        `INSERT INTO "attributes" ("id","attribute_name","slug","type","unit","description","is_filterable","is_comparable","is_active","is_global") VALUES
+        ('30000000-0000-4000-8000-000000000001','نوع الاستخدام','use_case','select',NULL,'الاستخدام المنشور للمنتج',FALSE,TRUE,TRUE,TRUE),
+        ('30000000-0000-4000-8000-000000000002','المنفذ','port_type','multiselect',NULL,'أنواع المنافذ المنشورة',TRUE,TRUE,TRUE,TRUE),
+        ('30000000-0000-4000-8000-000000000003','القدرة القصوى','max_power_w','number','W','القدرة القصوى كما يثبتها المصدر',TRUE,TRUE,TRUE,TRUE),
+        ('30000000-0000-4000-8000-000000000004','تقنية GaN','gan','boolean',NULL,'وجود تقنية GaN وفق المصدر',TRUE,TRUE,TRUE,TRUE),
+         ('30000000-0000-4000-8000-000000000005','السعة','capacity_mah','number','mAh','السعة المعلنة للمنتج',TRUE,TRUE,TRUE,TRUE),
+         ('30000000-0000-4000-8000-000000000006','جهد الإدخال','input_voltage_v','text','V','جهد الإدخال المنشور للمصدر',FALSE,TRUE,TRUE,TRUE),
+         ('30000000-0000-4000-8000-000000000007','الوزن','weight_g','number','g','وزن المنتج المنشور للمصدر',FALSE,TRUE,TRUE,TRUE)
        ON CONFLICT ("id") DO UPDATE SET
          "attribute_name" = EXCLUDED."attribute_name",
          "slug" = EXCLUDED."slug",

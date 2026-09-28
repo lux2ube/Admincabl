@@ -40,7 +40,10 @@ import {
   useUpdateAdminRow,
 } from '@workspace/api-client-react';
 import { ErrorBoundary } from '@/components/error-boundary';
-import { ProductSpecificationsSection } from '@/components/product-specifications-section';
+import {
+  ProductSpecificationsSection,
+  type ProductRequiredAttributeStatus,
+} from '@/components/product-specifications-section';
 import { Toaster } from '@/components/ui/toaster';
 import NotFound from '@/pages/not-found';
 import { ProductEditorPage } from '@/pages/product-editor-page';
@@ -966,7 +969,13 @@ function SeedPage() {
   </div>;
 }
 
-function ProductEditorRelationships({ row }: { row: Row }) {
+function ProductEditorRelationships({
+  row,
+  onRequiredAttributesChange,
+}: {
+  row: Row;
+  onRequiredAttributesChange: (status: ProductRequiredAttributeStatus) => void;
+}) {
   const { data: metadata, isLoading } = useGetAdminMetadata();
   if (isLoading) return <LoadingBlocks />;
   const productTable = metadata?.tables.find((table) => table.key === 'products');
@@ -984,7 +993,11 @@ function ProductEditorRelationships({ row }: { row: Row }) {
         }
         const isProductSpecifications = relation.targetTable === 'product_attributes' && relation.targetColumn === 'product_id';
         return isProductSpecifications
-          ? <ProductSpecificationsSection key={`${relation.targetTable}.${relation.targetColumn}`} productId={String(row.id ?? '')} />
+          ? <ProductSpecificationsSection
+              key={`${relation.targetTable}.${relation.targetColumn}`}
+              productId={String(row.id ?? '')}
+              onRequiredAttributesChange={onRequiredAttributesChange}
+            />
           : <RelatedRecordsSection
               key={`${relation.targetTable}.${relation.targetColumn}`}
               parentTable={productTable}
@@ -999,7 +1012,12 @@ function ProductEditorRelationships({ row }: { row: Row }) {
 
 function ProductEditorRoute() {
   const params = useParams<{ productId?: string }>();
-  return <ProductEditorPage productId={params.productId} renderRelatedRecords={(row) => <ProductEditorRelationships row={row} />} />;
+  return <ProductEditorPage
+    productId={params.productId}
+    renderRelatedRecords={(row, onRequiredAttributesChange) => (
+      <ProductEditorRelationships row={row} onRequiredAttributesChange={onRequiredAttributesChange} />
+    )}
+  />;
 }
 
 function Router() {

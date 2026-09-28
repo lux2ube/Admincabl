@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import {
@@ -18,6 +18,7 @@ import {
   useListAdminRows,
   useUpdateAdminRow,
 } from '@workspace/api-client-react';
+import type { ProductRequiredAttributeStatus } from '@/components/product-specifications-section';
 
 type Row = Record<string, unknown>;
 
@@ -41,7 +42,10 @@ type ProductValues = {
 
 type ProductEditorPageProps = {
   productId?: string;
-  renderRelatedRecords?: (row: Row) => ReactNode;
+  renderRelatedRecords?: (
+    row: Row,
+    onRequiredAttributesChange: (status: ProductRequiredAttributeStatus) => void,
+  ) => ReactNode;
 };
 
 const blankProduct = (): ProductValues => ({
@@ -277,6 +281,24 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
       : ''
   ));
   const [priceIntent, setPriceIntent] = useState<boolean | null>(null);
+  const [requiredStatus, setRequiredStatus] = useState<ProductRequiredAttributeStatus & { productId?: string }>({
+    ready: !productId,
+    missing: [],
+    productId,
+  });
+  const currentRequiredStatus = requiredStatus.productId === productId
+    ? requiredStatus
+    : { ready: !productId, missing: [] };
+  const updateRequiredStatus = useCallback(
+    (status: ProductRequiredAttributeStatus) => setRequiredStatus((current) => {
+      const unchanged = current.productId === productId
+        && current.ready === status.ready
+        && current.missing.length === status.missing.length
+        && current.missing.every((name, index) => name === status.missing[index]);
+      return unchanged ? current : { ...status, productId };
+    }),
+    [productId],
+  );
 
   const productParams = useMemo(() => ({
     filterColumn: 'id',
@@ -332,6 +354,14 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
   };
 
   const saveProduct = (published: boolean) => {
+    if (published && productId && !currentRequiredStatus.ready) {
+      setFormError('تعذر التحقق من المواصفات المطلوبة. انتظر اكتمال التحميل ثم حاول النشر مرة أخرى.');
+      return;
+    }
+    if (published && currentRequiredStatus.missing.length > 0) {
+      setFormError(`أكمل المواصفات المطلوبة قبل النشر: ${currentRequiredStatus.missing.join('، ')}`);
+      return;
+    }
     const validationError = validateProduct(values);
     if (validationError) {
       setFormError(validationError);
@@ -649,7 +679,7 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
             <h2 className="mt-1 text-lg font-extrabold tracking-[-.025em] text-primary">Categories, images, and specifications</h2>
             <p className="mt-1.5 text-xs leading-5 text-muted-foreground">Manage this product’s linked catalog records without changing its core product fields.</p>
           </div>
-          {renderRelatedRecords(productRow)}
+          {renderRelatedRecords(productRow, updateRequiredStatus)}
         </div>
       )}
 

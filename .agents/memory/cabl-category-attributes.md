@@ -3,10 +3,10 @@ name: CABL category attributes
 description: Rules for category-dependent attribute selection in the CABL admin product editor.
 ---
 
-Treat `attributes.category_id` as the current single-category assignment; a null category means the attribute is global. For a product, offer active global attributes plus attributes assigned to any of its linked categories. Keep existing product attribute rows visible when category links change, and flag mismatched assignments instead of deleting or hiding their values.
+Use `attributes` and `product_attributes` as the canonical model for editable product facts. Reuse definitions through `category_attributes`; keep global availability on the definition and visibility, order, required, and filter rules on each category assignment. Preserve existing values visibly when a product loses a matching category, and flag them as no longer applicable.
 
-Specifications describe product facts. Values that distinguish separately purchasable SKUs belong in the variant model rather than being treated as ordinary product specifications.
+Keep `specification_definitions` and `category_specification_definitions` in place for existing storefront modules until their consumers can be migrated safely. Do not move product values or verified source metadata into a definition model that does not own those values. Specifications describe product facts; values that distinguish separately purchasable SKUs belong in the variant model.
 
-**Why:** Products may belong to several categories, and removing a category must not silently erase specifications. The current schema supports one category per attribute definition, so future reuse across several categories needs an explicit category-to-attribute assignment table rather than duplicated definitions.
+**Why:** Product values and their source metadata already reference `attributes`; keeping that relationship avoids disconnecting verified facts or breaking storefront output while definitions become reusable.
 
-**How to apply:** In future category-attribute work, preserve global attributes and existing product values, handle category-link cache invalidation, and add per-category ordering or required/filter settings only through an explicit assignment model.
+**How to apply:** Add reusable product facts to the existing attribute/value model. Let category changes affect eligibility and presentation only, never silently delete saved values. Keep SKU-defining options in the variant model.

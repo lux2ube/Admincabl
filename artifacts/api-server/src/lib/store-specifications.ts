@@ -90,11 +90,25 @@ export async function fetchStoreSpecifications(productIds: string[]) {
        FROM "product_attributes" pa
        JOIN "attributes" a ON a."id" = pa."attribute_id" AND a."is_active" = TRUE
        WHERE pa."product_id" = ANY($1::uuid[])
-         AND (a."category_id" IS NULL OR EXISTS (
-           SELECT 1 FROM "product_categories" pac
-           WHERE pac."product_id" = pa."product_id" AND pac."category_id" = a."category_id"
-         ))
-       ORDER BY a."sort_order" ASC, a."attribute_name" ASC`,
+         AND (
+           a."is_global" = TRUE
+           OR EXISTS (
+             SELECT 1
+             FROM "category_attributes" ca
+             JOIN "product_categories" pac ON pac."category_id" = ca."category_id"
+             WHERE ca."attribute_id" = a."id"
+               AND ca."visible" = TRUE
+               AND pac."product_id" = pa."product_id"
+           )
+         )
+       ORDER BY COALESCE((
+         SELECT MIN(ca."sort_order")
+         FROM "category_attributes" ca
+         JOIN "product_categories" pac ON pac."category_id" = ca."category_id"
+         WHERE ca."attribute_id" = a."id"
+           AND ca."visible" = TRUE
+           AND pac."product_id" = pa."product_id"
+       ), a."sort_order") ASC, a."attribute_name" ASC`,
       [productIds],
     ),
     pool.query<{
@@ -401,6 +415,14 @@ export async function fetchStoreSpecificationFilters(categorySlug?: string) {
     ? `JOIN "product_categories" pcf ON pcf."product_id" = pa."product_id"
        JOIN "categories" cf ON cf."id" = pcf."category_id" AND cf."slug" = $1`
     : "";
+  const assignmentCategoryCondition = categorySlug
+    ? `ca."category_id" = cf."id"`
+    : `EXISTS (
+         SELECT 1
+         FROM "product_categories" pacf
+         WHERE pacf."product_id" = pa."product_id"
+           AND pacf."category_id" = ca."category_id"
+       )`;
   const [result, moduleResult] = await Promise.all([
     pool.query<{
     slug: string;
@@ -413,8 +435,18 @@ export async function fetchStoreSpecificationFilters(categorySlug?: string) {
      FROM "product_attributes" pa
      JOIN "attributes" a ON a."id" = pa."attribute_id"
      ${categoryJoin}
-       WHERE a."is_active" = TRUE AND a."is_filterable" = TRUE
-         AND (a."category_id" IS NULL OR a."category_id" = cf."id")
+       WHERE a."is_active" = TRUE
+         AND (
+           (a."is_global" = TRUE AND a."is_filterable" = TRUE)
+           OR EXISTS (
+             SELECT 1
+             FROM "category_attributes" ca
+             WHERE ca."attribute_id" = a."id"
+               AND ca."visible" = TRUE
+               AND ca."is_filterable" = TRUE
+               AND ${assignmentCategoryCondition}
+           )
+         )
      GROUP BY a."slug", a."attribute_name", a."unit", a."sort_order"
      ORDER BY a."sort_order" ASC, a."attribute_name" ASC`,
     params,

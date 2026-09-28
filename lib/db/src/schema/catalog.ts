@@ -1,8 +1,11 @@
 import { sql } from "drizzle-orm";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
 import {
   boolean,
   check,
   date,
+  index,
   integer,
   jsonb,
   numeric,
@@ -95,6 +98,7 @@ export const attributesTable = pgTable("attributes", {
   unit: varchar("unit", { length: 32 }),
   description: text("description"),
   categoryId: uuid("category_id").references(() => categoriesTable.id, { onDelete: "set null" }),
+  isGlobal: boolean("is_global").notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
   isFilterable: boolean("is_filterable").notNull().default(false),
   isComparable: boolean("is_comparable").notNull().default(false),
@@ -107,6 +111,31 @@ export const attributesTable = pgTable("attributes", {
   uniqueIndex("attributes_slug_unique").on(table.slug),
   check("attributes_type_check", sql`"type" IN ('text', 'number', 'boolean', 'select', 'multiselect')`),
 ]);
+
+export const categoryAttributesTable = pgTable(
+  "category_attributes",
+  {
+    categoryId: uuid("category_id").notNull().references(() => categoriesTable.id, { onDelete: "cascade" }),
+    attributeId: uuid("attribute_id").notNull().references(() => attributesTable.id, { onDelete: "cascade" }),
+    visible: boolean("visible").notNull().default(true),
+    sortOrder: integer("sort_order").notNull().default(0),
+    isRequired: boolean("is_required").notNull().default(false),
+    isFilterable: boolean("is_filterable").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.categoryId, table.attributeId] }),
+    index("category_attributes_attribute_id_idx").on(table.attributeId),
+  ],
+);
+
+export const insertCategoryAttributeSchema = createInsertSchema(categoryAttributesTable).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCategoryAttribute = z.infer<typeof insertCategoryAttributeSchema>;
+export type CategoryAttribute = typeof categoryAttributesTable.$inferSelect;
 
 export const attributeValuesTable = pgTable("attribute_values", {
   id: uuid("id").defaultRandom().primaryKey(),

@@ -100,6 +100,7 @@ const tables: AdminTable[] = [
     relations: [
       relation("parent_id", "categories", "id", "parent", "التصنيف الأب"),
       relation("id", "product_categories", "category_id", "has_many", "منتجات التصنيف"),
+      relation("id", "category_attributes", "category_id", "has_many", "خصائص التصنيف"),
     ],
   },
   {
@@ -153,11 +154,31 @@ const tables: AdminTable[] = [
     columns: [
       id(), column("attribute_name", "اسم الخاصية", "text", { nullable: false }), column("slug", "الرابط المختصر", "text"),
       column("type", "نوع القيمة", "text", { nullable: false }), column("unit", "الوحدة", "text"), column("description", "الوصف", "text"),
-      column("category_id", "التصنيف (فارغ = عام)", "uuid", { references: "categories.id" }), column("sort_order", "الترتيب", "number", { nullable: false }),
+      column("is_global", "متاحة في كل التصنيفات", "boolean", { nullable: false }), column("sort_order", "الترتيب", "number", { nullable: false }),
       column("is_filterable", "يظهر في الفلاتر", "boolean", { nullable: false }), column("is_comparable", "يظهر في المقارنة", "boolean", { nullable: false }),
       column("is_active", "نشط", "boolean", { nullable: false }), created(), updated(),
     ],
-    relations: [relation("id", "attribute_values", "attribute_id", "has_many", "قيم الخاصية"), relation("id", "product_attributes", "attribute_id", "has_many", "منتجات الخاصية")],
+    relations: [
+      relation("id", "attribute_values", "attribute_id", "has_many", "قيم الخاصية"),
+      relation("id", "product_attributes", "attribute_id", "has_many", "منتجات الخاصية"),
+      relation("id", "category_attributes", "attribute_id", "has_many", "التصنيفات المرتبطة"),
+    ],
+  },
+  {
+    key: "category_attributes", label: "خصائص التصنيفات", group: "المواصفات", primaryKey: "category_id,attribute_id",
+    columns: [
+      column("category_id", "التصنيف", "uuid", { nullable: false, primaryKey: true, references: "categories.id" }),
+      column("attribute_id", "الخاصية", "uuid", { nullable: false, primaryKey: true, references: "attributes.id" }),
+      column("visible", "ظاهرة", "boolean", { nullable: false }),
+      column("sort_order", "ترتيب الظهور", "number", { nullable: false }),
+      column("is_required", "مطلوبة لإكمال المنتج", "boolean", { nullable: false }),
+      column("is_filterable", "تظهر في فلاتر التصنيف", "boolean", { nullable: false }),
+      created(), updated(),
+    ],
+    relations: [
+      relation("category_id", "categories", "id", "belongs_to", "التصنيف"),
+      relation("attribute_id", "attributes", "id", "belongs_to", "الخاصية"),
+    ],
   },
   {
     key: "attribute_values", label: "قيم الخصائص", group: "الكتالوج", primaryKey: "id",

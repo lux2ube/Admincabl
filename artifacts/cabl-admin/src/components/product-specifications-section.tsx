@@ -1,9 +1,10 @@
 import { useMemo, useState, useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { Check, LoaderCircle, Plus, X } from 'lucide-react';
 import {
   getGetAdminDashboardQueryKey,
   getListAdminRowsQueryKey,
+  listAdminRows,
   useCreateAdminRow,
   useDeleteAdminRow,
   useListAdminRows,
@@ -16,8 +17,28 @@ type AttributeDefinition = Row & {
   attribute_name: string;
   type: string;
   unit?: string | null;
-  category_id?: string | null;
+  is_global?: boolean;
   is_active?: boolean;
+  sort_order?: number;
+};
+type CategoryAttributeAssignment = Row & {
+  category_id: string;
+  attribute_id: string;
+  visible?: boolean;
+  sort_order?: number;
+  is_required?: boolean;
+};
+type ProductAttributeOption = {
+  value: string;
+};
+type AttributeOptionState = {
+  options: ProductAttributeOption[];
+  ready: boolean;
+  error?: string;
+};
+export type ProductRequiredAttributeStatus = {
+  ready: boolean;
+  missing: string[];
 };
 
 const rowValue = (row: Row, attribute: AttributeDefinition) => {
@@ -32,7 +53,11 @@ const rowValue = (row: Row, attribute: AttributeDefinition) => {
   return '';
 };
 
-function encodeAttributeValue(type: string, value: string): { values?: Record<string, unknown>; error?: string } {
+function encodeAttributeValue(
+  type: string,
+  value: string,
+  allowedOptions: ProductAttributeOption[] = [],
+): { values?: Record<string, unknown>; error?: string } {
   const trimmed = value.trim();
   if (!trimmed) return { error: 'أدخل قيمة للمواصفة قبل الحفظ.' };
   if (type === 'number') {
@@ -44,6 +69,17 @@ function encodeAttributeValue(type: string, value: string): { values?: Record<st
     if (trimmed !== 'true' && trimmed !== 'false') return { error: 'اختر نعم أو لا.' };
     return { values: { value_text: null, value_number: null, value_boolean: trimmed === 'true' } };
   }
+  if (type === 'select' && !allowedOptions.some((option) => option.value === trimmed)) {
+    return { error: 'اختر قيمة من الخيارات المحددة لهذه المواصفة.' };
+  }
+  if (type === 'multiselect') {
+    const selected = [...new Set(trimmed.split(',').map((part) => part.trim()).filter(Boolean))];
+    if (!selected.length) return { error: 'اختر قيمة واحدة على الأقل.' };
+    if (selected.some((value) => !allowedOptions.some((option) => option.value === value))) {
+      return { error: 'اختر القيم من الخيارات المحددة لهذه المواصفة.' };
+    }
+    return { values: { value_text: selected.join(', '), value_number: null, value_boolean: null } };
+  }
   return { values: { value_text: trimmed, value_number: null, value_boolean: null } };
 }
 
@@ -52,20 +88,65 @@ function AttributeValueInput({
   value,
   onChange,
   id,
+  options = [],
+  disabled = false,
 }: {
   type: string;
   value: string;
   onChange: (value: string) => void;
   id: string;
+  options?: ProductAttributeOption[];
+  disabled?: boolean;
 }) {
   const className = 'focus-ring h-12 min-w-0 w-full rounded-2xl border border-border bg-background/80 px-3 text-sm font-medium shadow-sm outline-none transition-colors focus:border-accent';
+  const selectedValues = value.split(',').map((part) => part.trim()).filter(Boolean);
+  const visibleOptions = [
+    ...options,
+    ...selectedValues
+      .filter((selected) => !options.some((option) => option.value === selected))
+      .map((selected) => ({ value: selected })),
+  ];
   if (type === 'boolean') {
     return (
-      <select id={id} value={value} onChange={(event) => onChange(event.target.value)} className={className} dir="rtl">
+      <select id={id} value={value} onChange={(event) => onChange(event.target.value)} className={className} dir="rtl" disabled={disabled}>
         <option value="">اختر قيمة</option>
         <option value="true">نعم</option>
         <option value="false">لا</option>
       </select>
+    );
+  }
+  if (type === 'select') {
+    return (
+      <select id={id} value={value} onChange={(event) => onChange(event.target.value)} className={className} dir="rtl" disabled={disabled}>
+        <option value="">اختر قيمة</option>
+        {visibleOptions.map((option) => <option key={option.value} value={option.value}>{option.value}</option>)}
+      </select>
+    );
+  }
+  if (type === 'multiselect') {
+    return (
+      <div id={id} role="group" aria-label="القيم المتعددة" className="max-h-32 min-h-12 min-w-0 space-y-1 overflow-y-auto rounded-2xl border border-border bg-background/80 p-2">
+        {visibleOptions.length ? visibleOptions.map((option) => {
+          const checked = selectedValues.includes(option.value);
+          return (
+            <label key={option.value} className="flex cursor-pointer items-center gap-2 rounded-lg px-1.5 py-1 text-xs font-medium text-foreground hover:bg-muted">
+              <input
+                type="checkbox"
+                checked={checked}
+                disabled={disabled}
+                onChange={(event) => {
+                  const next = event.target.checked
+                    ? [...selectedValues, option.value]
+                    : selectedValues.filter((selected) => selected !== option.value);
+                  onChange(next.join(', '));
+                }}
+                className="accent-primary"
+              />
+              <span dir="auto">{option.value}</span>
+            </label>
+          );
+        }) : <p className="px-1 text-[10px] leading-5 text-muted-foreground">أضف خيارات لهذه الخاصية أولًا.</p>}
+      </div>
     );
   }
   return (
@@ -79,6 +160,7 @@ function AttributeValueInput({
       className={className}
       dir="auto"
       autoComplete="off"
+      disabled={disabled}
     />
   );
 }
@@ -87,6 +169,8 @@ function SpecificationRow({
   row,
   attribute,
   categoryWarning,
+  required,
+  optionState,
   saving,
   removing,
   onSave,
@@ -95,6 +179,8 @@ function SpecificationRow({
   row: Row;
   attribute: AttributeDefinition;
   categoryWarning: boolean;
+  required: boolean;
+  optionState: AttributeOptionState;
   saving: boolean;
   removing: boolean;
   onSave: (row: Row, value: string) => void;
@@ -110,6 +196,7 @@ function SpecificationRow({
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-2" dir="rtl">
       <label htmlFor={id} className="flex min-h-12 min-w-0 flex-col justify-center rounded-2xl border border-border bg-background/75 px-3 py-1 text-sm font-semibold shadow-sm" dir="auto">
         <span className="truncate">{attribute.attribute_name || String(row.attribute_id ?? 'مواصفة')}</span>
+        {required && <span className="text-[9px] font-bold leading-4 text-destructive">مطلوبة</span>}
         {categoryWarning && (
           <span className="text-[9px] font-semibold leading-4 text-amber-700">
             خارج تصنيفات المنتج الحالية · القيمة محفوظة
@@ -117,7 +204,15 @@ function SpecificationRow({
         )}
       </label>
       <div className="relative min-w-0">
-        <AttributeValueInput type={attribute.type} value={value} onChange={setValue} id={id} />
+        <AttributeValueInput
+          type={attribute.type}
+          value={value}
+          onChange={setValue}
+          id={id}
+          options={optionState.options}
+          disabled={!optionState.ready}
+        />
+        {optionState.error && <span className="mt-1 block text-[9px] font-semibold text-destructive">{optionState.error}</span>}
         {attribute.unit && attribute.type !== 'boolean' && (
           <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[11px] font-semibold text-muted-foreground" dir="auto">
             {attribute.unit}
@@ -131,7 +226,7 @@ function SpecificationRow({
             aria-label={`حفظ ${attribute.attribute_name}`}
             data-testid={`button-save-product-attribute-${String(row.id)}`}
             onClick={() => onSave(row, value)}
-            disabled={saving}
+            disabled={saving || !optionState.ready}
             className="focus-ring flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50"
           >
             {saving ? <LoaderCircle size={16} className="animate-spin" /> : <Check size={16} />}
@@ -153,7 +248,13 @@ function SpecificationRow({
   );
 }
 
-export function ProductSpecificationsSection({ productId }: { productId: string }) {
+export function ProductSpecificationsSection({
+  productId,
+  onRequiredAttributesChange,
+}: {
+  productId: string;
+  onRequiredAttributesChange?: (status: ProductRequiredAttributeStatus) => void;
+}) {
   const queryClient = useQueryClient();
   const [adding, setAdding] = useState(false);
   const [newAttributeId, setNewAttributeId] = useState('');
@@ -182,21 +283,182 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
     () => new Set(categoryRows.map((row) => String(row.category_id ?? '')).filter(Boolean)),
     [categoryRows],
   );
+  const orderedCategoryIds = useMemo(() => [...assignedCategoryIds].sort(), [assignedCategoryIds]);
+  const categoryAssignmentQueries = useQueries({
+    queries: orderedCategoryIds.map((categoryId) => {
+      const params = { filterColumn: 'category_id', filterValue: categoryId, limit: 100, offset: 0 };
+      return {
+        queryKey: getListAdminRowsQueryKey('category_attributes', params),
+        queryFn: ({ signal }: { signal: AbortSignal }) => listAdminRows('category_attributes', params, { signal }),
+      };
+    }),
+  });
+  const categoryAssignmentPageSpecs = categoryAssignmentQueries.flatMap((query, index) => {
+    const total = query.data?.total ?? 0;
+    const pages = [];
+    for (let offset = 100; offset < total; offset += 100) {
+      pages.push({ categoryId: orderedCategoryIds[index], offset });
+    }
+    return pages;
+  });
+  const categoryAssignmentPageQueries = useQueries({
+    queries: categoryAssignmentPageSpecs.map(({ categoryId, offset }) => {
+      const params = { filterColumn: 'category_id', filterValue: categoryId, limit: 100, offset };
+      return {
+        queryKey: getListAdminRowsQueryKey('category_attributes', params),
+        queryFn: ({ signal }: { signal: AbortSignal }) => listAdminRows('category_attributes', params, { signal }),
+      };
+    }),
+  });
+  const allCategoryAssignmentQueries = [...categoryAssignmentQueries, ...categoryAssignmentPageQueries];
+  const categoryAssignmentRows = allCategoryAssignmentQueries.flatMap(
+    (query) => (query.data?.rows ?? []) as CategoryAttributeAssignment[],
+  );
+  const categoryAssignmentLoading = allCategoryAssignmentQueries.some((query) => query.isFetching);
+  const categoryAssignmentLoadError = allCategoryAssignmentQueries.some((query) => query.isError);
   const attributesById = useMemo(() => new Map(attributes.map((attribute) => [String(attribute.id), attribute])), [attributes]);
+  const assignmentsByAttributeId = useMemo(() => {
+    const grouped = new Map<string, CategoryAttributeAssignment[]>();
+    for (const assignment of categoryAssignmentRows) {
+      const id = String(assignment.attribute_id);
+      grouped.set(id, [...(grouped.get(id) ?? []), assignment]);
+    }
+    return grouped;
+  }, [categoryAssignmentRows]);
   const attachedIds = new Set(rows.map((row) => String(row.attribute_id)));
+  const matchingAssignments = (attributeId: string) => (assignmentsByAttributeId.get(attributeId) ?? [])
+    .filter((assignment) => assignedCategoryIds.has(String(assignment.category_id)) && assignment.visible !== false);
+  const attributeSortOrder = (attribute: AttributeDefinition) => {
+    const assignedOrders = matchingAssignments(String(attribute.id))
+      .map((assignment) => Number(assignment.sort_order))
+      .filter(Number.isFinite);
+    return assignedOrders.length ? Math.min(...assignedOrders) : Number(attribute.sort_order ?? 0);
+  };
   const availableAttributes = attributes
     .filter((attribute) => {
-      const assignedToProductCategory = !attribute.category_id || assignedCategoryIds.has(String(attribute.category_id));
+      const assignedToProductCategory = attribute.is_global === true
+        || matchingAssignments(String(attribute.id)).length > 0;
       return attribute.is_active !== false
         && assignedToProductCategory
         && !attachedIds.has(String(attribute.id));
     })
-    .sort((left, right) => left.attribute_name.localeCompare(right.attribute_name, 'ar'));
+    .sort((left, right) => attributeSortOrder(left) - attributeSortOrder(right)
+      || left.attribute_name.localeCompare(right.attribute_name, 'ar'));
   const selectedAttribute = availableAttributes.find((attribute) => String(attribute.id) === newAttributeId);
+  const optionAttributeIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const row of rows) {
+      const id = String(row.attribute_id ?? '');
+      if (['select', 'multiselect'].includes(attributesById.get(id)?.type ?? '')) ids.add(id);
+    }
+    if (selectedAttribute && ['select', 'multiselect'].includes(selectedAttribute.type)) {
+      ids.add(String(selectedAttribute.id));
+    }
+    return [...ids].filter(Boolean).sort();
+  }, [rows, attributesById, selectedAttribute?.id, selectedAttribute?.type]);
+  const optionQueries = useQueries({
+    queries: optionAttributeIds.map((attributeId) => {
+      const params = { filterColumn: 'attribute_id', filterValue: attributeId, limit: 100, offset: 0 };
+      return {
+        queryKey: getListAdminRowsQueryKey('attribute_values', params),
+        queryFn: ({ signal }: { signal: AbortSignal }) => listAdminRows('attribute_values', params, { signal }),
+      };
+    }),
+  });
+  const optionPageSpecs = optionQueries.flatMap((query, index) => {
+    const total = query.data?.total ?? 0;
+    const pages = [];
+    for (let offset = 100; offset < total; offset += 100) {
+      pages.push({ attributeId: optionAttributeIds[index], offset });
+    }
+    return pages;
+  });
+  const optionPageQueries = useQueries({
+    queries: optionPageSpecs.map(({ attributeId, offset }) => {
+      const params = { filterColumn: 'attribute_id', filterValue: attributeId, limit: 100, offset };
+      return {
+        queryKey: getListAdminRowsQueryKey('attribute_values', params),
+        queryFn: ({ signal }: { signal: AbortSignal }) => listAdminRows('attribute_values', params, { signal }),
+      };
+    }),
+  });
+  const optionsByAttributeId = new Map<string, AttributeOptionState>();
+  optionAttributeIds.forEach((attributeId, index) => {
+    const query = optionQueries[index];
+    const pageQueries = optionPageSpecs
+      .map((spec, pageIndex) => spec.attributeId === attributeId ? optionPageQueries[pageIndex] : undefined)
+      .filter((pageQuery) => pageQuery !== undefined);
+    const relatedQueries = [query, ...pageQueries];
+    const optionRows = relatedQueries.flatMap((optionQuery) => (optionQuery?.data?.rows ?? []) as Row[]);
+    const values = [...new Set(optionRows.map((row) => String(row.attribute_value ?? '')).filter(Boolean))];
+    const queryFailed = relatedQueries.some((optionQuery) => optionQuery?.isError);
+    const queryPending = relatedQueries.some((optionQuery) => !optionQuery?.data || optionQuery.isFetching);
+    optionsByAttributeId.set(attributeId, {
+      options: values.map((value) => ({ value })),
+      ready: !queryPending && !queryFailed,
+      error: queryFailed
+        ? 'تعذر تحميل خيارات هذه الخاصية.'
+        : undefined,
+    });
+  });
+  const defaultOptionState: AttributeOptionState = { options: [], ready: true };
+  const optionStateFor = (attribute?: AttributeDefinition) => {
+    if (!attribute || !['select', 'multiselect'].includes(attribute.type)) return defaultOptionState;
+    return optionsByAttributeId.get(String(attribute.id)) ?? { options: [], ready: false };
+  };
+  const requiredAssignmentSignature = categoryAssignmentRows
+    .filter((assignment) => assignedCategoryIds.has(String(assignment.category_id))
+      && assignment.visible !== false
+      && assignment.is_required === true)
+    .map((assignment) => String(assignment.attribute_id))
+    .sort()
+    .join('|');
+  const requiredAttributeIds = useMemo(
+    () => new Set(requiredAssignmentSignature.split('|').filter(Boolean)),
+    [requiredAssignmentSignature],
+  );
+  const missingRequiredAttributes = useMemo(
+    () => [...requiredAttributeIds]
+      .filter((attributeId) => {
+        const row = rows.find((candidate) => String(candidate.attribute_id) === attributeId);
+        const attribute = attributesById.get(attributeId) ?? {
+          id: attributeId,
+          attribute_name: 'مواصفة مطلوبة',
+          type: 'text',
+        };
+        return !row || !rowValue(row, attribute).trim();
+      })
+      .map((attributeId) => attributesById.get(attributeId)?.attribute_name ?? 'مواصفة مطلوبة'),
+    [requiredAttributeIds, rows, attributesById],
+  );
+  const incompleteAdminRows = [productAttributesQuery, productCategoriesQuery, attributesQuery].some(
+    (query) => query.data && query.data.rows.length < query.data.total,
+  );
+  const dataReady = !productAttributesQuery.isFetching
+    && !productCategoriesQuery.isFetching
+    && !attributesQuery.isFetching
+    && !categoryAssignmentLoading
+    && !productAttributesQuery.isError
+    && !productCategoriesQuery.isError
+    && !attributesQuery.isError
+    && !categoryAssignmentLoadError
+    && !incompleteAdminRows;
+  const missingRequiredSignature = missingRequiredAttributes.join('\u0000');
+  const requiredStatus = useMemo(
+    () => ({
+      ready: dataReady,
+      missing: dataReady ? missingRequiredAttributes : [],
+    }),
+    [dataReady, missingRequiredSignature],
+  );
+  useEffect(() => {
+    onRequiredAttributesChange?.(requiredStatus);
+  }, [onRequiredAttributesChange, requiredStatus]);
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: getListAdminRowsQueryKey('product_attributes') });
     void queryClient.invalidateQueries({ queryKey: getListAdminRowsQueryKey('attributes') });
+    void queryClient.invalidateQueries({ queryKey: getListAdminRowsQueryKey('category_attributes') });
     void queryClient.invalidateQueries({ queryKey: getGetAdminDashboardQueryKey() });
   };
 
@@ -206,7 +468,12 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
       setError('تعذر العثور على تعريف هذه المواصفة.');
       return;
     }
-    const encoded = encodeAttributeValue(attribute.type, value);
+    const options = optionStateFor(attribute);
+    if (!options.ready) {
+      setError(options.error ?? 'انتظر تحميل خيارات هذه الخاصية.');
+      return;
+    }
+    const encoded = encodeAttributeValue(attribute.type, value, options.options);
     if (!encoded.values) {
       setError(encoded.error ?? 'تحقق من قيمة المواصفة.');
       return;
@@ -244,7 +511,16 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
       setError('اختر مواصفة أولًا.');
       return;
     }
-    const encoded = encodeAttributeValue(selectedAttribute.type, newValue);
+    const options = optionStateFor(selectedAttribute);
+    if (!options.ready) {
+      setError(options.error ?? 'انتظر تحميل خيارات هذه الخاصية.');
+      return;
+    }
+    if (['select', 'multiselect'].includes(selectedAttribute.type) && options.options.length === 0) {
+      setError('أضف خيارات مسموحة لهذه الخاصية قبل استخدامها.');
+      return;
+    }
+    const encoded = encodeAttributeValue(selectedAttribute.type, newValue, options.options);
     if (!encoded.values) {
       setError(encoded.error ?? 'تحقق من قيمة المواصفة.');
       return;
@@ -289,14 +565,21 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
         </span>
       </div>
 
-      {productAttributesQuery.isLoading || productCategoriesQuery.isLoading || attributesQuery.isLoading ? (
+      {productAttributesQuery.isFetching
+        || productCategoriesQuery.isFetching
+        || attributesQuery.isFetching
+        || categoryAssignmentLoading ? (
         <div className="space-y-2" aria-label="تحميل المواصفات">
           <div className="skeleton h-12 w-full" />
           <div className="skeleton h-12 w-full" />
         </div>
-      ) : productAttributesQuery.isError || productCategoriesQuery.isError || attributesQuery.isError ? (
+      ) : productAttributesQuery.isError
+        || productCategoriesQuery.isError
+        || attributesQuery.isError
+        || categoryAssignmentLoadError
+        || incompleteAdminRows ? (
         <p className="rounded-xl border border-destructive/25 bg-destructive/5 px-3 py-2.5 text-xs font-semibold text-destructive" role="alert">
-          تعذر تحميل مواصفات المنتج.
+          تعذر تحميل جميع مواصفات المنتج أو روابط التصنيفات. لم يتم إخفاء القيم المحفوظة.
         </p>
       ) : rows.length === 0 && !adding ? (
         <p className="rounded-xl border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
@@ -316,7 +599,9 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
                 key={String(row.id)}
                 row={row}
                 attribute={attribute ?? fallback}
-                categoryWarning={Boolean(attribute?.category_id && !assignedCategoryIds.has(String(attribute.category_id)))}
+                categoryWarning={Boolean(attribute && attribute.is_global !== true && matchingAssignments(String(attribute.id)).length === 0)}
+                required={requiredAttributeIds.has(String(row.attribute_id))}
+                optionState={optionStateFor(attribute ?? fallback)}
                 saving={updateRow.isPending}
                 removing={deleteRow.isPending}
                 onSave={saveExisting}
@@ -353,8 +638,10 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
                       value={newValue}
                       onChange={setNewValue}
                       id="input-new-product-attribute-value"
+                      options={optionStateFor(selectedAttribute).options}
+                      disabled={!optionStateFor(selectedAttribute).ready}
                     />
-                    {selectedAttribute.unit && selectedAttribute.type !== 'boolean' && (
+                    {selectedAttribute.unit && selectedAttribute.type !== 'boolean' && selectedAttribute.type !== 'multiselect' && (
                       <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[11px] font-semibold text-muted-foreground" dir="auto">
                         {selectedAttribute.unit}
                       </span>
@@ -370,7 +657,10 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
                   aria-label="حفظ المواصفة الجديدة"
                   data-testid="button-create-product-attribute"
                   onClick={addAttribute}
-                  disabled={createRow.isPending}
+                  disabled={createRow.isPending
+                    || !optionStateFor(selectedAttribute).ready
+                    || (['select', 'multiselect'].includes(selectedAttribute?.type ?? '')
+                      && optionStateFor(selectedAttribute).options.length === 0)}
                   className="focus-ring flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50"
                 >
                   {createRow.isPending ? <LoaderCircle size={16} className="animate-spin" /> : <Check size={16} />}
@@ -394,6 +684,11 @@ export function ProductSpecificationsSection({ productId }: { productId: string 
         </div>
       )}
 
+      {dataReady && missingRequiredAttributes.length > 0 && (
+        <p className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs font-semibold text-amber-900" role="status" data-testid="status-required-product-attributes">
+          أكمل المواصفات المطلوبة قبل نشر المنتج: {missingRequiredAttributes.join('، ')}
+        </p>
+      )}
       {error && <p className="mt-3 rounded-xl border border-destructive/25 bg-destructive/5 px-3 py-2 text-xs font-semibold text-destructive" role="alert" data-testid="status-product-attribute-error">{error}</p>}
       {notice && !error && <p className="mt-3 text-xs font-semibold text-secondary-foreground" role="status" data-testid="status-product-attribute-notice">{notice}</p>}
 
