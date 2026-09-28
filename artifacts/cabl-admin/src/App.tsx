@@ -981,7 +981,34 @@ function ProductEditorRelationships({
   const productTable = metadata?.tables.find((table) => table.key === 'products');
   if (!productTable) return <ErrorState label="product relationships" onRetry={() => queryClient.invalidateQueries({ queryKey: getGetAdminMetadataQueryKey() })} />;
 
-  const relations = productTable.relations.filter((relation) => relation.kind === 'has_many');
+  const supportedProductOwnedTables = [
+    'product_tags',
+    'product_attributes',
+    'variants',
+    'galleries',
+    'product_shippings',
+    'product_warranties',
+    'power_bank_specifications',
+    'cable_specifications',
+    'car_charger_specifications',
+    'charger_ports',
+    'product_charging_protocols',
+    'charger_power_profiles',
+    'product_dimensions',
+    'product_protections',
+    'product_compatibility',
+    'product_coupons',
+  ] as const;
+  const relations = supportedProductOwnedTables
+    .map((targetTable) => productTable.relations.find((relation) => relation.targetTable === targetTable) ?? {
+      column: 'id',
+      targetTable,
+      targetColumn: 'product_id',
+      kind: 'has_many',
+      label: metadata?.tables.find((table) => table.key === targetTable)?.label ?? targetTable,
+    })
+    .filter((relation) => metadata?.tables.some((table) => table.key === relation.targetTable))
+    .filter((relation) => !['order_items', 'card_items', 'sells'].includes(relation.targetTable));
   return (
     <div className="space-y-4">
       {relations.map((relation) => {

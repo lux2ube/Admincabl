@@ -19,6 +19,7 @@ import {
   useUpdateAdminRow,
 } from '@workspace/api-client-react';
 import type { ProductRequiredAttributeStatus } from '@/components/product-specifications-section';
+import { ProductCategoriesSection } from '@/components/product-categories-section';
 
 type Row = Record<string, unknown>;
 
@@ -49,7 +50,7 @@ type ProductEditorPageProps = {
 };
 
 const blankProduct = (): ProductValues => ({
-  brand: 'Vention',
+  brand: '',
   product_name: '',
   SKU: '',
   brand_id: '',
@@ -276,11 +277,14 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
   const [savedValues, setSavedValues] = useState<ProductValues>(blankProduct);
   const [formError, setFormError] = useState('');
   const [notice, setNotice] = useState(() => (
-    new URLSearchParams(window.location.search).get('created') === '1'
-      ? 'Product created. You can now add categories, images, and specifications.'
+    new URLSearchParams(window.location.search).get('categoryWarning') === '1'
+      ? 'Product saved, but one or more category links failed. Review the category section and retry.'
+      : new URLSearchParams(window.location.search).get('created') === '1'
+        ? 'Product created. Categories are selected above; you can now add images and specifications.'
       : ''
   ));
   const [priceIntent, setPriceIntent] = useState<boolean | null>(null);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [requiredStatus, setRequiredStatus] = useState<ProductRequiredAttributeStatus & { productId?: string }>({
     ready: !productId,
     missing: [],
@@ -317,8 +321,9 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
     query: { queryKey: getListAdminRowsQueryKey('brands', brandParams) },
   });
   const createRow = useCreateAdminRow();
+  const createCategoryRelation = useCreateAdminRow();
   const updateRow = useUpdateAdminRow();
-  const isPending = createRow.isPending || updateRow.isPending;
+  const isPending = createRow.isPending || updateRow.isPending || createCategoryRelation.isPending;
   const productRow = ((productQuery.data?.rows ?? []) as Row[])[0];
   const brands = (brandsQuery.data?.rows ?? []) as Row[];
   const isDirty = JSON.stringify(values) !== JSON.stringify(savedValues);
@@ -328,6 +333,7 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
       const empty = blankProduct();
       setValues(empty);
       setSavedValues(empty);
+      setSelectedCategoryIds([]);
       return;
     }
     if (productRow) {
@@ -342,6 +348,13 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
     setFormError('');
     setNotice('');
   };
+
+  const updateSelectedCategoryIds = useCallback((ids: string[]) => {
+    setSelectedCategoryIds((current) => (
+      current.length === ids.length && current.every((id, index) => id === ids[index]) ? current : ids
+    ));
+    setFormError('');
+  }, []);
 
   const leaveEditor = () => {
     if (isDirty && !window.confirm('Discard your unsaved product changes?')) return;
@@ -367,6 +380,14 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
       setFormError(validationError);
       return;
     }
+    if (!values.brand_id.trim()) {
+      setFormError('Select a brand record before saving the product.');
+      return;
+    }
+    if (!selectedCategoryIds.length) {
+      setFormError('Select at least one category before saving the product.');
+      return;
+    }
     setFormError('');
     setNotice('');
     setPriceIntent(published);
@@ -386,12 +407,19 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
             setSavedValues(saved);
             refreshProductData();
             const id = String((result.row as Row).id ?? '');
-            if (id) {
-              setLocation(`/table/products/${encodeURIComponent(id)}/edit?created=1`);
-            } else {
+            if (!id) {
               setNotice(published ? 'Product published.' : 'Draft saved.');
+              setPriceIntent(null);
+              return;
             }
-            setPriceIntent(null);
+            Promise.allSettled(selectedCategoryIds.map((categoryId) => createCategoryRelation.mutateAsync({
+              table: 'product_categories',
+              data: { values: { product_id: id, category_id: categoryId } },
+            }))).then((results) => {
+              const failed = results.filter((item) => item.status === 'rejected').length;
+              setLocation(`/table/products/${encodeURIComponent(id)}/edit?created=1${failed ? '&categoryWarning=1' : ''}`);
+              setPriceIntent(null);
+            });
           },
           onError,
         },
@@ -479,6 +507,11 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
         className="space-y-5"
         data-testid="form-product-editor"
       >
+        <ProductCategoriesSection
+          productId={productId}
+          selectedCategoryIds={selectedCategoryIds}
+          onSelectedCategoryIdsChange={updateSelectedCategoryIds}
+        />
         <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
           <div className="space-y-5">
             <EditorCard>
@@ -494,7 +527,7 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
                 <InputField id="product-sku" label="SKU" value={values.SKU} onChange={(value) => updateValue('SKU', value)} required maxLength={255} dir="ltr" />
                 <div className="min-w-0">
                   <label htmlFor="product-brand-id" className="mb-2 flex items-center justify-between gap-3 text-xs font-bold text-primary">
-                    <span>Brand record</span>
+                    <span>Brand record <span className="ml-1 text-accent">*</span></span>
                     {brandsQuery.isFetching && <span className="text-[10px] font-medium text-muted-foreground">Loading…</span>}
                   </label>
                   <select
@@ -516,6 +549,7 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
                     <option value="">Select a brand record</option>
                     {brands.map((brand) => <option key={String(brand.id)} value={String(brand.id)}>{String(brand.brand_name ?? brand.id)}</option>)}
                   </select>
+                  {brandsQuery.isError && <p className="mt-1.5 text-[10px] font-semibold text-destructive">Brand records could not be loaded. Try again before saving.</p>}
                 </div>
                 <div className="sm:col-span-2">
                   <InputField
