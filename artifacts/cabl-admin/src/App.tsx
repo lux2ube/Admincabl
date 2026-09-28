@@ -54,6 +54,32 @@ type Row = Record<string, unknown>;
 type AdminColumnLike = { key: string; label: string; type: string; nullable: boolean; primaryKey: boolean; generated?: boolean; references: string | null };
 type AdminRelationLike = { column: string; targetTable: string; targetColumn: string; kind: string; label: string };
 type AdminTableLike = { key: string; label: string; primaryKey: string; columns: AdminColumnLike[]; relations: AdminRelationLike[] };
+type ProductRelationPresentation = {
+  title: string;
+  description: string;
+  singular: string;
+  plural: string;
+  addLabel: string;
+  titleColumns: string[];
+};
+
+const productRelationPresentations: Record<string, ProductRelationPresentation> = {
+  product_tags: { title: 'Product tags', description: 'Choose the labels used to organize and surface this product.', singular: 'tag', plural: 'tags', addLabel: 'Add tag', titleColumns: ['tag_id', 'tag_name', 'name'] },
+  variants: { title: 'Variants', description: 'Manage the purchasable options and SKUs for this product.', singular: 'variant', plural: 'variants', addLabel: 'Add variant', titleColumns: ['variant_name', 'name', 'SKU', 'sku', 'option_name'] },
+  galleries: { title: 'Product images', description: 'Manage the images shown on the product page.', singular: 'image', plural: 'images', addLabel: 'Add image', titleColumns: ['alt_text', 'image_name', 'image_url', 'url', 'image'] },
+  product_shippings: { title: 'Shipping options', description: 'Set the shipping methods available for this product.', singular: 'shipping option', plural: 'shipping options', addLabel: 'Add shipping option', titleColumns: ['shipping_id', 'shipping_name', 'name'] },
+  product_warranties: { title: 'Warranty', description: 'Manage the warranty information displayed with this product.', singular: 'warranty detail', plural: 'warranty details', addLabel: 'Add warranty detail', titleColumns: ['warranty_id', 'warranty_name', 'name', 'duration'] },
+  power_bank_specifications: { title: 'Power bank specifications', description: 'Add the technical details specific to this power bank.', singular: 'specification', plural: 'specifications', addLabel: 'Add specification', titleColumns: ['capacity_mah', 'capacity', 'battery_type'] },
+  cable_specifications: { title: 'Cable specifications', description: 'Add the technical details specific to this cable.', singular: 'specification', plural: 'specifications', addLabel: 'Add specification', titleColumns: ['cable_type', 'cable_length', 'length'] },
+  car_charger_specifications: { title: 'Car charger specifications', description: 'Add the technical details specific to this car charger.', singular: 'specification', plural: 'specifications', addLabel: 'Add specification', titleColumns: ['max_power', 'port_count', 'ports'] },
+  charger_ports: { title: 'Charger ports', description: 'Describe the ports included with this charger.', singular: 'port', plural: 'ports', addLabel: 'Add port', titleColumns: ['port_name', 'name', 'port_type'] },
+  product_charging_protocols: { title: 'Charging protocols', description: 'Select the charging standards supported by this product.', singular: 'protocol', plural: 'protocols', addLabel: 'Add protocol', titleColumns: ['protocol_id', 'protocol_name', 'name'] },
+  charger_power_profiles: { title: 'Power profiles', description: 'Manage the power profiles supported by this charger.', singular: 'power profile', plural: 'power profiles', addLabel: 'Add power profile', titleColumns: ['profile_name', 'name', 'voltage'] },
+  product_dimensions: { title: 'Dimensions', description: 'Record the product dimensions and weight.', singular: 'dimension set', plural: 'dimension sets', addLabel: 'Add dimensions', titleColumns: ['length', 'width', 'height'] },
+  product_protections: { title: 'Protection features', description: 'Manage the safety and protection features for this product.', singular: 'protection feature', plural: 'protection features', addLabel: 'Add protection feature', titleColumns: ['protection_name', 'protection_type', 'name'] },
+  product_compatibility: { title: 'Compatibility', description: 'List the devices or product families this item works with.', singular: 'compatibility entry', plural: 'compatibility entries', addLabel: 'Add compatible device', titleColumns: ['device_name', 'device_model', 'model', 'name'] },
+  product_coupons: { title: 'Product coupons', description: 'Manage coupons that apply specifically to this product.', singular: 'coupon', plural: 'coupons', addLabel: 'Add coupon', titleColumns: ['coupon_id', 'coupon_code', 'code', 'name'] },
+};
 
 const rowId = (row: Row, table: { primaryKey: string }) => {
   const keys = table.primaryKey.split(',');
@@ -607,11 +633,12 @@ function RowDialog({ table, tables, row, onClose, onSaved }: { table: AdminTable
   );
 }
 
-function RelatedRecordsSection({ parentTable, parentRow, relation, relatedTable }: {
+function RelatedRecordsSection({ parentTable, parentRow, relation, relatedTable, presentation }: {
   parentTable: AdminTableLike;
   parentRow: Row;
   relation: AdminRelationLike;
   relatedTable: AdminTableLike;
+  presentation?: ProductRelationPresentation;
 }) {
   const parentValue = parentRow[relation.column];
   const [offset, setOffset] = useState(0);
@@ -642,11 +669,14 @@ function RelatedRecordsSection({ parentTable, parentRow, relation, relatedTable 
   };
   const handleDelete = (relatedRow: Row) => {
     const id = rowId(relatedRow, relatedTable);
-    if (!id || !window.confirm(`Remove this ${relatedTable.label} record from ${parentTable.label}?`)) return;
+    const itemLabel = presentation?.singular ?? `${relatedTable.label} record`;
+    if (!id || !window.confirm(presentation
+      ? `Remove this ${itemLabel} from the product?`
+      : `Remove this ${itemLabel} from ${parentTable.label}?`)) return;
     setSectionError('');
     deleteRow.mutate({ table: relatedTable.key, id }, {
       onSuccess: refreshRelatedRows,
-      onError: () => setSectionError(`Could not remove this linked ${relatedTable.label} record.`),
+      onError: () => setSectionError(`Could not remove this ${itemLabel}.`),
     });
   };
   const handleSaved = () => {
@@ -659,8 +689,16 @@ function RelatedRecordsSection({ parentTable, parentRow, relation, relatedTable 
     <section className="rounded-2xl border border-border bg-muted/20 p-4" data-testid={`related-section-${parentTable.key}-${relatedTable.key}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h4 className="text-sm font-extrabold text-primary">{relation.label}</h4>
-          <p className="mt-1 text-xs text-muted-foreground">{relatedTable.label} · {rowsQuery.isLoading ? 'Loading…' : `${total} linked ${total === 1 ? 'record' : 'records'}`}</p>
+          <h4 className="text-sm font-extrabold text-primary">{presentation?.title ?? relation.label}</h4>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {presentation?.description ?? relatedTable.label}
+            {' · '}
+            {rowsQuery.isLoading
+              ? 'Loading…'
+              : presentation
+                ? `${total} ${total === 1 ? presentation.singular : presentation.plural}`
+                : `${total} linked ${total === 1 ? 'record' : 'records'}`}
+          </p>
         </div>
         <button
           type="button"
@@ -668,7 +706,7 @@ function RelatedRecordsSection({ parentTable, parentRow, relation, relatedTable 
           onClick={() => { setSectionError(''); setEditor(null); }}
           className="focus-ring inline-flex h-9 items-center gap-2 rounded-lg bg-secondary px-3 text-xs font-bold text-secondary-foreground hover:bg-secondary/80"
         >
-          <Plus size={14} /> Add linked record
+          <Plus size={14} /> {presentation?.addLabel ?? 'Add linked record'}
         </button>
       </div>
       {sectionError && <p role="alert" className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive">{sectionError}</p>}
@@ -679,6 +717,7 @@ function RelatedRecordsSection({ parentTable, parentRow, relation, relatedTable 
           parentColumn={relation.targetColumn}
           parentValue={parentValue}
           row={editor}
+          entityLabel={presentation?.singular}
           onCancel={() => setEditor(undefined)}
           onSaved={handleSaved}
         />
@@ -686,20 +725,46 @@ function RelatedRecordsSection({ parentTable, parentRow, relation, relatedTable 
       {rowsQuery.isLoading ? (
         <p className="mt-4 text-xs text-muted-foreground">Loading linked records…</p>
       ) : rowsQuery.isError ? (
-        <p role="alert" className="mt-4 text-xs font-semibold text-destructive">Could not load linked records.</p>
+        <p role="alert" className="mt-4 text-xs font-semibold text-destructive">
+          {presentation ? `Could not load ${presentation.plural}.` : 'Could not load linked records.'}
+        </p>
       ) : rows.length === 0 ? (
-        <p className="mt-4 rounded-xl border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">No linked records yet.</p>
+        <p className="mt-4 rounded-xl border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
+          {presentation ? `No ${presentation.plural} added yet.` : 'No linked records yet.'}
+        </p>
       ) : (
         <div className="mt-4 space-y-2">
-          {rows.map((relatedRow) => {
+          {rows.map((relatedRow, index) => {
             const id = rowId(relatedRow, relatedTable);
+            const titleColumn = presentation?.titleColumns
+              .map((key) => relatedTable.columns.find((column) => column.key === key))
+              .find((column) => column
+                && !column.generated
+                && (!column.primaryKey || Boolean(column.references))
+                && column.key !== relation.targetColumn
+                && relatedRow[column.key] !== null
+                && relatedRow[column.key] !== undefined
+                && String(relatedRow[column.key]).trim() !== '');
             const previewColumns = relatedTable.columns
-              .filter((column) => !column.generated && column.key !== relation.targetColumn)
-              .slice(0, 3);
+              .filter((column) => !column.generated
+                && (!presentation || !column.primaryKey || Boolean(column.references))
+                && column.key !== relation.targetColumn
+                && column.key !== titleColumn?.key)
+              .slice(0, presentation ? 2 : 3);
             return (
               <div key={id} className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card px-3 py-3">
                 <div className="min-w-0 flex-1">
-                  <p className="mono truncate text-[10px] font-semibold text-muted-foreground">{id}</p>
+                  {presentation ? (
+                    <p className="truncate text-sm font-bold text-primary" dir="auto">
+                      {titleColumn
+                        ? titleColumn.references
+                          ? <RelatedFieldValue column={titleColumn} value={relatedRow[titleColumn.key]} />
+                          : displayValue(relatedRow[titleColumn.key])
+                        : `${presentation.singular} ${offset + index + 1}`}
+                    </p>
+                  ) : (
+                    <p className="mono truncate text-[10px] font-semibold text-muted-foreground">{id}</p>
+                  )}
                   <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
                     {previewColumns.map((column) => (
                       <span key={column.key} className="max-w-full truncate text-xs text-foreground">
@@ -712,8 +777,8 @@ function RelatedRecordsSection({ parentTable, parentRow, relation, relatedTable 
                   </div>
                 </div>
                 <div className="flex shrink-0 gap-1">
-                  {relationCanEdit && <button type="button" aria-label={`Edit linked ${relatedTable.label}`} data-testid={`button-edit-related-${id}`} onClick={() => setEditor(relatedRow)} className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-primary hover:bg-secondary"><Pencil size={14} /></button>}
-                  <button type="button" aria-label={`Remove linked ${relatedTable.label}`} data-testid={`button-delete-related-${id}`} onClick={() => handleDelete(relatedRow)} disabled={deleteRow.isPending} className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 disabled:opacity-50"><Trash2 size={14} /></button>
+                  {relationCanEdit && <button type="button" aria-label={presentation ? `Edit ${presentation.singular}` : `Edit linked ${relatedTable.label}`} data-testid={`button-edit-related-${id}`} onClick={() => setEditor(relatedRow)} className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-primary hover:bg-secondary"><Pencil size={14} /></button>}
+                  <button type="button" aria-label={presentation ? `Remove ${presentation.singular}` : `Remove linked ${relatedTable.label}`} data-testid={`button-delete-related-${id}`} onClick={() => handleDelete(relatedRow)} disabled={deleteRow.isPending} className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 disabled:opacity-50"><Trash2 size={14} /></button>
                 </div>
               </div>
             );
@@ -733,11 +798,12 @@ function RelatedRecordsSection({ parentTable, parentRow, relation, relatedTable 
   );
 }
 
-function RelatedRecordEditor({ table, parentColumn, parentValue, row, onCancel, onSaved }: {
+function RelatedRecordEditor({ table, parentColumn, parentValue, row, entityLabel, onCancel, onSaved }: {
   table: AdminTableLike;
   parentColumn: string;
   parentValue: unknown;
   row: Row | null;
+  entityLabel?: string;
   onCancel: () => void;
   onSaved: () => void;
 }) {
@@ -768,7 +834,9 @@ function RelatedRecordEditor({ table, parentColumn, parentValue, row, onCancel, 
       setError(result.error ?? 'Check the linked record values.');
       return;
     }
-    const onError = () => setError('The linked record could not be saved. Check the values and try again.');
+    const onError = () => setError(entityLabel
+      ? `The ${entityLabel} could not be saved. Check the values and try again.`
+      : 'The linked record could not be saved. Check the values and try again.');
     if (isEditing && row) {
       updateRow.mutate({ table: table.key, id: rowId(row, table), data: { values: result.parsed } }, { onSuccess: onSaved, onError });
     } else {
@@ -778,11 +846,13 @@ function RelatedRecordEditor({ table, parentColumn, parentValue, row, onCancel, 
   const columns = table.columns.filter((column) => !column.generated && column.key !== parentColumn);
 
   return (
-    <div className="mt-4 rounded-xl border border-accent/35 bg-card p-4" role="group" aria-label={`${isEditing ? 'Edit' : 'Add'} ${table.label}`}>
+    <div className="mt-4 rounded-xl border border-accent/35 bg-card p-4" role="group" aria-label={`${isEditing ? 'Edit' : 'Add'} ${entityLabel ?? table.label}`}>
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <p className="mono text-[10px] uppercase tracking-[.14em] text-accent">{isEditing ? 'edit linked record' : 'new linked record'}</p>
-          <h5 className="mt-1 text-sm font-extrabold text-primary">{table.label}</h5>
+          <p className="mono text-[10px] uppercase tracking-[.14em] text-accent">
+            {entityLabel ? `${isEditing ? 'edit' : 'add'} ${entityLabel}` : isEditing ? 'edit linked record' : 'new linked record'}
+          </p>
+          <h5 className="mt-1 text-sm font-extrabold text-primary">{entityLabel ? `${isEditing ? 'Edit' : 'Add'} ${entityLabel}` : table.label}</h5>
         </div>
         <button type="button" aria-label="Cancel linked record editing" onClick={closeEditor} className="focus-ring rounded-lg p-2 text-muted-foreground hover:bg-muted"><X size={16} /></button>
       </div>
@@ -803,7 +873,7 @@ function RelatedRecordEditor({ table, parentColumn, parentValue, row, onCancel, 
       <div className="mt-4 flex justify-end gap-2">
         <button type="button" onClick={closeEditor} className="focus-ring h-9 rounded-lg border border-border px-3 text-xs font-bold text-primary hover:bg-muted">Cancel</button>
         <button type="button" onClick={save} disabled={isPending} className="focus-ring inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground disabled:opacity-60">
-          {isPending && <LoaderCircle size={13} className="animate-spin" />}{isEditing ? 'Save linked record' : 'Add linked record'}
+          {isPending && <LoaderCircle size={13} className="animate-spin" />}{entityLabel ? `${isEditing ? 'Save' : 'Add'} ${entityLabel}` : isEditing ? 'Save linked record' : 'Add linked record'}
         </button>
       </div>
     </div>
@@ -1031,6 +1101,7 @@ function ProductEditorRelationships({
               parentRow={row}
               relation={relation}
               relatedTable={relatedTable}
+              presentation={productRelationPresentations[relation.targetTable]}
             />;
       })}
     </div>

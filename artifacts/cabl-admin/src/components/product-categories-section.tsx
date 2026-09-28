@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, FolderTree, LoaderCircle, RefreshCw, Search } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -14,15 +14,22 @@ export function ProductCategoriesSection({
   productId,
   selectedCategoryIds,
   onSelectedCategoryIdsChange,
+  onDirtyChange,
+  onSaveComplete,
+  disabled = false,
 }: {
   productId?: string;
   selectedCategoryIds: string[];
   onSelectedCategoryIdsChange: (ids: string[]) => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  onSaveComplete?: () => void;
+  disabled?: boolean;
 }) {
   const [search, setSearch] = useState('');
   const [sectionError, setSectionError] = useState('');
   const [sectionNotice, setSectionNotice] = useState('');
   const [persistedCategoryIds, setPersistedCategoryIds] = useState<string[]>([]);
+  const initializedProductId = useRef<string | null>(null);
   const queryClient = useQueryClient();
   const categoryParams = useMemo(() => ({
     search: search.trim() || undefined,
@@ -54,9 +61,23 @@ export function ProductCategoriesSection({
   const selectedSet = useMemo(() => new Set(selectedCategoryIds), [selectedCategoryIds]);
 
   useEffect(() => {
-    if (productId && !relationsQuery.isFetching && !relationsQuery.isError) {
-      onSelectedCategoryIdsChange(linkedCategoryIds);
-      setPersistedCategoryIds(linkedCategoryIds);
+    if (
+      !productId
+      || relationsQuery.isFetching
+      || relationsQuery.isError
+      || initializedProductId.current === productId
+    ) return;
+
+    const persistedIds = [...new Set(linkedCategoryIds)];
+    const params = new URLSearchParams(window.location.search);
+    const categoryDraftIds = params.has('categoryDraft')
+      ? String(params.get('categoryDraft') ?? '').split(',').filter(Boolean)
+      : null;
+    onSelectedCategoryIdsChange(categoryDraftIds ?? persistedIds);
+    setPersistedCategoryIds(persistedIds);
+    initializedProductId.current = productId;
+    if (categoryDraftIds !== null) {
+      setSectionError('Some category changes did not finish. Review this selection and save it again.');
     }
   }, [linkedCategoryIds, onSelectedCategoryIdsChange, productId, relationsQuery.isError, relationsQuery.isFetching]);
 
@@ -72,40 +93,79 @@ export function ProductCategoriesSection({
   };
 
   const isLoading = categoriesQuery.isLoading || Boolean(productId && relationsQuery.isLoading);
-  const isSaving = createRelation.isPending || deleteRelation.isPending;
+  const isSaving = disabled || createRelation.isPending || deleteRelation.isPending;
   const hasCategoryError = categoriesQuery.isError || Boolean(productId && relationsQuery.isError);
-  const categorySelectionDirty = productId && (
-    persistedCategoryIds.length !== selectedCategoryIds.length
+  const categorySelectionDirty = productId
+    ? persistedCategoryIds.length !== selectedCategoryIds.length
       || persistedCategoryIds.some((id) => !selectedSet.has(id))
-  );
+    : selectedCategoryIds.length > 0;
+
+  useEffect(() => {
+    onDirtyChange?.(Boolean(categorySelectionDirty));
+  }, [categorySelectionDirty, onDirtyChange]);
 
   const saveCategoryChanges = () => {
-    if (!productId || !categorySelectionDirty || !selectedCategoryIds.length) return;
+    if (!productId || !categorySelectionDirty) return;
     setSectionError('');
     setSectionNotice('');
-    const added = selectedCategoryIds
-      .filter((id) => !persistedCategoryIds.includes(id))
-      .map((categoryId) => createRelation.mutateAsync({
-        table: 'product_categories',
-        data: { values: { product_id: productId, category_id: categoryId } },
-      }));
-    const removed = persistedCategoryIds
-      .filter((id) => !selectedSet.has(id))
-      .map((categoryId) => deleteRelation.mutateAsync({
-        table: 'product_categories',
-        id: `category_id=${categoryId}|product_id=${productId}`,
-      }));
-    Promise.allSettled([...added, ...removed]).then((results) => {
-      const failed = results.filter((result) => result.status === 'rejected').length;
+    const operations = [
+      ...selectedCategoryIds
+        .filter((id) => !persistedCategoryIds.includes(id))
+        .map((categoryId) => ({
+          kind: 'add' as const,
+          categoryId,
+          promise: createRelation.mutateAsync({
+            table: 'product_categories',
+            data: { values: { product_id: productId, category_id: categoryId } },
+          }),
+        })),
+      ...persistedCategoryIds
+        .filter((id) => !selectedSet.has(id))
+        .map((categoryId) => ({
+          kind: 'remove' as const,
+          categoryId,
+          promise: deleteRelation.mutateAsync({
+            table: 'product_categories',
+            id: `category_id=${categoryId}|product_id=${productId}`,
+          }),
+        })),
+    ];
+
+    Promise.allSettled(operations.map((operation) => operation.promise)).then((results) => {
+      const nextPersistedIds = new Set(persistedCategoryIds);
+      let failed = 0;
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          failed += 1;
+          return;
+        }
+        const operation = operations[index];
+        if (operation.kind === 'add') nextPersistedIds.add(operation.categoryId);
+        else nextPersistedIds.delete(operation.categoryId);
+      });
+      setPersistedCategoryIds([...nextPersistedIds]);
       if (failed) {
         setSectionError(`${failed} category change${failed === 1 ? '' : 's'} failed. The saved links were not fully changed.`);
+        updateCategoryDraftSearch(selectedCategoryIds);
       } else {
         setSectionNotice('Category changes saved. Attribute options will follow these categories.');
+        updateCategoryDraftSearch(null);
+        onSaveComplete?.();
       }
-      setPersistedCategoryIds(failed ? persistedCategoryIds : selectedCategoryIds);
       void queryClient.invalidateQueries({ queryKey: getListAdminRowsQueryKey('product_categories', relationParams) });
     });
   };
+
+  function updateCategoryDraftSearch(draftIds: string[] | null) {
+    const url = new URL(window.location.href);
+    if (draftIds === null) {
+      url.searchParams.delete('categoryDraft');
+      url.searchParams.delete('categoryWarning');
+    } else {
+      url.searchParams.set('categoryDraft', draftIds.join(','));
+    }
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+  }
 
   return (
     <section className="cabl-card overflow-hidden" data-testid="section-product-categories">
@@ -200,7 +260,9 @@ export function ProductCategoriesSection({
 
       {selectedCategoryIds.length === 0 && !isLoading && !hasCategoryError && (
         <p className="mx-5 mb-5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs font-semibold text-amber-900" role="status" data-testid="status-product-category-required">
-          Choose at least one category before the first save.
+          {productId
+            ? 'No categories are assigned. Add a category to enable category-specific product attributes.'
+            : 'Choose at least one category before the first save.'}
         </p>
       )}
       {sectionError && <p className="mx-5 mb-5 rounded-xl border border-destructive/25 bg-destructive/5 px-3 py-2.5 text-xs font-semibold text-destructive" role="alert" data-testid="status-product-category-error">{sectionError}</p>}
@@ -220,7 +282,7 @@ export function ProductCategoriesSection({
               type="button"
               data-testid="button-save-product-categories"
               onClick={saveCategoryChanges}
-              disabled={isSaving || selectedCategoryIds.length === 0}
+              disabled={isSaving}
               className="focus-ring inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-[10px] font-bold text-primary-foreground disabled:opacity-60"
             >
               {isSaving && <LoaderCircle size={13} className="animate-spin" />}

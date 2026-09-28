@@ -67,6 +67,20 @@ const blankProduct = (): ProductValues => ({
   published: false,
 });
 
+function productCreationNotice() {
+  const params = new URLSearchParams(window.location.search);
+  const messages: string[] = [];
+  if (params.get('publishDeferred') === '1') {
+    messages.push('Draft created. Add the required product features, then publish it from this workspace.');
+  }
+  if (params.get('categoryWarning') === '1') {
+    messages.push('The product was created, but one or more category links need attention in the category section.');
+  } else if (params.get('created') === '1' && params.get('publishDeferred') !== '1') {
+    messages.push('Product created. Categories are selected above; you can now add images and specifications.');
+  }
+  return messages.join(' ');
+}
+
 function valuesFromRow(row: Row): ProductValues {
   return {
     brand: String(row.brand ?? ''),
@@ -276,20 +290,20 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
   const [values, setValues] = useState<ProductValues>(blankProduct);
   const [savedValues, setSavedValues] = useState<ProductValues>(blankProduct);
   const [formError, setFormError] = useState('');
-  const [notice, setNotice] = useState(() => (
-    new URLSearchParams(window.location.search).get('categoryWarning') === '1'
-      ? 'Product saved, but one or more category links failed. Review the category section and retry.'
-      : new URLSearchParams(window.location.search).get('created') === '1'
-        ? 'Product created. Categories are selected above; you can now add images and specifications.'
-      : ''
-  ));
+  const [notice, setNotice] = useState(productCreationNotice);
   const [priceIntent, setPriceIntent] = useState<boolean | null>(null);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [categoryDirty, setCategoryDirty] = useState(false);
+  const [isSavingNewCategories, setIsSavingNewCategories] = useState(false);
+  const [brandSearch, setBrandSearch] = useState('');
   const [requiredStatus, setRequiredStatus] = useState<ProductRequiredAttributeStatus & { productId?: string }>({
     ready: !productId,
     missing: [],
     productId,
   });
+  useEffect(() => {
+    setNotice(productId ? productCreationNotice() : '');
+  }, [productId]);
   const currentRequiredStatus = requiredStatus.productId === productId
     ? requiredStatus
     : { ready: !productId, missing: [] };
@@ -316,17 +330,21 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
       queryKey: getListAdminRowsQueryKey('products', productParams),
     },
   });
-  const brandParams = useMemo(() => ({ limit: 100, offset: 0 }), []);
+  const brandParams = useMemo(() => ({
+    search: brandSearch.trim() || undefined,
+    limit: 100,
+    offset: 0,
+  }), [brandSearch]);
   const brandsQuery = useListAdminRows('brands', brandParams, {
     query: { queryKey: getListAdminRowsQueryKey('brands', brandParams) },
   });
   const createRow = useCreateAdminRow();
   const createCategoryRelation = useCreateAdminRow();
   const updateRow = useUpdateAdminRow();
-  const isPending = createRow.isPending || updateRow.isPending || createCategoryRelation.isPending;
+  const isPending = createRow.isPending || updateRow.isPending || createCategoryRelation.isPending || isSavingNewCategories;
   const productRow = ((productQuery.data?.rows ?? []) as Row[])[0];
   const brands = (brandsQuery.data?.rows ?? []) as Row[];
-  const isDirty = JSON.stringify(values) !== JSON.stringify(savedValues);
+  const isDirty = JSON.stringify(values) !== JSON.stringify(savedValues) || categoryDirty;
 
   useEffect(() => {
     if (!productId) {
@@ -367,11 +385,16 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
   };
 
   const saveProduct = (published: boolean) => {
-    if (published && productId && !currentRequiredStatus.ready) {
+    const shouldPublish = Boolean(productId && published);
+    if (shouldPublish && categoryDirty) {
+      setFormError('Save the category changes before publishing so the product uses the selected categories.');
+      return;
+    }
+    if (shouldPublish && !currentRequiredStatus.ready) {
       setFormError('تعذر التحقق من المواصفات المطلوبة. انتظر اكتمال التحميل ثم حاول النشر مرة أخرى.');
       return;
     }
-    if (published && currentRequiredStatus.missing.length > 0) {
+    if (shouldPublish && currentRequiredStatus.missing.length > 0) {
       setFormError(`أكمل المواصفات المطلوبة قبل النشر: ${currentRequiredStatus.missing.join('، ')}`);
       return;
     }
@@ -380,18 +403,18 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
       setFormError(validationError);
       return;
     }
-    if (!values.brand_id.trim()) {
+    if (!productId && !values.brand_id.trim()) {
       setFormError('Select a brand record before saving the product.');
       return;
     }
-    if (!selectedCategoryIds.length) {
+    if (!productId && !selectedCategoryIds.length) {
       setFormError('Select at least one category before saving the product.');
       return;
     }
     setFormError('');
     setNotice('');
     setPriceIntent(published);
-    const payload = fieldValues(values, published);
+    const payload = fieldValues(values, shouldPublish);
     const onError = (error: unknown) => {
       setPriceIntent(null);
       setFormError(apiErrorMessage(error));
@@ -408,16 +431,25 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
             refreshProductData();
             const id = String((result.row as Row).id ?? '');
             if (!id) {
-              setNotice(published ? 'Product published.' : 'Draft saved.');
+              setFormError('The product was created, but the API did not return its ID. Reopen the product list to continue editing.');
+              setIsSavingNewCategories(false);
               setPriceIntent(null);
               return;
             }
+            setIsSavingNewCategories(true);
             Promise.allSettled(selectedCategoryIds.map((categoryId) => createCategoryRelation.mutateAsync({
               table: 'product_categories',
               data: { values: { product_id: id, category_id: categoryId } },
             }))).then((results) => {
-              const failed = results.filter((item) => item.status === 'rejected').length;
-              setLocation(`/table/products/${encodeURIComponent(id)}/edit?created=1${failed ? '&categoryWarning=1' : ''}`);
+              const failed = results.some((item) => item.status === 'rejected');
+              const params = new URLSearchParams({ created: '1' });
+              if (published) params.set('publishDeferred', '1');
+              if (failed) {
+                params.set('categoryWarning', '1');
+                params.set('categoryDraft', selectedCategoryIds.join(','));
+              }
+              setLocation(`/table/products/${encodeURIComponent(id)}/edit?${params.toString()}`);
+              setIsSavingNewCategories(false);
               setPriceIntent(null);
             });
           },
@@ -434,7 +466,7 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
           const saved = valuesFromRow(result.row as Row);
           setValues(saved);
           setSavedValues(saved);
-          setNotice(published ? 'Product published and changes saved.' : 'Draft saved.');
+          setNotice(`${shouldPublish ? 'Product published and changes saved.' : 'Draft saved.'}${categoryDirty ? ' Category changes are still pending above.' : ''}`);
           refreshProductData();
           setPriceIntent(null);
         },
@@ -502,7 +534,7 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          saveProduct(true);
+          saveProduct(Boolean(productId));
         }}
         className="space-y-5"
         data-testid="form-product-editor"
@@ -511,6 +543,9 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
           productId={productId}
           selectedCategoryIds={selectedCategoryIds}
           onSelectedCategoryIdsChange={updateSelectedCategoryIds}
+          onDirtyChange={setCategoryDirty}
+          onSaveComplete={() => setNotice('')}
+          disabled={isPending}
         />
         <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
           <div className="space-y-5">
@@ -523,33 +558,73 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
               />
               <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
                 <InputField id="product-name" label="Product name" value={values.product_name} onChange={(value) => updateValue('product_name', value)} required maxLength={255} />
-                <InputField id="product-brand" label="Brand name" value={values.brand} onChange={(value) => updateValue('brand', value)} required maxLength={100} />
                 <InputField id="product-sku" label="SKU" value={values.SKU} onChange={(value) => updateValue('SKU', value)} required maxLength={255} dir="ltr" />
-                <div className="min-w-0">
-                  <label htmlFor="product-brand-id" className="mb-2 flex items-center justify-between gap-3 text-xs font-bold text-primary">
-                    <span>Brand record <span className="ml-1 text-accent">*</span></span>
-                    {brandsQuery.isFetching && <span className="text-[10px] font-medium text-muted-foreground">Loading…</span>}
-                  </label>
-                  <select
-                    id="product-brand-id"
-                    data-testid="select-product-brand"
-                    value={values.brand_id}
-                    onChange={(event) => {
-                      const brandId = event.target.value;
-                      const selected = brands.find((brand) => String(brand.id) === brandId);
-                      setValues((current) => ({
-                        ...current,
-                        brand_id: brandId,
-                        ...(selected?.brand_name ? { brand: String(selected.brand_name) } : {}),
-                      }));
-                      setFormError('');
-                    }}
-                    className="focus-ring h-11 w-full rounded-xl border border-input bg-background px-3.5 text-sm outline-none focus:border-accent"
-                  >
-                    <option value="">Select a brand record</option>
-                    {brands.map((brand) => <option key={String(brand.id)} value={String(brand.id)}>{String(brand.brand_name ?? brand.id)}</option>)}
-                  </select>
-                  {brandsQuery.isError && <p className="mt-1.5 text-[10px] font-semibold text-destructive">Brand records could not be loaded. Try again before saving.</p>}
+                <div className="space-y-3 sm:col-span-2">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="min-w-0">
+                      <label htmlFor="product-brand-search" className="mb-2 flex items-center justify-between gap-3 text-xs font-bold text-primary">
+                        <span>Find a brand</span>
+                        {brandsQuery.isFetching && <span className="text-[10px] font-medium text-muted-foreground">Loading…</span>}
+                      </label>
+                      <input
+                        id="product-brand-search"
+                        data-testid="input-product-brand-search"
+                        type="search"
+                        value={brandSearch}
+                        onChange={(event) => setBrandSearch(event.target.value)}
+                        placeholder="Search brand records"
+                        className="focus-ring h-11 w-full rounded-xl border border-input bg-background px-3.5 text-sm outline-none placeholder:text-muted-foreground focus:border-accent"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <label htmlFor="product-brand-id" className="mb-2 block text-xs font-bold text-primary">
+                        Brand record{!productId && <span className="ml-1 text-accent">*</span>}
+                      </label>
+                      <select
+                        id="product-brand-id"
+                        data-testid="select-product-brand"
+                        value={values.brand_id}
+                        onChange={(event) => {
+                          const brandId = event.target.value;
+                          const selected = brands.find((brand) => String(brand.id) === brandId);
+                          setValues((current) => ({
+                            ...current,
+                            brand_id: brandId,
+                            ...(selected?.brand_name ? { brand: String(selected.brand_name) } : {}),
+                          }));
+                          setFormError('');
+                        }}
+                        className="focus-ring h-11 w-full rounded-xl border border-input bg-background px-3.5 text-sm outline-none focus:border-accent"
+                      >
+                        <option value="">Select a brand record</option>
+                        {values.brand_id && !brands.some((brand) => String(brand.id) === values.brand_id) && (
+                          <option value={values.brand_id}>Current linked brand · {values.brand || values.brand_id}</option>
+                        )}
+                        {brands.map((brand) => <option key={String(brand.id)} value={String(brand.id)}>{String(brand.brand_name ?? brand.id)}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  {values.brand_id ? (
+                    <p className="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground" role="status" data-testid="text-linked-brand-name">
+                      Product brand name follows the selected record: <strong className="text-primary">{values.brand}</strong>
+                    </p>
+                  ) : (
+                    <InputField
+                      id="product-brand"
+                      label="Brand name"
+                      value={values.brand}
+                      onChange={(value) => updateValue('brand', value)}
+                      required
+                      maxLength={100}
+                      note={productId ? 'This existing product is not linked to a brand record. Choose one above to link it.' : 'Choose a brand record above to create a linked product.'}
+                    />
+                  )}
+                  {brandsQuery.isError && (
+                    <p className="flex flex-wrap items-center gap-2 text-[10px] font-semibold text-destructive" role="alert">
+                      <span>Brand records could not be loaded.</span>
+                      <button type="button" onClick={() => void brandsQuery.refetch()} className="underline underline-offset-2">Retry</button>
+                    </p>
+                  )}
                 </div>
                 <div className="sm:col-span-2">
                   <InputField
@@ -692,13 +767,15 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
         </div>
 
         <div className="sticky bottom-0 z-20 -mx-4 flex flex-col-reverse gap-2 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:flex-row sm:justify-end md:-mx-10 md:px-10">
-          <button type="button" onClick={() => saveProduct(false)} disabled={isPending} data-testid="button-save-product-draft" className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 text-xs font-bold text-primary hover:bg-muted disabled:opacity-60">
-            {isPending && priceIntent === false && <LoaderCircle size={14} className="animate-spin" />}
-            Save as draft
-          </button>
+          {productId && (
+            <button type="button" onClick={() => saveProduct(false)} disabled={isPending} data-testid="button-save-product-draft" className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 text-xs font-bold text-primary hover:bg-muted disabled:opacity-60">
+              {isPending && priceIntent === false && <LoaderCircle size={14} className="animate-spin" />}
+              Save as draft
+            </button>
+          )}
           <button type="submit" disabled={isPending} data-testid="button-publish-product" className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-xs font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-60">
-            {isPending && priceIntent === true ? <LoaderCircle size={14} className="animate-spin" /> : <Check size={14} />}
-            {values.published ? 'Save and publish changes' : 'Save and publish'}
+            {isPending && priceIntent !== null && priceIntent === Boolean(productId) ? <LoaderCircle size={14} className="animate-spin" /> : <Check size={14} />}
+            {!productId ? 'Create product draft' : values.published ? 'Save and publish changes' : 'Save and publish'}
           </button>
           <button type="button" onClick={leaveEditor} className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-primary">
             <ArrowLeft size={14} /> Cancel
