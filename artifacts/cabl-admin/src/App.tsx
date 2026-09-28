@@ -69,12 +69,6 @@ const productRelationPresentations: Record<string, ProductRelationPresentation> 
   galleries: { title: 'Product images', description: 'Manage the images shown on the product page.', singular: 'image', plural: 'images', addLabel: 'Add image', titleColumns: ['alt_text', 'image_name', 'image_url', 'url', 'image'] },
   product_shippings: { title: 'Shipping options', description: 'Set the shipping methods available for this product.', singular: 'shipping option', plural: 'shipping options', addLabel: 'Add shipping option', titleColumns: ['shipping_id', 'shipping_name', 'name'] },
   product_warranties: { title: 'Warranty', description: 'Manage the warranty information displayed with this product.', singular: 'warranty detail', plural: 'warranty details', addLabel: 'Add warranty detail', titleColumns: ['warranty_id', 'warranty_name', 'name', 'duration'] },
-  power_bank_specifications: { title: 'Power bank specifications', description: 'Add the technical details specific to this power bank.', singular: 'specification', plural: 'specifications', addLabel: 'Add specification', titleColumns: ['capacity_mah', 'capacity', 'battery_type'] },
-  cable_specifications: { title: 'Cable specifications', description: 'Add the technical details specific to this cable.', singular: 'specification', plural: 'specifications', addLabel: 'Add specification', titleColumns: ['cable_type', 'cable_length', 'length'] },
-  car_charger_specifications: { title: 'Car charger specifications', description: 'Add the technical details specific to this car charger.', singular: 'specification', plural: 'specifications', addLabel: 'Add specification', titleColumns: ['max_power', 'port_count', 'ports'] },
-  charger_ports: { title: 'Charger ports', description: 'Describe the ports included with this charger.', singular: 'port', plural: 'ports', addLabel: 'Add port', titleColumns: ['port_name', 'name', 'port_type'] },
-  product_charging_protocols: { title: 'Charging protocols', description: 'Select the charging standards supported by this product.', singular: 'protocol', plural: 'protocols', addLabel: 'Add protocol', titleColumns: ['protocol_id', 'protocol_name', 'name'] },
-  charger_power_profiles: { title: 'Power profiles', description: 'Manage the power profiles supported by this charger.', singular: 'power profile', plural: 'power profiles', addLabel: 'Add power profile', titleColumns: ['profile_name', 'name', 'voltage'] },
   product_dimensions: { title: 'Dimensions', description: 'Record the product dimensions and weight.', singular: 'dimension set', plural: 'dimension sets', addLabel: 'Add dimensions', titleColumns: ['length', 'width', 'height'] },
   product_protections: { title: 'Protection features', description: 'Manage the safety and protection features for this product.', singular: 'protection feature', plural: 'protection features', addLabel: 'Add protection feature', titleColumns: ['protection_name', 'protection_type', 'name'] },
   product_compatibility: { title: 'Compatibility', description: 'List the devices or product families this item works with.', singular: 'compatibility entry', plural: 'compatibility entries', addLabel: 'Add compatible device', titleColumns: ['device_name', 'device_model', 'model', 'name'] },
@@ -1042,9 +1036,13 @@ function SeedPage() {
 function ProductEditorRelationships({
   row,
   onRequiredAttributesChange,
+  selectedCategoryIds,
+  categoryDirty,
 }: {
   row: Row;
   onRequiredAttributesChange: (status: ProductRequiredAttributeStatus) => void;
+  selectedCategoryIds: string[];
+  categoryDirty: boolean;
 }) {
   const { data: metadata, isLoading } = useGetAdminMetadata();
   if (isLoading) return <LoadingBlocks />;
@@ -1058,12 +1056,6 @@ function ProductEditorRelationships({
     'galleries',
     'product_shippings',
     'product_warranties',
-    'power_bank_specifications',
-    'cable_specifications',
-    'car_charger_specifications',
-    'charger_ports',
-    'product_charging_protocols',
-    'charger_power_profiles',
     'product_dimensions',
     'product_protections',
     'product_compatibility',
@@ -1093,6 +1085,8 @@ function ProductEditorRelationships({
           ? <ProductSpecificationsSection
               key={`${relation.targetTable}.${relation.targetColumn}`}
               productId={String(row.id ?? '')}
+              selectedCategoryIds={selectedCategoryIds}
+              categoryDirty={categoryDirty}
               onRequiredAttributesChange={onRequiredAttributesChange}
             />
           : <RelatedRecordsSection
@@ -1112,8 +1106,13 @@ function ProductEditorRoute() {
   const params = useParams<{ productId?: string }>();
   return <ProductEditorPage
     productId={params.productId}
-    renderRelatedRecords={(row, onRequiredAttributesChange) => (
-      <ProductEditorRelationships row={row} onRequiredAttributesChange={onRequiredAttributesChange} />
+    renderRelatedRecords={(row, onRequiredAttributesChange, categorySelection) => (
+      <ProductEditorRelationships
+        row={row}
+        onRequiredAttributesChange={onRequiredAttributesChange}
+        selectedCategoryIds={categorySelection.selectedCategoryIds}
+        categoryDirty={categorySelection.categoryDirty}
+      />
     )}
   />;
 }

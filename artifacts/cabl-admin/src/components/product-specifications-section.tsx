@@ -250,9 +250,13 @@ function SpecificationRow({
 
 export function ProductSpecificationsSection({
   productId,
+  selectedCategoryIds,
+  categoryDirty = false,
   onRequiredAttributesChange,
 }: {
   productId: string;
+  selectedCategoryIds?: string[];
+  categoryDirty?: boolean;
   onRequiredAttributesChange?: (status: ProductRequiredAttributeStatus) => void;
 }) {
   const queryClient = useQueryClient();
@@ -280,8 +284,12 @@ export function ProductSpecificationsSection({
   const categoryRows = (productCategoriesQuery.data?.rows ?? []) as Row[];
   const attributes = (attributesQuery.data?.rows ?? []) as AttributeDefinition[];
   const assignedCategoryIds = useMemo(
-    () => new Set(categoryRows.map((row) => String(row.category_id ?? '')).filter(Boolean)),
-    [categoryRows],
+    () => new Set(
+      categoryDirty && selectedCategoryIds
+        ? selectedCategoryIds
+        : categoryRows.map((row) => String(row.category_id ?? '')).filter(Boolean),
+    ),
+    [categoryDirty, selectedCategoryIds, categoryRows],
   );
   const orderedCategoryIds = useMemo(() => [...assignedCategoryIds].sort(), [assignedCategoryIds]);
   const categoryAssignmentQueries = useQueries({

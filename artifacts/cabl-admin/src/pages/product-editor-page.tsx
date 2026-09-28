@@ -46,6 +46,7 @@ type ProductEditorPageProps = {
   renderRelatedRecords?: (
     row: Row,
     onRequiredAttributesChange: (status: ProductRequiredAttributeStatus) => void,
+    categorySelection: { selectedCategoryIds: string[]; categoryDirty: boolean },
   ) => ReactNode;
 };
 
@@ -790,7 +791,7 @@ export function ProductEditorPage({ productId, renderRelatedRecords }: ProductEd
             <h2 className="mt-1 text-lg font-extrabold tracking-[-.025em] text-primary">Categories, images, and specifications</h2>
             <p className="mt-1.5 text-xs leading-5 text-muted-foreground">Manage this product’s linked catalog records without changing its core product fields.</p>
           </div>
-          {renderRelatedRecords(productRow, updateRequiredStatus)}
+          {renderRelatedRecords(productRow, updateRequiredStatus, { selectedCategoryIds, categoryDirty })}
         </div>
       )}
 
