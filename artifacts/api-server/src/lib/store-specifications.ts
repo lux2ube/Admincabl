@@ -48,6 +48,7 @@ export async function fetchStoreSpecifications(productIds: string[]) {
   );
   if (!productIds.length) return specifications;
 
+  // Keep saved catalog values public until legacy definitions are mapped to categories.
   const [categories, definitions, attributes, ports, protocols, profiles, outputs, dimensions, protections, compatibility, warranties, powerBanks, cables, carChargers] = await Promise.all([
     pool.query<{ product_id: string; slug: string | null }>(
       `SELECT DISTINCT ON (pc."product_id") pc."product_id", c."slug"
@@ -100,6 +101,11 @@ export async function fetchStoreSpecifications(productIds: string[]) {
                AND ca."visible" = TRUE
                AND pac."product_id" = pa."product_id"
            )
+            OR NOT EXISTS (
+              SELECT 1
+              FROM "category_attributes" ca_unassigned
+              WHERE ca_unassigned."attribute_id" = a."id"
+            )
          )
        ORDER BY COALESCE((
          SELECT MIN(ca."sort_order")
@@ -446,6 +452,14 @@ export async function fetchStoreSpecificationFilters(categorySlug?: string) {
                AND ca."is_filterable" = TRUE
                AND ${assignmentCategoryCondition}
            )
+            OR (
+              a."is_filterable" = TRUE
+              AND NOT EXISTS (
+                SELECT 1
+                FROM "category_attributes" ca_unassigned
+                WHERE ca_unassigned."attribute_id" = a."id"
+              )
+            )
          )
      GROUP BY a."slug", a."attribute_name", a."unit", a."sort_order"
      ORDER BY a."sort_order" ASC, a."attribute_name" ASC`,
