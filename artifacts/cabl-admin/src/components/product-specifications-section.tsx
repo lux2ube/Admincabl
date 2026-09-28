@@ -334,16 +334,15 @@ export function ProductSpecificationsSection({
       .filter(Number.isFinite);
     return assignedOrders.length ? Math.min(...assignedOrders) : Number(attribute.sort_order ?? 0);
   };
-  const availableAttributes = attributes
+  const eligibleAttributes = attributes
     .filter((attribute) => {
       const assignedToProductCategory = attribute.is_global === true
         || matchingAssignments(String(attribute.id)).length > 0;
-      return attribute.is_active !== false
-        && assignedToProductCategory
-        && !attachedIds.has(String(attribute.id));
+      return attribute.is_active !== false && assignedToProductCategory;
     })
     .sort((left, right) => attributeSortOrder(left) - attributeSortOrder(right)
       || left.attribute_name.localeCompare(right.attribute_name, 'ar'));
+  const availableAttributes = eligibleAttributes.filter((attribute) => !attachedIds.has(String(attribute.id)));
   const selectedAttribute = availableAttributes.find((attribute) => String(attribute.id) === newAttributeId);
   const optionAttributeIds = useMemo(() => {
     const ids = new Set<string>();
@@ -557,7 +556,7 @@ export function ProductSpecificationsSection({
           <p className="mono text-[10px] uppercase tracking-[.16em] text-muted-foreground">Product details</p>
           <h4 className="mt-1 text-base font-extrabold text-primary" dir="rtl">المواصفات</h4>
           <p className="mt-1 max-w-xl text-[11px] leading-5 text-muted-foreground" dir="rtl">
-            تظهر خصائص تصنيفات المنتج والخصائص العامة. اربط التصنيف من قسم العلاقات؛ تغيير التصنيف لا يحذف القيم المحفوظة.
+            تظهر خصائص التصنيفات المرتبطة بالمنتج. لا تصبح الخاصية عامة إلا عند تفعيل ذلك صراحةً؛ تغيير التصنيف لا يحذف القيم المحفوظة.
           </p>
         </div>
         <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground" data-testid="text-product-specification-count">
@@ -583,7 +582,7 @@ export function ProductSpecificationsSection({
         </p>
       ) : rows.length === 0 && !adding ? (
         <p className="rounded-xl border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
-          لا توجد مواصفات لهذا المنتج بعد. أضف تصنيفًا أو خصائص عامة ثم اربط ما يناسب المنتج.
+          لا توجد مواصفات لهذا المنتج بعد. اربط المنتج بتصنيف، ثم اربط الخصائص به من شاشة «خصائص التصنيفات» لتظهر هنا.
         </p>
       ) : (
         <div className="space-y-2">
@@ -630,6 +629,15 @@ export function ProductSpecificationsSection({
                   </option>
                 ))}
               </select>
+              {availableAttributes.length === 0 && (
+                <p className="col-span-full text-[10px] font-semibold leading-5 text-muted-foreground" dir="rtl">
+                  {assignedCategoryIds.size === 0
+                    ? 'اربط المنتج بتصنيف أولًا؛ ستظهر هنا الخصائص المرتبطة بذلك التصنيف.'
+                    : eligibleAttributes.length === 0
+                      ? 'لا توجد خصائص مرتبطة بتصنيفات المنتج. أضف الربط من شاشة «خصائص التصنيفات».'
+                      : 'أُضيفت جميع الخصائص المتاحة لهذا المنتج.'}
+                </p>
+              )}
               <div className="relative min-w-0">
                 {selectedAttribute ? (
                   <>
