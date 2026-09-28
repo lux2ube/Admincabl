@@ -334,8 +334,13 @@ const tables: AdminTable[] = [
   },
   {
     key: "shippings", label: "طرق الشحن", group: "الشحن", primaryKey: "id",
-    columns: [serialId(), column("name", "اسم الشحن", "text", { nullable: false }), column("active", "نشط", "boolean", { nullable: false }), column("icon_path", "الأيقونة", "text"), created(), updated()],
-    relations: [relation("id", "product_shippings", "shipping_id", "has_many", "شحن المنتجات"), relation("id", "order_items", "shipping_id", "has_many", "شحن الطلبات")],
+    columns: [serialId(), column("name", "اسم الشحن", "text", { nullable: false }), column("slug", "المعرّف", "text"), column("description", "الوصف", "text"), column("service_categories", "فئات الخدمة", "array"), column("default_charge", "الرسوم الافتراضية", "number", { nullable: false }), column("default_free", "مجاني افتراضياً", "boolean"), column("estimated_days", "الأيام المتوقعة", "number"), column("seo_title", "عنوان SEO", "text"), column("meta_description", "وصف SEO", "text"), column("active", "نشط", "boolean", { nullable: false }), column("icon_path", "الأيقونة", "text"), created(), updated()],
+    relations: [relation("id", "product_shippings", "shipping_id", "has_many", "شحن المنتجات"), relation("id", "shipping_coverage_cities", "shipping_id", "has_many", "مدن التغطية"), relation("id", "order_items", "shipping_id", "has_many", "شحن الطلبات")],
+  },
+  {
+    key: "shipping_coverage_cities", label: "مدن تغطية الشحن", group: "الشحن", primaryKey: "id",
+    columns: [serialId(), column("shipping_id", "طريقة الشحن", "number", { nullable: false, references: "shippings.id" }), column("city_name_ar", "المدينة بالعربية", "text", { nullable: false }), column("governorate_name_ar", "المحافظة بالعربية", "text", { nullable: false }), column("city_name_en", "المدينة بالإنجليزية", "text"), column("active", "نشط", "boolean", { nullable: false }), column("sort_order", "ترتيب العرض", "number", { nullable: false }), created(), updated()],
+    relations: [relation("shipping_id", "shippings", "id", "belongs_to", "طريقة الشحن")],
   },
   {
     key: "product_shippings", label: "شحن المنتجات", group: "العلاقات", primaryKey: "product_id,shipping_id",
@@ -359,7 +364,7 @@ const tables: AdminTable[] = [
   },
   {
     key: "orders", label: "الطلبات", group: "المبيعات", primaryKey: "id",
-    columns: [column("id", "رقم الطلب", "text", { nullable: false, primaryKey: true }), column("coupon_id", "القسيمة", "number", { references: "coupons.id" }), column("customer_id", "العميل", "uuid", { references: "customers.id" }), column("payment_method_id", "طريقة الدفع", "number", { references: "payment_methods.id" }), column("payment_reference", "رقم العملية", "text"), column("payment_status", "حالة الدفع", "text", { nullable: false }), column("payment_submitted_at", "تاريخ إرسال الدفع", "date"), column("payment_verified_at", "تاريخ اعتماد الدفع", "date"), column("order_status_id", "حالة الطلب", "number", { references: "order_statuses.id" }), column("order_approved_at", "تاريخ الاعتماد", "date"), column("order_delivered_carrier_date", "تاريخ التسليم لشركة الشحن", "date"), column("order_delivered_customer_date", "تاريخ تسليم العميل", "date"), created()],
+    columns: [column("id", "رقم الطلب", "text", { nullable: false, primaryKey: true }), column("coupon_id", "القسيمة", "number", { references: "coupons.id" }), column("customer_id", "العميل", "uuid", { references: "customers.id" }), column("payment_method_id", "طريقة الدفع", "number", { references: "payment_methods.id" }), column("payment_reference", "رقم العملية", "text"), column("shipping_cost", "رسوم الشحن المحفوظة", "number"), column("payment_status", "حالة الدفع", "text", { nullable: false }), column("payment_submitted_at", "تاريخ إرسال الدفع", "date"), column("payment_verified_at", "تاريخ اعتماد الدفع", "date"), column("order_status_id", "حالة الطلب", "number", { references: "order_statuses.id" }), column("order_approved_at", "تاريخ الاعتماد", "date"), column("order_delivered_carrier_date", "تاريخ التسليم لشركة الشحن", "date"), column("order_delivered_customer_date", "تاريخ تسليم العميل", "date"), created()],
     relations: [relation("customer_id", "customers", "id", "belongs_to", "العميل"), relation("payment_method_id", "payment_methods", "id", "belongs_to", "طريقة الدفع"), relation("order_status_id", "order_statuses", "id", "belongs_to", "الحالة"), relation("coupon_id", "coupons", "id", "belongs_to", "القسيمة"), relation("id", "order_items", "order_id", "has_many", "عناصر الطلب")],
   },
   {

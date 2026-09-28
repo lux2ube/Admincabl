@@ -287,8 +287,20 @@ record in each product-type table.
 Reusable shipping methods:
 
 - `id`: serial primary key.
-- `name`, `active`, `icon_path`.
+- `name`, `slug`, `description`, `service_categories`, `active`, `icon_path`.
+- `default_charge`, nullable `default_free`, and `estimated_days` supply the
+  method-level fallback when no product-specific shipping rule exists.
+- `seo_title` and `meta_description` drive the Yemen delivery landing page.
 - `created_at`, `updated_at`, `created_by`, `updated_by`.
+
+#### `shipping_coverage_cities`
+
+Active service areas for a shipping method:
+
+- `shipping_id` references `shippings.id`.
+- `city_name_ar`, `governorate_name_ar`, and optional `city_name_en`.
+- `active`, `sort_order`, and timestamps.
+- Unique per method and Arabic city name.
 
 #### `product_shippings`
 
@@ -302,7 +314,9 @@ Product-specific shipping terms:
 - Composite primary key: `(product_id, shipping_id)`.
 
 The product and shipping columns are application-managed relations in the
-current Drizzle definition.
+current Drizzle definition. These rules remain authoritative when present;
+the shipping method's default charge is used when no matching product rules
+exist.
 
 #### `payment_methods`
 

@@ -465,6 +465,48 @@ components:
         estimatedDays:
           type: ["number", "null"]
       required: [id, name, charge, free, estimatedDays]
+    StoreCoverageCity:
+      type: object
+      properties:
+        id:
+          type: number
+        cityNameAr:
+          type: string
+        governorateNameAr:
+          type: string
+        cityNameEn:
+          type: ["string", "null"]
+      required: [id, cityNameAr, governorateNameAr, cityNameEn]
+    StoreDeliveryMethod:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        slug:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        serviceCategories:
+          type: array
+          items:
+            type: string
+        charge:
+          type: number
+        free:
+          type: boolean
+        estimatedDays:
+          type: ["number", "null"]
+        seoTitle:
+          type: ["string", "null"]
+        metaDescription:
+          type: ["string", "null"]
+        coverageCities:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoreCoverageCity"
+      required: [id, name, slug, description, serviceCategories, charge, free, estimatedDays, seoTitle, metaDescription, coverageCities]
     StorePaymentMethod:
       type: object
       properties:
@@ -854,7 +896,7 @@ components:
         shippingOptions:
           type: array
           items:
-            $ref: "#/components/schemas/StoreShippingOption"
+            $ref: "#/components/schemas/StoreDeliveryMethod"
         paymentMethods:
           type: array
           items:

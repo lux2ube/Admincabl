@@ -1805,6 +1805,28 @@ function PurchaseSteps({ current }: { current: 'cart' | 'checkout' }) {
 
 const YEMEN_CITIES = ['صنعاء', 'عدن', 'تعز', 'الحديدة', 'إب', 'حضرموت', 'ذمار', 'المكلا', 'سيئون', 'حجة', 'صعدة', 'شبوة', 'مأرب', 'البيضاء', 'لحج', 'أبين', 'عمران', 'المحويت', 'ريمة', 'الضالع', 'الجوف'];
 
+function normalizeCityName(value: string) {
+  return value
+    .normalize('NFKC')
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+    .trim()
+    .toLocaleLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+function shippingCoversCity(
+  option: { coverageCities: Array<{ cityNameAr: string; cityNameEn: string | null }> },
+  city: string,
+) {
+  if (!option.coverageCities.length) return true;
+  const normalizedCity = normalizeCityName(city);
+  return option.coverageCities.some((coverage) =>
+    [coverage.cityNameAr, coverage.cityNameEn]
+      .filter((name): name is string => Boolean(name))
+      .some((name) => normalizeCityName(name) === normalizedCity),
+  );
+}
+
 export function CartPage() {
   const { cartProducts, cartCount, formatPrice } = useStore();
   const subtotal = cartProducts.reduce((sum, item) => sum + (item.product.discountPrice ?? item.product.regularPrice) * item.quantity, 0);
@@ -1853,10 +1875,14 @@ export function CheckoutPage() {
   const [error, setError] = useState('');
   const [couponHint, setCouponHint] = useState('');
   useEffect(() => {
-    if (!shippingId && catalog?.shippingOptions[0]) setShippingId(catalog.shippingOptions[0].id);
+    const availableOptions = catalog?.shippingOptions.filter((option) => shippingCoversCity(option, form.city)) || [];
+    if (!availableOptions.some((option) => option.id === shippingId)) {
+      setShippingId(availableOptions[0]?.id);
+    }
     if (!paymentId && catalog?.paymentMethods[0]) setPaymentId(catalog.paymentMethods[0].id);
-  }, [catalog, shippingId, paymentId]);
-  const selectedShipping = catalog?.shippingOptions.find((item) => item.id === shippingId);
+  }, [catalog, shippingId, paymentId, form.city]);
+  const availableShippingOptions = catalog?.shippingOptions.filter((option) => shippingCoversCity(option, form.city)) || [];
+  const selectedShipping = availableShippingOptions.find((item) => item.id === shippingId);
   const selectedPayment = catalog?.paymentMethods.find((item) => item.id === paymentId);
   const subtotal = cartProducts.reduce((sum, item) => sum + (item.product.discountPrice ?? item.product.regularPrice) * item.quantity, 0);
   const shippingCost = selectedShipping?.free ? 0 : selectedShipping?.charge || 0;
@@ -1865,7 +1891,7 @@ export function CheckoutPage() {
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setError('');
-    if (!shippingId || !paymentId || !cartProducts.length) {
+    if (!shippingId || !availableShippingOptions.some((option) => option.id === shippingId) || !paymentId || !cartProducts.length) {
       setError('اختر طريقة الشحن والدفع وتأكد من وجود منتج في السلة.');
       return;
     }
@@ -1907,7 +1933,8 @@ export function CheckoutPage() {
             <section className="checkout-section">
               <div className="checkout-section-heading"><span className="step-dot">03</span><div><h2>الشحن والدفع</h2><p>خيارات مختصرة، اختر الأنسب لك.</p></div></div>
               <h3 className="choice-label">طريقة الشحن</h3>
-              <div className="method-choice-grid">{catalog?.shippingOptions.map((option) => <label className={`method-choice ${shippingId === option.id ? 'selected' : ''}`} key={option.id}><input type="radio" name="shipping" checked={shippingId === option.id} onChange={() => setShippingId(option.id)} data-testid={`input-shipping-${option.id}`} /><span className="method-choice-mark">{shippingId === option.id && <Check size={13} />}</span><span className="method-choice-copy"><strong>{option.name}</strong><small>{option.estimatedDays ? `${option.estimatedDays} أيام تقريباً` : 'تأكيد المدة مع الطلب'}</small></span><b>{option.free ? 'مجاني' : formatPrice(option.charge)}</b></label>)}</div>
+              <div className="method-choice-grid">{availableShippingOptions.map((option) => <label className={`method-choice ${shippingId === option.id ? 'selected' : ''}`} key={option.id}><input type="radio" name="shipping" checked={shippingId === option.id} onChange={() => setShippingId(option.id)} data-testid={`input-shipping-${option.id}`} /><span className="method-choice-mark">{shippingId === option.id && <Check size={13} />}</span><span className="method-choice-copy"><strong>{option.name}</strong><small>{option.estimatedDays ? `${option.estimatedDays} أيام تقريباً` : 'تأكيد المدة مع الطلب'}{option.coverageCities.length ? ` · تغطية ${option.coverageCities.length} مدن` : ''}</small></span><b>{option.free ? 'مجاني' : formatPrice(option.charge)}</b></label>)}</div>
+              {!availableShippingOptions.length && <p className="notice" role="status">لا توجد طريقة شحن متاحة لهذه المدينة حالياً.</p>}
               <h3 className="choice-label">طريقة الدفع</h3>
               <div className="payment-select-wrap"><CreditCard size={17} /><select value={paymentId ?? ''} onChange={(event) => setPaymentId(Number(event.target.value))} required data-testid="select-payment-method"><option value="" disabled>اختر طريقة الدفع</option>{catalog?.paymentMethods.map((method) => <option value={method.id} key={method.id}>{method.name}</option>)}</select></div>
               {selectedPayment && <p className="selected-payment-note">{selectedPayment.description || selectedPayment.instructions || 'تفاصيل الدفع تظهر عند تأكيد الطلب.'}</p>}

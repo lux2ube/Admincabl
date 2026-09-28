@@ -5,7 +5,7 @@ import path from "node:path";
 const distDir = path.resolve(process.env.STORE_DIST || "artifacts/cabl-store/dist/public");
 const baseUrl = process.env.ACCEPTANCE_BASE_URL?.replace(/\/+$/, "") || null;
 const expectedBasePath = (process.env.BASE_PATH || "/cabl-store/").replace(/\/+$/, "");
-const routes = ["/", "/category/wireless-microphones", "/brand/anker", "/anker/chargers", "/soundcore/wireless-earbuds/soundcore-r50i-cabl-sco-r50i", "/guides/chargers-yemen", "/locations/yemen"];
+const routes = ["/", "/category/wireless-microphones", "/brand/anker", "/anker/chargers", "/soundcore/wireless-earbuds/soundcore-r50i-cabl-sco-r50i", "/guides/chargers-yemen", "/shipping", "/locations/yemen"];
 
 for (const route of routes) {
   const file = route === "/" ? path.join(distDir, "index.html") : path.join(distDir, route.slice(1), "index.html");
@@ -26,6 +26,21 @@ for (const route of routes) {
   assert.ok(Array.isArray(catalog.products), `${route} catalog payload should contain products`);
   assert.ok(Array.isArray(catalog.currencies), `${route} catalog payload should contain currencies`);
   assert.doesNotMatch(html, /جارٍ تجهيز المتجر/, `${route} should not expose a loading-only SEO shell`);
+  if (route === "/shipping" || route === "/locations/yemen") {
+    const tawseel = catalog.shippingOptions?.find((method) => method.slug === "tawseel-yemen");
+    assert.ok(tawseel, `${route} catalog should include the Tawseel method`);
+    assert.equal(tawseel.coverageCities.length, 7, `${route} should include all seven configured coverage cities`);
+    const crawlableBody = html.match(/<main>([\s\S]*?)<\/main>/)?.[1] || "";
+    assert.ok(crawlableBody.includes(tawseel.name), `${route} crawlable body should include the Tawseel method name`);
+    assert.ok(html.includes(tawseel.seoTitle), `${route} should use the editable Tawseel SEO title`);
+    assert.ok(html.includes(tawseel.metaDescription), `${route} should use the editable Tawseel meta description`);
+    for (const city of tawseel.coverageCities) {
+      assert.ok(crawlableBody.includes(city.cityNameAr), `${route} crawlable body should include coverage city ${city.cityNameAr}`);
+    }
+    for (const category of tawseel.serviceCategories) {
+      assert.ok(crawlableBody.includes(category), `${route} crawlable body should include service category ${category}`);
+    }
+  }
 }
 
 const robots = fs.readFileSync(path.join(distDir, "robots.txt"), "utf8");
@@ -37,6 +52,8 @@ const sitemap = fs.readFileSync(path.join(distDir, "sitemap.xml"), "utf8");
 assert.match(sitemap, /^<\?xml version="1\.0" encoding="UTF-8"\?>/, "sitemap.xml should be valid XML output");
 assert.match(sitemap, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/, "sitemap.xml should use the sitemap namespace");
 assert.match(sitemap, new RegExp(`<loc>${expectedBasePath || ""}(?:/[^<]*)?<\\/loc>`), "sitemap.xml should contain mounted storefront URLs");
+assert.ok(sitemap.includes(`${expectedBasePath}/shipping`), "sitemap.xml should include the shipping landing page");
+assert.ok(sitemap.includes(`${expectedBasePath}/locations/yemen`), "sitemap.xml should include the Yemen delivery coverage page");
 assert.doesNotMatch(sitemap, /\/api\/store\//, "sitemap.xml must not point crawlers at backend routes");
 
 const productCandidates = [];

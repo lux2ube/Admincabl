@@ -74,6 +74,13 @@ const asNumber = (value: unknown) => {
 
 const roundMoney = (value: number) => Math.round(value * 100) / 100;
 
+const normalizeCityName = (value: string) => value
+  .normalize("NFKC")
+  .replace(/[\u064B-\u065F\u0670\u0640]/g, "")
+  .trim()
+  .toLocaleLowerCase()
+  .replace(/\s+/g, " ");
+
 const asIso = (value: unknown) => {
   if (value instanceof Date) return value.toISOString();
   return new Date(String(value)).toISOString();
@@ -389,7 +396,7 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
     }
 
   const specificationsPromise = fetchStoreSpecifications([...productMap.keys()]);
-  const [categoriesResult, brandsResult, shippingResult, paymentMethodsResult, currenciesResult] = await Promise.all([
+  const [categoriesResult, brandsResult, shippingResult, shippingCitiesResult, paymentMethodsResult, currenciesResult] = await Promise.all([
     pool.query<{
       id: string;
       name: string;
@@ -431,18 +438,44 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
     pool.query<{
       id: number;
       name: string;
+      slug: string | null;
+      description: string | null;
+      service_categories: string[] | null;
       charge: string | number;
       free: boolean;
       estimated_days: string | number | null;
-    }>(`SELECT s."id", s."name",
-          COALESCE(MAX(ps."ship_charge"), 0) AS "charge",
-          COALESCE(BOOL_AND(COALESCE(ps."free", TRUE)), TRUE) AS "free",
-          MIN(ps."estimated_days") AS "estimated_days"
+      seo_title: string | null;
+      meta_description: string | null;
+    }>(`SELECT s."id", s."name", s."slug", s."description", s."service_categories",
+          CASE
+            WHEN s."default_free" IS TRUE THEN 0::numeric
+            WHEN COUNT(ps."shipping_id") > 0 THEN COALESCE(MAX(ps."ship_charge"), 0)
+            ELSE s."default_charge"
+          END AS "charge",
+          CASE
+            WHEN s."default_free" IS TRUE THEN TRUE
+            WHEN COUNT(ps."shipping_id") > 0 THEN BOOL_AND(COALESCE(ps."free", FALSE))
+            WHEN s."default_free" IS FALSE THEN FALSE
+            ELSE TRUE
+          END AS "free",
+          COALESCE(MIN(ps."estimated_days"), s."estimated_days") AS "estimated_days",
+          s."seo_title", s."meta_description"
        FROM "shippings" s
        LEFT JOIN "product_shippings" ps ON ps."shipping_id" = s."id"
        WHERE s."active" = TRUE
-       GROUP BY s."id", s."name"
+        GROUP BY s."id", s."name", s."slug", s."description", s."service_categories",
+          s."default_charge", s."default_free", s."estimated_days", s."seo_title", s."meta_description"
        ORDER BY s."id" ASC`),
+    pool.query<{
+      id: number;
+      shipping_id: number;
+      city_name_ar: string;
+      governorate_name_ar: string;
+      city_name_en: string | null;
+    }>(`SELECT "id", "shipping_id", "city_name_ar", "governorate_name_ar", "city_name_en"
+       FROM "shipping_coverage_cities"
+       WHERE "active" = TRUE
+       ORDER BY "shipping_id" ASC, "sort_order" ASC, "id" ASC`),
     pool.query<{
       id: number;
       name: string;
@@ -503,12 +536,34 @@ router.get("/store/catalog", async (req, res): Promise<void> => {
       slug: brand.slug,
       productCount: brand.product_count,
     }));
+    const citiesByShipping = new Map<number, Array<{
+      id: number;
+      cityNameAr: string;
+      governorateNameAr: string;
+      cityNameEn: string | null;
+    }>>();
+    for (const city of shippingCitiesResult.rows) {
+      const cities = citiesByShipping.get(city.shipping_id) || [];
+      cities.push({
+        id: city.id,
+        cityNameAr: city.city_name_ar,
+        governorateNameAr: city.governorate_name_ar,
+        cityNameEn: city.city_name_en,
+      });
+      citiesByShipping.set(city.shipping_id, cities);
+    }
     const shippingOptions = shippingResult.rows.map((shipping) => ({
       id: shipping.id,
       name: shipping.name,
+      slug: shipping.slug,
+      description: shipping.description,
+      serviceCategories: shipping.service_categories || [],
       charge: asNumber(shipping.charge),
       free: shipping.free,
       estimatedDays: shipping.estimated_days === null ? null : asNumber(shipping.estimated_days),
+      seoTitle: shipping.seo_title,
+      metaDescription: shipping.meta_description,
+      coverageCities: citiesByShipping.get(shipping.id) || [],
     }));
     const paymentMethods = paymentMethodsResult.rows.map((method) => ({
       id: method.id,
@@ -878,7 +933,9 @@ router.get("/store/orders", async (req, res): Promise<void> => {
     }>(
       `SELECT o."id", COALESCE(os."status_name", 'جديد') AS "status",
         COALESCE(SUM(oi."price" * oi."quantity"), 0) +
-          COALESCE(SUM(CASE WHEN oi."shipping_id" IS NOT NULL THEN COALESCE(ps."ship_charge", 0) * oi."quantity" ELSE 0 END), 0) AS "total",
+          COALESCE(MAX(o."shipping_cost"),
+            SUM(CASE WHEN oi."shipping_id" IS NOT NULL AND COALESCE(ps."free", FALSE) = FALSE
+              THEN COALESCE(ps."ship_charge", 0) * oi."quantity" ELSE 0 END), 0) AS "total",
         o."created_at"
        FROM "orders" o
        JOIN "customers" c ON c."id" = o."customer_id"
@@ -924,8 +981,30 @@ router.post("/store/orders", async (req, res): Promise<void> => {
     const shippingResult = await client.query<{
       id: number;
       name: string;
-    }>(`SELECT "id", "name" FROM "shippings" WHERE "id" = $1 AND "active" = TRUE`, [input.shippingId]);
-    if (!shippingResult.rows[0]) throw new Error("طريقة الشحن المحددة غير متاحة");
+      default_charge: string | number;
+      default_free: boolean | null;
+    }>(`SELECT "id", "name", "default_charge", "default_free"
+        FROM "shippings" WHERE "id" = $1 AND "active" = TRUE`, [input.shippingId]);
+    const shippingMethod = shippingResult.rows[0];
+    if (!shippingMethod) throw new Error("طريقة الشحن المحددة غير متاحة");
+    const coverageResult = await client.query<{
+      city_name_ar: string;
+      city_name_en: string | null;
+    }>(
+      `SELECT "city_name_ar", "city_name_en"
+       FROM "shipping_coverage_cities"
+       WHERE "shipping_id" = $1 AND "active" = TRUE`,
+      [input.shippingId],
+    );
+    if (coverageResult.rows.length) {
+      const requestedCity = normalizeCityName(input.address.city);
+      const cityIsCovered = coverageResult.rows.some((city) =>
+        [city.city_name_ar, city.city_name_en]
+          .filter((name): name is string => Boolean(name))
+          .some((name) => normalizeCityName(name) === requestedCity),
+      );
+      if (!cityIsCovered) throw new Error(`طريقة الشحن المحددة لا تغطي مدينة ${input.address.city.trim()}`);
+    }
     const paymentMethodResult = await client.query<{
       id: number;
       name: string;
@@ -971,14 +1050,22 @@ router.post("/store/orders", async (req, res): Promise<void> => {
     );
     const shippingRules = new Map(shippingRulesResult.rows.map((rule) => [rule.product_id, rule]));
     let subtotal = 0;
-    let shippingCost = 0;
+    let shippingCost = shippingMethod.default_free === true
+      ? 0
+      : shippingRulesResult.rows.length
+        ? 0
+        : shippingMethod.default_free === false
+          ? asNumber(shippingMethod.default_charge)
+          : 0;
     const items = input.items.map((item) => {
       const product = products.get(item.productId)!;
       if (product.quantity < item.quantity) throw new Error(`الكمية المطلوبة من ${product.product_name} غير متوفرة`);
       const price = asNumber(product.discount_price ?? product.regular_price);
       const shippingRule = shippingRules.get(item.productId);
       subtotal += price * item.quantity;
-      if (shippingRule && !shippingRule.free) shippingCost += asNumber(shippingRule.ship_charge) * item.quantity;
+      if (shippingMethod.default_free !== true && shippingRule && !shippingRule.free) {
+        shippingCost += asNumber(shippingRule.ship_charge) * item.quantity;
+      }
       return { productId: item.productId, productName: product.product_name, quantity: item.quantity, price };
     });
 
@@ -1039,9 +1126,9 @@ router.post("/store/orders", async (req, res): Promise<void> => {
     const total = roundMoney(subtotal + shippingCost - discount);
     const paymentStatus = paymentMethod.requires_transaction_reference ? "awaiting_verification" : "cod_pending";
     await client.query(
-      `INSERT INTO "orders" ("id", "coupon_id", "customer_id", "payment_method_id", "payment_reference", "payment_status", "payment_submitted_at", "order_status_id", "created_at")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
-      [id, couponId, customerId, paymentMethod.id, paymentReference, paymentStatus, paymentReference ? new Date() : null, statusId],
+      `INSERT INTO "orders" ("id", "coupon_id", "customer_id", "payment_method_id", "payment_reference", "shipping_cost", "payment_status", "payment_submitted_at", "order_status_id", "created_at")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
+      [id, couponId, customerId, paymentMethod.id, paymentReference, roundMoney(shippingCost), paymentStatus, paymentReference ? new Date() : null, statusId],
     );
     for (const item of items) {
       await client.query(
@@ -1103,7 +1190,9 @@ router.get("/store/orders/:id", async (req, res): Promise<void> => {
          COALESCE(o."payment_status", 'awaiting_payment') AS "payment_status",
          o."payment_reference",
         COALESCE(SUM(oi."price" * oi."quantity"), 0) AS "subtotal",
-        COALESCE(SUM(CASE WHEN oi."shipping_id" IS NOT NULL THEN COALESCE(ps."ship_charge", 0) * oi."quantity" ELSE 0 END), 0) AS "shipping_cost"
+         COALESCE(MAX(o."shipping_cost"),
+           SUM(CASE WHEN oi."shipping_id" IS NOT NULL AND COALESCE(ps."free", FALSE) = FALSE
+             THEN COALESCE(ps."ship_charge", 0) * oi."quantity" ELSE 0 END), 0) AS "shipping_cost"
        FROM "orders" o
        JOIN "customers" c ON c."id" = o."customer_id"
        LEFT JOIN "order_statuses" os ON os."id" = o."order_status_id"

@@ -486,9 +486,23 @@ function renderBody(page, routePath, entity = null) {
   const guideContent = entity?.type === "guide" && entity.content
     ? `<section><h2>محتوى الدليل</h2>${renderTextContent(entity.content)}</section>`
     : "";
+  const deliveryMethods = entity?.type === "location"
+    ? (entity.method ? [entity.method] : [])
+    : entity?.type === "shipping"
+      ? (entity.methods || [])
+      : [];
+  const deliveryContent = deliveryMethods.length
+    ? `<section class="seo-delivery-content"><h2>${entity?.type === "location" ? "مدن التغطية" : "طرق الشحن والتغطية"}</h2>${deliveryMethods.map((method) => {
+      const cities = (method.coverageCities || []).map((city) =>
+        `<li><strong>${escapeHtml(city.cityNameAr)}</strong> — ${escapeHtml(city.governorateNameAr)}${city.cityNameEn ? ` <span dir="ltr">(${escapeHtml(city.cityNameEn)})</span>` : ""}</li>`,
+      ).join("");
+      const categories = (method.serviceCategories || []).map((category) => `<li>${escapeHtml(category)}</li>`).join("");
+      return `<article><h3>${escapeHtml(method.name)}</h3>${method.description ? `<p>${escapeHtml(method.description)}</p>` : ""}<p>${method.free ? "الشحن مجاني حالياً." : "تظهر الرسوم النهائية في صفحة إتمام الطلب."}</p>${categories ? `<h4>فئات الخدمة</h4><ul>${categories}</ul>` : ""}${cities ? `<h4>المدن والمحافظات</h4><ul>${cities}</ul>` : ""}</article>`;
+    }).join("")}</section>`
+    : "";
   const categoryLinks = relatedBrands ? `<section><h2>العلامات المتاحة</h2><ul>${relatedBrands}</ul></section>` : "";
   const buyingLinks = `<section><h2>روابط مفيدة قبل الطلب</h2><p><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/shipping"))}">الشحن والتوصيل</a> · <a href="${escapeHtml(absoluteUrl("/return-policy"))}">الإرجاع والاستبدال</a></p></section>`;
-  return `<header><a href="${escapeHtml(absoluteUrl("/"))}">CABL اليمن</a><nav>${links}</nav></header><main><p>دليل CABL في اليمن</p><h1>${escapeHtml(page.h1)}</h1><p>${escapeHtml(page.description)}</p>${productDetails}${guideContent}${categoryLinks}${renderProductList(entityProducts)}${renderRelatedProducts(entity?.relatedProducts)}${renderKeywordCoverage(page.keywordRows)}<section><h2>معلومات قبل الطلب</h2><p>راجع المواصفات والتوافق والسعر والتوافر في صفحة المنتج، ثم أدخل العنوان في checkout لرؤية خيارات الشحن الحالية.</p></section>${buyingLinks}</main><footer><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/contact"))}">تواصل معنا</a></footer>`;
+  return `<header><a href="${escapeHtml(absoluteUrl("/"))}">CABL اليمن</a><nav>${links}</nav></header><main><p>دليل CABL في اليمن</p><h1>${escapeHtml(page.h1)}</h1><p>${escapeHtml(page.description)}</p>${productDetails}${guideContent}${deliveryContent}${categoryLinks}${renderProductList(entityProducts)}${renderRelatedProducts(entity?.relatedProducts)}${renderKeywordCoverage(page.keywordRows)}<section><h2>معلومات قبل الطلب</h2><p>راجع المواصفات والتوافق والسعر والتوافر في صفحة المنتج، ثم أدخل العنوان في checkout لرؤية خيارات الشحن الحالية.</p></section>${buyingLinks}</main><footer><a href="${escapeHtml(absoluteUrl("/about"))}">عن CABL</a> · <a href="${escapeHtml(absoluteUrl("/contact"))}">تواصل معنا</a></footer>`;
 }
 
 function withSeo(indexHtml, page, routePath, entity = null, catalog = null) {
@@ -553,6 +567,32 @@ async function main() {
   const catalog = await getRequiredJson("/store/catalog", "catalog");
   if (!Array.isArray(catalog.products)) {
     throw new Error(`Required prerender data unavailable for catalog: ${apiBase}/store/catalog (response does not contain a products array)`);
+  }
+  if (!Array.isArray(catalog.shippingOptions)) {
+    throw new Error(`Required prerender data unavailable for catalog: ${apiBase}/store/catalog (response does not contain shippingOptions)`);
+  }
+  const tawseel = catalog.shippingOptions.find((method) => method.slug === "tawseel-yemen");
+  if (!tawseel || tawseel.coverageCities.length !== 7) {
+    throw new Error("Required Tawseel SEO data is missing or does not contain the seven configured coverage cities.");
+  }
+  const shippingPage = routes.get("/shipping");
+  if (shippingPage) {
+    routes.set("/shipping", {
+      ...shippingPage,
+      title: tawseel.seoTitle?.trim() ? `${tawseel.seoTitle.trim()} | CABL` : shippingPage.title,
+      description: tawseel.metaDescription?.trim() || tawseel.description?.trim() || shippingPage.description,
+      entity: { type: "shipping", methods: catalog.shippingOptions },
+    });
+  }
+  const locationPage = routes.get("/locations/yemen");
+  if (locationPage) {
+    routes.set("/locations/yemen", {
+      ...locationPage,
+      title: tawseel.seoTitle?.trim() ? `${tawseel.seoTitle.trim()} | CABL` : locationPage.title,
+      h1: `${tawseel.name} في اليمن`,
+      description: tawseel.metaDescription?.trim() || tawseel.description?.trim() || locationPage.description,
+      entity: { type: "location", method: tawseel },
+    });
   }
   const guideRoutes = await mapWithConcurrency(Object.keys(guidePages), async (routePath) => {
     const slug = routePath.split("/").filter(Boolean).at(-1);

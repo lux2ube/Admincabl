@@ -227,9 +227,20 @@ export const GetStoreCatalogResponse = zod.object({
   "shippingOptions": zod.array(zod.object({
   "id": zod.number(),
   "name": zod.string(),
+  "slug": zod.string().nullable(),
+  "description": zod.string().nullable(),
+  "serviceCategories": zod.array(zod.string()),
   "charge": zod.number(),
   "free": zod.boolean(),
-  "estimatedDays": zod.number().nullable()
+  "estimatedDays": zod.number().nullable(),
+  "seoTitle": zod.string().nullable(),
+  "metaDescription": zod.string().nullable(),
+  "coverageCities": zod.array(zod.object({
+  "id": zod.number(),
+  "cityNameAr": zod.string(),
+  "governorateNameAr": zod.string(),
+  "cityNameEn": zod.string().nullable()
+}))
 })),
   "paymentMethods": zod.array(zod.object({
   "id": zod.number(),

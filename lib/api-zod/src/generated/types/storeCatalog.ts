@@ -8,15 +8,15 @@
 import type { StoreCatalogBrand } from './storeCatalogBrand';
 import type { StoreCatalogCategory } from './storeCatalogCategory';
 import type { StoreCurrency } from './storeCurrency';
+import type { StoreDeliveryMethod } from './storeDeliveryMethod';
 import type { StorePaymentMethod } from './storePaymentMethod';
 import type { StoreProduct } from './storeProduct';
-import type { StoreShippingOption } from './storeShippingOption';
 
 export interface StoreCatalog {
   products: StoreProduct[];
   categories: StoreCatalogCategory[];
   brands: StoreCatalogBrand[];
-  shippingOptions: StoreShippingOption[];
+  shippingOptions: StoreDeliveryMethod[];
   paymentMethods: StorePaymentMethod[];
   currencies: StoreCurrency[];
 }

@@ -386,6 +386,7 @@ export function ArticlePage() {
 export function LocationPage() {
   const { catalog, formatPrice } = useStore();
   const { slug = 'yemen' } = useParams<{ slug: string }>();
+  const tawseel = catalog?.shippingOptions.find((option) => option.slug === 'tawseel-yemen');
   const [capacity, setCapacity] = useState('20000');
   const [deviceWh, setDeviceWh] = useState('15');
   const wh = Number(capacity) * 3.7 / 1000;
@@ -393,10 +394,21 @@ export function LocationPage() {
   const charges = deviceWh ? Math.max(0, usableWh / Number(deviceWh)).toFixed(1) : '0';
   return (
     <>
-      <PageMeta title="التوصيل داخل اليمن" description="معلومات الشحن والتوصيل داخل اليمن من CABL." />
-      <EditorialHero eyebrow="التوصيل / اليمن" title="راجع خيارات الشحن حسب محافظتك" description={`راجع خيارات الشحن الحالية قبل تأكيد طلبك إلى ${slug === 'yemen' ? 'المحافظة التي تختارها' : slug}.`}>
+      <PageMeta title={tawseel?.seoTitle || 'التوصيل داخل اليمن'} description={tawseel?.metaDescription || tawseel?.description || 'معلومات الشحن والتوصيل داخل اليمن من CABL.'} />
+      <EditorialHero eyebrow="التوصيل / اليمن" title={tawseel ? `${tawseel.name} إلى مدن يمنية محددة` : 'راجع خيارات الشحن حسب محافظتك'} description={tawseel?.description || `راجع خيارات الشحن الحالية قبل تأكيد طلبك إلى ${slug === 'yemen' ? 'المحافظة التي تختارها' : slug}.`}>
         <Link href="/checkout" className="button button-primary">ابدأ طلبك <ArrowLeft size={16} /></Link>
       </EditorialHero>
+      {tawseel && (
+        <EditorialSection title={`مدن تغطية ${tawseel.name}`}>
+          {tawseel.description && <p>{tawseel.description}</p>}
+          <InfoCards items={tawseel.coverageCities.map((city) => ({
+            icon: <MapPin />,
+            title: city.cityNameAr,
+            text: `${city.governorateNameAr}${city.cityNameEn ? ` · ${city.cityNameEn}` : ''}`,
+          }))} />
+          {tawseel.serviceCategories.length > 0 && <p className="content-disclaimer">فئات الخدمة: {tawseel.serviceCategories.join('، ')}.</p>}
+        </EditorialSection>
+      )}
       <EditorialSection title="خيارات الشحن الحالية">
         <InfoCards items={(catalog?.shippingOptions || []).map((option) => ({ icon: <Truck />, title: option.name, text: `${option.free ? 'بدون رسوم شحن' : `الرسوم الحالية ${formatPrice(option.charge)}`} — المدة التقديرية ${option.estimatedDays ? `${option.estimatedDays} أيام` : 'تؤكد مع الطلب'}.` }))} />
         {!catalog?.shippingOptions?.length && <p className="empty-state">ستظهر خيارات الشحن النشطة بعد إدخال المدينة والعنوان في checkout.</p>}
@@ -577,10 +589,25 @@ export function VerifyPage() {
 
 export function ShippingPage() {
   const { catalog, formatPrice } = useStore();
+  const tawseel = catalog?.shippingOptions.find((option) => option.slug === 'tawseel-yemen');
   return (
     <>
-      <PageMeta title="الشحن والتوصيل" description="سياسة الشحن والتوصيل الحالية في متجر CABL داخل اليمن." />
+      <PageMeta title={tawseel?.seoTitle || 'الشحن والتوصيل'} description={tawseel?.metaDescription || 'سياسة الشحن والتوصيل الحالية في متجر CABL داخل اليمن.'} />
       <EditorialHero eyebrow="سياسة الشحن" title="الشحن والتوصيل" description="تعرف على مناطق التوصيل والمدة والرسوم قبل تأكيد الطلب." />
+      {tawseel && (
+        <EditorialSection title={`التوصيل عبر ${tawseel.name}`}>
+          {tawseel.description && <p>{tawseel.description}</p>}
+          <div className="policy-list">
+            <p><Check size={17} /> {tawseel.free ? 'الشحن مجاني حالياً لهذه الطريقة.' : 'راجع الرسوم الحالية قبل إرسال الطلب.'}</p>
+            {tawseel.serviceCategories.length > 0 && <p><Check size={17} /> فئات الخدمة: {tawseel.serviceCategories.join('، ')}.</p>}
+          </div>
+          <InfoCards items={tawseel.coverageCities.map((city) => ({
+            icon: <MapPin />,
+            title: city.cityNameAr,
+            text: `${city.governorateNameAr}${city.cityNameEn ? ` · ${city.cityNameEn}` : ''}`,
+          }))} />
+        </EditorialSection>
+      )}
       <EditorialSection title="مناطق التوصيل">
         <div className="policy-list">
           <p><MapPin size={17} /> نخدم العناوين التي تظهر لها طريقة شحن نشطة في checkout داخل اليمن.</p>

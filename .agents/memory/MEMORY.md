@@ -19,7 +19,7 @@
 - [RTL mobile flex sizing](rtl-mobile-flex-sizing.md) — column layouts need stretch alignment explicitly or `align-items: start` can shrink cards and create side gutters.
 - [Build environment requirements](build-environment-requirements.md) — Vite artifact builds validate PORT and BASE_PATH even without starting a server.
 - [PageSpeed preview versus production](pagespeed-preview-vs-production.md) — final Lighthouse scores require the published/static artifact, not the Vite preview URL.
-- [Supabase data migration](supabase-data-migration.md) — legacy PostgreSQL copies need column-qualified inserts because physical column order can differ after schema push.
+- [Supabase data migration](supabase-data-migration.md) — use column-qualified inserts, verify serial sequences, and never approve a push that proposes truncating populated data.
 - [Supabase SQL execution](supabase-sql-execution.md) — use the app's pg client for one-off SQL; psql can misparse the configured URL and expose credential fragments in errors.
 - [WebMCP availability](webmcp-availability.md) — WebMCP is experimental; feature-detect the browser API and keep registrations abortable and read-only by default.
 - [Homepage first paint](homepage-first-paint.md) — keep the storefront hero independent of catalog latency and route-level lazy loading.

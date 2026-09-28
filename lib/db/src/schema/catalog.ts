@@ -251,6 +251,14 @@ export const cardItemsTable = pgTable("card_items", {
 export const shippingsTable = pgTable("shippings", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  slug: text("slug"),
+  description: text("description"),
+  serviceCategories: text("service_categories").array(),
+  defaultCharge: numeric("default_charge", { precision: 12, scale: 2 }).notNull().default("0"),
+  defaultFree: boolean("default_free"),
+  estimatedDays: numeric("estimated_days", { precision: 5, scale: 1 }),
+  seoTitle: text("seo_title"),
+  metaDescription: text("meta_description"),
   active: boolean("active").notNull().default(true),
   iconPath: text("icon_path"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
@@ -258,6 +266,25 @@ export const shippingsTable = pgTable("shippings", {
   createdBy: uuid("created_by"),
   updatedBy: uuid("updated_by"),
 });
+
+export const shippingCoverageCitiesTable = pgTable(
+  "shipping_coverage_cities",
+  {
+    id: serial("id").primaryKey(),
+    shippingId: integer("shipping_id").notNull().references(() => shippingsTable.id, { onDelete: "cascade" }),
+    cityNameAr: text("city_name_ar").notNull(),
+    governorateNameAr: text("governorate_name_ar").notNull(),
+    cityNameEn: text("city_name_en"),
+    active: boolean("active").notNull().default(true),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("shipping_coverage_cities_shipping_city_unique").on(table.shippingId, table.cityNameAr),
+    index("shipping_coverage_cities_shipping_sort_idx").on(table.shippingId, table.sortOrder),
+  ],
+);
 
 export const productShippingsTable = pgTable(
   "product_shippings",
@@ -341,6 +368,7 @@ export const ordersTable = pgTable("orders", {
   customerId: uuid("customer_id"),
   paymentMethodId: integer("payment_method_id"),
   paymentReference: varchar("payment_reference", { length: 255 }),
+  shippingCost: numeric("shipping_cost", { precision: 12, scale: 2 }),
   paymentStatus: varchar("payment_status", { length: 50 }).notNull().default("awaiting_payment"),
   paymentSubmittedAt: timestamp("payment_submitted_at", { withTimezone: true }),
   paymentVerifiedAt: timestamp("payment_verified_at", { withTimezone: true }),

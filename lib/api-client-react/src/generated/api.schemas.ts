@@ -14,6 +14,33 @@ export interface StoreShippingOption {
   estimatedDays: number | null;
 }
 
+export interface StoreCoverageCity {
+  id: number;
+  cityNameAr: string;
+  governorateNameAr: string;
+  /** @nullable */
+  cityNameEn: string | null;
+}
+
+export interface StoreDeliveryMethod {
+  id: number;
+  name: string;
+  /** @nullable */
+  slug: string | null;
+  /** @nullable */
+  description: string | null;
+  serviceCategories: string[];
+  charge: number;
+  free: boolean;
+  /** @nullable */
+  estimatedDays: number | null;
+  /** @nullable */
+  seoTitle: string | null;
+  /** @nullable */
+  metaDescription: string | null;
+  coverageCities: StoreCoverageCity[];
+}
+
 export interface StorePaymentMethod {
   id: number;
   name: string;
@@ -329,7 +356,7 @@ export interface StoreCatalog {
   products: StoreProduct[];
   categories: StoreCatalogCategory[];
   brands: StoreCatalogBrand[];
-  shippingOptions: StoreShippingOption[];
+  shippingOptions: StoreDeliveryMethod[];
   paymentMethods: StorePaymentMethod[];
   currencies: StoreCurrency[];
 }
