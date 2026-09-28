@@ -11,6 +11,7 @@ import {
   useUpdateAdminRow,
 } from '@workspace/api-client-react';
 import { ProductAttributeSetup } from '@/components/product-attribute-setup';
+import { CategoryLinkedSpecifications } from '@/components/category-linked-specifications';
 
 type Row = Record<string, unknown>;
 type AttributeDefinition = Row & {
@@ -701,6 +702,12 @@ export function ProductSpecificationsSection({
           )}
         </div>
       )}
+
+      <CategoryLinkedSpecifications
+        productId={productId}
+        categoryIds={orderedCategoryIds}
+        genericAttributeSlugs={eligibleAttributes.map((attribute) => String(attribute.slug ?? ''))}
+      />
 
       {setupOpen && (
         <ProductAttributeSetup
