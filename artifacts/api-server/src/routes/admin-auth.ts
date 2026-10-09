@@ -399,12 +399,25 @@ router.post("/admin/auth/login", async (req, res): Promise<void> => {
     if (!account && bootstrap?.status === "invalid") {
       sendUnavailable(
         res,
-        "The initial Admin credentials are invalid. Set a valid username and a password of at least 12 characters.",
+        "The initial Admin credentials are invalid. Use a 3–64 character username with only letters, numbers, ., _, @, +, or -, and a 12–128 character password.",
       );
       return;
     }
 
-    const pepper = getSessionSecret();
+    let pepper: string;
+    try {
+      pepper = getSessionSecret();
+    } catch {
+      req.log.error(
+        { code: "SESSION_SECRET_MISSING_OR_SHORT" },
+        "Admin sign-in configuration is invalid",
+      );
+      sendUnavailable(
+        res,
+        "Admin session configuration is incomplete. Set SESSION_SECRET to at least 32 characters.",
+      );
+      return;
+    }
 
     const attempt = await recordLoginAttempt(req, pepper);
     if (attempt.attempts > maxLoginAttempts) {
