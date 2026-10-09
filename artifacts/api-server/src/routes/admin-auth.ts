@@ -1,4 +1,6 @@
 import {
+  createCipheriv,
+  createDecipheriv,
   createHash,
   createHmac,
   randomBytes,
@@ -23,6 +25,7 @@ const loginWindowMs = 15 * 60 * 1000;
 const maxLoginAttempts = 8;
 const passwordMinLength = 12;
 const passwordMaxLength = 128;
+const sessionSecretMinLength = 32;
 
 type AdminCredentials = {
   username: string;
@@ -41,6 +44,20 @@ const normalizeUsername = (username: string) => username.trim().toLowerCase();
 const isValidUsername = (username: string) =>
   /^[a-zA-Z0-9._@+-]{3,64}$/.test(username);
 
+function safeErrorContext(error: unknown): { type: string; code?: string } {
+  const code =
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    typeof error.code === "string"
+      ? error.code
+      : undefined;
+  return {
+    type: error instanceof Error ? error.name : typeof error,
+    ...(code ? { code } : {}),
+  };
+}
+
 function safeEqual(left: Buffer, right: Buffer): boolean {
   return left.length === right.length && timingSafeEqual(left, right);
 }
@@ -49,6 +66,42 @@ function constantTimeTextEqual(left: string, right: string): boolean {
   const leftDigest = createHash("sha256").update(left).digest();
   const rightDigest = createHash("sha256").update(right).digest();
   return safeEqual(leftDigest, rightDigest) && left.length === right.length;
+}
+
+function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.length < sessionSecretMinLength) {
+    throw new Error("SESSION_SECRET is missing or too short");
+  }
+  return secret;
+}
+
+function sessionEncryptionKey(): Buffer {
+  return createHash("sha256").update(getSessionSecret()).digest();
+}
+
+function encryptSessionKey(sessionKey: string): string {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", sessionEncryptionKey(), iv);
+  const ciphertext = Buffer.concat([
+    cipher.update(sessionKey, "utf8"),
+    cipher.final(),
+  ]);
+  return Buffer.concat([iv, cipher.getAuthTag(), ciphertext]).toString("base64url");
+}
+
+function decryptSessionKey(encryptedSessionKey: string): string {
+  const packed = Buffer.from(encryptedSessionKey, "base64url");
+  if (packed.length < 29) throw new Error("Invalid encrypted Admin session key");
+  const iv = packed.subarray(0, 12);
+  const authTag = packed.subarray(12, 28);
+  const ciphertext = packed.subarray(28);
+  const decipher = createDecipheriv("aes-256-gcm", sessionEncryptionKey(), iv);
+  decipher.setAuthTag(authTag);
+  return Buffer.concat([
+    decipher.update(ciphertext),
+    decipher.final(),
+  ]).toString("utf8");
 }
 
 function derivePasswordHash(password: string, salt: Buffer): Promise<Buffer> {
@@ -140,7 +193,7 @@ function hasValidSession(req: Request, account: AdminCredentials): boolean {
   const [encodedPayload, suppliedSignature, extra] = token.split(".");
   if (!encodedPayload || !suppliedSignature || extra !== undefined) return false;
 
-  const expectedSignature = createHmac("sha256", account.session_key)
+  const expectedSignature = createHmac("sha256", decryptSessionKey(account.session_key))
     .update(encodedPayload)
     .digest("base64url");
   if (!safeEqual(Buffer.from(suppliedSignature), Buffer.from(expectedSignature))) return false;
@@ -170,11 +223,11 @@ function setSessionCookie(
       exp: Math.floor(Date.now() / 1000) + Math.floor(sessionLifetimeMs / 1000),
       version: account.session_version,
     },
-    account.session_key,
+    decryptSessionKey(account.session_key),
   );
   res.cookie(cookieName, token, {
     httpOnly: true,
-    secure: req.secure,
+    secure: req.secure || process.env.NODE_ENV === "production",
     sameSite: "strict",
     path: "/",
     maxAge: sessionLifetimeMs,
@@ -187,7 +240,7 @@ function clearSessionCookie(
 ): void {
   res.clearCookie(cookieName, {
     httpOnly: true,
-    secure: req.secure,
+    secure: req.secure || process.env.NODE_ENV === "production",
     sameSite: "strict",
     path: "/",
   });
@@ -227,7 +280,7 @@ async function createInitialCredentials(
        (id, username, password_hash, password_salt, session_key, session_version)
      VALUES (1, $1, $2, $3, $4, 1)
      ON CONFLICT (id) DO NOTHING`,
-    [username, passwordHash, passwordSalt, sessionKey],
+    [username, passwordHash, passwordSalt, encryptSessionKey(sessionKey)],
   );
 
   const account = await getAdminCredentials();
@@ -298,7 +351,7 @@ export const requireAdmin: RequestHandler = (req, res, next) => {
       next();
     })
     .catch((error: unknown) => {
-      req.log.error({ err: error }, "Could not validate Admin session");
+      req.log.error(safeErrorContext(error), "Could not validate Admin session");
       sendUnavailable(res, "Admin authentication is unavailable.");
     });
 };
@@ -316,7 +369,7 @@ router.get("/admin/auth/session", async (req, res): Promise<void> => {
       username: account.username,
     }));
   } catch (error) {
-    req.log.error({ err: error }, "Could not load Admin session");
+    req.log.error(safeErrorContext(error), "Could not load Admin session");
     sendUnavailable(res, "Admin authentication is unavailable.");
   }
 });
@@ -351,11 +404,7 @@ router.post("/admin/auth/login", async (req, res): Promise<void> => {
       return;
     }
 
-    const pepper = account?.session_key ?? (bootstrap?.status === "ready" ? bootstrap.password : "");
-    if (!pepper) {
-      sendUnavailable(res, "Admin credentials are not configured on this deployment.");
-      return;
-    }
+    const pepper = getSessionSecret();
 
     const attempt = await recordLoginAttempt(req, pepper);
     if (attempt.attempts > maxLoginAttempts) {
@@ -368,13 +417,11 @@ router.post("/admin/auth/login", async (req, res): Promise<void> => {
 
     let matches = false;
     if (account) {
-      matches =
-        username === account.username &&
-        (await verifyPassword(password, account));
+      const passwordMatches = await verifyPassword(password, account);
+      matches = username === account.username && passwordMatches;
     } else if (bootstrap?.status === "ready") {
-      matches =
-        username === bootstrap.username &&
-        constantTimeTextEqual(password, bootstrap.password);
+      const passwordMatches = constantTimeTextEqual(password, bootstrap.password);
+      matches = username === bootstrap.username && passwordMatches;
       if (matches) {
         account = await createInitialCredentials(bootstrap.username, bootstrap.password);
         matches =
@@ -395,7 +442,7 @@ router.post("/admin/auth/login", async (req, res): Promise<void> => {
       username: account.username,
     }));
   } catch (error) {
-    req.log.error({ err: error }, "Admin sign-in failed");
+    req.log.error(safeErrorContext(error), "Admin sign-in failed");
     sendUnavailable(res, "Admin authentication is unavailable.");
   }
 });
@@ -476,7 +523,7 @@ router.post(
         username: updatedAccount.username,
       }));
     } catch (error) {
-      req.log.error({ err: error }, "Could not update Admin credentials");
+      req.log.error(safeErrorContext(error), "Could not update Admin credentials");
       sendUnavailable(res, "Admin credentials could not be updated.");
     }
   },

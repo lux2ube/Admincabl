@@ -7,6 +7,7 @@
 - [Currency display model](currency-display-model.md) — keep catalog and order calculations in USD; convert only presentation values using active database rates.
 - [CairoVolt data boundary](cairovolt-data-boundary.md) — keep reference-site presentation assets local, but source all commerce data from the project database.
 - [CABL editorial content](cabl-editorial-content.md) — preserve the page structure without inventing unsupported commerce, warranty, contact, or Egypt-specific claims.
+- [CABL Admin shared account](cabl-admin-shared-account.md) — keep the Admin login shared; credential changes belong in authenticated Admin settings.
 - [Shared CABL shell](shared-cabl-shell.md) — every interactive and static route should preserve the same CABL header and footer.
 - [CABL programmatic SEO](cabl-programmatic-seo.md) — treat the keyword bank as semantic coverage, and index only pages with distinct catalog or verified first-party value.
 - [CairoVolt clone permission](cairovolt-clone-permission.md) — exact CairoVolt branding, content, assets, and page structure are authorized for this project.
