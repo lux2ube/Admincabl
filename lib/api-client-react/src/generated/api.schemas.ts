@@ -561,6 +561,46 @@ export interface ErrorResponse {
   error: string;
 }
 
+export interface AdminLoginInput {
+  /**
+     * @minLength 3
+     * @maxLength 64
+     */
+  username: string;
+  /**
+     * @minLength 1
+     * @maxLength 128
+     */
+  password: string;
+}
+
+export interface AdminCredentialsUpdate {
+  /**
+     * @minLength 1
+     * @maxLength 128
+     */
+  currentPassword: string;
+  /**
+     * @minLength 3
+     * @maxLength 64
+     */
+  newUsername?: string;
+  /**
+     * @minLength 12
+     * @maxLength 128
+     */
+  newPassword?: string;
+}
+
+export interface AdminAuthSession {
+  authenticated: true;
+  username: string;
+}
+
+export interface AdminAuthLogout {
+  authenticated: false;
+}
+
 export type AdminColumnType = typeof AdminColumnType[keyof typeof AdminColumnType];
 
 

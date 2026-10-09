@@ -266,11 +266,147 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /admin/auth/session:
+    get:
+      operationId: getAdminAuthSession
+      tags: [admin]
+      summary: Check the current Admin session
+      responses:
+        "200":
+          description: Signed-in Admin session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAuthSession"
+        "401":
+          description: No valid Admin session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Admin authentication is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/auth/login:
+    post:
+      operationId: createAdminSession
+      tags: [admin]
+      summary: Sign in to the shared Admin account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginInput"
+      responses:
+        "200":
+          description: Signed-in Admin session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAuthSession"
+        "400":
+          description: Invalid login request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Invalid username or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Request origin is not trusted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Too many sign-in attempts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Admin authentication is not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/auth/logout:
+    post:
+      operationId: deleteAdminSession
+      tags: [admin]
+      summary: Sign out of the Admin account
+      responses:
+        "200":
+          description: Signed out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAuthLogout"
+        "403":
+          description: Request origin is not trusted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/auth/credentials:
+    post:
+      operationId: updateAdminCredentials
+      tags: [admin]
+      summary: Change the shared Admin username or password
+      security:
+        - AdminSessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminCredentialsUpdate"
+      responses:
+        "200":
+          description: Credentials updated and current session renewed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAuthSession"
+        "400":
+          description: Invalid credential update
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Current password is incorrect or session expired
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Request origin is not trusted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Admin authentication is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /admin/metadata:
     get:
       operationId: getAdminMetadata
       tags: [admin]
       summary: Get admin tables and relationships
+      security:
+        - AdminSessionCookie: []
       responses:
         "200":
           description: Admin metadata
@@ -283,6 +419,8 @@ paths:
       operationId: getAdminDashboard
       tags: [admin]
       summary: Get admin dashboard summary
+      security:
+        - AdminSessionCookie: []
       responses:
         "200":
           description: Dashboard summary
@@ -295,6 +433,8 @@ paths:
       operationId: listAdminRows
       tags: [admin]
       summary: List rows for an allowed admin table
+      security:
+        - AdminSessionCookie: []
       parameters:
         - $ref: "#/components/parameters/AdminTable"
         - name: search
@@ -342,6 +482,8 @@ paths:
       operationId: createAdminRow
       tags: [admin]
       summary: Create a row in an allowed admin table
+      security:
+        - AdminSessionCookie: []
       parameters:
         - $ref: "#/components/parameters/AdminTable"
       requestBody:
@@ -368,6 +510,8 @@ paths:
       operationId: updateAdminRow
       tags: [admin]
       summary: Update a row in an allowed admin table
+      security:
+        - AdminSessionCookie: []
       parameters:
         - $ref: "#/components/parameters/AdminTable"
         - $ref: "#/components/parameters/AdminRowId"
@@ -400,6 +544,8 @@ paths:
       operationId: deleteAdminRow
       tags: [admin]
       summary: Delete a row from an allowed admin table
+      security:
+        - AdminSessionCookie: []
       parameters:
         - $ref: "#/components/parameters/AdminTable"
         - $ref: "#/components/parameters/AdminRowId"
@@ -423,6 +569,8 @@ paths:
       operationId: seedAdminData
       tags: [admin]
       summary: Seed CABL catalog and reference data
+      security:
+        - AdminSessionCookie: []
       responses:
         "200":
           description: Seed summary
@@ -450,6 +598,11 @@ components:
       required: true
       schema:
         type: string
+  securitySchemes:
+    AdminSessionCookie:
+      type: apiKey
+      in: cookie
+      name: cabl_admin_session
   schemas:
     StoreShippingOption:
       type: object
@@ -1181,6 +1334,50 @@ components:
           type: string
       required:
         - error
+    AdminLoginInput:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 64
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required: [username, password]
+    AdminCredentialsUpdate:
+      type: object
+      properties:
+        currentPassword:
+          type: string
+          minLength: 1
+          maxLength: 128
+        newUsername:
+          type: string
+          minLength: 3
+          maxLength: 64
+        newPassword:
+          type: string
+          minLength: 12
+          maxLength: 128
+      required: [currentPassword]
+    AdminAuthSession:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+          enum: [true]
+        username:
+          type: string
+      required: [authenticated, username]
+    AdminAuthLogout:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+          enum: [false]
+      required: [authenticated]
     AdminColumn:
       type: object
       properties:

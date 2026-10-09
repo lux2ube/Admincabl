@@ -22,3 +22,4 @@ export * from "./catalog";
 export * from "./seo";
 export * from "./currency";
 export * from "./specifications";
+export * from "./admin-auth";

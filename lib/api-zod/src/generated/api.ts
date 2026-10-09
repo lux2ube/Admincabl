@@ -686,6 +686,69 @@ export const GetStoreOrderResponse = zod.object({
 
 
 /**
+ * @summary Check the current Admin session
+ */
+export const GetAdminAuthSessionResponse = zod.object({
+  "authenticated": zod.literal(true),
+  "username": zod.string()
+})
+
+
+/**
+ * @summary Sign in to the shared Admin account
+ */
+export const createAdminSessionBodyUsernameMin = 3;
+export const createAdminSessionBodyUsernameMax = 64;
+
+export const createAdminSessionBodyPasswordMax = 128;
+
+
+
+export const CreateAdminSessionBody = zod.object({
+  "username": zod.string().min(createAdminSessionBodyUsernameMin).max(createAdminSessionBodyUsernameMax),
+  "password": zod.string().min(1).max(createAdminSessionBodyPasswordMax)
+})
+
+export const CreateAdminSessionResponse = zod.object({
+  "authenticated": zod.literal(true),
+  "username": zod.string()
+})
+
+
+/**
+ * @summary Sign out of the Admin account
+ */
+export const DeleteAdminSessionResponse = zod.object({
+  "authenticated": zod.literal(false)
+})
+
+
+/**
+ * @summary Change the shared Admin username or password
+ */
+export const updateAdminCredentialsBodyCurrentPasswordMax = 128;
+
+export const updateAdminCredentialsBodyNewUsernameMin = 3;
+export const updateAdminCredentialsBodyNewUsernameMax = 64;
+
+export const updateAdminCredentialsBodyNewPasswordMin = 12;
+export const updateAdminCredentialsBodyNewPasswordMax = 128;
+
+
+
+export const UpdateAdminCredentialsBody = zod.object({
+  "currentPassword": zod.string().min(1).max(updateAdminCredentialsBodyCurrentPasswordMax),
+  "newUsername": zod.string().min(updateAdminCredentialsBodyNewUsernameMin).max(updateAdminCredentialsBodyNewUsernameMax).optional(),
+  "newPassword": zod.string().min(updateAdminCredentialsBodyNewPasswordMin).max(updateAdminCredentialsBodyNewPasswordMax).optional()
+})
+
+export const UpdateAdminCredentialsResponse = zod.object({
+  "authenticated": zod.literal(true),
+  "username": zod.string()
+})
+
+
+/**
  * @summary Get admin tables and relationships
  */
 export const GetAdminMetadataResponse = zod.object({

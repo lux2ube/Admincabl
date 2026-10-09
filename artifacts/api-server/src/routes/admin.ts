@@ -17,8 +17,10 @@ import {
 import { pool } from "@workspace/db";
 import { adminTableMap, adminTables, type AdminColumn, type AdminTable } from "../lib/admin-schema";
 import { brandPublicPath, productPublicPath, productSlug, publicCategoryPath, slugify } from "../lib/store-seo";
+import { requireAdmin } from "./admin-auth";
 
 const router: IRouter = Router();
+router.use(requireAdmin);
 const sensitiveColumns = new Set(["password_hash", "reset_token", "access_token", "refresh_token"]);
 
 const sanitizeRow = (row: Record<string, unknown>) =>

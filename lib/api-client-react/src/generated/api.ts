@@ -20,7 +20,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdminAuthLogout,
+  AdminAuthSession,
+  AdminCredentialsUpdate,
   AdminDashboard,
+  AdminLoginInput,
   AdminMetadata,
   AdminRow,
   AdminRowInput,
@@ -874,6 +878,296 @@ export function useGetStoreOrder<TData = Awaited<ReturnType<typeof getStoreOrder
 
 
 
+
+export const getGetAdminAuthSessionUrl = () => {
+
+
+
+
+  return `/api/admin/auth/session`
+}
+
+/**
+ * @summary Check the current Admin session
+ */
+export const getAdminAuthSession = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminAuthSession> => {
+
+  return customFetch<AdminAuthSession>(getGetAdminAuthSessionUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAdminAuthSessionQueryKey = () => {
+    return [
+    `/api/admin/auth/session`
+    ] as const;
+    }
+
+
+export const getGetAdminAuthSessionQueryOptions = <TData = Awaited<ReturnType<typeof getAdminAuthSession>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminAuthSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminAuthSessionQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminAuthSession>>> = ({ signal }) => getAdminAuthSession({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminAuthSession>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAdminAuthSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminAuthSession>>>
+export type GetAdminAuthSessionQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Check the current Admin session
+ */
+
+export function useGetAdminAuthSession<TData = Awaited<ReturnType<typeof getAdminAuthSession>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminAuthSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAdminAuthSessionQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateAdminSessionUrl = () => {
+
+
+
+
+  return `/api/admin/auth/login`
+}
+
+/**
+ * @summary Sign in to the shared Admin account
+ */
+export const createAdminSession = async (adminLoginInput: AdminLoginInput, options?: Parameters<typeof customFetch>[1]): Promise<AdminAuthSession> => {
+
+  return customFetch<AdminAuthSession>(getCreateAdminSessionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(adminLoginInput)
+  }
+);}
+
+
+
+
+
+export const getCreateAdminSessionMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAdminSession>>, TError,{data: BodyType<AdminLoginInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createAdminSession>>, TError,{data: BodyType<AdminLoginInput>}, TContext> => {
+
+const mutationKey = ['createAdminSession'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAdminSession>>, {data: BodyType<AdminLoginInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createAdminSession(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateAdminSessionMutationResult = NonNullable<Awaited<ReturnType<typeof createAdminSession>>>
+    export type CreateAdminSessionMutationBody = BodyType<AdminLoginInput>
+    export type CreateAdminSessionMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Sign in to the shared Admin account
+ */
+export const useCreateAdminSession = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAdminSession>>, TError,{data: BodyType<AdminLoginInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createAdminSession>>,
+        TError,
+        {data: BodyType<AdminLoginInput>},
+        TContext
+      > => {
+      return useMutation(getCreateAdminSessionMutationOptions(options));
+    }
+
+export const getDeleteAdminSessionUrl = () => {
+
+
+
+
+  return `/api/admin/auth/logout`
+}
+
+/**
+ * @summary Sign out of the Admin account
+ */
+export const deleteAdminSession = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminAuthLogout> => {
+
+  return customFetch<AdminAuthLogout>(getDeleteAdminSessionUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteAdminSessionMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdminSession>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteAdminSession>>, TError,void, TContext> => {
+
+const mutationKey = ['deleteAdminSession'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAdminSession>>, void> = () => {
+
+
+          return  deleteAdminSession(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAdminSessionMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAdminSession>>>
+
+    export type DeleteAdminSessionMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Sign out of the Admin account
+ */
+export const useDeleteAdminSession = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdminSession>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteAdminSession>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getDeleteAdminSessionMutationOptions(options));
+    }
+
+export const getUpdateAdminCredentialsUrl = () => {
+
+
+
+
+  return `/api/admin/auth/credentials`
+}
+
+/**
+ * @summary Change the shared Admin username or password
+ */
+export const updateAdminCredentials = async (adminCredentialsUpdate: AdminCredentialsUpdate, options?: Parameters<typeof customFetch>[1]): Promise<AdminAuthSession> => {
+
+  return customFetch<AdminAuthSession>(getUpdateAdminCredentialsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(adminCredentialsUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateAdminCredentialsMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminCredentials>>, TError,{data: BodyType<AdminCredentialsUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAdminCredentials>>, TError,{data: BodyType<AdminCredentialsUpdate>}, TContext> => {
+
+const mutationKey = ['updateAdminCredentials'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAdminCredentials>>, {data: BodyType<AdminCredentialsUpdate>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateAdminCredentials(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAdminCredentialsMutationResult = NonNullable<Awaited<ReturnType<typeof updateAdminCredentials>>>
+    export type UpdateAdminCredentialsMutationBody = BodyType<AdminCredentialsUpdate>
+    export type UpdateAdminCredentialsMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Change the shared Admin username or password
+ */
+export const useUpdateAdminCredentials = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminCredentials>>, TError,{data: BodyType<AdminCredentialsUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAdminCredentials>>,
+        TError,
+        {data: BodyType<AdminCredentialsUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateAdminCredentialsMutationOptions(options));
+    }
 
 export const getGetAdminMetadataUrl = () => {
 

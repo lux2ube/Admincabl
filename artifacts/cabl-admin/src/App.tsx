@@ -14,6 +14,7 @@ import {
   Hash,
   LayoutDashboard,
   LoaderCircle,
+  LogOut,
   Menu,
   Package,
   Pencil,
@@ -27,6 +28,7 @@ import {
   Truck,
   X,
 } from 'lucide-react';
+import { AdminAccountSecurityPage, AdminAuthGate } from './pages/admin-auth';
 import {
   getGetAdminDashboardQueryKey,
   getGetAdminMetadataQueryKey,
@@ -100,10 +102,27 @@ const displayValue = (value: unknown) => {
 const shortLabel = (value: string) =>
   value.replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 
-function Shell({ children }: { children: ReactNode }) {
+function Shell({
+  children,
+  username,
+  onLogout,
+}: {
+  children: ReactNode;
+  username: string;
+  onLogout: () => Promise<void>;
+}) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
   const { data: metadata, isLoading, isError } = useGetAdminMetadata();
+  const handleLogout = async () => {
+    setLogoutError('');
+    try {
+      await onLogout();
+    } catch {
+      setLogoutError('Could not sign out. Retry.');
+    }
+  };
   const groups = useMemo(() => {
     const tables = metadata?.tables ?? [];
     return tables.reduce<Record<string, typeof tables>>((acc, table) => {
@@ -156,6 +175,10 @@ function Shell({ children }: { children: ReactNode }) {
             <ServerCog size={16} /><span>Data seeding</span>
             {location === '/seed' && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary" />}
           </Link>
+          <Link href="/settings" data-testid="link-account-security" onClick={() => setMobileOpen(false)} className={`focus-ring mb-5 flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition-colors ${location === '/settings' ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent/70 hover:text-sidebar-foreground'}`}>
+            <Settings2 size={16} /><span>Account security</span>
+            {location === '/settings' && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary" />}
+          </Link>
           <div className="flex items-center justify-between px-3">
              <p className="mono text-[10px] uppercase tracking-[.2em] text-sidebar-foreground/90">Tables</p>
              <span className="mono text-[10px] text-sidebar-foreground/90" data-testid="text-table-count">{metadata?.tables.length ?? '···'}</span>
@@ -199,9 +222,20 @@ function Shell({ children }: { children: ReactNode }) {
           </div>
           <div className="flex items-center gap-2">
             <span className="hidden rounded-full border border-secondary bg-secondary/50 px-3 py-1.5 text-[11px] font-semibold text-secondary-foreground sm:inline-flex"><span className="mr-2 h-1.5 w-1.5 self-center rounded-full bg-accent" />API connected</span>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card text-xs font-extrabold text-accent" data-testid="avatar-operator">OP</div>
+            <Link href="/settings" aria-label={`Account security for ${username}`} className="focus-ring hidden max-w-40 truncate rounded-xl border border-border bg-card px-3 py-2 text-xs font-bold text-foreground sm:block" data-testid="text-admin-username">{username}</Link>
+            <button
+              type="button"
+              onClick={() => void handleLogout()}
+              aria-label="Sign out"
+              title={logoutError || 'Sign out'}
+              className="focus-ring flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition hover:border-destructive/30 hover:text-destructive"
+              data-testid="button-admin-logout"
+            >
+              <LogOut size={16} />
+            </button>
           </div>
         </header>
+        {logoutError && <p role="alert" className="border-b border-destructive/20 bg-destructive/5 px-5 py-2 text-xs text-destructive md:px-10">{logoutError}</p>}
         <div className="mx-auto max-w-[1500px] p-4 md:p-10">{children}</div>
       </main>
     </div>
@@ -1117,11 +1151,19 @@ function ProductEditorRoute() {
   />;
 }
 
-function Router() {
+function Router({
+  username,
+  onLogout,
+  onCredentialsUpdated,
+}: {
+  username: string;
+  onLogout: () => Promise<void>;
+  onCredentialsUpdated: (username: string) => void;
+}) {
   const [location] = useLocation();
-  return <ErrorBoundary resetKey={location}><Shell><Switch><Route path="/" component={Dashboard} /><Route path="/orders" component={OrdersPage} /><Route path="/table/products/new" component={ProductEditorRoute} /><Route path="/table/products/:productId/edit" component={ProductEditorRoute} /><Route path="/table/:table" component={TablePage} /><Route path="/seed" component={SeedPage} /><Route component={NotFound} /></Switch></Shell></ErrorBoundary>;
+  return <ErrorBoundary resetKey={location}><Shell username={username} onLogout={onLogout}><Switch><Route path="/" component={Dashboard} /><Route path="/orders" component={OrdersPage} /><Route path="/settings"><AdminAccountSecurityPage username={username} onCredentialsUpdated={onCredentialsUpdated} /></Route><Route path="/table/products/new" component={ProductEditorRoute} /><Route path="/table/products/:productId/edit" component={ProductEditorRoute} /><Route path="/table/:table" component={TablePage} /><Route path="/seed" component={SeedPage} /><Route component={NotFound} /></Switch></Shell></ErrorBoundary>;
 }
 
 export default function App() {
-  return <QueryClientProvider client={queryClient}><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><Router /></WouterRouter><Toaster /></QueryClientProvider>;
+  return <QueryClientProvider client={queryClient}><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><AdminAuthGate>{(auth) => <Router username={auth.username} onLogout={auth.signOut} onCredentialsUpdated={auth.updateUsername} />}</AdminAuthGate></WouterRouter><Toaster /></QueryClientProvider>;
 }
