@@ -5,6 +5,9 @@ import path from "node:path";
 const distDir = path.resolve(process.env.STORE_DIST || "artifacts/cabl-store/dist/public");
 const baseUrl = process.env.ACCEPTANCE_BASE_URL?.replace(/\/+$/, "") || null;
 const expectedBasePath = (process.env.BASE_PATH || "/cabl-store/").replace(/\/+$/, "");
+const expectedOrigin = new URL(process.env.PUBLIC_SITE_ORIGIN || "https://cabl.vercel.app").origin;
+const expectedRoutePath = (route) => route === "/" ? (expectedBasePath || "/") : `${expectedBasePath}${route}`;
+const expectedAbsoluteUrl = (route) => new URL(expectedRoutePath(route), `${expectedOrigin}/`).href;
 const routes = ["/", "/category/wireless-microphones", "/brand/anker", "/anker/chargers", "/soundcore/wireless-earbuds/soundcore-r50i-cabl-sco-r50i", "/guides/chargers-yemen", "/shipping", "/locations/yemen"];
 
 for (const route of routes) {
@@ -18,7 +21,7 @@ for (const route of routes) {
   assert.equal((html.match(/rel="canonical"/g) || []).length, 1, `${route} should contain one canonical`);
   assert.equal((html.match(/application\/ld\+json/g) || []).length, 1, `${route} should contain one JSON-LD block`);
   assert.doesNotMatch(html, /<h1>Page Not Found/i, `${route} must not be a 404 shell`);
-  const expectedCanonical = route === "/" ? (expectedBasePath || "/") : `${expectedBasePath}${route}`;
+  const expectedCanonical = expectedAbsoluteUrl(route);
   assert.match(html, new RegExp(`canonical" href="${expectedCanonical.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`), `${route} should use the mounted canonical`);
   const catalogPayload = html.match(/<script id="cabl-catalog-data" type="application\/json">([\s\S]*?)<\/script>/);
   assert.ok(catalogPayload, `${route} should expose a parseable catalog payload`);
@@ -45,15 +48,32 @@ for (const route of routes) {
 
 const robots = fs.readFileSync(path.join(distDir, "robots.txt"), "utf8");
 assert.match(robots, /^User-agent: \*/m, "robots.txt should be generated in the storefront output");
-assert.equal(robots.match(/^Sitemap: (.+)$/m)?.[1], `${expectedBasePath || ""}/sitemap.xml`, "robots.txt should point to the static storefront sitemap");
+assert.equal(robots.match(/^Sitemap: (.+)$/m)?.[1], expectedAbsoluteUrl("/sitemap.xml"), "robots.txt should point to the absolute static storefront sitemap");
+for (const route of ["/search", "/cart", "/checkout", "/orders", "/order/"]) {
+  assert.ok(robots.split(/\r?\n/).includes(`Disallow: ${expectedRoutePath(route)}`), `robots.txt should keep ${route} as a path rule`);
+}
+assert.doesNotMatch(robots, /^Disallow:\s*https?:/m, "robots.txt disallow rules must be paths, not absolute URLs");
 assert.doesNotMatch(robots, /\/api\/store\/sitemap\.xml/, "robots.txt must not depend on the backend sitemap route");
 
 const sitemap = fs.readFileSync(path.join(distDir, "sitemap.xml"), "utf8");
 assert.match(sitemap, /^<\?xml version="1\.0" encoding="UTF-8"\?>/, "sitemap.xml should be valid XML output");
 assert.match(sitemap, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/, "sitemap.xml should use the sitemap namespace");
-assert.match(sitemap, new RegExp(`<loc>${expectedBasePath || ""}(?:/[^<]*)?<\\/loc>`), "sitemap.xml should contain mounted storefront URLs");
-assert.ok(sitemap.includes(`${expectedBasePath}/shipping`), "sitemap.xml should include the shipping landing page");
-assert.ok(sitemap.includes(`${expectedBasePath}/locations/yemen`), "sitemap.xml should include the Yemen delivery coverage page");
+const sitemapLocations = [...sitemap.matchAll(/<loc>([\s\S]*?)<\/loc>/g)].map((match) =>
+  match[1]
+    .replaceAll("&amp;", "&")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&apos;", "'"),
+);
+assert.ok(sitemapLocations.length > 0, "sitemap.xml should contain URLs");
+for (const location of sitemapLocations) {
+  const url = new URL(location);
+  assert.equal(url.origin, expectedOrigin, "sitemap URLs should use the canonical site origin");
+}
+assert.ok(sitemapLocations.includes(expectedAbsoluteUrl("/")), "sitemap.xml should include the homepage");
+assert.ok(sitemapLocations.includes(expectedAbsoluteUrl("/shipping")), "sitemap.xml should include the shipping landing page");
+assert.ok(sitemapLocations.includes(expectedAbsoluteUrl("/locations/yemen")), "sitemap.xml should include the Yemen delivery coverage page");
 assert.doesNotMatch(sitemap, /\/api\/store\//, "sitemap.xml must not point crawlers at backend routes");
 
 const productCandidates = [];
@@ -104,10 +124,11 @@ assert.ok(new Set(selectedProducts.map((candidate) => candidate.product.brand?.n
 for (const candidate of selectedProducts) {
   const route = `${expectedBasePath || ""}/${path.relative(distDir, candidate.file).replace(/\/index\.html$/, "")}`.replace(/\/+/g, "/");
   const canonical = candidate.html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+  const expectedProductCanonical = new URL(route, `${expectedOrigin}/`).href;
   const product = candidate.product;
   const offer = product.offers;
   const productName = String(product.name);
-  assert.equal(canonical, route, `${route} should have its own canonical`);
+  assert.equal(canonical, expectedProductCanonical, `${route} should have its own absolute canonical`);
   assert.match(candidate.html, new RegExp(`<title>[^<]*${productName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`), `${route} title should contain the product name`);
   assert.match(candidate.html, new RegExp(`<h1>${productName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}<\/h1>`), `${route} H1 should be the database product name`);
   assert.match(candidate.html, new RegExp(`<strong>SKU:<\/strong>[^<]*<span dir="ltr">${String(product.sku).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}<\/span>`), `${route} should expose its SKU`);
@@ -137,12 +158,13 @@ if (baseUrl) {
     assert.equal(response.status, 200, `${route} should return HTTP 200`);
     const html = await response.text();
     assert.match(html, /<h1>[^<]+<\/h1>/, `${route} HTTP response should contain a crawlable H1`);
-    assert.match(html, new RegExp(`canonical" href="/cabl-store${route === "/" ? "" : route}"`), `${route} HTTP response should contain its mounted canonical`);
+    const expectedCanonical = expectedAbsoluteUrl(route);
+    assert.ok(html.includes(`<link rel="canonical" href="${expectedCanonical}"`), `${route} HTTP response should contain its absolute canonical`);
   }
 
   const slashResponse = await request("/category/wireless-microphones/");
   assert.equal(slashResponse.status, 308, "trailing slash should redirect");
-  assert.equal(slashResponse.headers.get("location"), "/cabl-store/category/wireless-microphones", "trailing slash should normalize to the canonical URL");
+  assert.equal(slashResponse.headers.get("location"), expectedRoutePath("/category/wireless-microphones"), "trailing slash should normalize to the canonical URL");
 
   for (const route of ["/category/does-not-exist", "/brand/does-not-exist", "/guides/does-not-exist"]) {
     const response = await request(route);

@@ -84,7 +84,13 @@ try {
   await run("pnpm", ["--filter", "@workspace/cabl-store", "run", "build"], {
     BASE_PATH: "/",
     VITE_API_BASE_URL: "",
+    PUBLIC_SITE_ORIGIN: process.env.PUBLIC_SITE_ORIGIN || "https://cabl.vercel.app",
     SEO_PRERENDER_API_URL: `http://127.0.0.1:${prerenderPort}/api`,
+  });
+
+  await run("pnpm", ["--filter", "@workspace/cabl-store", "run", "test:seo:render"], {
+    BASE_PATH: "/",
+    PUBLIC_SITE_ORIGIN: process.env.PUBLIC_SITE_ORIGIN || "https://cabl.vercel.app",
   });
 
   await run("pnpm", ["--filter", "@workspace/cabl-admin", "run", "build"], {

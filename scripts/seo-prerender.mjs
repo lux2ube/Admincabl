@@ -10,6 +10,7 @@ const root = process.cwd();
 const distDir = path.resolve(root, "dist/public");
 const apiBase = (process.env.SEO_PRERENDER_API_URL || "http://127.0.0.1:8080/api").replace(/\/$/, "");
 const basePath = (process.env.BASE_PATH || "/").replace(/\/+$/, "");
+const siteOrigin = new URL(process.env.PUBLIC_SITE_ORIGIN || "https://cabl.vercel.app").origin;
 const prerenderConcurrency = Math.max(1, Math.min(12, Number.parseInt(process.env.SEO_PRERENDER_CONCURRENCY || "6", 10) || 6));
 
 const guidePages = {
@@ -148,7 +149,7 @@ function mountedPath(routePath) {
 
 function absoluteUrl(routePath) {
   const normalized = String(routePath).replace(/^\/cabl-store(?=\/|$)/, "") || "/";
-  return mountedPath(normalized) || "/";
+  return new URL(mountedPath(normalized) || "/", siteOrigin).href;
 }
 
 function escapeXml(value) {
@@ -536,13 +537,17 @@ function renderSitemap(routes) {
 }
 
 function renderRobots() {
+  const robotsPath = (routePath) => {
+    const normalized = String(routePath).replace(/^\/cabl-store(?=\/|$)/, "") || "/";
+    return mountedPath(normalized) || "/";
+  };
   return `User-agent: *
 Allow: /
-Disallow: ${absoluteUrl("/search")}
-Disallow: ${absoluteUrl("/cart")}
-Disallow: ${absoluteUrl("/checkout")}
-Disallow: ${absoluteUrl("/orders")}
-Disallow: ${absoluteUrl("/order/")}
+Disallow: ${robotsPath("/search")}
+Disallow: ${robotsPath("/cart")}
+Disallow: ${robotsPath("/checkout")}
+Disallow: ${robotsPath("/orders")}
+Disallow: ${robotsPath("/order/")}
 
 Sitemap: ${absoluteUrl("/sitemap.xml")}
 `;
