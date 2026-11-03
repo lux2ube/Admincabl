@@ -9,6 +9,7 @@ type StoreContextValue = {
   isLoading: boolean;
   isError: boolean;
   cart: CartLine[];
+  clearCart: () => void;
   favorites: string[];
   addToCart: (productId: string, quantity?: number) => void;
   updateCart: (productId: string, quantity: number) => void;
@@ -125,7 +126,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     // embedded catalog is a complete snapshot for the current route.
     isLoading: !hasCatalog && (query.isLoading || query.isFetching),
     isError: !hasCatalog && query.isError,
-    cart, favorites,
+    cart, clearCart: () => setCart([]), favorites,
     addToCart: (productId, quantity = 1) => setCart((current) => {
       const existing = current.find((line) => line.productId === productId);
       const product = catalog?.products.find((item) => item.id === productId);

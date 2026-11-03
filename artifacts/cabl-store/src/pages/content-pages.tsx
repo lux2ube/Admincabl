@@ -28,7 +28,7 @@ type Currency = { code: string; ratePerUsd: number; isDefault: boolean };
 
 function PageMeta({ title, description, canonicalPath, indexable = true }: { title: string; description: string; canonicalPath?: string; indexable?: boolean }) {
   useEffect(() => {
-    setSeoHead({ title: `${title} | CABL`, description, canonicalPath, indexable });
+    setSeoHead({ title: `${title} | كابل ستور`, description, canonicalPath, indexable });
   }, [title, description, canonicalPath, indexable]);
   return null;
 }

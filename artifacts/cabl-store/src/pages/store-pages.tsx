@@ -6,10 +6,25 @@ import type { StoreOrderInput, StoreProduct } from '@workspace/api-client-react'
 import { useStore } from '@/lib/store';
 import { brandCategoryPath, brandPath, catalogImageSrcSet, catalogImageUrl, productPath } from '@/lib/store-routes';
 import { getSeoKeywordCluster, seoKeywordClusters } from '@/lib/seo-keywords';
-import { absoluteJsonLd, setSeoHead } from '@/lib/seo-head';
+import { absoluteJsonLd, arabicBrandDisplayName, setSeoHead } from '@/lib/seo-head';
 import { Breadcrumbs, CTASection, CatalogError, CatalogToolbar, LoadingCatalog, PageHeading } from '@/components/page-parts';
 import { CartLine, ProductGrid, QuantityControl } from '@/components/catalog-ui';
 import { EditorialSection, FAQList, InfoCards, ProductEditorial, mergeFaqItems } from '@/pages/content-pages';
+
+const STORE_WHATSAPP_NUMBER = '967771106977';
+
+const seoCategoryNames: Record<string, string> = {
+  chargers: 'شواحن',
+  'charging-cables': 'كابلات الشحن',
+  cables: 'كابلات الشحن',
+  'power-banks': 'باور بانك',
+  'phone-accessories': 'ملحقات الهواتف',
+  'hubs-adapters': 'ملحقات الهواتف',
+  'travel-adapters': 'شواحن السيارة وملحقات السفر',
+  'car-accessories': 'شواحن السيارة وملحقات السفر',
+  'wireless-earbuds': 'سماعات أذن لاسلكية',
+  'wireless-microphones': 'ميكروفونات لاسلكية',
+};
 
 function BidiProductText({ text }: { text: string }) {
   return (
@@ -31,8 +46,8 @@ function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; 
   useEffect(() => {
     if (isStaticHome) {
       setSeoHead({
-        title: 'CABL | منتجات الشحن والطاقة والإكسسوارات',
-        description: 'تسوق منتجات الشحن والطاقة والإكسسوارات من كتالوج CABL، مع أسعار ومخزون وخيارات شحن مأخوذة من المتجر.',
+        title: 'شواحن وكابلات وإكسسوارات في اليمن | كابل ستور',
+        description: 'تسوّق منتجات الشحن والطاقة والإكسسوارات من متجر كابل ستور في اليمن، مع أسعار ومخزون وخيارات شحن محدثة من المتجر.',
         canonicalPath: '/',
       });
       return;
@@ -80,12 +95,12 @@ function SEO({ type, slug }: { type: 'home' | 'category' | 'brand' | 'product'; 
 
 function StaticSEO({ title, description, canonicalPath, indexable = true, jsonLd }: { title: string; description: string; canonicalPath?: string; indexable?: boolean; jsonLd?: Record<string, unknown> }) {
   useEffect(() => {
-    setSeoHead({ title: `${title} | CABL`, description, canonicalPath, indexable, jsonLd });
+    setSeoHead({ title: `${title} | كابل ستور`, description, canonicalPath, indexable, jsonLd });
   }, [title, description, canonicalPath, indexable, jsonLd]);
   return null;
 }
 
-function NoIndex({ title, description = 'صفحة تنقل داخل متجر CABL.' }: { title?: string; description?: string }) {
+function NoIndex({ title, description = 'صفحة تنقل داخل متجر كابل ستور.' }: { title?: string; description?: string }) {
   const [location] = useLocation();
   const route = location.split('?')[0];
   const view = new URLSearchParams(window.location.search).get('view');
@@ -101,7 +116,7 @@ function NoIndex({ title, description = 'صفحة تنقل داخل متجر CAB
             ? 'تتبع الطلبات'
             : route.startsWith('/order/')
               ? 'تفاصيل الطلب'
-              : 'CABL';
+              : 'كابل ستور';
   return <StaticSEO title={title || routeTitle} description={description} indexable={false} />;
 }
 
@@ -637,7 +652,9 @@ function BrandStorefrontPage({ slug }: { slug: string }) {
     () => products.filter((product) => product.brandSlug === slug || product.brand.toLowerCase().replace(/\s+/g, '-') === slug),
     [products, slug],
   );
-  const brandName = brandSeo?.h1 || brandProducts[0]?.brand || slug.replaceAll('-', ' ');
+  const brandName = arabicBrandDisplayName(
+    (brandSeo?.h1 || brandProducts[0]?.brand || slug.replaceAll('-', ' ')).replace(/^منتجات\s+/u, ''),
+  );
   const categories = useMemo(
     () => Array.from(new Map(
       brandProducts
@@ -647,7 +664,7 @@ function BrandStorefrontPage({ slug }: { slug: string }) {
     [brandProducts],
   );
   const availableProducts = brandProducts.filter((product) => product.quantity > 0).length;
-  const brandDescription = brandSeo?.description || `منتجات ${brandName} المنشورة حالياً في كتالوج CABL. ابدأ من القسم الأقرب لاستخدامك، ثم راجع الموديل والمواصفات والتوافر قبل الطلب.`;
+  const brandDescription = brandSeo?.description || `منتجات ${brandName} المنشورة حالياً في كتالوج كابل ستور. ابدأ من القسم الأقرب لاستخدامك، ثم راجع الموديل والمواصفات والتوافر قبل الطلب.`;
   const technologies = useMemo(() => {
     const evidence = brandProducts
       .flatMap((product) => [product.productName, product.shortDescription, product.productDescription, product.productNote])
@@ -1099,8 +1116,11 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
   const products = catalog?.products || [];
   const brandProducts = products.filter((product) => product.brandSlug === brandSlug || product.brand.toLowerCase().replace(/\s+/g, '-') === brandSlug);
   const filtered = useMemo(() => brandProducts.filter((product) => matchesCategory(product, categorySlug)), [brandProducts, categorySlug]);
-  const brandName = brandProducts[0]?.brand || brandSlug.replaceAll('-', ' ');
-  const categoryName = filtered[0]?.category?.name || brandProducts.find((product) => matchesCategory(product, categorySlug))?.category?.name || categorySlug.replaceAll('-', ' ');
+  const sourceBrandName = brandProducts[0]?.brand || brandSlug.replaceAll('-', ' ');
+  const brandName = arabicBrandDisplayName(sourceBrandName);
+  const isBaseus = brandSlug.toLowerCase() === 'baseus';
+  const catalogCategoryName = filtered[0]?.category?.name || brandProducts.find((product) => matchesCategory(product, categorySlug))?.category?.name || categorySlug.replaceAll('-', ' ');
+  const categoryName = seoCategoryNames[categorySlug] || catalogCategoryName;
   const guideKey = guideKeyForCategory(categorySlug);
   const copy = categoryGuideCopy[guideKey] || {
     eyebrow: 'اختيار داخل العلامة',
@@ -1117,7 +1137,9 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
   const categoryPathSlug = filtered[0]?.category?.slug
     || brandProducts.find((product) => matchesCategory(product, categorySlug))?.category?.slug
     || categorySlug;
-  const description = `${categoryName} من ${brandName} في اليمن. قارن المواصفات والسعر والتوافر قبل الطلب من CABL.`;
+  const description = isBaseus
+    ? `كابل ستور هو الوكيل المعتمد لبيسوس في اليمن. تصفح ${categoryName} من بيسوس، وقارن المواصفات والسعر والتوافر قبل الطلب.`
+    : `${categoryName} من ${brandName} في اليمن. قارن المواصفات والسعر والتوافر قبل الطلب من كابل ستور.`;
   const canonicalPath = brandCategoryPath(brandSlug, categorySlug);
   const brandCategoryJsonLd = useMemo(() => ({
     '@context': 'https://schema.org',
@@ -1130,7 +1152,7 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
       },
       {
         '@type': 'Brand',
-        name: brandName,
+        name: sourceBrandName,
         url: brandPath(brandSlug),
       },
       {
@@ -1149,7 +1171,12 @@ function BrandCategoryPageView({ brandSlug, categorySlug }: { brandSlug: string;
 
   return (
     <>
-      <StaticSEO title={`${categoryName} ${brandName}`} description={description} canonicalPath={canonicalPath} jsonLd={brandCategoryJsonLd} />
+      <StaticSEO
+        title={isBaseus ? `${categoryName} من الوكيل المعتمد لبيسوس في اليمن` : `${categoryName} من ${brandName} في اليمن`}
+        description={description}
+        canonicalPath={canonicalPath}
+        jsonLd={brandCategoryJsonLd}
+      />
       <div className="category-landing-hero brand-category-hero">
         <div className="container">
           <Breadcrumbs items={[
@@ -1866,13 +1893,14 @@ export function CartPage() {
 }
 
 export function CheckoutPage() {
-  const { catalog, cartProducts, formatPrice } = useStore();
+  const { catalog, cartProducts, clearCart, formatPrice } = useStore();
   const [, setLocation] = useLocation();
   const orderMutation = useCreateStoreOrder();
   const [shippingId, setShippingId] = useState<number | undefined>(catalog?.shippingOptions[0]?.id);
   const [paymentId, setPaymentId] = useState<number | undefined>(catalog?.paymentMethods[0]?.id);
   const [form, setForm] = useState({ fullName: '', email: '', phoneNumber: '', addressLine1: '', city: 'صنعاء', paymentReference: '', couponCode: '' });
   const [error, setError] = useState('');
+  const [whatsappFallbackUrl, setWhatsappFallbackUrl] = useState('');
   const [couponHint, setCouponHint] = useState('');
   useEffect(() => {
     const availableOptions = catalog?.shippingOptions.filter((option) => shippingCoversCity(option, form.city)) || [];
@@ -1888,9 +1916,11 @@ export function CheckoutPage() {
   const shippingCost = selectedShipping?.free ? 0 : selectedShipping?.charge || 0;
   const update = (key: keyof typeof form) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm((current) => ({ ...current, [key]: event.target.value }));
   const applyCoupon = () => setCouponHint(form.couponCode.trim() ? 'سيتم التحقق من الكود عند تأكيد الطلب.' : 'أدخل كود الخصم أولاً.');
+  const whatsappUrl = (message: string) => `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setError('');
+    setWhatsappFallbackUrl('');
     if (!shippingId || !availableShippingOptions.some((option) => option.id === shippingId) || !paymentId || !cartProducts.length) {
       setError('اختر طريقة الشحن والدفع وتأكد من وجود منتج في السلة.');
       return;
@@ -1908,8 +1938,44 @@ export function CheckoutPage() {
       couponCode: form.couponCode || null,
     };
     orderMutation.mutate({ data: payload }, {
-      onSuccess: (order) => setLocation(`/order/${order.id}?phone=${encodeURIComponent(form.phoneNumber)}`),
-      onError: () => setError('لم يتم إرسال الطلب. راجع البيانات وكود الخصم وحاول مرة أخرى.'),
+      onSuccess: (order) => {
+        const message = [
+          'طلب جديد من كابل ستور',
+          `رقم الطلب: #${order.id}`,
+          `الاسم: ${form.fullName.trim()}`,
+          `الهاتف: ${form.phoneNumber.trim()}`,
+          `المدينة: ${form.city}`,
+          `العنوان: ${form.addressLine1.trim()}`,
+          `الشحن: ${selectedShipping?.name || 'غير محدد'}`,
+          `طريقة الدفع: ${order.paymentMethodName}`,
+          'المنتجات:',
+          ...order.items.map((item) => `- ${item.productName} × ${item.quantity} — ${formatPrice(item.price * item.quantity)}`),
+          `المجموع: ${formatPrice(order.subtotal)}`,
+          `الشحن: ${formatPrice(order.shippingCost)}`,
+          ...(order.discount > 0 ? [`الخصم: ${formatPrice(order.discount)}`] : []),
+          `الإجمالي: ${formatPrice(order.total)}`,
+        ].join('\n');
+        clearCart();
+        window.location.assign(whatsappUrl(message));
+      },
+      onError: () => {
+        const message = [
+          'طلب جديد من كابل ستور — لم يتأكد الحفظ الإلكتروني',
+          `الاسم: ${form.fullName.trim()}`,
+          `الهاتف: ${form.phoneNumber.trim()}`,
+          `المدينة: ${form.city}`,
+          `العنوان: ${form.addressLine1.trim()}`,
+          `الشحن: ${selectedShipping?.name || 'غير محدد'}`,
+          `طريقة الدفع: ${selectedPayment?.name || 'غير محدد'}`,
+          'المنتجات:',
+          ...cartProducts.map(({ product, quantity }) => `- ${product.productName} × ${quantity} — ${formatPrice((product.discountPrice ?? product.regularPrice) * quantity)}`),
+          `الإجمالي المتوقع قبل تأكيد الكود: ${formatPrice(subtotal + shippingCost)}`,
+          ...(form.couponCode.trim() ? [`كود الخصم: ${form.couponCode.trim()}`] : []),
+          ...(form.paymentReference.trim() ? [`مرجع التحويل: ${form.paymentReference.trim()}`] : []),
+        ].join('\n');
+        setWhatsappFallbackUrl(whatsappUrl(message));
+        setError('تعذر تأكيد حفظ الطلب إلكترونيًا. يمكنك إرسال التفاصيل عبر واتساب كبديل، وتأكد من استلام الرسالة قبل إعادة المحاولة.');
+      },
     });
   };
   if (!cartProducts.length) return <><NoIndex /><div className="container checkout-page"><div className="empty-state"><h3>السلة فارغة</h3><Link href="/search" className="button button-primary" data-testid="link-checkout-empty">العودة للتسوق</Link></div></div></>;
@@ -1940,7 +2006,10 @@ export function CheckoutPage() {
               {selectedPayment && <p className="selected-payment-note">{selectedPayment.description || selectedPayment.instructions || 'تفاصيل الدفع تظهر عند تأكيد الطلب.'}</p>}
               {selectedPayment?.requiresTransactionReference && <div className="method-extra"><Field label="مرجع التحويل" value={form.paymentReference} onChange={update('paymentReference')} full /></div>}
             </section>
-            {error && <div className="notice" role="alert" data-testid="status-checkout-error">{error}</div>}
+            {error && <div className="notice" role="alert" data-testid="status-checkout-error">
+              <p>{error}</p>
+              {whatsappFallbackUrl && <a className="button button-primary" href={whatsappFallbackUrl} target="_blank" rel="noreferrer" data-testid="link-checkout-whatsapp-fallback"><MessageCircleIcon size={16}/> إرسال التفاصيل عبر واتساب</a>}
+            </div>}
           </div>
           <aside className="summary-panel checkout-summary">
             <div className="summary-kicker"><span>الخطوة الأخيرة</span><ShieldCheck size={16} /></div>

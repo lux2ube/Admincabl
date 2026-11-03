@@ -32,3 +32,4 @@
 - [Single Vercel deployment](single-vercel-deployment.md) — publish storefront, admin, and Express API from the repository root with one domain.
 - [Product description generation](product-description-generation.md) — generate full Arabic copy from verified catalog/specification data and keep meta descriptions concise.
 - [CABL category attributes](cabl-category-attributes.md) — reuse attribute definitions across categories while keeping assignment rules separate from product values.
+- [CABL Arabic SEO identity](cabl-arabic-seo-identity.md) — use “كابل ستور” in Arabic titles; CABL is an authorized Baseus agent in Yemen.

@@ -11,6 +11,24 @@ const distDir = path.resolve(root, "dist/public");
 const apiBase = (process.env.SEO_PRERENDER_API_URL || "http://127.0.0.1:8080/api").replace(/\/$/, "");
 const basePath = (process.env.BASE_PATH || "/").replace(/\/+$/, "");
 const siteOrigin = new URL(process.env.PUBLIC_SITE_ORIGIN || "https://cabl.vercel.app").origin;
+const storeNameAr = "كابل ستور";
+const arabicBrandNames = {
+  anker: "أنكر",
+  baseus: "بيسوس",
+  ugreen: "يوجرين",
+  vention: "فينتشن",
+  soundcore: "ساوندكور",
+  hollyland: "هوليلاند",
+};
+const seoCategoryNames = {
+  chargers: "شواحن",
+  "charging-cables": "كابلات الشحن",
+  "power-banks": "باور بانك",
+  "phone-accessories": "ملحقات الهواتف",
+  "travel-adapters": "شواحن السيارة وملحقات السفر",
+  "wireless-earbuds": "سماعات أذن لاسلكية",
+  "wireless-microphones": "ميكروفونات لاسلكية",
+};
 const prerenderConcurrency = Math.max(1, Math.min(12, Number.parseInt(process.env.SEO_PRERENDER_CONCURRENCY || "6", 10) || 6));
 
 const guidePages = {
@@ -150,6 +168,46 @@ function mountedPath(routePath) {
 function absoluteUrl(routePath) {
   const normalized = String(routePath).replace(/^\/cabl-store(?=\/|$)/, "") || "/";
   return new URL(mountedPath(normalized) || "/", siteOrigin).href;
+}
+
+function arabicSeoTitle(value) {
+  let title = String(value || "")
+    .replace(/\bCABL(?:\s*STORE)?\b/gi, storeNameAr)
+    .replace(/\bwireless\s+earbuds?\b/gi, "سماعات أذن لاسلكية")
+    .replace(/\bwireless\s+microphones?\b/gi, "ميكروفونات لاسلكية")
+    .replace(/\bwireless\b/gi, "لاسلكي")
+    .replace(/\bpower\s*bank\b/gi, "باور بانك")
+    .replace(/\bfast\s+charge\b/gi, "الشحن السريع")
+    .replace(/\bproducts?\b/gi, "منتجات")
+    .replace(/\bchargers?\b/gi, "شواحن")
+    .replace(/\bcables?\b/gi, "كابلات")
+    .replace(/\baccessories\b/gi, "إكسسوارات")
+    .replace(/\bin Yemen\b/gi, "في اليمن")
+    .replace(/\bNexode\b/gi, "نيكسود")
+    .replace(/\bLARK\b/gi, "لارك")
+    .replace(/\bCombo\b/gi, "كومبو")
+    .replace(/\bAir\b/gi, "إير")
+    .replace(/\bUno\b/gi, "أونو")
+    .replace(/\bHDMI\b/gi, "إتش دي إم آي")
+    .replace(/\bLED\b/gi, "ليد")
+    .replace(/\bUSB-C\b/gi, "يو إس بي-سي")
+    .replace(/\bUSB-A\b/gi, "يو إس بي-إيه")
+    .replace(/\bUSB\b/gi, "يو إس بي")
+    .replace(/\bLightning\b/gi, "لايتنينغ")
+    .replace(/\bPD\b/gi, "توصيل الطاقة")
+    .replace(/(\d+)\s*-\s*in\s*-\s*(\d+)/gi, "$1 في $2")
+    .replace(/(\d[\d,.]*)\s*W\b/gi, "$1 وات")
+    .replace(/(\d[\d,.]*)\s*mAh\b/gi, "$1 مللي أمبير");
+
+  for (const [slug, arabicName] of Object.entries(arabicBrandNames)) {
+    title = title.replace(new RegExp(`\\b${slug}\\b`, "gi"), arabicName);
+  }
+
+  const parts = title
+    .split(/\s*\|\s*/)
+    .map((part) => part.trim())
+    .filter((part) => part && !/^(?:CABL|CABL\s*STORE|كابل ستور|متجر كابل ستور)$/iu.test(part));
+  return `${parts.join(" | ") || "متجر إلكترونيات في اليمن"} | ${storeNameAr}`;
 }
 
 function escapeXml(value) {
@@ -507,22 +565,23 @@ function renderBody(page, routePath, entity = null) {
 }
 
 function withSeo(indexHtml, page, routePath, entity = null, catalog = null) {
+  const localizedPage = { ...page, title: arabicSeoTitle(page.title) };
   const canonicalPath = page.canonicalPath || routePath;
   const canonical = absoluteUrl(canonicalPath);
-  const schema = pageJsonLd(page, canonicalPath, entity);
+  const schema = pageJsonLd(localizedPage, canonicalPath, entity);
   const catalogPayload = catalog
     ? `<script id="cabl-catalog-data" type="application/json">${serializeJsonForHtml(catalog)}</script>`
     : "";
   let html = indexHtml
-    .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(page.title)}</title>`)
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(localizedPage.title)}</title>`)
     .replace(/<meta name="description" content="[^"]*"\s*\/?>/, `<meta name="description" content="${escapeHtml(page.description)}" />`)
     .replace(/<meta name="robots" content="[^"]*"\s*\/?>/, `<meta name="robots" content="${page.indexable === false ? "noindex, follow" : "index, follow"}" />`)
     .replace(/<link rel="canonical" href="[^"]*"\s*\/?>/g, "")
     .replace(/<meta property="og:[^"]*"[^>]*\/?>/g, "")
     .replace(/<meta name="twitter:[^"]*"[^>]*\/?>/g, "")
     .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, "")
-    .replace("</head>", `<meta property="og:title" content="${escapeHtml(page.title)}" /><meta property="og:description" content="${escapeHtml(page.description)}" /><meta property="og:url" content="${escapeHtml(canonical)}" /><meta property="og:locale" content="ar_YE" /><meta property="og:site_name" content="CABL" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="${escapeHtml(page.title)}" /><meta name="twitter:description" content="${escapeHtml(page.description)}" /><link rel="canonical" href="${escapeHtml(canonical)}" /><script type="application/ld+json">${JSON.stringify(schema)}</script>${catalogPayload}</head>`);
-  return replaceRootContent(html, renderBody(page, routePath, entity));
+    .replace("</head>", `<meta property="og:title" content="${escapeHtml(localizedPage.title)}" /><meta property="og:description" content="${escapeHtml(page.description)}" /><meta property="og:url" content="${escapeHtml(canonical)}" /><meta property="og:locale" content="ar_YE" /><meta property="og:site_name" content="كابل ستور" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="${escapeHtml(localizedPage.title)}" /><meta name="twitter:description" content="${escapeHtml(page.description)}" /><link rel="canonical" href="${escapeHtml(canonical)}" /><script type="application/ld+json">${JSON.stringify(schema)}</script>${catalogPayload}</head>`);
+  return replaceRootContent(html, renderBody(localizedPage, routePath, entity));
 }
 
 function renderSitemap(routes) {
@@ -685,12 +744,19 @@ async function main() {
   for (const product of brandCategories.values()) {
     const routePath = `/${product.brandSlug}/${publicCategorySlug(product.category.slug)}`;
     const categoryName = product.category.name;
+    const categoryTitleName = seoCategoryNames[product.category.slug] || categoryName;
     const brandName = product.brand;
+    const brandNameAr = arabicBrandNames[product.brandSlug.toLowerCase()] || brandName;
+    const isBaseus = product.brandSlug.toLowerCase() === "baseus";
     const matchingProducts = products.filter((item) => item.brandSlug === product.brandSlug && item.category?.slug === product.category.slug);
     routes.set(routePath, {
-      title: `${categoryName} من ${brandName} في اليمن | CABL`,
-      h1: `${categoryName} من ${brandName}`,
-      description: `تصفح منتجات ${categoryName} من ${brandName} المنشورة في كتالوج CABL داخل اليمن، وقارن السعر والتوافر قبل الطلب.`,
+      title: isBaseus
+        ? `${categoryTitleName} من الوكيل المعتمد لبيسوس في اليمن`
+        : `${categoryTitleName} من ${brandNameAr} في اليمن`,
+      h1: `${categoryTitleName} من ${brandNameAr}`,
+      description: isBaseus
+        ? `كابل ستور هو الوكيل المعتمد لبيسوس في اليمن. تصفح ${categoryTitleName} المنشورة، وقارن المواصفات والسعر والتوافر قبل الطلب.`
+        : `تصفح منتجات ${categoryTitleName} من ${brandNameAr} المنشورة في كتالوج كابل ستور داخل اليمن، وقارن السعر والتوافر قبل الطلب.`,
       canonicalPath: mountedPath(routePath),
       entityType: "brand-category",
       entity: {

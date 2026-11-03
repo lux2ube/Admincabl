@@ -7,6 +7,59 @@ export type SeoHead = {
   image?: string;
 };
 
+const arabicBrandNames: Record<string, string> = {
+  anker: "أنكر",
+  baseus: "بيسوس",
+  ugreen: "يوجرين",
+  vention: "فينتشن",
+  soundcore: "ساوندكور",
+  hollyland: "هوليلاند",
+};
+
+export function arabicBrandDisplayName(value: string) {
+  let localized = value;
+  for (const [brand, arabicName] of Object.entries(arabicBrandNames)) {
+    localized = localized.replace(new RegExp(`\\b${brand}\\b`, "gi"), arabicName);
+  }
+  return localized;
+}
+
+export function arabicSeoTitle(value: string) {
+  let localized = value
+    .replace(/\bCABL(?:\s*STORE)?\b/gi, "كابل ستور")
+    .replace(/\bwireless\s+earbuds?\b/gi, "سماعات أذن لاسلكية")
+    .replace(/\bwireless\s+microphones?\b/gi, "ميكروفونات لاسلكية")
+    .replace(/\bwireless\b/gi, "لاسلكي")
+    .replace(/\bpower\s*bank\b/gi, "باور بانك")
+    .replace(/\bfast\s+charge\b/gi, "الشحن السريع")
+    .replace(/\bproducts?\b/gi, "منتجات")
+    .replace(/\bchargers?\b/gi, "شواحن")
+    .replace(/\bcables?\b/gi, "كابلات")
+    .replace(/\baccessories\b/gi, "إكسسوارات")
+    .replace(/\bin Yemen\b/gi, "في اليمن")
+    .replace(/\bNexode\b/gi, "نيكسود")
+    .replace(/\bLARK\b/gi, "لارك")
+    .replace(/\bCombo\b/gi, "كومبو")
+    .replace(/\bAir\b/gi, "إير")
+    .replace(/\bUno\b/gi, "أونو")
+    .replace(/\bHDMI\b/gi, "إتش دي إم آي")
+    .replace(/\bLED\b/gi, "ليد")
+    .replace(/\bUSB-C\b/gi, "يو إس بي-سي")
+    .replace(/\bUSB-A\b/gi, "يو إس بي-إيه")
+    .replace(/\bUSB\b/gi, "يو إس بي")
+    .replace(/\bLightning\b/gi, "لايتنينغ")
+    .replace(/\bPD\b/gi, "توصيل الطاقة")
+    .replace(/(\d+)\s*-\s*in\s*-\s*(\d+)/gi, "$1 في $2")
+    .replace(/(\d[\d,.]*)\s*W\b/gi, "$1 وات")
+    .replace(/(\d[\d,.]*)\s*mAh\b/gi, "$1 مللي أمبير");
+  localized = arabicBrandDisplayName(localized);
+  const parts = localized
+    .split(/\s*\|\s*/)
+    .map((part) => part.trim())
+    .filter((part) => part && !/^(?:CABL|CABL\s*STORE|كابل ستور|متجر كابل ستور)$/iu.test(part));
+  return `${parts.join(" | ") || "متجر إلكترونيات في اليمن"} | كابل ستور`;
+}
+
 function basePath() {
   return import.meta.env.BASE_URL.replace(/\/$/, '');
 }
@@ -58,13 +111,15 @@ function setLink(rel: string, href: string) {
 }
 
 export function setSeoHead({ title, description, canonicalPath = currentRoutePath(), indexable = true, jsonLd, image }: SeoHead) {
-  document.title = title;
+  const localizedTitle = arabicSeoTitle(title);
+  document.title = localizedTitle;
   setMeta('name', 'description', description);
   setMeta('name', 'robots', indexable ? 'index, follow' : 'noindex, follow');
-  setMeta('property', 'og:title', title);
+  setMeta('property', 'og:title', localizedTitle);
   setMeta('property', 'og:description', description);
   setMeta('property', 'og:url', canonicalUrl(canonicalPath));
-  setMeta('name', 'twitter:title', title);
+  setMeta('property', 'og:site_name', 'كابل ستور');
+  setMeta('name', 'twitter:title', localizedTitle);
   setMeta('name', 'twitter:description', description);
   if (image) {
     setMeta('property', 'og:image', image);

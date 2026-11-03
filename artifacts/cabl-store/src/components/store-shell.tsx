@@ -92,7 +92,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
   }, [catalog, location]);
   const hidePeopleAlsoSearch = ['/cart', '/checkout', '/orders'].some((path) => location === path || location.startsWith(`${path}/`));
   return <div dir="rtl" className="min-h-[100dvh]">
-     <div className="top-strip"><div className="container top-strip-inner"><div className="top-announcement"><span>الوكيل الحصري لشركة Baseus في اليمن</span><a href="https://wa.me/967771106977" target="_blank" rel="noreferrer" className="top-phone" dir="ltr" aria-label="تواصل معنا عبر واتساب على 771106977" data-testid="link-whatsapp"><MessageCircle size={13}/> 771106977</a></div><Link href="/orders" className="phone-link" data-testid="link-track-order"><PackageSearch size={13}/> تتبع طلبك</Link></div></div>
+    <div className="top-strip"><div className="container top-strip-inner"><div className="top-announcement"><span>الوكيل المعتمد لبيسوس في اليمن</span><a href="https://wa.me/967771106977" target="_blank" rel="noreferrer" className="top-phone" dir="ltr" aria-label="تواصل معنا عبر واتساب على 771106977" data-testid="link-whatsapp"><MessageCircle size={13}/> 771106977</a></div><Link href="/orders" className="phone-link" data-testid="link-track-order"><PackageSearch size={13}/> تتبع طلبك</Link></div></div>
       <header className={`site-header${isScrolled ? ' is-scrolled' : ''}${location.split('?')[0] === '/' ? ' is-home' : ''}`}>
       <div className="container header-main">
         <button className="mobile-menu" onClick={() => setMobileOpen(true)} aria-label="فتح القائمة" data-testid="button-open-menu"><Menu size={23}/></button>

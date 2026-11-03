@@ -73,6 +73,7 @@ type GuideSeoInput = {
 };
 
 export const STORE_BASE_PATH = "/cabl-store";
+const STORE_NAME_AR = "كابل ستور";
 
 export function mountedStorePath(path: string) {
   const normalized = path.startsWith("/") ? path : `/${path}`;
@@ -80,36 +81,36 @@ export function mountedStorePath(path: string) {
   return `${STORE_BASE_PATH}${normalized === "/" ? "" : normalized}`;
 }
 
-const HOME_TITLE = "CABL | منتجات الشحن والطاقة والإكسسوارات";
-const HOME_DESCRIPTION = "تسوق منتجات الشحن والطاقة والإكسسوارات من كتالوج CABL، مع أسعار ومخزون وخيارات شحن مأخوذة من المتجر.";
+const HOME_TITLE = "شواحن وكابلات وإكسسوارات في اليمن | كابل ستور";
+const HOME_DESCRIPTION = "تسوّق منتجات الشحن والطاقة والإكسسوارات من متجر كابل ستور في اليمن، مع أسعار ومخزون وخيارات شحن محدثة من المتجر.";
 
 const categorySeoProfiles: Record<string, { title: string; description: string }> = {
   chargers: {
-    title: "شواحن الجوال والشحن السريع في اليمن | CABL",
+    title: "شواحن الجوال والشحن السريع في اليمن | كابل ستور",
     description: "قارن شواحن الجوال وUSB-C وPD المتاحة في كتالوج CABL داخل اليمن، مع مواصفات المنتج والسعر والتوافر قبل الطلب.",
   },
   "charging-cables": {
-    title: "كابلات وتوصيلات الشحن في اليمن | CABL",
+    title: "كابلات وتوصيلات الشحن في اليمن | كابل ستور",
     description: "استكشف توصيلات الشحن المنشورة في CABL حسب USB-C وLightning والقدرة ونقل البيانات عندما تكون هذه القيم موثقة للموديل.",
   },
   "power-banks": {
-    title: "خوازن الطاقة والباور بانك في اليمن | CABL",
+    title: "باور بانك وبطاريات متنقلة في اليمن | كابل ستور",
     description: "قارن خوازن الطاقة والباور بانك المتاحة في اليمن حسب السعة والقدرة والمنافذ والخصائص المنشورة للموديل.",
   },
   "phone-accessories": {
-    title: "وصلات ومحاور وملحقات الأجهزة في اليمن | CABL",
+    title: "وصلات ومحاور وملحقات الأجهزة في اليمن | كابل ستور",
     description: "تصفح وصلات ومحاور وملحقات الأجهزة المنشورة في CABL، وقارن المنافذ والقدرة والتوافق والسعر قبل الطلب.",
   },
   "travel-adapters": {
-    title: "شواحن السيارة وملحقات السفر في اليمن | CABL",
+    title: "شواحن السيارة وملحقات السفر في اليمن | كابل ستور",
     description: "قارن شواحن السيارة وملحقات السفر المنشورة في كتالوج CABL حسب القدرة والمنافذ والتوافق والتوافر داخل اليمن.",
   },
   "wireless-earbuds": {
-    title: "سماعات الأذن اللاسلكية في اليمن | CABL",
+    title: "سماعات الأذن اللاسلكية في اليمن | كابل ستور",
     description: "قارن سماعات الأذن اللاسلكية المنشورة في اليمن حسب الموديل والاستخدام والمكالمات والخصائص المعلنة.",
   },
   "wireless-microphones": {
-    title: "الميكروفونات اللاسلكية لصناع المحتوى في اليمن | CABL",
+    title: "الميكروفونات اللاسلكية لصناع المحتوى في اليمن | كابل ستور",
     description: "استكشف الميكروفونات اللاسلكية المنشورة في اليمن، وقارن التكوين والمستقبلات والتوافق قبل الطلب من CABL.",
   },
 };
@@ -409,6 +410,58 @@ function sourceFeatureSentence(detail: string, input: ProductDescriptionInput) {
 
 function arabicBrandName(brand: string, brandSlug: string) {
   return arabicBrandNames[brandSlug.toLowerCase()] || brand;
+}
+
+function arabicSeoTitle(value: string) {
+  let title = String(value || "")
+    .replace(/\bCABL(?:\s*STORE)?\b/gi, STORE_NAME_AR)
+    .replace(/\bwireless\s+earbuds?\b/gi, "سماعات أذن لاسلكية")
+    .replace(/\bwireless\s+microphones?\b/gi, "ميكروفونات لاسلكية")
+    .replace(/\bwireless\b/gi, "لاسلكي")
+    .replace(/\bpower\s*bank\b/gi, "باور بانك")
+    .replace(/\bfast\s+charge\b/gi, "الشحن السريع")
+    .replace(/\bproducts?\b/gi, "منتجات")
+    .replace(/\bchargers?\b/gi, "شواحن")
+    .replace(/\bcables?\b/gi, "كابلات")
+    .replace(/\baccessories\b/gi, "إكسسوارات")
+    .replace(/\bin Yemen\b/gi, "في اليمن")
+    .replace(/\bNexode\b/gi, "نيكسود")
+    .replace(/\bLARK\b/gi, "لارك")
+    .replace(/\bCombo\b/gi, "كومبو")
+    .replace(/\bAir\b/gi, "إير")
+    .replace(/\bUno\b/gi, "أونو");
+
+  for (const [slug, arabicName] of Object.entries(arabicBrandNames)) {
+    title = title.replace(new RegExp(`\\b${slug}\\b`, "gi"), arabicName);
+  }
+
+  const parts = arabicTechnicalText(title)
+    .split(/\s*\|\s*/)
+    .map((part) => part.trim())
+    .filter((part) => part && !/^(?:CABL|CABL\s*STORE|كابل ستور|متجر كابل ستور)$/iu.test(part));
+  return `${parts.join(" | ") || "متجر إلكترونيات في اليمن"} | ${STORE_NAME_AR}`;
+}
+
+function arabicSeoTitleWithContext(value: string, requiredTerms: string[]) {
+  const core = arabicSeoTitle(value).replace(/\s*\|\s*كابل ستور$/u, "").trim();
+  const parts = core.split(/\s*\|\s*/).map((part) => part.trim()).filter(Boolean);
+  const existingText = () => parts.join(" ");
+  const missingTerms: string[] = [];
+
+  for (const term of requiredTerms
+    .map((item) => arabicSeoTitle(item).replace(/\s*\|\s*كابل ستور$/u, "").trim())
+    .filter(Boolean)) {
+    if (!existingText().includes(term)) missingTerms.push(term);
+  }
+  if (!existingText().includes("في اليمن")) {
+    if (missingTerms.length) missingTerms.push("في اليمن");
+    else if (parts.length) parts[parts.length - 1] = `${parts[parts.length - 1]} في اليمن`;
+  }
+  if (missingTerms.length) {
+    if (missingTerms.at(-1) !== "في اليمن" && !existingText().includes("في اليمن")) missingTerms.push("في اليمن");
+    parts.push(missingTerms.join(" "));
+  }
+  return `${parts.join(" | ")} | ${STORE_NAME_AR}`;
 }
 
 function replaceEnglishBrandNames(value: string, input: ProductDescriptionInput) {
@@ -749,14 +802,16 @@ export function buildHomeSeo(): SeoResponse {
         {
           "@type": "Organization",
           "@id": "/#organization",
-      name: "CABL",
+          name: "كابل ستور",
+          alternateName: "CABL",
           url: "/",
-           description: "متجر إلكترونيات ومنتجات شحن وطاقة من كتالوج CABL.",
+          description: "متجر إلكترونيات ومنتجات شحن وطاقة من كابل ستور في اليمن.",
         },
         {
           "@type": "WebSite",
           "@id": "/#website",
-          name: "CABL",
+          name: "كابل ستور",
+          alternateName: "CABL",
           url: "/",
           inLanguage: "ar-YE",
           publisher: { "@id": "/#organization" },
@@ -764,9 +819,10 @@ export function buildHomeSeo(): SeoResponse {
         {
           "@type": "Store",
           "@id": "/#store",
-          name: "CABL منتجات الشحن والطاقة",
+          name: "كابل ستور لمنتجات الشحن والطاقة",
+          alternateName: "CABL",
           url: "/",
-           description: "كتالوج CABL لمنتجات الشحن والطاقة والإكسسوارات.",
+          description: "كتالوج كابل ستور لمنتجات الشحن والطاقة والإكسسوارات.",
         },
       ],
     },
@@ -775,6 +831,7 @@ export function buildHomeSeo(): SeoResponse {
 
 export function buildProductSeo(input: ProductSeoInput): SeoResponse {
   const displayName = cleanProductText(productDisplayName(input.brand, input.productName));
+  const brandArabic = arabicBrandName(input.brand, input.brandSlug);
   const fullDescription = buildProductDescription(input);
   const description = input.metaDescription?.trim() || productMetaDescription(fullDescription);
   const canonicalPath = productPublicPath({
@@ -791,7 +848,10 @@ export function buildProductSeo(input: ProductSeoInput): SeoResponse {
   return {
     entityType: "product",
     slug: input.slug,
-    title: input.seoTitle?.trim() || `${displayName} | ${categoryName} | CABL`,
+    title: arabicSeoTitleWithContext(
+      input.seoTitle?.trim() || `${displayName} | ${categoryName}`,
+      [brandArabic, categoryName],
+    ),
     h1: input.productName,
     description,
     canonicalPath,
@@ -835,7 +895,10 @@ export function buildCategorySeo(input: CategorySeoInput): SeoResponse {
   return {
     entityType: "category",
     slug: input.slug,
-    title: input.seoTitle || keywordProfile?.title || `${input.name} | CABL`,
+    title: arabicSeoTitleWithContext(
+      keywordProfile?.title || input.seoTitle || input.name,
+      [input.name],
+    ),
     h1: input.name,
     description,
     canonicalPath,
@@ -854,19 +917,25 @@ export function buildCategorySeo(input: CategorySeoInput): SeoResponse {
 
 export function buildBrandSeo(input: BrandSeoInput): SeoResponse {
   const canonicalPath = `/brand/${input.slug}`;
-  const description = input.metaDescription
-    || input.seoDescription
-    || input.description
-    || `منتجات ${input.name} في اليمن من كتالوج CABL، مع صفحات الموديلات والمواصفات والسعر والتوافر قبل الطلب.`;
+  const brandArabic = arabicBrandName(input.name, input.slug);
+  const isBaseus = input.slug.toLowerCase() === "baseus";
+  const description = isBaseus
+    ? "متجر كابل ستور هو الوكيل المعتمد لبيسوس في اليمن. استكشف المنتجات المنشورة، وراجع الموديل والمواصفات والسعر والتوافر قبل الطلب."
+    : input.metaDescription
+      || input.seoDescription
+      || input.description
+      || `منتجات ${brandArabic} المتاحة في اليمن من متجر كابل ستور، مع صفحات الموديلات والمواصفات والسعر والتوافر قبل الطلب.`;
 
   return {
     entityType: "brand",
     slug: input.slug,
-    title: input.seoTitle || `منتجات ${input.name} | CABL`,
-    h1: `منتجات ${input.name}`,
+    title: isBaseus
+      ? "وكيل بيسوس المعتمد في اليمن | كابل ستور"
+      : arabicSeoTitleWithContext(input.seoTitle || `منتجات ${brandArabic}`, [brandArabic]),
+    h1: `منتجات ${brandArabic}`,
     description,
     canonicalPath,
-    indexable: input.indexable,
+    indexable: isBaseus ? true : input.indexable,
     breadcrumbs: breadcrumbs([{ name: input.name, path: canonicalPath }]),
     jsonLd: {
       "@context": "https://schema.org",
@@ -888,7 +957,7 @@ export function buildGuideSeo(input: GuideSeoInput): SeoResponse {
   return {
     entityType: "guide",
     slug: input.slug,
-    title: input.title,
+    title: arabicSeoTitle(input.title),
     h1: input.h1,
     description,
     canonicalPath,
@@ -902,7 +971,7 @@ export function buildGuideSeo(input: GuideSeoInput): SeoResponse {
       articleBody: input.content,
       url: canonicalPath,
       ...(input.imagePath ? { image: [input.imagePath] } : {}),
-       publisher: { "@type": "Organization", name: "CABL", url: "/" },
+       publisher: { "@type": "Organization", name: "كابل ستور", alternateName: "CABL", url: "/" },
     },
   };
 }

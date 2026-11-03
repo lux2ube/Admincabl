@@ -8,12 +8,35 @@ const expectedBasePath = (process.env.BASE_PATH || "/cabl-store/").replace(/\/+$
 const expectedOrigin = new URL(process.env.PUBLIC_SITE_ORIGIN || "https://cabl.vercel.app").origin;
 const expectedRoutePath = (route) => route === "/" ? (expectedBasePath || "/") : `${expectedBasePath}${route}`;
 const expectedAbsoluteUrl = (route) => new URL(expectedRoutePath(route), `${expectedOrigin}/`).href;
-const routes = ["/", "/category/wireless-microphones", "/brand/anker", "/anker/chargers", "/soundcore/wireless-earbuds/soundcore-r50i-cabl-sco-r50i", "/guides/chargers-yemen", "/shipping", "/locations/yemen"];
+const routes = ["/", "/category/chargers", "/category/charging-cables", "/category/wireless-microphones", "/brand/anker", "/brand/ugreen", "/brand/baseus", "/anker/chargers", "/ugreen/cables", "/baseus/chargers", "/soundcore/wireless-earbuds/soundcore-r50i-cabl-sco-r50i", "/guides/chargers-yemen", "/shipping", "/locations/yemen"];
 
 for (const route of routes) {
   const file = route === "/" ? path.join(distDir, "index.html") : path.join(distDir, route.slice(1), "index.html");
   assert.ok(fs.existsSync(file), `missing pre-rendered route: ${route}`);
   const html = fs.readFileSync(file, "utf8");
+  const title = html.match(/<title>([\s\S]*?)<\/title>/)?.[1];
+  assert.ok(title, `${route} should have a page title`);
+  assert.match(title, /كابل ستور$/u, `${route} title should use the Arabic store name`);
+  assert.doesNotMatch(title, /\b(?:CABL|Baseus|UGREEN|Anker|Soundcore|Hollyland|Vention|USB-C|USB-A|Lightning|Power Bank)\b/i, `${route} title should not use English brand or category words`);
+  if (route === "/brand/baseus") {
+    assert.equal(title, "وكيل بيسوس المعتمد في اليمن | كابل ستور", "the Baseus brand page should target its verified Yemen agent query");
+    assert.match(html, /content="index, follow"/, "the Baseus brand page should be indexable");
+    assert.ok(html.includes("كابل ستور هو الوكيل المعتمد لبيسوس في اليمن"), "the Baseus page should state the verified agent relationship");
+  }
+  if (route === "/brand/ugreen") {
+    assert.equal(title, "منتجات يوجرين في اليمن | كابل ستور", "the UGREEN brand title should include its Arabic brand name and Yemen");
+  }
+  if (route === "/category/charging-cables") {
+    assert.equal(title, "كابلات وتوصيلات الشحن في اليمن | كابل ستور", "the cable category title should use the Arabic cable keyword and Yemen");
+  }
+  if (route === "/ugreen/cables") {
+    assert.equal(title, "كابلات الشحن من يوجرين في اليمن | كابل ستور", "the UGREEN cable page should target brand, category, and country");
+  }
+  if (route === "/soundcore/wireless-earbuds/soundcore-r50i-cabl-sco-r50i") {
+    assert.match(title, /ساوندكور/u, "product titles should include the Arabic brand");
+    assert.match(title, /سماعات أذن لاسلكية/u, "product titles should include the Arabic product category");
+    assert.match(title, /في اليمن/u, "product titles should include Yemen");
+  }
   assert.match(html, /<h1>[^<]+<\/h1>/, `${route} should contain a crawlable H1`);
   assert.match(html, /<link rel="canonical" href="[^"]+"/, `${route} should contain a canonical`);
   assert.match(html, /<script type="application\/ld\+json">/, `${route} should contain JSON-LD`);
@@ -23,6 +46,15 @@ for (const route of routes) {
   assert.doesNotMatch(html, /<h1>Page Not Found/i, `${route} must not be a 404 shell`);
   const expectedCanonical = expectedAbsoluteUrl(route);
   assert.match(html, new RegExp(`canonical" href="${expectedCanonical.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`), `${route} should use the mounted canonical`);
+  const jsonLdMatch = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  assert.ok(jsonLdMatch, `${route} should include parseable JSON-LD`);
+  const jsonLd = JSON.parse(jsonLdMatch[1]);
+  const graph = Array.isArray(jsonLd["@graph"]) ? jsonLd["@graph"] : [jsonLd];
+  const breadcrumbs = graph.find((item) => item["@type"] === "BreadcrumbList");
+  assert.ok(breadcrumbs, `${route} should expose breadcrumb structured data`);
+  for (const item of breadcrumbs.itemListElement || []) {
+    assert.equal(new URL(item.item).origin, expectedOrigin, `${route} breadcrumb item URLs should be absolute and canonical`);
+  }
   const catalogPayload = html.match(/<script id="cabl-catalog-data" type="application\/json">([\s\S]*?)<\/script>/);
   assert.ok(catalogPayload, `${route} should expose a parseable catalog payload`);
   const catalog = JSON.parse(catalogPayload[1]);
@@ -72,6 +104,8 @@ for (const location of sitemapLocations) {
   assert.equal(url.origin, expectedOrigin, "sitemap URLs should use the canonical site origin");
 }
 assert.ok(sitemapLocations.includes(expectedAbsoluteUrl("/")), "sitemap.xml should include the homepage");
+assert.ok(sitemapLocations.includes(expectedAbsoluteUrl("/brand/baseus")), "sitemap.xml should include the Baseus brand page");
+assert.ok(sitemapLocations.includes(expectedAbsoluteUrl("/ugreen/cables")), "sitemap.xml should include the UGREEN cable-category page");
 assert.ok(sitemapLocations.includes(expectedAbsoluteUrl("/shipping")), "sitemap.xml should include the shipping landing page");
 assert.ok(sitemapLocations.includes(expectedAbsoluteUrl("/locations/yemen")), "sitemap.xml should include the Yemen delivery coverage page");
 assert.doesNotMatch(sitemap, /\/api\/store\//, "sitemap.xml must not point crawlers at backend routes");
