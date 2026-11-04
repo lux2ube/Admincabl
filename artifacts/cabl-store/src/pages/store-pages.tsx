@@ -1894,7 +1894,6 @@ export function CartPage() {
 
 export function CheckoutPage() {
   const { catalog, cartProducts, clearCart, formatPrice } = useStore();
-  const [, setLocation] = useLocation();
   const orderMutation = useCreateStoreOrder();
   const [shippingId, setShippingId] = useState<number | undefined>(catalog?.shippingOptions[0]?.id);
   const [paymentId, setPaymentId] = useState<number | undefined>(catalog?.paymentMethods[0]?.id);
